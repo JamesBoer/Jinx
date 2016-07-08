@@ -1,0 +1,222 @@
+/*
+The Jinx library is distributed under the MIT License (MIT)
+https://opensource.org/licenses/MIT
+See LICENSE.TXT or Jinx.h for license details.
+Copyright (c) 2016 James Boer
+*/
+
+#include "JxInternal.h"
+
+using namespace Jinx;
+
+
+Library::Library(RuntimeWPtr runtime, const String & name) :
+	m_name(name),
+	m_runtime(runtime)
+{
+}
+
+FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool returnValue, std::initializer_list<String> name) const
+{
+	// Build function signature parts from parameters
+	FunctionSignatureParts parts;
+	for (const auto & n : name)
+	{
+		// Validate name
+		if (n.empty())
+		{
+			LogWriteLine("Registered function requires a valid name");
+			return FunctionSignature();
+		}
+
+		FunctionSignaturePart part;
+		if (n.empty())
+		{
+			LogWriteLine("Empty identifier in function signature");
+			return FunctionSignature();
+		}
+		else if (n[0] == '{')
+		{
+			// Validate parameter part and parse optional type
+			String np;
+			np.reserve(32);
+			const char * p = n.c_str();
+			const char * e = p + n.size();
+			bool term = false;
+			++p;
+			while (p != e)
+			{
+				if (*p == '}')
+				{
+					++p;
+					term = true;
+					break;
+				}
+				else if (*p != ' ')
+				{
+					np += (char)(std::tolower(*p));
+					part.names.push_back(np);
+				}
+				++p;
+			}
+			if (!term)
+			{
+				LogWriteLine("Argument not properly terminated in function signature");
+				return FunctionSignature();
+			}
+			if (!np.empty())
+			{	
+				if (!StringToValueType(np, &part.valueType))
+				{
+					LogWriteLine("Unknown parameter value in function signature");
+					return FunctionSignature();
+				}
+			}
+			while (p != e)
+			{
+				if (*p != ' ')
+				{
+					LogWriteLine("Invalid symbols after closing argument brace");
+					return FunctionSignature();
+				}
+				++p;
+			}
+			part.partType = FunctionSignaturePartType::Parameter;
+		}
+		else
+		{
+			// Break names into component parts
+			String np;
+			np.reserve(32);
+			const char * p = n.c_str();
+			const char * e = p + n.size();
+			while (p != e)
+			{
+				if (*p == '/')
+				{
+					part.names.push_back(np);
+					np.clear();
+				}
+				else if (*p == '{' || *p == '}')
+				{
+					LogWriteLine("Illegal characters { or } found in name.  Missing comma?");
+					return FunctionSignature();
+				}
+				else
+				{
+					np += (char)(std::tolower(*p));
+				}
+				++p;
+			}
+			part.partType = FunctionSignaturePartType::Name;
+			part.names.push_back(np);
+		}
+		parts.push_back(part);
+	}
+
+	// Create functions signature
+	ScopeType scope = publicScope ? ScopeType::Public : ScopeType::Private;
+	FunctionSignature functionSignature(scope, returnValue, GetName(), parts);
+	return functionSignature;
+}
+
+PropertyName Library::GetPropertyName(const String & name)
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	auto itr = m_propertyNameTable.find(name);
+	if (itr == m_propertyNameTable.end())
+		return PropertyName();
+	return itr->second;
+}
+
+Variant Library::GetProperty(const String & name) const
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	auto itr = m_propertyNameTable.find(name);
+	if (itr == m_propertyNameTable.end())
+		return Variant();
+	auto runtime = m_runtime.lock();
+	if (!runtime)
+		return Variant();
+	return runtime->GetProperty(itr->second.GetId());
+}
+
+bool Library::PropertyNameExists(const String & name) const
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
+}
+
+bool Library::RegisterFunction(bool publicScope, bool returnValue, std::initializer_list<String> name, FunctionCallback function)
+{
+	if (name.size() < 1)
+	{
+		LogWriteLine("Registered function requires a valid name");
+		return false;
+	}
+	if (!function)
+	{
+		LogWriteLine("Registered function requires a valid callback");
+		return false;
+	}
+
+	// Calculate the function signature
+	FunctionSignature functionSignature = CreateFunctionSignature(publicScope, returnValue, name);
+	if (!functionSignature.IsValid())
+		return false;
+
+	// Register function in library table.  This allows scripts compiled
+	// to parse and use this function.
+	m_functionTable.Register(functionSignature, false);
+
+	// Register the function definition with the runtime system for 
+	// runtime lookups.
+	auto runtime = m_runtime.lock();
+	if (!runtime)
+		return false;
+	runtime->RegisterFunction(functionSignature, function);
+
+	// Return success
+	return true;
+}
+
+bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & name, const Variant & value)
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+
+	// Register the property name with the library
+	PropertyName prop(readOnly, publicScope ? ScopeType::Public : ScopeType::Private, GetName(), name);
+	if (!RegisterPropertyName(prop, false))
+		return false;
+
+	// Set the property with the runtime value
+	auto runtime = m_runtime.lock();
+	if (!runtime)
+		return false;
+	runtime->SetProperty(prop.GetId(), value);
+
+	// Return success
+	return true;
+}
+
+bool Library::RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates)
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
+		return false;
+	m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
+	return true;
+}
+
+void Library::SetProperty(const String & name, const Variant & value)
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	auto itr = m_propertyNameTable.find(name);
+	if (itr == m_propertyNameTable.end())
+		return;
+	auto runtime = m_runtime.lock();
+	if (!runtime)
+		return;
+	runtime->SetProperty(itr->second.GetId(), value);
+}
+
