@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA32F95F1CE2CF8300941746 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA32F9581CE2CF8300941746 /* Main.cpp */; };
-		AA32F9601CE2CF8300941746 /* TestCollections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA32F9591CE2CF8300941746 /* TestCollections.cpp */; };
-		AA32F9611CE2CF8300941746 /* TestIfElse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA32F95A1CE2CF8300941746 /* TestIfElse.cpp */; };
-		AA32F9621CE2CF8300941746 /* TestLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA32F95B1CE2CF8300941746 /* TestLoops.cpp */; };
-		AA32F9631CE2CF8300941746 /* TestStatements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA32F95C1CE2CF8300941746 /* TestStatements.cpp */; };
-		AA32F9641CE2CF8300941746 /* UnitTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA32F95D1CE2CF8300941746 /* UnitTest.cpp */; };
 		AA32F9651CE2D35E00941746 /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA32F9541CE2CF5E00941746 /* libJinx.a */; };
-		AA552CBB1D04EC4300A87EF3 /* TestErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA552CBA1D04EC4300A87EF3 /* TestErrors.cpp */; };
-		AA935EF21D2F810A00564635 /* TestLibCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA935EF11D2F810A00564635 /* TestLibCore.cpp */; };
-		AABF964C1CFFDCD300CB2EF4 /* TestFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AABF964A1CFFDCD300CB2EF4 /* TestFunctions.cpp */; };
-		AABF964D1CFFDCD300CB2EF4 /* TestLibraries.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AABF964B1CFFDCD300CB2EF4 /* TestLibraries.cpp */; };
-		AADBEDDE1D0447CA00A57411 /* TestCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBEDDC1D0447CA00A57411 /* TestCallbacks.cpp */; };
-		AADBEDDF1D0447CA00A57411 /* TestCasts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBEDDD1D0447CA00A57411 /* TestCasts.cpp */; };
+		AA8B44B21D30503900CEBD9B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A51D30503900CEBD9B /* Main.cpp */; };
+		AA8B44B31D30503900CEBD9B /* TestCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A61D30503900CEBD9B /* TestCallbacks.cpp */; };
+		AA8B44B41D30503900CEBD9B /* TestCasts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A71D30503900CEBD9B /* TestCasts.cpp */; };
+		AA8B44B51D30503900CEBD9B /* TestCollections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A81D30503900CEBD9B /* TestCollections.cpp */; };
+		AA8B44B61D30503900CEBD9B /* TestErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A91D30503900CEBD9B /* TestErrors.cpp */; };
+		AA8B44B71D30503900CEBD9B /* TestFunctions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AA1D30503900CEBD9B /* TestFunctions.cpp */; };
+		AA8B44B81D30503900CEBD9B /* TestIfElse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AB1D30503900CEBD9B /* TestIfElse.cpp */; };
+		AA8B44B91D30503900CEBD9B /* TestLibCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AC1D30503900CEBD9B /* TestLibCore.cpp */; };
+		AA8B44BA1D30503900CEBD9B /* TestLibraries.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AD1D30503900CEBD9B /* TestLibraries.cpp */; };
+		AA8B44BB1D30503900CEBD9B /* TestLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AE1D30503900CEBD9B /* TestLoops.cpp */; };
+		AA8B44BC1D30503900CEBD9B /* TestStatements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AF1D30503900CEBD9B /* TestStatements.cpp */; };
+		AA8B44BD1D30503900CEBD9B /* UnitTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44B01D30503900CEBD9B /* UnitTest.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,20 +54,20 @@
 /* Begin PBXFileReference section */
 		AA32F9451CE2CF1F00941746 /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA32F94F1CE2CF5E00941746 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Library/Project/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
-		AA32F9571CE2CF8300941746 /* catch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hpp; path = ../../../../Source/catch.hpp; sourceTree = "<group>"; };
-		AA32F9581CE2CF8300941746 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../../Source/Main.cpp; sourceTree = "<group>"; };
-		AA32F9591CE2CF8300941746 /* TestCollections.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestCollections.cpp; path = ../../../../Source/TestCollections.cpp; sourceTree = "<group>"; };
-		AA32F95A1CE2CF8300941746 /* TestIfElse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestIfElse.cpp; path = ../../../../Source/TestIfElse.cpp; sourceTree = "<group>"; };
-		AA32F95B1CE2CF8300941746 /* TestLoops.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestLoops.cpp; path = ../../../../Source/TestLoops.cpp; sourceTree = "<group>"; };
-		AA32F95C1CE2CF8300941746 /* TestStatements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestStatements.cpp; path = ../../../../Source/TestStatements.cpp; sourceTree = "<group>"; };
-		AA32F95D1CE2CF8300941746 /* UnitTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UnitTest.cpp; path = ../../../../Source/UnitTest.cpp; sourceTree = "<group>"; };
-		AA32F95E1CE2CF8300941746 /* UnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnitTest.h; path = ../../../../Source/UnitTest.h; sourceTree = "<group>"; };
-		AA552CBA1D04EC4300A87EF3 /* TestErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestErrors.cpp; path = ../../../../Source/TestErrors.cpp; sourceTree = "<group>"; };
-		AA935EF11D2F810A00564635 /* TestLibCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestLibCore.cpp; path = ../../../../Source/TestLibCore.cpp; sourceTree = "<group>"; };
-		AABF964A1CFFDCD300CB2EF4 /* TestFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestFunctions.cpp; path = ../../../../Source/TestFunctions.cpp; sourceTree = "<group>"; };
-		AABF964B1CFFDCD300CB2EF4 /* TestLibraries.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestLibraries.cpp; path = ../../../../Source/TestLibraries.cpp; sourceTree = "<group>"; };
-		AADBEDDC1D0447CA00A57411 /* TestCallbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestCallbacks.cpp; path = ../../../../Source/TestCallbacks.cpp; sourceTree = "<group>"; };
-		AADBEDDD1D0447CA00A57411 /* TestCasts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TestCasts.cpp; path = ../../../../Source/TestCasts.cpp; sourceTree = "<group>"; };
+		AA8B44A41D30503900CEBD9B /* catch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
+		AA8B44A51D30503900CEBD9B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
+		AA8B44A61D30503900CEBD9B /* TestCallbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCallbacks.cpp; sourceTree = "<group>"; };
+		AA8B44A71D30503900CEBD9B /* TestCasts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCasts.cpp; sourceTree = "<group>"; };
+		AA8B44A81D30503900CEBD9B /* TestCollections.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCollections.cpp; sourceTree = "<group>"; };
+		AA8B44A91D30503900CEBD9B /* TestErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestErrors.cpp; sourceTree = "<group>"; };
+		AA8B44AA1D30503900CEBD9B /* TestFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestFunctions.cpp; sourceTree = "<group>"; };
+		AA8B44AB1D30503900CEBD9B /* TestIfElse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestIfElse.cpp; sourceTree = "<group>"; };
+		AA8B44AC1D30503900CEBD9B /* TestLibCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestLibCore.cpp; sourceTree = "<group>"; };
+		AA8B44AD1D30503900CEBD9B /* TestLibraries.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestLibraries.cpp; sourceTree = "<group>"; };
+		AA8B44AE1D30503900CEBD9B /* TestLoops.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestLoops.cpp; sourceTree = "<group>"; };
+		AA8B44AF1D30503900CEBD9B /* TestStatements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestStatements.cpp; sourceTree = "<group>"; };
+		AA8B44B01D30503900CEBD9B /* UnitTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UnitTest.cpp; sourceTree = "<group>"; };
+		AA8B44B11D30503900CEBD9B /* UnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTest.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,22 +102,23 @@
 		AA32F9471CE2CF1F00941746 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				AA935EF11D2F810A00564635 /* TestLibCore.cpp */,
-				AA32F9571CE2CF8300941746 /* catch.hpp */,
-				AA32F9581CE2CF8300941746 /* Main.cpp */,
-				AADBEDDC1D0447CA00A57411 /* TestCallbacks.cpp */,
-				AADBEDDD1D0447CA00A57411 /* TestCasts.cpp */,
-				AA32F9591CE2CF8300941746 /* TestCollections.cpp */,
-				AA552CBA1D04EC4300A87EF3 /* TestErrors.cpp */,
-				AABF964A1CFFDCD300CB2EF4 /* TestFunctions.cpp */,
-				AA32F95A1CE2CF8300941746 /* TestIfElse.cpp */,
-				AABF964B1CFFDCD300CB2EF4 /* TestLibraries.cpp */,
-				AA32F95B1CE2CF8300941746 /* TestLoops.cpp */,
-				AA32F95C1CE2CF8300941746 /* TestStatements.cpp */,
-				AA32F95D1CE2CF8300941746 /* UnitTest.cpp */,
-				AA32F95E1CE2CF8300941746 /* UnitTest.h */,
+				AA8B44A41D30503900CEBD9B /* catch.hpp */,
+				AA8B44A51D30503900CEBD9B /* Main.cpp */,
+				AA8B44A61D30503900CEBD9B /* TestCallbacks.cpp */,
+				AA8B44A71D30503900CEBD9B /* TestCasts.cpp */,
+				AA8B44A81D30503900CEBD9B /* TestCollections.cpp */,
+				AA8B44A91D30503900CEBD9B /* TestErrors.cpp */,
+				AA8B44AA1D30503900CEBD9B /* TestFunctions.cpp */,
+				AA8B44AB1D30503900CEBD9B /* TestIfElse.cpp */,
+				AA8B44AC1D30503900CEBD9B /* TestLibCore.cpp */,
+				AA8B44AD1D30503900CEBD9B /* TestLibraries.cpp */,
+				AA8B44AE1D30503900CEBD9B /* TestLoops.cpp */,
+				AA8B44AF1D30503900CEBD9B /* TestStatements.cpp */,
+				AA8B44B01D30503900CEBD9B /* UnitTest.cpp */,
+				AA8B44B11D30503900CEBD9B /* UnitTest.h */,
 			);
-			path = UnitTests;
+			name = UnitTests;
+			path = ../../../Source;
 			sourceTree = "<group>";
 		};
 		AA32F9501CE2CF5E00941746 /* Products */ = {
@@ -201,18 +202,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA552CBB1D04EC4300A87EF3 /* TestErrors.cpp in Sources */,
-				AA32F9611CE2CF8300941746 /* TestIfElse.cpp in Sources */,
-				AA32F9641CE2CF8300941746 /* UnitTest.cpp in Sources */,
-				AABF964C1CFFDCD300CB2EF4 /* TestFunctions.cpp in Sources */,
-				AA935EF21D2F810A00564635 /* TestLibCore.cpp in Sources */,
-				AADBEDDE1D0447CA00A57411 /* TestCallbacks.cpp in Sources */,
-				AA32F95F1CE2CF8300941746 /* Main.cpp in Sources */,
-				AA32F9601CE2CF8300941746 /* TestCollections.cpp in Sources */,
-				AA32F9631CE2CF8300941746 /* TestStatements.cpp in Sources */,
-				AA32F9621CE2CF8300941746 /* TestLoops.cpp in Sources */,
-				AADBEDDF1D0447CA00A57411 /* TestCasts.cpp in Sources */,
-				AABF964D1CFFDCD300CB2EF4 /* TestLibraries.cpp in Sources */,
+				AA8B44B91D30503900CEBD9B /* TestLibCore.cpp in Sources */,
+				AA8B44BD1D30503900CEBD9B /* UnitTest.cpp in Sources */,
+				AA8B44B61D30503900CEBD9B /* TestErrors.cpp in Sources */,
+				AA8B44B81D30503900CEBD9B /* TestIfElse.cpp in Sources */,
+				AA8B44B41D30503900CEBD9B /* TestCasts.cpp in Sources */,
+				AA8B44B31D30503900CEBD9B /* TestCallbacks.cpp in Sources */,
+				AA8B44B21D30503900CEBD9B /* Main.cpp in Sources */,
+				AA8B44BA1D30503900CEBD9B /* TestLibraries.cpp in Sources */,
+				AA8B44B51D30503900CEBD9B /* TestCollections.cpp in Sources */,
+				AA8B44BC1D30503900CEBD9B /* TestStatements.cpp in Sources */,
+				AA8B44B71D30503900CEBD9B /* TestFunctions.cpp in Sources */,
+				AA8B44BB1D30503900CEBD9B /* TestLoops.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

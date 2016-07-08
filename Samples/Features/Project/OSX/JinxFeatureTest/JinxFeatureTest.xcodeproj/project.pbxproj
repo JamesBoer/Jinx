@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AA81E20D1CE2D64F00123CA5 /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA81E20A1CE2D63D00123CA5 /* libJinx.a */; };
-		AA81E20F1CE2D66900123CA5 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA81E20E1CE2D66900123CA5 /* Main.cpp */; };
+		AA8B44C01D3050E100CEBD9B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44BF1D3050E100CEBD9B /* Main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,7 +43,7 @@
 /* Begin PBXFileReference section */
 		AA81E1FB1CE2D62B00123CA5 /* JinxFeatureTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JinxFeatureTest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA81E2051CE2D63D00123CA5 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../../Library/Project/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
-		AA81E20E1CE2D66900123CA5 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../../Source/Main.cpp; sourceTree = "<group>"; };
+		AA8B44BF1D3050E100CEBD9B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Samples/Features/Source/Main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,9 +78,10 @@
 		AA81E1FD1CE2D62B00123CA5 /* JinxFeatureTest */ = {
 			isa = PBXGroup;
 			children = (
-				AA81E20E1CE2D66900123CA5 /* Main.cpp */,
+				AA8B44BF1D3050E100CEBD9B /* Main.cpp */,
 			);
-			path = JinxFeatureTest;
+			name = JinxFeatureTest;
+			path = ../../../../../UnitTests/Source;
 			sourceTree = "<group>";
 		};
 		AA81E2061CE2D63D00123CA5 /* Products */ = {
@@ -164,7 +165,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA81E20F1CE2D66900123CA5 /* Main.cpp in Sources */,
+				AA8B44C01D3050E100CEBD9B /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
