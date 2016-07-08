@@ -14,7 +14,7 @@ namespace Jinx
 	const size_t MutexDataSize = 64;
 
 	// Platform-specific locking mechanism.  We don't use std::mutex because it uses new/delete internally,
-	// and we're prefer to control all allocations.
+	// and we'd prefer to control all allocations.
 	class Mutex
 	{
 	public:

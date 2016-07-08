@@ -5,6 +5,7 @@ release/
 *.user
 *.sdf
 *.suo
+*.opendb
 
 # Xcode
 .DS_Store
@@ -22,5 +23,6 @@ build/
 xcuserdata
 profile
 *.moved-aside
+
 
 

@@ -73,6 +73,19 @@ by James Boer, and distributed under the MIT license.
 /*! \namespace */
 namespace Jinx
 {
+
+	/// Major version number
+	const uint32_t MajorVersion = 0;
+
+	/// Minor version number
+	const uint32_t MinorVersion = 0;
+
+	/// Patch number
+	const uint32_t PatchNumber = 1;
+
+	/// Version string
+	static const char * VersionString = "0.0.1";
+
 	// Forward declaration
 	class IScript;
 
