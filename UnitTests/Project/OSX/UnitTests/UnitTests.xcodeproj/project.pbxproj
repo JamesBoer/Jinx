@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		AA32F9651CE2D35E00941746 /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA32F9541CE2CF5E00941746 /* libJinx.a */; };
 		AA8B44B21D30503900CEBD9B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A51D30503900CEBD9B /* Main.cpp */; };
-		AA8B44B31D30503900CEBD9B /* TestCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A61D30503900CEBD9B /* TestCallbacks.cpp */; };
 		AA8B44B41D30503900CEBD9B /* TestCasts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A71D30503900CEBD9B /* TestCasts.cpp */; };
 		AA8B44B51D30503900CEBD9B /* TestCollections.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A81D30503900CEBD9B /* TestCollections.cpp */; };
 		AA8B44B61D30503900CEBD9B /* TestErrors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A91D30503900CEBD9B /* TestErrors.cpp */; };
@@ -20,6 +19,8 @@
 		AA8B44BB1D30503900CEBD9B /* TestLoops.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AE1D30503900CEBD9B /* TestLoops.cpp */; };
 		AA8B44BC1D30503900CEBD9B /* TestStatements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44AF1D30503900CEBD9B /* TestStatements.cpp */; };
 		AA8B44BD1D30503900CEBD9B /* UnitTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44B01D30503900CEBD9B /* UnitTest.cpp */; };
+		AAF049601D322C9900090BA3 /* TestNative.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAF0495E1D322C9900090BA3 /* TestNative.cpp */; };
+		AAF049611D322C9900090BA3 /* TestUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAF0495F1D322C9900090BA3 /* TestUnicode.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,7 +57,6 @@
 		AA32F94F1CE2CF5E00941746 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Library/Project/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
 		AA8B44A41D30503900CEBD9B /* catch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
 		AA8B44A51D30503900CEBD9B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
-		AA8B44A61D30503900CEBD9B /* TestCallbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCallbacks.cpp; sourceTree = "<group>"; };
 		AA8B44A71D30503900CEBD9B /* TestCasts.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCasts.cpp; sourceTree = "<group>"; };
 		AA8B44A81D30503900CEBD9B /* TestCollections.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestCollections.cpp; sourceTree = "<group>"; };
 		AA8B44A91D30503900CEBD9B /* TestErrors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestErrors.cpp; sourceTree = "<group>"; };
@@ -68,6 +68,8 @@
 		AA8B44AF1D30503900CEBD9B /* TestStatements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestStatements.cpp; sourceTree = "<group>"; };
 		AA8B44B01D30503900CEBD9B /* UnitTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UnitTest.cpp; sourceTree = "<group>"; };
 		AA8B44B11D30503900CEBD9B /* UnitTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTest.h; sourceTree = "<group>"; };
+		AAF0495E1D322C9900090BA3 /* TestNative.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestNative.cpp; sourceTree = "<group>"; };
+		AAF0495F1D322C9900090BA3 /* TestUnicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestUnicode.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,9 +104,10 @@
 		AA32F9471CE2CF1F00941746 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				AAF0495E1D322C9900090BA3 /* TestNative.cpp */,
+				AAF0495F1D322C9900090BA3 /* TestUnicode.cpp */,
 				AA8B44A41D30503900CEBD9B /* catch.hpp */,
 				AA8B44A51D30503900CEBD9B /* Main.cpp */,
-				AA8B44A61D30503900CEBD9B /* TestCallbacks.cpp */,
 				AA8B44A71D30503900CEBD9B /* TestCasts.cpp */,
 				AA8B44A81D30503900CEBD9B /* TestCollections.cpp */,
 				AA8B44A91D30503900CEBD9B /* TestErrors.cpp */,
@@ -204,11 +207,12 @@
 			files = (
 				AA8B44B91D30503900CEBD9B /* TestLibCore.cpp in Sources */,
 				AA8B44BD1D30503900CEBD9B /* UnitTest.cpp in Sources */,
+				AAF049611D322C9900090BA3 /* TestUnicode.cpp in Sources */,
 				AA8B44B61D30503900CEBD9B /* TestErrors.cpp in Sources */,
 				AA8B44B81D30503900CEBD9B /* TestIfElse.cpp in Sources */,
 				AA8B44B41D30503900CEBD9B /* TestCasts.cpp in Sources */,
-				AA8B44B31D30503900CEBD9B /* TestCallbacks.cpp in Sources */,
 				AA8B44B21D30503900CEBD9B /* Main.cpp in Sources */,
+				AAF049601D322C9900090BA3 /* TestNative.cpp in Sources */,
 				AA8B44BA1D30503900CEBD9B /* TestLibraries.cpp in Sources */,
 				AA8B44B51D30503900CEBD9B /* TestCollections.cpp in Sources */,
 				AA8B44BC1D30503900CEBD9B /* TestStatements.cpp in Sources */,

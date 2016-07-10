@@ -59,13 +59,13 @@ String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16Str)
 }
 #else
 
-StringU16 Jinx::ConvertUtf8toUtf16(String utf8Str)
+StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t, Allocator<char16_t>, Allocator<char>> convert;
 	return convert.from_bytes(utf8Str);
 }
 
-String Jinx::ConvertUtf16toUtf8(StringU16 utf16_string)
+String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t, Allocator<char16_t>, Allocator<char>> convert;
 	return convert.to_bytes(utf16_string);
