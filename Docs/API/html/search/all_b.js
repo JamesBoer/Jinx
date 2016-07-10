@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['scriptcompilationcount',['scriptCompilationCount',['../struct_jinx_1_1_performance_stats.html#a701826a0bf844a7b60fa2632c4477cb0',1,'Jinx::PerformanceStats']]],
-  ['scriptexecutioncount',['scriptExecutionCount',['../struct_jinx_1_1_performance_stats.html#a6dcf87f106c4b92dbdd668818f3d5b93',1,'Jinx::PerformanceStats']]],
-  ['setproperty',['SetProperty',['../class_jinx_1_1_i_library.html#a32346265f79792d69d6ffe5e4945d9d9',1,'Jinx::ILibrary']]],
-  ['setvariable',['SetVariable',['../class_jinx_1_1_i_script.html#a00c9be2222beda416088575b5b8d9918',1,'Jinx::IScript']]],
-  ['shutdown',['ShutDown',['../_jinx_8h.html#a7a1b0849201e9ffdc4adfd1d20ebce54',1,'Jinx']]]
+  ['reallocfn',['reallocFn',['../struct_jinx_1_1_global_params.html#ae135b2616b7c2df0f5ec8e12b3f1c9e3',1,'Jinx::GlobalParams::reallocFn()'],['../_jinx_8h.html#adbe71f891fedec537a90904bb32bb111',1,'Jinx::ReallocFn()']]],
+  ['registerfunction',['RegisterFunction',['../class_jinx_1_1_i_library.html#a7fe80895d328feaef272bda6cec3b5d9',1,'Jinx::ILibrary']]],
+  ['registerproperty',['RegisterProperty',['../class_jinx_1_1_i_library.html#a968f0464cf24d791920563af00703179',1,'Jinx::ILibrary']]],
+  ['runtimeptr',['RuntimePtr',['../_jinx_8h.html#a6bc9758497dff930dae7356ec5a43a42',1,'Jinx']]]
 ];

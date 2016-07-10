@@ -23,7 +23,6 @@ static const char * s_opcodeName[] =
 	"add",
 	"and",
 	"callfunc",
-	"callobjfunc",
 	"cast",
 	"decrement",
 	"divide",

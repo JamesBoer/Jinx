@@ -253,9 +253,11 @@ namespace Jinx
 
 	const MemoryStats & GetMemoryStats();
 
-    // Define a custom internal string using our own allocator
+    // Define a custom UTF-8 string using internal allocator
     typedef std::basic_string <char, std::char_traits<char>, Allocator<char>> String;
 
+	// Define a custom UTF-16 string using internal allocator
+	typedef std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>> StringU16;
 
 };
 

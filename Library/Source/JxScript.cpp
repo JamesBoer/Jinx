@@ -132,10 +132,6 @@ bool Script::Execute()
 				m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 			}
 			break;
-			case Opcode::CallObjFunc:
-			{
-			}
-			break;
 			case Opcode::Cast:
 			{
 				uint8_t b;

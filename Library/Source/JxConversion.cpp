@@ -9,12 +9,6 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
-#if defined(JINX_WINDOWS)
-#define JxStrCaseCmp _strcmpi
-#else
-#define JxStrCaseCmp strcasecmp
-#endif
-
 static uint8_t s_valueTypeToByte[] =
 {
 	0,  // Null,
@@ -66,12 +60,12 @@ uint8_t Jinx::ValueTypeToByte(ValueType type)
 bool Jinx::StringToBoolean(const String & inValue, bool * outValue)
 {
 	assert(outValue);
-	if (JxStrCaseCmp(inValue.c_str(), "true") == 0)
+	if (strcmp(inValue.c_str(), "true") == 0)
 	{
 		*outValue = true;
 		return true;
 	}
-	else if (JxStrCaseCmp(inValue.c_str(), "false") == 0)
+	else if (strcmp(inValue.c_str(), "false") == 0)
 	{
 		*outValue = false;
 		return true;

@@ -510,6 +510,11 @@ String Variant::GetString() const
 	return String();
 }
 
+StringU16 Variant::GetStringU16() const
+{
+	return ConvertUtf8ToUtf16(GetString());
+}
+
 ValueType Variant::GetValType() const
 {
 	switch (m_type)
@@ -604,6 +609,11 @@ void Variant::SetString(const String & value)
 	m_type = ValueType::String;
 	new(&m_string) String();
 	m_string = value;
+}
+
+void Variant::SetString(const StringU16 & value)
+{
+	SetString(ConvertUtf16ToUtf8(value));
 }
 
 void Variant::SetValType(ValueType value)

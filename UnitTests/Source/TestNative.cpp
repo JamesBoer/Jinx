@@ -37,7 +37,7 @@ static Variant YetAnotherFunction(ScriptPtr script, Parameters params)
 }
 
 
-TEST_CASE("Test Callbacks", "[Callbacks]")
+TEST_CASE("Test Native", "[Native]")
 {
 	SECTION("Test native callback functions")
 	{

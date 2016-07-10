@@ -151,7 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Main.cpp" />
-    <ClCompile Include="..\..\..\Source\TestCallbacks.cpp" />
+    <ClCompile Include="..\..\..\Source\TestNative.cpp" />
     <ClCompile Include="..\..\..\Source\TestCasts.cpp" />
     <ClCompile Include="..\..\..\Source\TestCollections.cpp" />
     <ClCompile Include="..\..\..\Source\TestErrors.cpp" />
@@ -161,6 +161,7 @@
     <ClCompile Include="..\..\..\Source\TestLibraries.cpp" />
     <ClCompile Include="..\..\..\Source\TestLoops.cpp" />
     <ClCompile Include="..\..\..\Source\TestStatements.cpp" />
+    <ClCompile Include="..\..\..\Source\TestUnicode.cpp" />
     <ClCompile Include="..\..\..\Source\UnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>

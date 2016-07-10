@@ -59,7 +59,9 @@ namespace Jinx
 		Variant(int64_t value) : m_type(ValueType::Null) { SetInteger(value); }
 		Variant(double value) : m_type(ValueType::Null) { SetNumber(value); }
 		Variant(const char * value) : m_type(ValueType::Null) { SetString(value); }
+		Variant(const char16_t * value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const String & value) : m_type(ValueType::Null) { SetString(value); }
+		Variant(const StringU16 & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
 		Variant(const CollectionItr & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
@@ -96,6 +98,7 @@ namespace Jinx
 		int64_t GetInteger() const;
 		double GetNumber() const;
 		String GetString() const;
+		StringU16 GetStringU16() const;
 		CollectionPtr GetCollection() const;
 		CollectionItr GetCollectionItr() const;
 		UserObjectPtr GetUserObject() const;
@@ -126,6 +129,7 @@ namespace Jinx
 		void SetInteger(int64_t value);
 		void SetNumber(double value);
 		void SetString(const String & value);
+		void SetString(const StringU16 & value);
 		void SetCollection(const CollectionPtr & value);
 		void SetCollectionItr(const CollectionItr & value);
 		void SetUserObject(const UserObjectPtr & value);

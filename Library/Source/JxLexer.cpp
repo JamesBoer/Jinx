@@ -242,23 +242,22 @@ bool Lexer::Execute()
 
 bool Lexer::IsName(const char * ptr) const
 {
-	char32_t c = GetUTF32CodePoint(ptr);
-	if (IsNameStart(ptr) || c == '-' || c == '.' || (c >= '0' && c <= '9') ||
-		c == 0xB7 || (c >= 0x0300 && c <= 0x036F) || (c >= 0x203F && c <= 0x2040))
-		return true;
-	return false;
+	char c = *ptr;
+	if (IsWhitespace(c) || IsNewline(c))
+		return false;
+	if (static_cast<unsigned char>(c) <= 32)
+		return false;
+	if (c == ',' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '/')
+		return false;
+	return true;
 }
 
 bool Lexer::IsNameStart(const char * ptr) const
 {
-	char32_t c = GetUTF32CodePoint(ptr);
-	if (c == ':' || (c >= 'A' && c <= 'Z') || c == '_' || (c >= 'a' && c <= 'z') ||
-		(c >= 0xC0 && c <= 0xD6) || (c >= 0xD8 && c <= 0xF6) || (c >= 0xF8 && c <= 0x2FF) ||
-		(c >= 0x370 && c <= 0x37D) || (c >= 0x37F && c <= 0x1FFF) || (c >= 0x200C && c <= 0x200D) ||
-		(c >= 0x2070 && c <= 0x218F) || (c >= 0x2C00 && c <= 0x2FEF) || (c >= 0x3001 && c <= 0xD7FF) ||
-		(c >= 0xF900 && c <= 0xFDCF) || (c >= 0xFFDF0 && c <= 0xFFFD) || (c >= 0x10000 && c <= 0xEFFFF))
-		return true;
-	return false;
+	char c = *ptr;
+	if (IsNumberStart(c) || !IsName(ptr))
+		return false;
+	return true;
 }
 
 bool Lexer::IsNextCharacter(unsigned char c) const 
@@ -392,8 +391,6 @@ void Lexer::ParseName()
 	if (quotedName)
 		AdvanceCurrent();
 	auto name = String(startName, count);
-	// Convert all names to lower case to simply the parsing stage
-	StringToLower(name);
 	CreateSymbol(name);
 }
 

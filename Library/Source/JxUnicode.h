@@ -14,9 +14,10 @@ namespace Jinx
 {
 
 	size_t GetUtf8CharSize(const char * utf8Str);
-	void ConvertUtf8ToUtf32(const char * utf8In, uint32_t inBufferCount, char32_t * utf32CodePoint, uint32_t * numCharsOut);
-	char32_t GetUTF32CodePoint(const char * ptr);
 
+	StringU16 ConvertUtf8ToUtf16(const String & utf8Str);
+	String ConvertUtf16ToUtf8(const StringU16 & utf16Str);
+	
 };
 
 #endif // JX_UNICODE_H__

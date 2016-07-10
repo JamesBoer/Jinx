@@ -46,6 +46,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 
 int main(int argc, char ** argv)
 {
+	printf("Jinx version: %s\n", Jinx::VersionString);
 
 	GlobalParams globalParams;
 	globalParams.logSymbols = true;
@@ -55,32 +56,19 @@ int main(int argc, char ** argv)
 	globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 	globalParams.freeFn = [](void * p) { free(p); };
 	Jinx::Initialize(globalParams);
-
+	
 	auto runtime = Jinx::CreateRuntime();
 
 	static const char * scriptText =
 	u8R"(
 
-			import core
-
-			a is variable "p"
-			--write line "new"
-			set variable "p" to "new"
+		いろは is "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
 
 	)";
 
-	/*
 	auto script = TestExecuteScript(scriptText);
 	REQUIRE(script);
-	REQUIRE(script->GetVariable("a").IsCollection() == true);
-	*/
-
-	auto script = runtime->CreateScript(scriptText);
-	REQUIRE(script);
-	script->SetVariable("p", "test");
-	REQUIRE(script->Execute());
-	REQUIRE(script->GetVariable("a").GetString() == "test");
-	//REQUIRE(script->GetVariable("p").GetString() == "new");
+	REQUIRE(script->GetVariable(u8"いろは").GetString() == u8"いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす");
 
 	script = nullptr;
 	runtime = nullptr;

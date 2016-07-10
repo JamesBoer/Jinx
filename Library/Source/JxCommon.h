@@ -23,7 +23,6 @@ namespace Jinx
 		Add,
 		And,
 		CallFunc,
-		CallObjFunc,
 		Cast,
 		Decrement,
 		Divide,
@@ -214,12 +213,6 @@ namespace Jinx
 		strncpy(dest, source, destBufferSize);
 		return dest;
 #endif
-	}
-
-	inline void StringToLower(String & str)
-	{
-		for (unsigned i = 0; i < str.length(); i++)
-			str[i] = (char)tolower(str[i]);
 	}
 
 	RuntimeID GetRandomId();
