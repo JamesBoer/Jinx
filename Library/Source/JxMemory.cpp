@@ -518,10 +518,17 @@ void BlockHeap::ShutDown()
 	MemoryBlock * next;
 	while (curr)
 	{
-		m_stats.externalFreeCount++;
-		m_stats.currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+		if (curr->usedBytes == 0)
+		{
+			m_stats.externalFreeCount++;
+			m_stats.currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+			m_freeFn(curr);
+		}
+		else
+		{
+			LogWriteLine("Could not free block at shutdown.  Memory still in use.");
+		}
 		next = curr->next;
-		m_freeFn(curr);
 		curr = next;
 	}
 	m_head = nullptr;
