@@ -48,6 +48,9 @@ by James Boer, and distributed under the MIT license.
 #include <vector>
 #include <map>
 #include <string>
+#include <cstddef>
+#include <limits>
+#include <cstring>
 
 #include "JxMemory.h"
 #include "JxBuffer.h"
