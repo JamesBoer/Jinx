@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.0.2] - 2016-17-07
+### Added
+- Makefiles and NetBeans projects for Linux platform
+
+### Fixed
+- Projects compile cleanly under Linux/g++
+
 ## [0.0.2] - 2016-09-07
 ### Added
 - Support for UTF-16 conversions in Variant class
