@@ -115,7 +115,7 @@ namespace Jinx
 		const FunctionSignature * CheckFunctionCall() const;
 
 		// Parse access keyword
-		ScopeType ParseScope();
+		VisibilityType ParseScope();
 
 		// Parse current condition operator
 		Opcode ParseLogicalOperator();
@@ -139,7 +139,7 @@ namespace Jinx
 		bool ParseSubscript();
 
 		// Parse a new property declaration
-		void ParsePropertyDeclaration(bool readOnly, ScopeType scope);
+		void ParsePropertyDeclaration(bool readOnly, VisibilityType scope);
 
 		// Parse property name
 		PropertyName ParsePropertyName();
@@ -148,10 +148,10 @@ namespace Jinx
 		String ParseFunctionNamePart();
 
 		// Parse function signature
-		FunctionSignature ParseFunctionSignature(ScopeType access);
+		FunctionSignature ParseFunctionSignature(VisibilityType access);
 
 		// Parse function block
-		void ParseFunctionDefinition(ScopeType scope);
+		void ParseFunctionDefinition(VisibilityType scope);
 
 		// Parse a function call with the given signature
 		void ParseFunctionCall(const FunctionSignature * signature);

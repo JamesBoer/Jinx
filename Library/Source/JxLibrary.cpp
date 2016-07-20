@@ -115,7 +115,7 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 	}
 
 	// Create functions signature
-	ScopeType scope = publicScope ? ScopeType::Public : ScopeType::Private;
+	VisibilityType scope = publicScope ? VisibilityType::Public : VisibilityType::Private;
 	FunctionSignature functionSignature(scope, returnValue, GetName(), parts);
 	return functionSignature;
 }
@@ -185,7 +185,7 @@ bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & n
 	std::lock_guard<Mutex> lock(m_propertyMutex);
 
 	// Register the property name with the library
-	PropertyName prop(readOnly, publicScope ? ScopeType::Public : ScopeType::Private, GetName(), name);
+	PropertyName prop(readOnly, publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), name);
 	if (!RegisterPropertyName(prop, false))
 		return false;
 

@@ -536,7 +536,7 @@ const FunctionSignature * Parser::CheckFunctionCall() const
 								else
 								{
 									functionSignature = fnSig;
-									if (functionSignature->GetScope() == ScopeType::Private && library != m_library)
+									if (functionSignature->GetVisibility() == VisibilityType::Private && library != m_library)
 									{
 										LogWriteLine("Warning: Scope does not allow calling of library function");
 										return nullptr;
@@ -603,21 +603,21 @@ bool Parser::CheckProperty() const
 	return false;
 }
 
-ScopeType Parser::ParseScope()
+VisibilityType Parser::ParseScope()
 {
 	if (m_error || m_currentSymbol == m_symbolList.end())
-		return ScopeType::Local;
+		return VisibilityType::Local;
 	if (m_currentSymbol->type == SymbolType::Private)
 	{
 		NextSymbol();
-		return ScopeType::Private;
+		return VisibilityType::Private;
 	}
 	if (m_currentSymbol->type == SymbolType::Public)
 	{
 		NextSymbol();
-		return ScopeType::Public;
+		return VisibilityType::Public;
 	}
-	return ScopeType::Local;
+	return VisibilityType::Local;
 }
 
 Opcode Parser::ParseLogicalOperator()
@@ -790,7 +790,7 @@ bool Parser::ParseSubscript()
 	return Expect(SymbolType::SquareClose);
 }
 
-void Parser::ParsePropertyDeclaration(bool readOnly, ScopeType scope)
+void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 {
 	if (m_error)
 		return;
@@ -878,7 +878,7 @@ PropertyName Parser::ParsePropertyName()
 			return PropertyName();
 		}
 		// Check for invalid scope
-		if (m_library->GetName() != libraryName && propertyName.GetScope() != ScopeType::Public)
+		if (m_library->GetName() != libraryName && propertyName.GetVisibility() != VisibilityType::Public)
 		{
 			Error("Unable to access private property");
 			return PropertyName();
@@ -902,7 +902,7 @@ PropertyName Parser::ParsePropertyName()
 				{
 					// If we haven't specified the library name explicitly, we can assume we're looking
 					// for a different library.
-					if (m_library->GetName() != libraryName && propertyName.GetScope() != ScopeType::Public)
+					if (m_library->GetName() != libraryName && propertyName.GetVisibility() != VisibilityType::Public)
 						continue;
 					if (foundProperty)
 					{
@@ -912,7 +912,7 @@ PropertyName Parser::ParsePropertyName()
 					foundProperty = true;
 				}
 			}
-			if (propertyName.IsValid() && library != m_library && propertyName.GetScope() != ScopeType::Public)
+			if (propertyName.IsValid() && library != m_library && propertyName.GetVisibility() != VisibilityType::Public)
 			{
 				Error("Unable to access private property");
 				return PropertyName();
@@ -936,7 +936,7 @@ String Parser::ParseFunctionNamePart()
 	return s;
 }
 
-FunctionSignature Parser::ParseFunctionSignature(ScopeType scope)
+FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 {
 	bool returnParameter = Accept(SymbolType::Return);
 	if (Check(SymbolType::NewLine))
@@ -1035,7 +1035,7 @@ FunctionSignature Parser::ParseFunctionSignature(ScopeType scope)
 	return signature;
 }
 
-void Parser::ParseFunctionDefinition(ScopeType scope)
+void Parser::ParseFunctionDefinition(VisibilityType scope)
 {
 	// Check to make sure we're at the root frame
 	if (!IsRootFrame())
@@ -1060,7 +1060,7 @@ void Parser::ParseFunctionDefinition(ScopeType scope)
 	}
 
 	// Check function scope type
-	if (signature.GetScope() == ScopeType::Local)
+	if (signature.GetVisibility() == VisibilityType::Local)
 	{
 		// Register function signature for local scope only
 		if (!m_localFunctions.Register(signature, true))
@@ -1732,12 +1732,12 @@ void Parser::ParseStatement()
 		bool readOnly = Accept(SymbolType::Readonly);
 
 		// Parse scope level
-		ScopeType scope = ParseScope();
+		VisibilityType scope = ParseScope();
 
 		// Read only can only apply to properties
 		if (readOnly)
 		{
-			if (scope == ScopeType::Local)
+			if (scope == VisibilityType::Local)
 			{
 				Error("The 'readonly' keyword must precede a private or public property");
 				return;
@@ -1759,7 +1759,7 @@ void Parser::ParseStatement()
 			}
 
 			// We're declaring a new property if we see a non-local scope declaration
-			if (scope != ScopeType::Local)
+			if (scope != VisibilityType::Local)
 			{
 				ParsePropertyDeclaration(readOnly, scope);
 			}
@@ -1818,7 +1818,7 @@ void Parser::ParseStatement()
 				}
 			}
 		}
-		else if (scope == ScopeType::Local)
+		else if (scope == VisibilityType::Local)
 		{
 			if (Accept(SymbolType::Begin))
 			{
@@ -1884,7 +1884,7 @@ void Parser::ParseStatement()
 		}
 		else
 		{
-			Error("Invalid symbol after scope specifier '%'", scope == ScopeType::Public ? "public" : "private");
+			Error("Invalid symbol after scope specifier '%'", scope == VisibilityType::Public ? "public" : "private");
 		}
 	}
 }

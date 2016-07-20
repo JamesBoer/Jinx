@@ -17,13 +17,13 @@ namespace Jinx
 	{
 	public:
 		PropertyName();
-		PropertyName(bool readOnly, ScopeType scope, const String & moduleName, const String & propertyName, Variant defaultValue = nullptr);
+		PropertyName(bool readOnly, VisibilityType visibility, const String & moduleName, const String & propertyName, Variant defaultValue = nullptr);
 
-		bool IsValid() const { return m_scope != ScopeType::Local; }
+		bool IsValid() const { return m_visibility != VisibilityType::Local; }
 		bool IsReadOnly() const { return m_readOnly; }
 		RuntimeID GetId() const { return m_id; }
 		const String & GetName() const { return m_name; }
-		ScopeType GetScope() const { return m_scope; }
+		VisibilityType GetVisibility() const { return m_visibility; }
 		const Variant & GetDefaultValue() const { return m_defaultValue; }
 
 		// Serialization
@@ -35,7 +35,7 @@ namespace Jinx
 		RuntimeID m_id;
 		bool m_readOnly;
 		String m_name;
-		ScopeType m_scope;
+		VisibilityType m_visibility;
 		Variant m_defaultValue;
 	};
 

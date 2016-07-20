@@ -37,7 +37,7 @@ namespace Jinx
 	{
 	public:
 		FunctionSignature();
-		FunctionSignature(ScopeType access, bool returnParameter, const String & libraryName, const FunctionSignatureParts & parts);
+		FunctionSignature(VisibilityType visibility, bool returnParameter, const String & libraryName, const FunctionSignatureParts & parts);
 
 		// Get unique function id
 		RuntimeID GetId() const { return m_id; }
@@ -45,8 +45,8 @@ namespace Jinx
 		// Get signature length
 		size_t GetLength() const { return m_parts.size(); }
 
-		// Get scope level
-		ScopeType GetScope() const { return m_scope; }
+		// Get visibility level
+		VisibilityType GetVisibility() const { return m_visibility; }
 
 		// Get signature parts
 		const FunctionSignatureParts & GetParts() const { return m_parts; }
@@ -83,8 +83,8 @@ namespace Jinx
 		// Unique id
 		RuntimeID m_id;
 
-		// Accessibility level
-		ScopeType m_scope;
+		// Visibility level
+		VisibilityType m_visibility;
 
 		// Indicates whether the function returns an anonymous parameter
 		bool m_returnParameter;

@@ -181,7 +181,7 @@ bool Script::Execute()
 			{
 				FunctionSignature signature;	
 				signature.Read(m_execution.back().reader);
-				if (signature.GetScope() != ScopeType::Local)
+				if (signature.GetVisibility() != VisibilityType::Local)
 					m_library->Functions().Register(signature, false);
 				// Note: we add 5 bytes to the current position to skip over the jump command and offset value
 				m_runtime->RegisterFunction(signature, m_execution.back().bytecode, m_execution.back().reader.Tell() + 5);

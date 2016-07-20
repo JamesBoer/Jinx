@@ -17,14 +17,14 @@ FunctionSignature::FunctionSignature() :
 {
 }
 
-FunctionSignature::FunctionSignature(ScopeType access, bool returnParameter, const String & libraryName, const FunctionSignatureParts & parts) :
-	m_scope(access),
+FunctionSignature::FunctionSignature(VisibilityType visibility, bool returnParameter, const String & libraryName, const FunctionSignatureParts & parts) :
+	m_visibility(visibility),
 	m_returnParameter(returnParameter),
 	m_parts(parts)
 {
-	if (m_scope == ScopeType::Local)
+	if (m_visibility == VisibilityType::Local)
 	{
-		// Local scope functions use a randomly generated ID to avoid collisions with any other name.
+		// Local functions use a randomly generated ID to avoid collisions with any other name.
 		// We don't use a predictable hash algorithm because when calling a library function, it
 		// could accidentally call the wrong local function if it has the same signature as a local
 		// function in the original calling script.  Because it's a local function, there's also 
@@ -127,7 +127,7 @@ void FunctionSignature::Read(BinaryReader & reader)
 {
 	// Read this object from a memory buffer
 	reader.Read(&m_id);
-	reader.Read<ScopeType, uint8_t>(&m_scope);
+	reader.Read<VisibilityType, uint8_t>(&m_visibility);
 	reader.Read(&m_returnParameter);
 	uint8_t partSize;
 	reader.Read(&partSize);
@@ -152,7 +152,7 @@ void FunctionSignature::Write(BinaryWriter & writer) const
 {
 	// Write this object to a memory buffer
 	writer.Write(m_id);
-	writer.Write<ScopeType, uint8_t>(m_scope);
+	writer.Write<VisibilityType, uint8_t>(m_visibility);
 	writer.Write(m_returnParameter);
 	writer.Write(static_cast<uint8_t>(m_parts.size()));
 	for (const auto & part : m_parts)

@@ -160,8 +160,8 @@ namespace Jinx
 	// Get the name of a value type
 	const char * GetValueTypeName(ValueType valueType);
 
-	// Access level 
-	enum class ScopeType
+	// Visibility type 
+	enum class VisibilityType
 	{
 		Local,
 		Private,

@@ -11,14 +11,14 @@ using namespace Jinx;
 
 PropertyName::PropertyName() :
 	m_readOnly(false),
-	m_scope(ScopeType::Local),
+	m_visibility(VisibilityType::Local),
 	m_id(0)
 {
 }
 
-PropertyName::PropertyName(bool readOnly, ScopeType scope, const String & moduleName, const String & propertyName, Variant defaultValue) :
+PropertyName::PropertyName(bool readOnly, VisibilityType visibility, const String & moduleName, const String & propertyName, Variant defaultValue) :
 	m_readOnly(readOnly),
-	m_scope(scope),
+	m_visibility(visibility),
 	m_name(propertyName),
 	m_defaultValue(defaultValue)
 {
@@ -31,7 +31,7 @@ void PropertyName::Read(BinaryReader & reader)
 	reader.Read(&m_id);
 	reader.Read(&m_readOnly);
 	reader.Read(&m_name);
-	reader.Read<ScopeType, uint8_t>(&m_scope);
+	reader.Read<VisibilityType, uint8_t>(&m_visibility);
 	m_defaultValue.Read(reader);
 }
 
@@ -40,6 +40,6 @@ void PropertyName::Write(BinaryWriter & writer) const
 	writer.Write(m_id);
 	writer.Write(m_readOnly);
 	writer.Write(m_name);
-	writer.Write<ScopeType, uint8_t>(m_scope);
+	writer.Write<VisibilityType, uint8_t>(m_visibility);
 	m_defaultValue.Write(writer);
 }
