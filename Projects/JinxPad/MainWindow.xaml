@@ -1,0 +1,56 @@
+﻿<Window 
+    x:Class="JinxPad.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:p="clr-namespace:JinxPad.Properties"
+    xmlns:local="clr-namespace:JinxPad"
+    xmlns:jinx="clr-namespace:JinxTools;assembly=JinxTools"
+    Initialized="OnInitialized"
+    Closing="OnClosing"
+    Closed="OnClosed"
+    mc:Ignorable="d"
+    Title="Jinx Editor" 
+    Height="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowHeight, Mode=TwoWay}"
+    Width="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowWidth, Mode=TwoWay}"
+    Left="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowLeft, Mode=TwoWay}"
+    Top="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowTop, Mode=TwoWay}"
+    WindowState="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowState, Mode=TwoWay}"
+    >
+
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Cut" CanExecute="CutCanExecute" Executed="CutExecuted" />
+        <CommandBinding Command="ApplicationCommands.Copy" CanExecute="CopyCanExecute" Executed="CopyExecuted" />
+        <CommandBinding Command="ApplicationCommands.Paste" CanExecute="PasteCanExecute" Executed="PasteExecuted" />
+    </Window.CommandBindings>
+
+    <Grid>
+        <DockPanel>
+            <Menu DockPanel.Dock="Top" Height="20">
+                <MenuItem Header="File">
+                    <MenuItem Header="New" HorizontalAlignment="Left" Width="140" Click="OnNew"/>
+                    <MenuItem Header="Open..." HorizontalAlignment="Left" Width="140" Click="OnOpen"/>
+                    <MenuItem Header="Save" HorizontalAlignment="Left" Width="140" Click="OnSave"/>
+                    <MenuItem Header="Save As..." HorizontalAlignment="Left" Width="140" Click="OnSaveAs"/>
+                    <Separator HorizontalAlignment="Left" Height="1" Width="140"/>
+                    <MenuItem Header="Exit" HorizontalAlignment="Left" Width="140" Click="OnExit"/>
+                </MenuItem>
+                <MenuItem Header="Edit">
+                    <MenuItem Command="ApplicationCommands.Cut" />
+                    <MenuItem Command="ApplicationCommands.Copy" />
+                    <MenuItem Command="ApplicationCommands.Paste" />
+                </MenuItem>
+                <MenuItem Header="Help">
+                    <MenuItem Header="View Tutorial" Click="OnHelpViewTutorial" />
+                    <MenuItem Header="About..." Click="OnHelpAbout" />
+                </MenuItem>
+            </Menu>
+            <jinx:Editor 
+                x:Name="Editor"
+                TextChanged="OnTextChanged"
+                LineNumbersVisibility="Visible"
+                />
+        </DockPanel>
+    </Grid>
+</Window>
