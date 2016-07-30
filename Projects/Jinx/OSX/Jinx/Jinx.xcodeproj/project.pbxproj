@@ -7,98 +7,98 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA0EAD491D166DBE00654244 /* JxLibCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0EAD431D166DBE00654244 /* JxLibCore.cpp */; };
-		AA0EAD4A1D166DBE00654244 /* JxLibCore.h in Headers */ = {isa = PBXBuildFile; fileRef = AA0EAD441D166DBE00654244 /* JxLibCore.h */; };
-		AA93A2931CE2CE8100104611 /* Jinx.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2731CE2CE8100104611 /* Jinx.h */; };
-		AA93A2941CE2CE8100104611 /* JxBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2741CE2CE8100104611 /* JxBuffer.cpp */; };
-		AA93A2951CE2CE8100104611 /* JxBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2751CE2CE8100104611 /* JxBuffer.h */; };
-		AA93A2961CE2CE8100104611 /* JxCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2761CE2CE8100104611 /* JxCollection.cpp */; };
-		AA93A2971CE2CE8100104611 /* JxCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2771CE2CE8100104611 /* JxCollection.h */; };
-		AA93A2981CE2CE8100104611 /* JxCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2781CE2CE8100104611 /* JxCommon.cpp */; };
-		AA93A2991CE2CE8100104611 /* JxCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2791CE2CE8100104611 /* JxCommon.h */; };
-		AA93A29A1CE2CE8100104611 /* JxFunctionTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A27A1CE2CE8100104611 /* JxFunctionTable.cpp */; };
-		AA93A29B1CE2CE8100104611 /* JxFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A27B1CE2CE8100104611 /* JxFunctionTable.h */; };
-		AA93A29C1CE2CE8100104611 /* JxInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A27C1CE2CE8100104611 /* JxInternal.h */; };
-		AA93A29D1CE2CE8100104611 /* JxLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A27D1CE2CE8100104611 /* JxLexer.cpp */; };
-		AA93A29E1CE2CE8100104611 /* JxLexer.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A27E1CE2CE8100104611 /* JxLexer.h */; };
-		AA93A29F1CE2CE8100104611 /* JxLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A27F1CE2CE8100104611 /* JxLibrary.cpp */; };
-		AA93A2A01CE2CE8100104611 /* JxLibrary.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2801CE2CE8100104611 /* JxLibrary.h */; };
-		AA93A2A11CE2CE8100104611 /* JxLogging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2811CE2CE8100104611 /* JxLogging.cpp */; };
-		AA93A2A21CE2CE8100104611 /* JxLogging.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2821CE2CE8100104611 /* JxLogging.h */; };
-		AA93A2A31CE2CE8100104611 /* JxMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2831CE2CE8100104611 /* JxMemory.cpp */; };
-		AA93A2A41CE2CE8100104611 /* JxMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2841CE2CE8100104611 /* JxMemory.h */; };
-		AA93A2A51CE2CE8100104611 /* JxParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2851CE2CE8100104611 /* JxParser.cpp */; };
-		AA93A2A61CE2CE8100104611 /* JxParser.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2861CE2CE8100104611 /* JxParser.h */; };
-		AA93A2A71CE2CE8100104611 /* JxRuntime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2871CE2CE8100104611 /* JxRuntime.cpp */; };
-		AA93A2A81CE2CE8100104611 /* JxRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2881CE2CE8100104611 /* JxRuntime.h */; };
-		AA93A2A91CE2CE8100104611 /* JxScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2891CE2CE8100104611 /* JxScript.cpp */; };
-		AA93A2AA1CE2CE8100104611 /* JxScript.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A28A1CE2CE8100104611 /* JxScript.h */; };
-		AA93A2AB1CE2CE8100104611 /* JxSerialize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A28B1CE2CE8100104611 /* JxSerialize.cpp */; };
-		AA93A2AC1CE2CE8100104611 /* JxSerialize.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A28C1CE2CE8100104611 /* JxSerialize.h */; };
-		AA93A2AF1CE2CE8100104611 /* JxUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A28F1CE2CE8100104611 /* JxUnicode.cpp */; };
-		AA93A2B01CE2CE8100104611 /* JxUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2901CE2CE8100104611 /* JxUnicode.h */; };
-		AA93A2B11CE2CE8100104611 /* JxVariant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA93A2911CE2CE8100104611 /* JxVariant.cpp */; };
-		AA93A2B21CE2CE8100104611 /* JxVariant.h in Headers */ = {isa = PBXBuildFile; fileRef = AA93A2921CE2CE8100104611 /* JxVariant.h */; };
-		AA9C27531D0C0BF70092A8A4 /* JxPropertyName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA9C27511D0C0BF70092A8A4 /* JxPropertyName.cpp */; };
-		AA9C27541D0C0BF70092A8A4 /* JxPropertyName.h in Headers */ = {isa = PBXBuildFile; fileRef = AA9C27521D0C0BF70092A8A4 /* JxPropertyName.h */; };
-		AAA1A3A81D1E3E5A00143B43 /* JxMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAA1A3A61D1E3E5A00143B43 /* JxMutex.cpp */; };
-		AAA1A3A91D1E3E5A00143B43 /* JxMutex.h in Headers */ = {isa = PBXBuildFile; fileRef = AAA1A3A71D1E3E5A00143B43 /* JxMutex.h */; };
-		AABF96461CFFDCA100CB2EF4 /* JxFunctionDefinition.h in Headers */ = {isa = PBXBuildFile; fileRef = AABF96431CFFDCA100CB2EF4 /* JxFunctionDefinition.h */; };
-		AABF96471CFFDCA100CB2EF4 /* JxFunctionSignature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AABF96441CFFDCA100CB2EF4 /* JxFunctionSignature.cpp */; };
-		AABF96481CFFDCA100CB2EF4 /* JxFunctionSignature.h in Headers */ = {isa = PBXBuildFile; fileRef = AABF96451CFFDCA100CB2EF4 /* JxFunctionSignature.h */; };
-		AADBEDD81D0447B800A57411 /* JxConversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBEDD41D0447B800A57411 /* JxConversion.cpp */; };
-		AADBEDD91D0447B800A57411 /* JxConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = AADBEDD51D0447B800A57411 /* JxConversion.h */; };
-		AADBEDDA1D0447B800A57411 /* JxHash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AADBEDD61D0447B800A57411 /* JxHash.cpp */; };
-		AADBEDDB1D0447B800A57411 /* JxHash.h in Headers */ = {isa = PBXBuildFile; fileRef = AADBEDD71D0447B800A57411 /* JxHash.h */; };
-		AAE3C94E1D0E3AB5008270D6 /* JxGuid.h in Headers */ = {isa = PBXBuildFile; fileRef = AAE3C94C1D0E3AB5008270D6 /* JxGuid.h */; };
+		AA7D1C5F1D4D229000A5AAF3 /* Jinx.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C331D4D229000A5AAF3 /* Jinx.h */; };
+		AA7D1C601D4D229000A5AAF3 /* JxBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C341D4D229000A5AAF3 /* JxBuffer.cpp */; };
+		AA7D1C611D4D229000A5AAF3 /* JxBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C351D4D229000A5AAF3 /* JxBuffer.h */; };
+		AA7D1C621D4D229000A5AAF3 /* JxCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C361D4D229000A5AAF3 /* JxCollection.cpp */; };
+		AA7D1C631D4D229000A5AAF3 /* JxCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C371D4D229000A5AAF3 /* JxCollection.h */; };
+		AA7D1C641D4D229000A5AAF3 /* JxCommon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C381D4D229000A5AAF3 /* JxCommon.cpp */; };
+		AA7D1C651D4D229000A5AAF3 /* JxCommon.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C391D4D229000A5AAF3 /* JxCommon.h */; };
+		AA7D1C661D4D229000A5AAF3 /* JxConversion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C3A1D4D229000A5AAF3 /* JxConversion.cpp */; };
+		AA7D1C671D4D229000A5AAF3 /* JxConversion.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C3B1D4D229000A5AAF3 /* JxConversion.h */; };
+		AA7D1C681D4D229000A5AAF3 /* JxFunctionDefinition.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C3C1D4D229000A5AAF3 /* JxFunctionDefinition.h */; };
+		AA7D1C691D4D229000A5AAF3 /* JxFunctionSignature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C3D1D4D229000A5AAF3 /* JxFunctionSignature.cpp */; };
+		AA7D1C6A1D4D229000A5AAF3 /* JxFunctionSignature.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C3E1D4D229000A5AAF3 /* JxFunctionSignature.h */; };
+		AA7D1C6B1D4D229000A5AAF3 /* JxFunctionTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C3F1D4D229000A5AAF3 /* JxFunctionTable.cpp */; };
+		AA7D1C6C1D4D229000A5AAF3 /* JxFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C401D4D229000A5AAF3 /* JxFunctionTable.h */; };
+		AA7D1C6D1D4D229000A5AAF3 /* JxGuid.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C411D4D229000A5AAF3 /* JxGuid.h */; };
+		AA7D1C6E1D4D229000A5AAF3 /* JxHash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C421D4D229000A5AAF3 /* JxHash.cpp */; };
+		AA7D1C6F1D4D229000A5AAF3 /* JxHash.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C431D4D229000A5AAF3 /* JxHash.h */; };
+		AA7D1C701D4D229000A5AAF3 /* JxInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C441D4D229000A5AAF3 /* JxInternal.h */; };
+		AA7D1C711D4D229000A5AAF3 /* JxLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C451D4D229000A5AAF3 /* JxLexer.cpp */; };
+		AA7D1C721D4D229000A5AAF3 /* JxLexer.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C461D4D229000A5AAF3 /* JxLexer.h */; };
+		AA7D1C731D4D229000A5AAF3 /* JxLibCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C471D4D229000A5AAF3 /* JxLibCore.cpp */; };
+		AA7D1C741D4D229000A5AAF3 /* JxLibCore.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C481D4D229000A5AAF3 /* JxLibCore.h */; };
+		AA7D1C751D4D229000A5AAF3 /* JxLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C491D4D229000A5AAF3 /* JxLibrary.cpp */; };
+		AA7D1C761D4D229000A5AAF3 /* JxLibrary.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C4A1D4D229000A5AAF3 /* JxLibrary.h */; };
+		AA7D1C771D4D229000A5AAF3 /* JxLogging.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C4B1D4D229000A5AAF3 /* JxLogging.cpp */; };
+		AA7D1C781D4D229000A5AAF3 /* JxLogging.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C4C1D4D229000A5AAF3 /* JxLogging.h */; };
+		AA7D1C791D4D229000A5AAF3 /* JxMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C4D1D4D229000A5AAF3 /* JxMemory.cpp */; };
+		AA7D1C7A1D4D229000A5AAF3 /* JxMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C4E1D4D229000A5AAF3 /* JxMemory.h */; };
+		AA7D1C7B1D4D229000A5AAF3 /* JxMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C4F1D4D229000A5AAF3 /* JxMutex.cpp */; };
+		AA7D1C7C1D4D229000A5AAF3 /* JxMutex.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C501D4D229000A5AAF3 /* JxMutex.h */; };
+		AA7D1C7D1D4D229000A5AAF3 /* JxParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C511D4D229000A5AAF3 /* JxParser.cpp */; };
+		AA7D1C7E1D4D229000A5AAF3 /* JxParser.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C521D4D229000A5AAF3 /* JxParser.h */; };
+		AA7D1C7F1D4D229000A5AAF3 /* JxPropertyName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C531D4D229000A5AAF3 /* JxPropertyName.cpp */; };
+		AA7D1C801D4D229000A5AAF3 /* JxPropertyName.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C541D4D229000A5AAF3 /* JxPropertyName.h */; };
+		AA7D1C811D4D229000A5AAF3 /* JxRuntime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C551D4D229000A5AAF3 /* JxRuntime.cpp */; };
+		AA7D1C821D4D229000A5AAF3 /* JxRuntime.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C561D4D229000A5AAF3 /* JxRuntime.h */; };
+		AA7D1C831D4D229000A5AAF3 /* JxScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C571D4D229000A5AAF3 /* JxScript.cpp */; };
+		AA7D1C841D4D229000A5AAF3 /* JxScript.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C581D4D229000A5AAF3 /* JxScript.h */; };
+		AA7D1C851D4D229000A5AAF3 /* JxSerialize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C591D4D229000A5AAF3 /* JxSerialize.cpp */; };
+		AA7D1C861D4D229000A5AAF3 /* JxSerialize.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C5A1D4D229000A5AAF3 /* JxSerialize.h */; };
+		AA7D1C871D4D229000A5AAF3 /* JxUnicode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C5B1D4D229000A5AAF3 /* JxUnicode.cpp */; };
+		AA7D1C881D4D229000A5AAF3 /* JxUnicode.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C5C1D4D229000A5AAF3 /* JxUnicode.h */; };
+		AA7D1C891D4D229000A5AAF3 /* JxVariant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C5D1D4D229000A5AAF3 /* JxVariant.cpp */; };
+		AA7D1C8A1D4D229000A5AAF3 /* JxVariant.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C5E1D4D229000A5AAF3 /* JxVariant.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AA0EAD431D166DBE00654244 /* JxLibCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLibCore.cpp; path = ../../../Source/JxLibCore.cpp; sourceTree = "<group>"; };
-		AA0EAD441D166DBE00654244 /* JxLibCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLibCore.h; path = ../../../Source/JxLibCore.h; sourceTree = "<group>"; };
+		AA7D1C331D4D229000A5AAF3 /* Jinx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Jinx.h; path = ../../../../Source/Jinx.h; sourceTree = "<group>"; };
+		AA7D1C341D4D229000A5AAF3 /* JxBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxBuffer.cpp; path = ../../../../Source/JxBuffer.cpp; sourceTree = "<group>"; };
+		AA7D1C351D4D229000A5AAF3 /* JxBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxBuffer.h; path = ../../../../Source/JxBuffer.h; sourceTree = "<group>"; };
+		AA7D1C361D4D229000A5AAF3 /* JxCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxCollection.cpp; path = ../../../../Source/JxCollection.cpp; sourceTree = "<group>"; };
+		AA7D1C371D4D229000A5AAF3 /* JxCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxCollection.h; path = ../../../../Source/JxCollection.h; sourceTree = "<group>"; };
+		AA7D1C381D4D229000A5AAF3 /* JxCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxCommon.cpp; path = ../../../../Source/JxCommon.cpp; sourceTree = "<group>"; };
+		AA7D1C391D4D229000A5AAF3 /* JxCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxCommon.h; path = ../../../../Source/JxCommon.h; sourceTree = "<group>"; };
+		AA7D1C3A1D4D229000A5AAF3 /* JxConversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxConversion.cpp; path = ../../../../Source/JxConversion.cpp; sourceTree = "<group>"; };
+		AA7D1C3B1D4D229000A5AAF3 /* JxConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxConversion.h; path = ../../../../Source/JxConversion.h; sourceTree = "<group>"; };
+		AA7D1C3C1D4D229000A5AAF3 /* JxFunctionDefinition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionDefinition.h; path = ../../../../Source/JxFunctionDefinition.h; sourceTree = "<group>"; };
+		AA7D1C3D1D4D229000A5AAF3 /* JxFunctionSignature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxFunctionSignature.cpp; path = ../../../../Source/JxFunctionSignature.cpp; sourceTree = "<group>"; };
+		AA7D1C3E1D4D229000A5AAF3 /* JxFunctionSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionSignature.h; path = ../../../../Source/JxFunctionSignature.h; sourceTree = "<group>"; };
+		AA7D1C3F1D4D229000A5AAF3 /* JxFunctionTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxFunctionTable.cpp; path = ../../../../Source/JxFunctionTable.cpp; sourceTree = "<group>"; };
+		AA7D1C401D4D229000A5AAF3 /* JxFunctionTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionTable.h; path = ../../../../Source/JxFunctionTable.h; sourceTree = "<group>"; };
+		AA7D1C411D4D229000A5AAF3 /* JxGuid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxGuid.h; path = ../../../../Source/JxGuid.h; sourceTree = "<group>"; };
+		AA7D1C421D4D229000A5AAF3 /* JxHash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxHash.cpp; path = ../../../../Source/JxHash.cpp; sourceTree = "<group>"; };
+		AA7D1C431D4D229000A5AAF3 /* JxHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxHash.h; path = ../../../../Source/JxHash.h; sourceTree = "<group>"; };
+		AA7D1C441D4D229000A5AAF3 /* JxInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxInternal.h; path = ../../../../Source/JxInternal.h; sourceTree = "<group>"; };
+		AA7D1C451D4D229000A5AAF3 /* JxLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLexer.cpp; path = ../../../../Source/JxLexer.cpp; sourceTree = "<group>"; };
+		AA7D1C461D4D229000A5AAF3 /* JxLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLexer.h; path = ../../../../Source/JxLexer.h; sourceTree = "<group>"; };
+		AA7D1C471D4D229000A5AAF3 /* JxLibCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLibCore.cpp; path = ../../../../Source/JxLibCore.cpp; sourceTree = "<group>"; };
+		AA7D1C481D4D229000A5AAF3 /* JxLibCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLibCore.h; path = ../../../../Source/JxLibCore.h; sourceTree = "<group>"; };
+		AA7D1C491D4D229000A5AAF3 /* JxLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLibrary.cpp; path = ../../../../Source/JxLibrary.cpp; sourceTree = "<group>"; };
+		AA7D1C4A1D4D229000A5AAF3 /* JxLibrary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLibrary.h; path = ../../../../Source/JxLibrary.h; sourceTree = "<group>"; };
+		AA7D1C4B1D4D229000A5AAF3 /* JxLogging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLogging.cpp; path = ../../../../Source/JxLogging.cpp; sourceTree = "<group>"; };
+		AA7D1C4C1D4D229000A5AAF3 /* JxLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLogging.h; path = ../../../../Source/JxLogging.h; sourceTree = "<group>"; };
+		AA7D1C4D1D4D229000A5AAF3 /* JxMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxMemory.cpp; path = ../../../../Source/JxMemory.cpp; sourceTree = "<group>"; };
+		AA7D1C4E1D4D229000A5AAF3 /* JxMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxMemory.h; path = ../../../../Source/JxMemory.h; sourceTree = "<group>"; };
+		AA7D1C4F1D4D229000A5AAF3 /* JxMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxMutex.cpp; path = ../../../../Source/JxMutex.cpp; sourceTree = "<group>"; };
+		AA7D1C501D4D229000A5AAF3 /* JxMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxMutex.h; path = ../../../../Source/JxMutex.h; sourceTree = "<group>"; };
+		AA7D1C511D4D229000A5AAF3 /* JxParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxParser.cpp; path = ../../../../Source/JxParser.cpp; sourceTree = "<group>"; };
+		AA7D1C521D4D229000A5AAF3 /* JxParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxParser.h; path = ../../../../Source/JxParser.h; sourceTree = "<group>"; };
+		AA7D1C531D4D229000A5AAF3 /* JxPropertyName.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxPropertyName.cpp; path = ../../../../Source/JxPropertyName.cpp; sourceTree = "<group>"; };
+		AA7D1C541D4D229000A5AAF3 /* JxPropertyName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxPropertyName.h; path = ../../../../Source/JxPropertyName.h; sourceTree = "<group>"; };
+		AA7D1C551D4D229000A5AAF3 /* JxRuntime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxRuntime.cpp; path = ../../../../Source/JxRuntime.cpp; sourceTree = "<group>"; };
+		AA7D1C561D4D229000A5AAF3 /* JxRuntime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxRuntime.h; path = ../../../../Source/JxRuntime.h; sourceTree = "<group>"; };
+		AA7D1C571D4D229000A5AAF3 /* JxScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxScript.cpp; path = ../../../../Source/JxScript.cpp; sourceTree = "<group>"; };
+		AA7D1C581D4D229000A5AAF3 /* JxScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxScript.h; path = ../../../../Source/JxScript.h; sourceTree = "<group>"; };
+		AA7D1C591D4D229000A5AAF3 /* JxSerialize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxSerialize.cpp; path = ../../../../Source/JxSerialize.cpp; sourceTree = "<group>"; };
+		AA7D1C5A1D4D229000A5AAF3 /* JxSerialize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxSerialize.h; path = ../../../../Source/JxSerialize.h; sourceTree = "<group>"; };
+		AA7D1C5B1D4D229000A5AAF3 /* JxUnicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxUnicode.cpp; path = ../../../../Source/JxUnicode.cpp; sourceTree = "<group>"; };
+		AA7D1C5C1D4D229000A5AAF3 /* JxUnicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxUnicode.h; path = ../../../../Source/JxUnicode.h; sourceTree = "<group>"; };
+		AA7D1C5D1D4D229000A5AAF3 /* JxVariant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxVariant.cpp; path = ../../../../Source/JxVariant.cpp; sourceTree = "<group>"; };
+		AA7D1C5E1D4D229000A5AAF3 /* JxVariant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxVariant.h; path = ../../../../Source/JxVariant.h; sourceTree = "<group>"; };
 		AA93A26B1CE2CE5900104611 /* libJinx.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libJinx.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA93A2731CE2CE8100104611 /* Jinx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Jinx.h; path = ../../../Source/Jinx.h; sourceTree = "<group>"; };
-		AA93A2741CE2CE8100104611 /* JxBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxBuffer.cpp; path = ../../../Source/JxBuffer.cpp; sourceTree = "<group>"; };
-		AA93A2751CE2CE8100104611 /* JxBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxBuffer.h; path = ../../../Source/JxBuffer.h; sourceTree = "<group>"; };
-		AA93A2761CE2CE8100104611 /* JxCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxCollection.cpp; path = ../../../Source/JxCollection.cpp; sourceTree = "<group>"; };
-		AA93A2771CE2CE8100104611 /* JxCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxCollection.h; path = ../../../Source/JxCollection.h; sourceTree = "<group>"; };
-		AA93A2781CE2CE8100104611 /* JxCommon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxCommon.cpp; path = ../../../Source/JxCommon.cpp; sourceTree = "<group>"; };
-		AA93A2791CE2CE8100104611 /* JxCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxCommon.h; path = ../../../Source/JxCommon.h; sourceTree = "<group>"; };
-		AA93A27A1CE2CE8100104611 /* JxFunctionTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxFunctionTable.cpp; path = ../../../Source/JxFunctionTable.cpp; sourceTree = "<group>"; };
-		AA93A27B1CE2CE8100104611 /* JxFunctionTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionTable.h; path = ../../../Source/JxFunctionTable.h; sourceTree = "<group>"; };
-		AA93A27C1CE2CE8100104611 /* JxInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxInternal.h; path = ../../../Source/JxInternal.h; sourceTree = "<group>"; };
-		AA93A27D1CE2CE8100104611 /* JxLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLexer.cpp; path = ../../../Source/JxLexer.cpp; sourceTree = "<group>"; };
-		AA93A27E1CE2CE8100104611 /* JxLexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLexer.h; path = ../../../Source/JxLexer.h; sourceTree = "<group>"; };
-		AA93A27F1CE2CE8100104611 /* JxLibrary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLibrary.cpp; path = ../../../Source/JxLibrary.cpp; sourceTree = "<group>"; };
-		AA93A2801CE2CE8100104611 /* JxLibrary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLibrary.h; path = ../../../Source/JxLibrary.h; sourceTree = "<group>"; };
-		AA93A2811CE2CE8100104611 /* JxLogging.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxLogging.cpp; path = ../../../Source/JxLogging.cpp; sourceTree = "<group>"; };
-		AA93A2821CE2CE8100104611 /* JxLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLogging.h; path = ../../../Source/JxLogging.h; sourceTree = "<group>"; };
-		AA93A2831CE2CE8100104611 /* JxMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxMemory.cpp; path = ../../../Source/JxMemory.cpp; sourceTree = "<group>"; };
-		AA93A2841CE2CE8100104611 /* JxMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxMemory.h; path = ../../../Source/JxMemory.h; sourceTree = "<group>"; };
-		AA93A2851CE2CE8100104611 /* JxParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxParser.cpp; path = ../../../Source/JxParser.cpp; sourceTree = "<group>"; };
-		AA93A2861CE2CE8100104611 /* JxParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxParser.h; path = ../../../Source/JxParser.h; sourceTree = "<group>"; };
-		AA93A2871CE2CE8100104611 /* JxRuntime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxRuntime.cpp; path = ../../../Source/JxRuntime.cpp; sourceTree = "<group>"; };
-		AA93A2881CE2CE8100104611 /* JxRuntime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxRuntime.h; path = ../../../Source/JxRuntime.h; sourceTree = "<group>"; };
-		AA93A2891CE2CE8100104611 /* JxScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxScript.cpp; path = ../../../Source/JxScript.cpp; sourceTree = "<group>"; };
-		AA93A28A1CE2CE8100104611 /* JxScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxScript.h; path = ../../../Source/JxScript.h; sourceTree = "<group>"; };
-		AA93A28B1CE2CE8100104611 /* JxSerialize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxSerialize.cpp; path = ../../../Source/JxSerialize.cpp; sourceTree = "<group>"; };
-		AA93A28C1CE2CE8100104611 /* JxSerialize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxSerialize.h; path = ../../../Source/JxSerialize.h; sourceTree = "<group>"; };
-		AA93A28F1CE2CE8100104611 /* JxUnicode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxUnicode.cpp; path = ../../../Source/JxUnicode.cpp; sourceTree = "<group>"; };
-		AA93A2901CE2CE8100104611 /* JxUnicode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxUnicode.h; path = ../../../Source/JxUnicode.h; sourceTree = "<group>"; };
-		AA93A2911CE2CE8100104611 /* JxVariant.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxVariant.cpp; path = ../../../Source/JxVariant.cpp; sourceTree = "<group>"; };
-		AA93A2921CE2CE8100104611 /* JxVariant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxVariant.h; path = ../../../Source/JxVariant.h; sourceTree = "<group>"; };
-		AA9C27511D0C0BF70092A8A4 /* JxPropertyName.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxPropertyName.cpp; path = ../../../Source/JxPropertyName.cpp; sourceTree = "<group>"; };
-		AA9C27521D0C0BF70092A8A4 /* JxPropertyName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxPropertyName.h; path = ../../../Source/JxPropertyName.h; sourceTree = "<group>"; };
-		AAA1A3A61D1E3E5A00143B43 /* JxMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxMutex.cpp; path = ../../../Source/JxMutex.cpp; sourceTree = "<group>"; };
-		AAA1A3A71D1E3E5A00143B43 /* JxMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxMutex.h; path = ../../../Source/JxMutex.h; sourceTree = "<group>"; };
-		AABF96431CFFDCA100CB2EF4 /* JxFunctionDefinition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionDefinition.h; path = ../../../Source/JxFunctionDefinition.h; sourceTree = "<group>"; };
-		AABF96441CFFDCA100CB2EF4 /* JxFunctionSignature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxFunctionSignature.cpp; path = ../../../Source/JxFunctionSignature.cpp; sourceTree = "<group>"; };
-		AABF96451CFFDCA100CB2EF4 /* JxFunctionSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionSignature.h; path = ../../../Source/JxFunctionSignature.h; sourceTree = "<group>"; };
-		AADBEDD41D0447B800A57411 /* JxConversion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxConversion.cpp; path = ../../../Source/JxConversion.cpp; sourceTree = "<group>"; };
-		AADBEDD51D0447B800A57411 /* JxConversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxConversion.h; path = ../../../Source/JxConversion.h; sourceTree = "<group>"; };
-		AADBEDD61D0447B800A57411 /* JxHash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxHash.cpp; path = ../../../Source/JxHash.cpp; sourceTree = "<group>"; };
-		AADBEDD71D0447B800A57411 /* JxHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxHash.h; path = ../../../Source/JxHash.h; sourceTree = "<group>"; };
-		AAE3C94C1D0E3AB5008270D6 /* JxGuid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxGuid.h; path = ../../../Source/JxGuid.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,50 +131,50 @@
 		AA93A2721CE2CE6700104611 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				AAA1A3A61D1E3E5A00143B43 /* JxMutex.cpp */,
-				AAA1A3A71D1E3E5A00143B43 /* JxMutex.h */,
-				AA0EAD431D166DBE00654244 /* JxLibCore.cpp */,
-				AA0EAD441D166DBE00654244 /* JxLibCore.h */,
-				AAE3C94C1D0E3AB5008270D6 /* JxGuid.h */,
-				AA9C27511D0C0BF70092A8A4 /* JxPropertyName.cpp */,
-				AA9C27521D0C0BF70092A8A4 /* JxPropertyName.h */,
-				AADBEDD41D0447B800A57411 /* JxConversion.cpp */,
-				AADBEDD51D0447B800A57411 /* JxConversion.h */,
-				AADBEDD61D0447B800A57411 /* JxHash.cpp */,
-				AADBEDD71D0447B800A57411 /* JxHash.h */,
-				AABF96431CFFDCA100CB2EF4 /* JxFunctionDefinition.h */,
-				AABF96441CFFDCA100CB2EF4 /* JxFunctionSignature.cpp */,
-				AABF96451CFFDCA100CB2EF4 /* JxFunctionSignature.h */,
-				AA93A2731CE2CE8100104611 /* Jinx.h */,
-				AA93A2741CE2CE8100104611 /* JxBuffer.cpp */,
-				AA93A2751CE2CE8100104611 /* JxBuffer.h */,
-				AA93A2761CE2CE8100104611 /* JxCollection.cpp */,
-				AA93A2771CE2CE8100104611 /* JxCollection.h */,
-				AA93A2781CE2CE8100104611 /* JxCommon.cpp */,
-				AA93A2791CE2CE8100104611 /* JxCommon.h */,
-				AA93A27A1CE2CE8100104611 /* JxFunctionTable.cpp */,
-				AA93A27B1CE2CE8100104611 /* JxFunctionTable.h */,
-				AA93A27C1CE2CE8100104611 /* JxInternal.h */,
-				AA93A27D1CE2CE8100104611 /* JxLexer.cpp */,
-				AA93A27E1CE2CE8100104611 /* JxLexer.h */,
-				AA93A27F1CE2CE8100104611 /* JxLibrary.cpp */,
-				AA93A2801CE2CE8100104611 /* JxLibrary.h */,
-				AA93A2811CE2CE8100104611 /* JxLogging.cpp */,
-				AA93A2821CE2CE8100104611 /* JxLogging.h */,
-				AA93A2831CE2CE8100104611 /* JxMemory.cpp */,
-				AA93A2841CE2CE8100104611 /* JxMemory.h */,
-				AA93A2851CE2CE8100104611 /* JxParser.cpp */,
-				AA93A2861CE2CE8100104611 /* JxParser.h */,
-				AA93A2871CE2CE8100104611 /* JxRuntime.cpp */,
-				AA93A2881CE2CE8100104611 /* JxRuntime.h */,
-				AA93A2891CE2CE8100104611 /* JxScript.cpp */,
-				AA93A28A1CE2CE8100104611 /* JxScript.h */,
-				AA93A28B1CE2CE8100104611 /* JxSerialize.cpp */,
-				AA93A28C1CE2CE8100104611 /* JxSerialize.h */,
-				AA93A28F1CE2CE8100104611 /* JxUnicode.cpp */,
-				AA93A2901CE2CE8100104611 /* JxUnicode.h */,
-				AA93A2911CE2CE8100104611 /* JxVariant.cpp */,
-				AA93A2921CE2CE8100104611 /* JxVariant.h */,
+				AA7D1C331D4D229000A5AAF3 /* Jinx.h */,
+				AA7D1C341D4D229000A5AAF3 /* JxBuffer.cpp */,
+				AA7D1C351D4D229000A5AAF3 /* JxBuffer.h */,
+				AA7D1C361D4D229000A5AAF3 /* JxCollection.cpp */,
+				AA7D1C371D4D229000A5AAF3 /* JxCollection.h */,
+				AA7D1C381D4D229000A5AAF3 /* JxCommon.cpp */,
+				AA7D1C391D4D229000A5AAF3 /* JxCommon.h */,
+				AA7D1C3A1D4D229000A5AAF3 /* JxConversion.cpp */,
+				AA7D1C3B1D4D229000A5AAF3 /* JxConversion.h */,
+				AA7D1C3C1D4D229000A5AAF3 /* JxFunctionDefinition.h */,
+				AA7D1C3D1D4D229000A5AAF3 /* JxFunctionSignature.cpp */,
+				AA7D1C3E1D4D229000A5AAF3 /* JxFunctionSignature.h */,
+				AA7D1C3F1D4D229000A5AAF3 /* JxFunctionTable.cpp */,
+				AA7D1C401D4D229000A5AAF3 /* JxFunctionTable.h */,
+				AA7D1C411D4D229000A5AAF3 /* JxGuid.h */,
+				AA7D1C421D4D229000A5AAF3 /* JxHash.cpp */,
+				AA7D1C431D4D229000A5AAF3 /* JxHash.h */,
+				AA7D1C441D4D229000A5AAF3 /* JxInternal.h */,
+				AA7D1C451D4D229000A5AAF3 /* JxLexer.cpp */,
+				AA7D1C461D4D229000A5AAF3 /* JxLexer.h */,
+				AA7D1C471D4D229000A5AAF3 /* JxLibCore.cpp */,
+				AA7D1C481D4D229000A5AAF3 /* JxLibCore.h */,
+				AA7D1C491D4D229000A5AAF3 /* JxLibrary.cpp */,
+				AA7D1C4A1D4D229000A5AAF3 /* JxLibrary.h */,
+				AA7D1C4B1D4D229000A5AAF3 /* JxLogging.cpp */,
+				AA7D1C4C1D4D229000A5AAF3 /* JxLogging.h */,
+				AA7D1C4D1D4D229000A5AAF3 /* JxMemory.cpp */,
+				AA7D1C4E1D4D229000A5AAF3 /* JxMemory.h */,
+				AA7D1C4F1D4D229000A5AAF3 /* JxMutex.cpp */,
+				AA7D1C501D4D229000A5AAF3 /* JxMutex.h */,
+				AA7D1C511D4D229000A5AAF3 /* JxParser.cpp */,
+				AA7D1C521D4D229000A5AAF3 /* JxParser.h */,
+				AA7D1C531D4D229000A5AAF3 /* JxPropertyName.cpp */,
+				AA7D1C541D4D229000A5AAF3 /* JxPropertyName.h */,
+				AA7D1C551D4D229000A5AAF3 /* JxRuntime.cpp */,
+				AA7D1C561D4D229000A5AAF3 /* JxRuntime.h */,
+				AA7D1C571D4D229000A5AAF3 /* JxScript.cpp */,
+				AA7D1C581D4D229000A5AAF3 /* JxScript.h */,
+				AA7D1C591D4D229000A5AAF3 /* JxSerialize.cpp */,
+				AA7D1C5A1D4D229000A5AAF3 /* JxSerialize.h */,
+				AA7D1C5B1D4D229000A5AAF3 /* JxUnicode.cpp */,
+				AA7D1C5C1D4D229000A5AAF3 /* JxUnicode.h */,
+				AA7D1C5D1D4D229000A5AAF3 /* JxVariant.cpp */,
+				AA7D1C5E1D4D229000A5AAF3 /* JxVariant.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -186,30 +186,30 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA9C27541D0C0BF70092A8A4 /* JxPropertyName.h in Headers */,
-				AA93A2A01CE2CE8100104611 /* JxLibrary.h in Headers */,
-				AA93A2AC1CE2CE8100104611 /* JxSerialize.h in Headers */,
-				AA0EAD4A1D166DBE00654244 /* JxLibCore.h in Headers */,
-				AAA1A3A91D1E3E5A00143B43 /* JxMutex.h in Headers */,
-				AA93A2A41CE2CE8100104611 /* JxMemory.h in Headers */,
-				AA93A2A61CE2CE8100104611 /* JxParser.h in Headers */,
-				AAE3C94E1D0E3AB5008270D6 /* JxGuid.h in Headers */,
-				AA93A2A81CE2CE8100104611 /* JxRuntime.h in Headers */,
-				AA93A2951CE2CE8100104611 /* JxBuffer.h in Headers */,
-				AA93A29B1CE2CE8100104611 /* JxFunctionTable.h in Headers */,
-				AA93A2971CE2CE8100104611 /* JxCollection.h in Headers */,
-				AADBEDDB1D0447B800A57411 /* JxHash.h in Headers */,
-				AA93A2931CE2CE8100104611 /* Jinx.h in Headers */,
-				AABF96481CFFDCA100CB2EF4 /* JxFunctionSignature.h in Headers */,
-				AA93A2B01CE2CE8100104611 /* JxUnicode.h in Headers */,
-				AA93A2991CE2CE8100104611 /* JxCommon.h in Headers */,
-				AADBEDD91D0447B800A57411 /* JxConversion.h in Headers */,
-				AA93A2B21CE2CE8100104611 /* JxVariant.h in Headers */,
-				AA93A29C1CE2CE8100104611 /* JxInternal.h in Headers */,
-				AA93A29E1CE2CE8100104611 /* JxLexer.h in Headers */,
-				AA93A2A21CE2CE8100104611 /* JxLogging.h in Headers */,
-				AABF96461CFFDCA100CB2EF4 /* JxFunctionDefinition.h in Headers */,
-				AA93A2AA1CE2CE8100104611 /* JxScript.h in Headers */,
+				AA7D1C8A1D4D229000A5AAF3 /* JxVariant.h in Headers */,
+				AA7D1C611D4D229000A5AAF3 /* JxBuffer.h in Headers */,
+				AA7D1C7E1D4D229000A5AAF3 /* JxParser.h in Headers */,
+				AA7D1C7C1D4D229000A5AAF3 /* JxMutex.h in Headers */,
+				AA7D1C881D4D229000A5AAF3 /* JxUnicode.h in Headers */,
+				AA7D1C861D4D229000A5AAF3 /* JxSerialize.h in Headers */,
+				AA7D1C721D4D229000A5AAF3 /* JxLexer.h in Headers */,
+				AA7D1C841D4D229000A5AAF3 /* JxScript.h in Headers */,
+				AA7D1C631D4D229000A5AAF3 /* JxCollection.h in Headers */,
+				AA7D1C701D4D229000A5AAF3 /* JxInternal.h in Headers */,
+				AA7D1C5F1D4D229000A5AAF3 /* Jinx.h in Headers */,
+				AA7D1C6D1D4D229000A5AAF3 /* JxGuid.h in Headers */,
+				AA7D1C761D4D229000A5AAF3 /* JxLibrary.h in Headers */,
+				AA7D1C6A1D4D229000A5AAF3 /* JxFunctionSignature.h in Headers */,
+				AA7D1C801D4D229000A5AAF3 /* JxPropertyName.h in Headers */,
+				AA7D1C681D4D229000A5AAF3 /* JxFunctionDefinition.h in Headers */,
+				AA7D1C651D4D229000A5AAF3 /* JxCommon.h in Headers */,
+				AA7D1C671D4D229000A5AAF3 /* JxConversion.h in Headers */,
+				AA7D1C7A1D4D229000A5AAF3 /* JxMemory.h in Headers */,
+				AA7D1C6F1D4D229000A5AAF3 /* JxHash.h in Headers */,
+				AA7D1C6C1D4D229000A5AAF3 /* JxFunctionTable.h in Headers */,
+				AA7D1C741D4D229000A5AAF3 /* JxLibCore.h in Headers */,
+				AA7D1C781D4D229000A5AAF3 /* JxLogging.h in Headers */,
+				AA7D1C821D4D229000A5AAF3 /* JxRuntime.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,26 +269,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA93A2A31CE2CE8100104611 /* JxMemory.cpp in Sources */,
-				AAA1A3A81D1E3E5A00143B43 /* JxMutex.cpp in Sources */,
-				AA93A2A91CE2CE8100104611 /* JxScript.cpp in Sources */,
-				AA93A29D1CE2CE8100104611 /* JxLexer.cpp in Sources */,
-				AA93A2AF1CE2CE8100104611 /* JxUnicode.cpp in Sources */,
-				AA93A2B11CE2CE8100104611 /* JxVariant.cpp in Sources */,
-				AABF96471CFFDCA100CB2EF4 /* JxFunctionSignature.cpp in Sources */,
-				AA0EAD491D166DBE00654244 /* JxLibCore.cpp in Sources */,
-				AA93A29F1CE2CE8100104611 /* JxLibrary.cpp in Sources */,
-				AA93A29A1CE2CE8100104611 /* JxFunctionTable.cpp in Sources */,
-				AA93A2A11CE2CE8100104611 /* JxLogging.cpp in Sources */,
-				AADBEDD81D0447B800A57411 /* JxConversion.cpp in Sources */,
-				AA93A2AB1CE2CE8100104611 /* JxSerialize.cpp in Sources */,
-				AA9C27531D0C0BF70092A8A4 /* JxPropertyName.cpp in Sources */,
-				AA93A2A51CE2CE8100104611 /* JxParser.cpp in Sources */,
-				AA93A2941CE2CE8100104611 /* JxBuffer.cpp in Sources */,
-				AADBEDDA1D0447B800A57411 /* JxHash.cpp in Sources */,
-				AA93A2981CE2CE8100104611 /* JxCommon.cpp in Sources */,
-				AA93A2A71CE2CE8100104611 /* JxRuntime.cpp in Sources */,
-				AA93A2961CE2CE8100104611 /* JxCollection.cpp in Sources */,
+				AA7D1C851D4D229000A5AAF3 /* JxSerialize.cpp in Sources */,
+				AA7D1C791D4D229000A5AAF3 /* JxMemory.cpp in Sources */,
+				AA7D1C6B1D4D229000A5AAF3 /* JxFunctionTable.cpp in Sources */,
+				AA7D1C751D4D229000A5AAF3 /* JxLibrary.cpp in Sources */,
+				AA7D1C691D4D229000A5AAF3 /* JxFunctionSignature.cpp in Sources */,
+				AA7D1C871D4D229000A5AAF3 /* JxUnicode.cpp in Sources */,
+				AA7D1C811D4D229000A5AAF3 /* JxRuntime.cpp in Sources */,
+				AA7D1C7B1D4D229000A5AAF3 /* JxMutex.cpp in Sources */,
+				AA7D1C831D4D229000A5AAF3 /* JxScript.cpp in Sources */,
+				AA7D1C891D4D229000A5AAF3 /* JxVariant.cpp in Sources */,
+				AA7D1C601D4D229000A5AAF3 /* JxBuffer.cpp in Sources */,
+				AA7D1C661D4D229000A5AAF3 /* JxConversion.cpp in Sources */,
+				AA7D1C771D4D229000A5AAF3 /* JxLogging.cpp in Sources */,
+				AA7D1C731D4D229000A5AAF3 /* JxLibCore.cpp in Sources */,
+				AA7D1C641D4D229000A5AAF3 /* JxCommon.cpp in Sources */,
+				AA7D1C7D1D4D229000A5AAF3 /* JxParser.cpp in Sources */,
+				AA7D1C7F1D4D229000A5AAF3 /* JxPropertyName.cpp in Sources */,
+				AA7D1C6E1D4D229000A5AAF3 /* JxHash.cpp in Sources */,
+				AA7D1C711D4D229000A5AAF3 /* JxLexer.cpp in Sources */,
+				AA7D1C621D4D229000A5AAF3 /* JxCollection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
