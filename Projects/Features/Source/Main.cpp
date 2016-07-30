@@ -14,7 +14,7 @@ Copyright (c) 2016 James Boer
 #include <conio.h>
 #endif
 
-#include "../../../Library/Source/Jinx.h"
+#include "../../../Source/Jinx.h"
 
 using namespace Jinx;
 

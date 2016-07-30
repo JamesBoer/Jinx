@@ -1,7 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.0.2] - 2016-17-07
+## [0.0.3] - 2016-29-07
+### Added
+- WPF/.NET Editor control for Jinx
+- JinxPad sample project demonstrating use of editor control
+
+### Changed
+- Reorganized library projects
+
+## [0.0.3] - 2016-17-07
 ### Added
 - Makefiles and NetBeans projects for Linux platform
 

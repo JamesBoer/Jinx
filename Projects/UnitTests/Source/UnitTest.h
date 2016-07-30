@@ -26,7 +26,7 @@ THE SOFTWARE.
 #ifndef UNIT_TESTS_H____
 #define UNIT_TESTS_H____
 
-#include "../../Library/Source/Jinx.h"
+#include "../../../Source/Jinx.h"
 
 #include "catch.hpp"
 

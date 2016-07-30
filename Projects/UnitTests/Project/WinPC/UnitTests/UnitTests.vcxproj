@@ -165,7 +165,7 @@
     <ClCompile Include="..\..\..\Source\UnitTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\Library\Project\WinPC\Jinx\Jinx.vcxproj">
+    <ProjectReference Include="..\..\..\..\Jinx\WinPC\Jinx\Jinx.vcxproj">
       <Project>{87ea7f25-24be-45b7-a39b-001ac70cfaad}</Project>
     </ProjectReference>
   </ItemGroup>
