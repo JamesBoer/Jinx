@@ -7,23 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA81E20D1CE2D64F00123CA5 /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA81E20A1CE2D63D00123CA5 /* libJinx.a */; };
-		AA8B44C01D3050E100CEBD9B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44BF1D3050E100CEBD9B /* Main.cpp */; };
+		AA7D1C951D4D23B600A5AAF3 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C941D4D23B600A5AAF3 /* Main.cpp */; };
+		AA7D1C961D4D23E700A5AAF3 /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA7D1C921D4D233000A5AAF3 /* libJinx.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AA81E2091CE2D63D00123CA5 /* PBXContainerItemProxy */ = {
+		AA7D1C911D4D233000A5AAF3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = AA81E2051CE2D63D00123CA5 /* Jinx.xcodeproj */;
+			containerPortal = AA7D1C8D1D4D233000A5AAF3 /* Jinx.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = AA93A26B1CE2CE5900104611;
-			remoteInfo = Jinx;
-		};
-		AA81E20B1CE2D64900123CA5 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AA81E2051CE2D63D00123CA5 /* Jinx.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = AA93A26A1CE2CE5900104611;
 			remoteInfo = Jinx;
 		};
 /* End PBXContainerItemProxy section */
@@ -41,9 +34,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AA7D1C8D1D4D233000A5AAF3 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Jinx/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
+		AA7D1C941D4D23B600A5AAF3 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../Source/Main.cpp; sourceTree = "<group>"; };
 		AA81E1FB1CE2D62B00123CA5 /* JinxFeatureTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JinxFeatureTest; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA81E2051CE2D63D00123CA5 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../../Library/Project/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
-		AA8B44BF1D3050E100CEBD9B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Samples/Features/Source/Main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,18 +44,34 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA81E20D1CE2D64F00123CA5 /* libJinx.a in Frameworks */,
+				AA7D1C961D4D23E700A5AAF3 /* libJinx.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		AA7D1C8E1D4D233000A5AAF3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA7D1C921D4D233000A5AAF3 /* libJinx.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA7D1C931D4D236200A5AAF3 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				AA7D1C941D4D23B600A5AAF3 /* Main.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
 		AA81E1F21CE2D62B00123CA5 = {
 			isa = PBXGroup;
 			children = (
-				AA81E2051CE2D63D00123CA5 /* Jinx.xcodeproj */,
-				AA81E1FD1CE2D62B00123CA5 /* JinxFeatureTest */,
+				AA7D1C8D1D4D233000A5AAF3 /* Jinx.xcodeproj */,
+				AA7D1C931D4D236200A5AAF3 /* Source */,
 				AA81E1FC1CE2D62B00123CA5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -71,23 +80,6 @@
 			isa = PBXGroup;
 			children = (
 				AA81E1FB1CE2D62B00123CA5 /* JinxFeatureTest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		AA81E1FD1CE2D62B00123CA5 /* JinxFeatureTest */ = {
-			isa = PBXGroup;
-			children = (
-				AA8B44BF1D3050E100CEBD9B /* Main.cpp */,
-			);
-			name = JinxFeatureTest;
-			path = ../../../../../UnitTests/Source;
-			sourceTree = "<group>";
-		};
-		AA81E2061CE2D63D00123CA5 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				AA81E20A1CE2D63D00123CA5 /* libJinx.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -106,7 +98,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				AA81E20C1CE2D64900123CA5 /* PBXTargetDependency */,
 			);
 			name = JinxFeatureTest;
 			productName = JinxFeatureTest;
@@ -139,8 +130,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = AA81E2061CE2D63D00123CA5 /* Products */;
-					ProjectRef = AA81E2051CE2D63D00123CA5 /* Jinx.xcodeproj */;
+					ProductGroup = AA7D1C8E1D4D233000A5AAF3 /* Products */;
+					ProjectRef = AA7D1C8D1D4D233000A5AAF3 /* Jinx.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -151,11 +142,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		AA81E20A1CE2D63D00123CA5 /* libJinx.a */ = {
+		AA7D1C921D4D233000A5AAF3 /* libJinx.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libJinx.a;
-			remoteRef = AA81E2091CE2D63D00123CA5 /* PBXContainerItemProxy */;
+			remoteRef = AA7D1C911D4D233000A5AAF3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -165,19 +156,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA8B44C01D3050E100CEBD9B /* Main.cpp in Sources */,
+				AA7D1C951D4D23B600A5AAF3 /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		AA81E20C1CE2D64900123CA5 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = Jinx;
-			targetProxy = AA81E20B1CE2D64900123CA5 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA81E2001CE2D62B00123CA5 /* Debug */ = {
