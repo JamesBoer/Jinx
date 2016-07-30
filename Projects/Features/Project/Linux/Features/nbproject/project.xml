@@ -9,7 +9,7 @@
             <header-extensions/>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects>
-                <make-dep-project>../../../../../Library/Project/Linux/Jinx</make-dep-project>
+                <make-dep-project>../../../../Jinx/Linux/Jinx</make-dep-project>
             </make-dep-projects>
             <sourceRootList/>
             <confList>

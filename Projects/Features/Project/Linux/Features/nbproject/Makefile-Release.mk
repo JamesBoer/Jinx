@@ -52,13 +52,13 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../../../../Library/Project/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
+LDLIBSOPTIONS=../../../../Jinx/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/features
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/features: ../../../../../Library/Project/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/features: ../../../../Jinx/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/features: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -67,11 +67,11 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/features: ${OBJECTFILES}
 ${OBJECTDIR}/_ext/1ad155ca/Main.o: ../../../Source/Main.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1ad155ca
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1ad155ca/Main.o ../../../Source/Main.cpp
+	$(COMPILE.cc) -O2 -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1ad155ca/Main.o ../../../Source/Main.cpp
 
 # Subprojects
 .build-subprojects:
-	cd ../../../../../Library/Project/Linux/Jinx && ${MAKE}  -f Makefile CONF=Release
+	cd ../../../../Jinx/Linux/Jinx && ${MAKE}  -f Makefile CONF=Release
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -80,7 +80,7 @@ ${OBJECTDIR}/_ext/1ad155ca/Main.o: ../../../Source/Main.cpp
 
 # Subprojects
 .clean-subprojects:
-	cd ../../../../../Library/Project/Linux/Jinx && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../../../../Jinx/Linux/Jinx && ${MAKE}  -f Makefile CONF=Release clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

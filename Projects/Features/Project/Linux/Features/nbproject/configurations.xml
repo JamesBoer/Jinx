@@ -41,12 +41,12 @@
         <linkerTool>
           <linkerLibItems>
             <linkerLibProjectItem>
-              <makeArtifact PL="../../../../../Library/Project/Linux/Jinx"
+              <makeArtifact PL="../../../../Jinx/Linux/Jinx"
                             CT="3"
                             CN="Debug"
                             AC="true"
                             BL="true"
-                            WD="../../../../../Library/Project/Linux/Jinx"
+                            WD="../../../../Jinx/Linux/Jinx"
                             BC="${MAKE}  -f Makefile CONF=Debug"
                             CC="${MAKE}  -f Makefile CONF=Debug clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjinx.a">
@@ -70,6 +70,7 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <standard>11</standard>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -80,12 +81,12 @@
         <linkerTool>
           <linkerLibItems>
             <linkerLibProjectItem>
-              <makeArtifact PL="../../../../../Library/Project/Linux/Jinx"
+              <makeArtifact PL="../../../../Jinx/Linux/Jinx"
                             CT="3"
                             CN="Release"
                             AC="false"
                             BL="true"
-                            WD="../../../../../Library/Project/Linux/Jinx"
+                            WD="../../../../Jinx/Linux/Jinx"
                             BC="${MAKE}  -f Makefile CONF=Release"
                             CC="${MAKE}  -f Makefile CONF=Release clean"
                             OP="${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjinx.a">
