@@ -117,7 +117,7 @@ namespace JinxTools
         }
 
         public static readonly DependencyProperty LineNumbersTextBrushProperty =
-            DependencyProperty.Register("LineNumbersTextBrush", typeof(Brush), typeof(Editor), new PropertyMetadata(new SolidColorBrush(Colors.LightGray)));
+            DependencyProperty.Register("LineNumbersTextBrush", typeof(Brush), typeof(Editor), new PropertyMetadata(new SolidColorBrush(Colors.DarkGray)));
 
 
         public int SpacesPerTab
@@ -242,8 +242,10 @@ namespace JinxTools
             // Add scroll changed event handler
             m_scrollViewer.ScrollChanged += OnScrollChanged;
 
+            // Adjust line number margin width
             SetLineNumberCanvasWidth();
 
+            // Render the control
             InvalidateVisual();
         }
 
@@ -256,20 +258,27 @@ namespace JinxTools
             if (!IsLoaded || m_renderContainer == null || m_lineNumbersContainer == null)
                 return;
 
+            if (LineCount > 0)
+                m_lineCount = LineCount;
+
+            // Calculate beginning and ending line
+            m_viewLineStart = (int)Math.Floor(VerticalOffset / m_lineHeight);
+            m_viewLineEnd = m_viewLineStart + (int)Math.Ceiling(m_scrollViewer.ActualHeight / m_lineHeight);
+
             // Draw highlighted text
             var dc = m_renderContainer.RenderOpen();
-            var fmtText = GetHighlightedText(Text);
-            dc.DrawText(fmtText, new Point(-HorizontalOffset + 2, -VerticalOffset));
+            var fmtText = GetHighlightedText(GetVisibleLines());
+            dc.DrawText(fmtText, new Point(-HorizontalOffset + 2, -VerticalOffset + m_textRenderOffset));
             dc.Close();
 
             // Adjust line number margin width based on line number count
             SetLineNumberCanvasWidth();
 
             // Draw line numbers
-            var dc2 = m_lineNumbersContainer.RenderOpen();
-            var fmtText2 = GetLineNumbers();
-            dc2.DrawText(fmtText2, new Point(-HorizontalOffset + m_lineNumbersContainer.ActualWidth, -VerticalOffset));
-            dc2.Close();
+            dc = m_lineNumbersContainer.RenderOpen();
+            fmtText = GetLineNumbers();
+            dc.DrawText(fmtText, new Point(-HorizontalOffset + m_lineNumbersContainer.ActualWidth, -VerticalOffset + (m_viewLineStart * m_lineHeight)));
+            dc.Close();
 
             base.OnRender(drawingContext);
         }
@@ -308,27 +317,27 @@ namespace JinxTools
             foreach (Match match in numberRegex.Matches(text))
                 fmtTxt.SetForegroundBrush(ValueTextBrush, match.Index, match.Length);
             
-            // Block Comments
-            Regex blockCommentRegex = new Regex(@"(?s)-{3,}(.*?)-{3,}");
-            foreach (Match match in blockCommentRegex.Matches(text))
-                fmtTxt.SetForegroundBrush(CommentTextBrush, match.Index, match.Length);
-            
             // Strings
             Regex stringRegex = new Regex(@"\""([^\""]*)\""");
             foreach (Match match in stringRegex.Matches(text))
                 fmtTxt.SetForegroundBrush(ValueTextBrush, match.Index, match.Length);
             
+            // Block Comments
+            Regex blockCommentRegex = new Regex(@"(?s)-{3,}(.*?)-{3,}");
+            foreach (Match match in blockCommentRegex.Matches(text))
+                fmtTxt.SetForegroundBrush(CommentTextBrush, match.Index, match.Length);
+            
             return fmtTxt;
         }
 
         /// <summary>
-        /// Create line number text based on current line count.
+        /// Create line number text based on current line count and view.
         /// </summary>
         /// <returns></returns>
         private FormattedText GetLineNumbers()
         {
             StringBuilder lineNumberText = new StringBuilder();
-            for (int i = 1; i <= m_lineCount; ++i)
+            for (int i = m_viewLineStart + 1; i <= m_lineCount && i <= m_viewLineEnd; ++i)
             {
                 lineNumberText.Append(i.ToString());
                 lineNumberText.Append("\n");
@@ -365,15 +374,57 @@ namespace JinxTools
             return fmtText;
         }
 
+        private string GetVisibleLines()
+        {
+            // Find begin and end positions
+            string t = Text;
+            int lineStart = Math.Max(1, m_viewLineStart - m_lineRenderOffset);
+            m_textRenderOffset = (lineStart - 1) * m_lineHeight;
+            int lineEnd = Math.Min(m_lineCount, m_viewLineEnd + m_lineRenderOffset);
+            int line = 1;
+            int posBegin = 0;
+            int posEnd = t.Length;
+            for(int i = 0; i < t.Length; ++i)
+            {
+                if (t[i] == '\n')
+                {
+                    ++line;
+                    if (line == lineStart)
+                    {
+                        posBegin = Math.Min(i + 1, t.Length - 1);
+                    }
+                    else if (line == lineEnd)
+                    {
+                        posEnd = Math.Min(i + 1, t.Length - 1);
+                        break;
+                    }
+                }
+            }
+
+            // Return visible substring, plus a fore and aft offset to improve syntax highlighting
+            return t.Substring(posBegin, posEnd - posBegin);
+        }
+
         #endregion
 
         #region Private Members
 
+        // Rendering elements
         private VisualHost m_renderContainer;
         private VisualHost m_lineNumbersContainer;
         private ScrollViewer m_scrollViewer;
+
+        // Text measurements
         private double m_lineHeight;
         private int m_lineCount;
+        private int m_viewLineStart;
+        private int m_viewLineEnd;
+        private double m_textRenderOffset;
+
+        // Line render offset
+        private const int m_lineRenderOffset = 50;
+
+        // Keyword and value matching hashsets
         private HashSet<string> m_keywords = new HashSet<string>
         {
             "import", "library", "is", "not", "and", "or", "null", "number", "integer", "boolean", "string",
