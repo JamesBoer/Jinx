@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.0.3] - 2016-29-07
+## [0.0.4] - 2016-29-07
 ### Added
 - WPF/.NET Editor control for Jinx
 - JinxPad sample project demonstrating use of editor control
