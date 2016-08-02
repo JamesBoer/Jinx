@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="97">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>../../../../Source/Jinx.h</itemPath>
+      <itemPath>../../../../Source/JxBuffer.cpp</itemPath>
+      <itemPath>../../../../Source/JxBuffer.h</itemPath>
+      <itemPath>../../../../Source/JxCollection.cpp</itemPath>
+      <itemPath>../../../../Source/JxCollection.h</itemPath>
+      <itemPath>../../../../Source/JxCommon.cpp</itemPath>
+      <itemPath>../../../../Source/JxCommon.h</itemPath>
+      <itemPath>../../../../Source/JxConversion.cpp</itemPath>
+      <itemPath>../../../../Source/JxConversion.h</itemPath>
+      <itemPath>../../../../Source/JxFunctionDefinition.h</itemPath>
+      <itemPath>../../../../Source/JxFunctionSignature.cpp</itemPath>
+      <itemPath>../../../../Source/JxFunctionSignature.h</itemPath>
+      <itemPath>../../../../Source/JxFunctionTable.cpp</itemPath>
+      <itemPath>../../../../Source/JxFunctionTable.h</itemPath>
+      <itemPath>../../../../Source/JxGuid.h</itemPath>
+      <itemPath>../../../../Source/JxHash.cpp</itemPath>
+      <itemPath>../../../../Source/JxHash.h</itemPath>
+      <itemPath>../../../../Source/JxInternal.h</itemPath>
+      <itemPath>../../../../Source/JxLexer.cpp</itemPath>
+      <itemPath>../../../../Source/JxLexer.h</itemPath>
+      <itemPath>../../../../Source/JxLibCore.cpp</itemPath>
+      <itemPath>../../../../Source/JxLibCore.h</itemPath>
+      <itemPath>../../../../Source/JxLibrary.cpp</itemPath>
+      <itemPath>../../../../Source/JxLibrary.h</itemPath>
+      <itemPath>../../../../Source/JxLogging.cpp</itemPath>
+      <itemPath>../../../../Source/JxLogging.h</itemPath>
+      <itemPath>../../../../Source/JxMemory.cpp</itemPath>
+      <itemPath>../../../../Source/JxMemory.h</itemPath>
+      <itemPath>../../../../Source/JxMutex.cpp</itemPath>
+      <itemPath>../../../../Source/JxMutex.h</itemPath>
+      <itemPath>../../../../Source/JxParser.cpp</itemPath>
+      <itemPath>../../../../Source/JxParser.h</itemPath>
+      <itemPath>../../../../Source/JxPropertyName.cpp</itemPath>
+      <itemPath>../../../../Source/JxPropertyName.h</itemPath>
+      <itemPath>../../../../Source/JxRuntime.cpp</itemPath>
+      <itemPath>../../../../Source/JxRuntime.h</itemPath>
+      <itemPath>../../../../Source/JxScript.cpp</itemPath>
+      <itemPath>../../../../Source/JxScript.h</itemPath>
+      <itemPath>../../../../Source/JxSerialize.cpp</itemPath>
+      <itemPath>../../../../Source/JxSerialize.h</itemPath>
+      <itemPath>../../../../Source/JxUnicode.cpp</itemPath>
+      <itemPath>../../../../Source/JxUnicode.h</itemPath>
+      <itemPath>../../../../Source/JxVariant.cpp</itemPath>
+      <itemPath>../../../../Source/JxVariant.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="3">
+      <toolsSet>
+        <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <standard>11</standard>
+        </ccTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="../../../../Source/Jinx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxBuffer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxBuffer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCollection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCollection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCommon.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCommon.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxConversion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxConversion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionDefinition.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionSignature.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionSignature.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionTable.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionTable.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxGuid.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxHash.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxHash.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxInternal.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLexer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLexer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibCore.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibCore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibrary.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibrary.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLogging.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLogging.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMemory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMemory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMutex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMutex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxParser.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxParser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxPropertyName.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxPropertyName.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxRuntime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxRuntime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxScript.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxScript.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxSerialize.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxSerialize.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicode.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariant.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariant.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="3">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <standard>11</standard>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <archiverTool>
+        </archiverTool>
+      </compileType>
+      <item path="../../../../Source/Jinx.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxBuffer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxBuffer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCollection.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCollection.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCommon.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxCommon.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxConversion.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxConversion.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionDefinition.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionSignature.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionSignature.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionTable.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxFunctionTable.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxGuid.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxHash.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxHash.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxInternal.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLexer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLexer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibCore.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibCore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibrary.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLibrary.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLogging.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxLogging.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMemory.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMemory.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMutex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxMutex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxParser.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxParser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxPropertyName.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxPropertyName.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxRuntime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxRuntime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxScript.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxScript.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxSerialize.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxSerialize.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicode.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariant.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariant.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
