@@ -380,7 +380,7 @@ namespace JinxTools
             string t = Text;
             int lineStart = Math.Max(1, m_viewLineStart - m_lineRenderOffset);
             m_textRenderOffset = (lineStart - 1) * m_lineHeight;
-            int lineEnd = Math.Min(m_lineCount, m_viewLineEnd + m_lineRenderOffset);
+            int lineEnd = Math.Min(m_lineCount + 1, m_viewLineEnd + m_lineRenderOffset);
             int line = 1;
             int posBegin = 0;
             int posEnd = t.Length;

@@ -50,7 +50,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Jinx.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -128,9 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Jinx.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Jinx.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Jinx.png" />
