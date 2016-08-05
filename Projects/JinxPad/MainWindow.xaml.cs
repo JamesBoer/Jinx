@@ -116,29 +116,12 @@ namespace JinxPad
 
         private void OnSave(object sender, RoutedEventArgs e)
         {
-            if (String.IsNullOrEmpty(m_filePath))
-            {
-                OnSaveAs(sender, e);
-            }
-            else
-            {
-                FileSave();
-            }
+            FileSave();
         }
 
         private void OnSaveAs(object sender, RoutedEventArgs e)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "Jinx Files(*.jinx)|*.jinx|All Files(*.*)|*.*";
-            dlg.AddExtension = true;
-            dlg.InitialDirectory = Properties.Settings.Default.CurrentFolder;
-            bool? success = dlg.ShowDialog();
-            if (success.HasValue && success == true)
-            {
-                m_filePath = dlg.FileName;
-                Properties.Settings.Default.CurrentFolder = Path.GetDirectoryName(dlg.FileName);
-                FileSave();
-            }
+            FileSaveAs();
         }
 
         private void OnHelpViewTutorial(object sender, RoutedEventArgs e)
@@ -171,19 +154,41 @@ namespace JinxPad
 
         #region Private Functions
 
+        private void FileSaveAs()
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+            dlg.Filter = "Jinx Files(*.jinx)|*.jinx|All Files(*.*)|*.*";
+            dlg.AddExtension = true;
+            dlg.InitialDirectory = Properties.Settings.Default.CurrentFolder;
+            bool? success = dlg.ShowDialog();
+            if (success.HasValue && success == true)
+            {
+                m_filePath = dlg.FileName;
+                Properties.Settings.Default.CurrentFolder = Path.GetDirectoryName(dlg.FileName);
+                FileSave();
+            }
+        }
+
         private void FileSave()
         {
-            try
+            if (String.IsNullOrEmpty(m_filePath))
             {
-                using (StreamWriter writer = new StreamWriter(m_filePath))
-                {
-                    writer.Write(Editor.Text);
-                    m_textChanged = false;
-                }
+                FileSaveAs();
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show("Error saving Jinx file: " + ex.ToString());
+                try
+                {
+                    using (StreamWriter writer = new StreamWriter(m_filePath))
+                    {
+                        writer.Write(Editor.Text);
+                        m_textChanged = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error saving Jinx file: " + ex.ToString());
+                }
             }
         }
 
