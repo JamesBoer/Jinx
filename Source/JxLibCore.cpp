@@ -132,8 +132,15 @@ static Variant RemoveFrom(ScriptPtr, Parameters params)
 	{
 		auto collTarget = params[1].GetCollection();
 		const auto & coll = *params[0].GetCollection();
-		for (const auto & v : coll)
-			collTarget->erase(v.second);
+		if (collTarget && !collTarget->empty())
+		{
+			for (const auto & v : coll)
+			{
+				collTarget->erase(v.second);
+				if (collTarget->empty())
+					break;
+			}
+		}
 	}
 	else
 	{

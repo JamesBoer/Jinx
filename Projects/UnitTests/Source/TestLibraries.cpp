@@ -107,13 +107,24 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 			)";
 
+		static const char * scriptText4 =
+			u8R"(
+    
+			import test
+     
+			increment test y by 2
+			
+			)";
+
 		auto runtime = TestCreateRuntime();
 		auto script1 = TestExecuteScript(scriptText1, runtime);
 		auto script2 = TestExecuteScript(scriptText2, runtime);
 		auto script3 = TestExecuteScript(scriptText3, runtime);
+		auto script4 = TestExecuteScript(scriptText4, runtime);
 		REQUIRE(script1);
 		REQUIRE(script2);
 		REQUIRE(script3);
+		REQUIRE(script4);
 		REQUIRE(script1->GetVariable("a").GetInteger() == 5);
 		REQUIRE(script2->GetVariable("b").GetInteger() == 5);
 		REQUIRE(script3->GetVariable("c").GetInteger() == 2);
@@ -122,6 +133,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 		REQUIRE(library->GetProperty("x").GetInteger() == 5);
 		library->SetProperty("x", "str");
 		REQUIRE(library->GetProperty("x").GetString() == "str");
+		REQUIRE(library->GetProperty("y").GetInteger() == 4);
 	}
 
 	SECTION("Test library property from bytecode")

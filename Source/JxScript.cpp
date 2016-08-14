@@ -61,6 +61,9 @@ bool Script::Execute()
 	// Mark script execution start time
 	auto begin = std::chrono::high_resolution_clock::now();
 
+	uint32_t tickInstCount = 0;
+	uint32_t maxInstCount = MaxInstructions();
+
 	Opcode opcode;
 	do
 	{
@@ -73,6 +76,16 @@ bool Script::Execute()
 			return false;
 		}
 		opcode = static_cast<Opcode>(opByte);
+		++tickInstCount;
+		if (tickInstCount >= maxInstCount)
+		{
+			if (ErrorOnMaxInstrunction())
+			{
+				Error("Exceeded max instruction count");
+				return false;
+			}
+			return true;
+		}
 
 		// Execute the current opcode
 		switch (opcode)
@@ -143,12 +156,10 @@ bool Script::Execute()
 			break;
 			case Opcode::Decrement:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
-				auto var = GetVariable(name);
 				auto op1 = Pop();
-				var -= op1;
-				SetVariable(name, var);
+				auto op2 = Pop();
+				op2 -= op1;
+				Push(op2);
 			}
 			break;
 			case Opcode::Divide:
@@ -209,12 +220,10 @@ bool Script::Execute()
 			break;
 			case Opcode::Increment:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
-				auto var = GetVariable(name);
 				auto op1 = Pop();
-				var += op1;
-				SetVariable(name, var);
+				auto op2 = Pop();
+				op2 += op1;
+				Push(op2);
 			}
 			break;
 			case Opcode::Jump:
@@ -385,7 +394,18 @@ bool Script::Execute()
 				Variant collection(CreateCollection());
 				for (uint32_t i = 0; i < count; ++i)
 				{
-					size_t index = m_stack.size() - ((count - i) * 2);
+					size_t offset = (count - i) * 2;
+					if (offset > m_stack.size())
+					{
+						Error("Collection data error");
+						return false;
+					}
+					size_t index = m_stack.size() - offset;
+					if ((index + 1) > m_stack.size())
+					{
+						Error("Error in collection data");
+						return false;
+					}
 					Variant key = m_stack[index];
 					Variant value = m_stack[index + 1];
 					collection.GetCollection()->insert(std::make_pair(key, value));
@@ -428,6 +448,11 @@ bool Script::Execute()
 				uint32_t count;
 				m_execution.back().reader.Read(&count);
 				Variant collection(CreateCollection());
+				if (count > m_stack.size())
+				{
+					Error("Push list error");
+					return false;
+				}
 				for (uint32_t i = 0; i < count; ++i)
 				{
 					size_t index = m_stack.size() - (count - i);

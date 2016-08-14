@@ -857,14 +857,10 @@ Variant Jinx::operator % (const Variant & left, const Variant & right)
 
 bool Jinx::operator == (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != right.GetType())
-	{
-		return false;
-	}
 	switch (left.GetType())
 	{
 	case ValueType::Null:
-		return true;
+		return right.IsNull();
 	case ValueType::Number:
 		return left.GetNumber() == right.GetNumber();
 	case ValueType::Integer:
@@ -874,7 +870,7 @@ bool Jinx::operator == (const Variant & left, const Variant & right)
 	case ValueType::String:
 		return left.GetString() == right.GetString();
 	case ValueType::Collection:
-		break;
+		return left.GetCollection() == right.GetCollection();
 	case ValueType::CollectionItr:
 		return left.GetCollectionItr() == right.GetCollectionItr();
 	case ValueType::UserObject:
@@ -894,14 +890,10 @@ bool Jinx::operator == (const Variant & left, const Variant & right)
 
 bool Jinx::operator < (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != right.GetType())
-	{
-		return false;
-	}
 	switch (left.GetType())
 	{
 	case ValueType::Null:
-		return true;
+		return false;
 	case ValueType::Number:
 		return left.GetNumber() < right.GetNumber();
 	case ValueType::Integer:
@@ -931,14 +923,10 @@ bool Jinx::operator < (const Variant & left, const Variant & right)
 
 bool Jinx::operator <= (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != right.GetType())
-	{
-		return false;
-	}
 	switch (left.GetType())
 	{
 	case ValueType::Null:
-		return true;
+		return false;
 	case ValueType::Number:
 		return left.GetNumber() <= right.GetNumber();
 	case ValueType::Integer:

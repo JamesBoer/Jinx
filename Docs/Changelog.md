@@ -1,7 +1,21 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.0.4] - 2016-29-07
+## [0.1.0] - 2016-08-12
+### Added
+- Fuzzing test to ensure runtime robustness
+- New unit tests for incrementing/decrementing properties
+- Bytecode execution count limiter and behavior flag
+
+### Changed
+- Modified changelog date format to year-month-date as intended
+
+### Fixed
+- Increment and decrement keywords now work correctly with properties
+- Memory shutdown function fixed
+- Fixed several runtime crashes or asserts from initial fuzz tests
+
+## [0.0.4] - 2016-07-29
 ### Added
 - WPF/.NET Editor control for Jinx
 - JinxPad sample project demonstrating use of editor control
@@ -9,14 +23,14 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Reorganized library projects
 
-## [0.0.3] - 2016-17-07
+## [0.0.3] - 2016-07-17
 ### Added
 - Makefiles and NetBeans projects for Linux platform
 
 ### Fixed
 - Projects compile cleanly under Linux/g++
 
-## [0.0.2] - 2016-09-07
+## [0.0.2] - 2016-07-09
 ### Added
 - Support for UTF-16 conversions in Variant class
 - Added unit tests for Unicode conversion and variable names
@@ -34,7 +48,7 @@ All notable changes to this project will be documented in this file.
 - Deleted unused opcode
 - Removed case insensitivity
 
-## [0.0.1] - 2016-08-07
+## [0.0.1] - 2016-07-08
 ### Added
 - Initial release
 - Added initial library version numbers and string

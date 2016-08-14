@@ -84,6 +84,8 @@ bool Jinx::StringToNumber(const String & value, double * outValue)
 		++p;
 	while (*p != '\0')
 	{
+		if (*p < 0)
+			return false;
 		if (std::isdigit(*p))
 		{
 			++count;
@@ -114,6 +116,8 @@ bool Jinx::StringToInteger(const String & value, int64_t * outValue)
 		++p;
 	while (*p != '\0')
 	{
+		if (*p < 0)
+			return false;
 		if (std::isdigit(*p))
 		{
 			++count;

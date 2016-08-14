@@ -277,6 +277,8 @@ bool Lexer::IsNextDigit() const
 	if (IsEndOfText())
 		return false;
 	const char ch = *(m_current + 1);
+	if (ch < 0)
+		return false;
 	if (IsNewline(ch))
 		return false;
 	if (!std::isdigit(ch))

@@ -48,30 +48,41 @@ int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::VersionString);
 
-	GlobalParams globalParams;
-	globalParams.logSymbols = true;
-	globalParams.logBytecode = true;
-	globalParams.allocBlockSize = 1024 * 256;
-	globalParams.allocFn = [](size_t size) { return malloc(size); };
-	globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-	globalParams.freeFn = [](void * p) { free(p); };
-	Jinx::Initialize(globalParams);
+	// Add scope block to ensure all objects are destroyed for shutdown test
+	{
+		GlobalParams globalParams;
+		globalParams.logSymbols = true;
+		globalParams.logBytecode = true;
+		globalParams.allocBlockSize = 1024 * 256;
+		globalParams.allocFn = [](size_t size) { return malloc(size); };
+		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
+		globalParams.freeFn = [](void * p) { free(p); };
+		Jinx::Initialize(globalParams);
 	
-	auto runtime = Jinx::CreateRuntime();
+		auto runtime = Jinx::CreateRuntime();
 
-	static const char * scriptText =
-	u8R"(
+		static const char * scriptText =
+		u8R"(
 
-		いろは is "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
+				-- Create collection using an initialization list
+				a is 3, 2, 1
 
-	)";
+		)";
 
-	auto script = TestExecuteScript(scriptText);
-	REQUIRE(script);
-	REQUIRE(script->GetVariable(u8"いろは").GetString() == u8"いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす");
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 3);
+		REQUIRE(collection->find(1) != collection->end());
+		REQUIRE(collection->find(1)->second.GetInteger() == 3);
+		REQUIRE(collection->find(2) != collection->end());
+		REQUIRE(collection->find(2)->second.GetInteger() == 2);
+		REQUIRE(collection->find(3) != collection->end());
+		REQUIRE(collection->find(3)->second.GetInteger() == 1);
 
-	script = nullptr;
-	runtime = nullptr;
+	}
 
 	Jinx::ShutDown();
 
