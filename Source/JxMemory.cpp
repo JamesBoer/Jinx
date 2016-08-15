@@ -154,6 +154,7 @@ namespace Jinx
 		void Free(void * ptr);
 		void Free(MemoryHeader * header);
 		const MemoryStats & GetMemoryStats() const { return m_stats; }
+		void LogAllocations();
 		void ShutDown();
 
 	private:
@@ -192,6 +193,7 @@ namespace Jinx
 		void * Realloc(void * ptr, size_t bytes) { return m_reallocFn(ptr, bytes); }
 		void Free(void * ptr) { m_freeFn(ptr); }
 		const MemoryStats & GetMemoryStats() const { return m_stats; }
+		void LogAllocations() {}
 		void ShutDown() {}
 
 	private:
@@ -236,7 +238,7 @@ using namespace Jinx;
 BlockHeap::BlockHeap() :
 	m_head(nullptr),
 	m_tail(nullptr),
-	m_allocBlockSize(1024 * 8)
+	m_allocBlockSize((1024 * 8) - sizeof(MemoryBlock))
 {
 	m_allocFn = [](size_t size) { return malloc(size); };
 	m_freeFn = [](void * p) { return free(p); };
@@ -352,6 +354,7 @@ MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 #endif 
 	m_stats.currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
 	m_stats.externalAllocCount++;
+	m_stats.currentBlockCount++;
 	return newBlock;
 }
 
@@ -456,6 +459,7 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 		// Track allocation stats
 		m_stats.externalFreeCount++;
 		m_stats.currentAllocatedMemory -= (block->capacity + sizeof(MemoryBlock));
+		m_stats.currentBlockCount--;
 
 		// Free the block of memory
 		m_freeFn(block);
@@ -471,8 +475,59 @@ void BlockHeap::Initialize(const GlobalParams & params)
 		m_allocFn = params.allocFn;
 		m_reallocFn = params.reallocFn;
 		m_freeFn = params.freeFn;
-		m_allocBlockSize = params.allocBlockSize;
+		// Alloc block size must be at least 4K (otherwise, what's the point of a block allocator?)
+		assert(params.allocBlockSize >= (1024 * 4));
+		m_allocBlockSize = params.allocBlockSize - sizeof(MemoryBlock);
 	}
+}
+
+void BlockHeap::LogAllocations()
+{
+	LogWriteLine("=== Memory Log Begin ===");
+
+	// Log all memory blocks
+	auto memBlock = m_head;
+	while (memBlock)
+	{
+		LogWriteLine("");
+		LogWriteLine("--- Memory Block ---");
+#ifdef JINX_USE_MEMORY_GUARDS
+		bool memGuardsIntact = (memcmp(memBlock->memGuardHead, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) &&
+			(memcmp(memBlock->memGuardTail, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) ? true : false;
+		LogWriteLine("Memory guards intact: %s", memGuardsIntact ? "true" : "false");
+#endif 		
+		LogWriteLine("Data = %p", memBlock->data);
+		LogWriteLine("Used bytes = %zu", memBlock->usedBytes);
+		LogWriteLine("Allocated bytes = %zu", memBlock->allocatedBytes);
+		LogWriteLine("Capacity = %zu", memBlock->capacity);
+		LogWriteLine("Count = %zu", memBlock->count);
+#ifdef JINX_DEBUG_ALLOCATION
+		LogWriteLine("Memory allocations:");
+		auto memHeader = memBlock->head;
+		while (memHeader)
+		{
+			LogWriteLine("Allocation %p, size: %zu, File: %s, Function: %s", 
+				memHeader->memBlock, memHeader->bytes, memHeader->file ? memHeader->file : "", memHeader->function ? memHeader->function : "");
+			memHeader = memHeader->next;
+		}
+#endif
+		memBlock = memBlock->next;
+	}
+	LogWriteLine("");
+
+	// Log memory stats
+	auto memStats = GetMemoryStats();
+	LogWriteLine("--- Memory Stats ---");
+	LogWriteLine("External alloc count:     %i", memStats.externalAllocCount);
+	LogWriteLine("External free count:      %i", memStats.externalFreeCount);
+	LogWriteLine("Internal alloc count:     %i", memStats.internalAllocCount);
+	LogWriteLine("Internal free count:      %i", memStats.internalFreeCount);
+	LogWriteLine("Current block count:      %i", memStats.currentBlockCount);
+	LogWriteLine("Current allocated memory: %lli", memStats.currentAllocatedMemory);
+	LogWriteLine("Current used memory:      %lli", memStats.currentAllocatedMemory);
+	LogWriteLine("");
+	LogWriteLine("=== Memory Log End ===");
+
 }
 
 void * BlockHeap::Realloc(void * ptr, size_t bytes)
@@ -647,5 +702,12 @@ void Jinx::ShutDownMemory()
 const MemoryStats & Jinx::GetMemoryStats()
 {
 	return s_heap.GetMemoryStats();
+}
+
+void Jinx::LogAllocations()
+{
+#ifndef JINX_DEBUG_USE_STD_ALLOC
+	s_heap.LogAllocations();
+#endif
 }
 

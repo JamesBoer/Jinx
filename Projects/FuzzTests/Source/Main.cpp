@@ -531,58 +531,18 @@ private:
 };
 
 
-
-Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
-{
-	if (!runtime)
-		runtime = CreateRuntime();
-
-	// Compile the text to bytecode
-	auto bytecode = runtime->Compile(scriptText, "Test Script");
-	if (!bytecode)
-		return nullptr;
-
-	// Create a runtime script with the given bytecode
-	auto script = runtime->CreateScript(bytecode);
-
-	// Execute script and update runtime until script is finished
-	do
-	{
-		if (!script->Execute())
-			return nullptr;
-	} 
-	while (!script->IsFinished());
-
-	return script;
-}
-
-Jinx::ScriptPtr TestCompileScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
-{
-	if (!runtime)
-		runtime = CreateRuntime();
-
-	// Compile the text to bytecode
-	auto bytecode = runtime->Compile(scriptText, "Test Script");
-	if (!bytecode)
-		return nullptr;
-
-	// Create a runtime script with the given bytecode
-	auto script = runtime->CreateScript(bytecode);
-
-	return script;
-}
-
-
 int main(int argc, char * argv[])
 {
 	Jinx::GlobalParams globalParams;
+	globalParams.logSymbols = false;
+	globalParams.logBytecode = false;
 	globalParams.enableLogging = false;
 	Jinx::Initialize(globalParams);
-	auto runtime = CreateRuntime();
 
 	// Validate that all scripts compile and execute successfully
 	for (auto i = 0u; i < countof(s_testScripts); ++i)
 	{
+		auto runtime = CreateRuntime();
 		// Compile the text to bytecode
 		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
 		assert(bytecode);
@@ -597,6 +557,7 @@ int main(int argc, char * argv[])
 	Fuzzer sourceFuzzer;
 	for (auto c = 0; c < NumPermutations; ++c)
 	{
+		auto runtime = CreateRuntime();
 		for (auto i = 0u; i < countof(s_testScripts); ++i)
 		{
 			// Compile the text to bytecode
@@ -609,14 +570,15 @@ int main(int argc, char * argv[])
 			if (script)
 				script->Execute();
 		}
-		printf("Source permutation %i\n", c);
+		auto stats = Jinx::GetMemoryStats();
+		printf("Source permutation %i (Allocated Memory = %lli)\n", c, stats.currentAllocatedMemory);
 	}
-
 
 	// Run fuzz permutations on bytecode
 	Fuzzer bytecodeFuzzer;
 	for (auto c = 0; c < NumPermutations; ++c)
 	{
+		auto runtime = CreateRuntime();
 		for (auto i = 0u; i < countof(s_testScripts); ++i)
 		{
 			// Compile the text to bytecode
@@ -629,7 +591,8 @@ int main(int argc, char * argv[])
 			assert(script);
 			script->Execute();
 		}
-		printf("Bytecode permutation %i\n", c);
+		auto stats = Jinx::GetMemoryStats();
+		printf("Bytecode permutation %i (Allocated Memory = %lli)\n", c, stats.currentAllocatedMemory);
 	}
 
 	return 0;

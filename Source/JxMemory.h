@@ -234,6 +234,7 @@ namespace Jinx
 			externalFreeCount(0),
 			internalAllocCount(0),
 			internalFreeCount(0),
+			currentBlockCount(0),
 			currentAllocatedMemory(0),
 			currentUsedMemory(0)
 		{}
@@ -241,6 +242,7 @@ namespace Jinx
 		uint32_t externalFreeCount;
 		uint32_t internalAllocCount;
 		uint32_t internalFreeCount;
+		uint32_t currentBlockCount;
 		uint64_t currentAllocatedMemory;
 		uint64_t currentUsedMemory;
 	};
@@ -251,7 +253,11 @@ namespace Jinx
 
 	void ShutDownMemory();
 
+	// Get memory stats
 	const MemoryStats & GetMemoryStats();
+
+	// Log all currently allocated memory (debug only)
+	void LogAllocations();
 
     // Define a custom UTF-8 string using internal allocator
     typedef std::basic_string <char, std::char_traits<char>, Allocator<char>> String;
