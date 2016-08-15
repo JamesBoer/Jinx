@@ -497,16 +497,16 @@ void BlockHeap::LogAllocations()
 		LogWriteLine("Memory guards intact: %s", memGuardsIntact ? "true" : "false");
 #endif 		
 		LogWriteLine("Data = %p", memBlock->data);
-		LogWriteLine("Used bytes = %zu", memBlock->usedBytes);
-		LogWriteLine("Allocated bytes = %zu", memBlock->allocatedBytes);
-		LogWriteLine("Capacity = %zu", memBlock->capacity);
-		LogWriteLine("Count = %zu", memBlock->count);
+		LogWriteLine("Used bytes = %" PRIuPTR, memBlock->usedBytes);
+		LogWriteLine("Allocated bytes = %" PRIuPTR, memBlock->allocatedBytes);
+		LogWriteLine("Capacity = %" PRIuPTR, memBlock->capacity);
+		LogWriteLine("Count = %" PRIuPTR, memBlock->count);
 #ifdef JINX_DEBUG_ALLOCATION
 		LogWriteLine("Memory allocations:");
 		auto memHeader = memBlock->head;
 		while (memHeader)
 		{
-			LogWriteLine("Allocation %p, size: %zu, File: %s, Function: %s", 
+			LogWriteLine("Allocation %p, size: %"  PRIuPTR ", File: %s, Function: %s", 
 				memHeader->memBlock, memHeader->bytes, memHeader->file ? memHeader->file : "", memHeader->function ? memHeader->function : "");
 			memHeader = memHeader->next;
 		}
