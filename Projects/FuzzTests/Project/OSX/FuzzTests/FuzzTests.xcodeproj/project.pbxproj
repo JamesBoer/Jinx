@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA0BC2E41D615C8400F7F01B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA0BC2E31D615C8400F7F01B /* Main.cpp */; };
-		AA0BC2E51D615C9D00F7F01B /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0BC2E21D615C6A00F7F01B /* libJinx.a */; };
+		AA23487A1D6163AB00395F2C /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AAEB8C931D61633700AFBF08 /* libJinx.a */; };
+		AAEB8C8D1D61632200AFBF08 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAEB8C8C1D61632200AFBF08 /* Main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AA0BC2E11D615C6A00F7F01B /* PBXContainerItemProxy */ = {
+		AAEB8C921D61633700AFBF08 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = AA0BC2DD1D615C6A00F7F01B /* Jinx.xcodeproj */;
+			containerPortal = AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = AA93A26B1CE2CE5900104611;
 			remoteInfo = Jinx;
@@ -35,8 +35,8 @@
 
 /* Begin PBXFileReference section */
 		AA0BC2D31D615C3500F7F01B /* FuzzTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FuzzTests; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0BC2DD1D615C6A00F7F01B /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../Jinx/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
-		AA0BC2E31D615C8400F7F01B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../FuzzTests/Source/Main.cpp; sourceTree = "<group>"; };
+		AAEB8C8C1D61632200AFBF08 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../../Source/Main.cpp; sourceTree = "<group>"; };
+		AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Jinx/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,7 +44,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0BC2E51D615C9D00F7F01B /* libJinx.a in Frameworks */,
+				AA23487A1D6163AB00395F2C /* libJinx.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,7 +54,7 @@
 		AA0BC2CA1D615C3500F7F01B = {
 			isa = PBXGroup;
 			children = (
-				AA0BC2DD1D615C6A00F7F01B /* Jinx.xcodeproj */,
+				AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */,
 				AA0BC2D51D615C3500F7F01B /* FuzzTests */,
 				AA0BC2D41D615C3500F7F01B /* Products */,
 			);
@@ -71,15 +71,15 @@
 		AA0BC2D51D615C3500F7F01B /* FuzzTests */ = {
 			isa = PBXGroup;
 			children = (
-				AA0BC2E31D615C8400F7F01B /* Main.cpp */,
+				AAEB8C8C1D61632200AFBF08 /* Main.cpp */,
 			);
 			path = FuzzTests;
 			sourceTree = "<group>";
 		};
-		AA0BC2DE1D615C6A00F7F01B /* Products */ = {
+		AAEB8C8F1D61633700AFBF08 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AA0BC2E21D615C6A00F7F01B /* libJinx.a */,
+				AAEB8C931D61633700AFBF08 /* libJinx.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,8 +130,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = AA0BC2DE1D615C6A00F7F01B /* Products */;
-					ProjectRef = AA0BC2DD1D615C6A00F7F01B /* Jinx.xcodeproj */;
+					ProductGroup = AAEB8C8F1D61633700AFBF08 /* Products */;
+					ProjectRef = AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -142,11 +142,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		AA0BC2E21D615C6A00F7F01B /* libJinx.a */ = {
+		AAEB8C931D61633700AFBF08 /* libJinx.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libJinx.a;
-			remoteRef = AA0BC2E11D615C6A00F7F01B /* PBXContainerItemProxy */;
+			remoteRef = AAEB8C921D61633700AFBF08 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -156,7 +156,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA0BC2E41D615C8400F7F01B /* Main.cpp in Sources */,
+				AAEB8C8D1D61632200AFBF08 /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +277,7 @@
 				AA0BC2DC1D615C3500F7F01B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
