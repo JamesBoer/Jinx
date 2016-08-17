@@ -93,6 +93,7 @@ namespace Jinx
 		Minus,
 		Equals,
 		NotEquals,
+		Percent,
 		Comma,
 		ParenOpen,
 		ParenClose,
@@ -130,7 +131,6 @@ namespace Jinx
 		Library,
 		Loop,
 		New,
-		Mod,
 		Not,
 		Null,
 		Number,
@@ -176,7 +176,7 @@ namespace Jinx
 
 	const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
 	const uint16_t BytecodeMajorVersion = 0;
-	const uint16_t BytecodeMinorVersion = 0;
+	const uint16_t BytecodeMinorVersion = 1;
 
 	struct BytecodeHeader
 	{
@@ -216,6 +216,8 @@ namespace Jinx
 	}
 
 	RuntimeID GetRandomId();
+	uint32_t MaxInstructions();
+	bool ErrorOnMaxInstrunction();
 
 	// Forward declarations
 	class Runtime;

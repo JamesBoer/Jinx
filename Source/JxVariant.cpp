@@ -834,6 +834,11 @@ Variant Jinx::operator / (const Variant & left, const Variant & right)
 
 Variant Jinx::operator % (const Variant & left, const Variant & right)
 {
+	// Handle floating-point numbers with fmod function
+	if (left.GetType() == ValueType::Number || right.GetType() == ValueType::Number)
+		return fmod(left.GetNumber(), right.GetNumber());
+
+	// Check for non-integer types, especially since co-erced right values will be zero
 	if (left.GetType() != ValueType::Integer)
 	{
 		LogWriteLine("Invalid left operand for mod");
@@ -845,26 +850,16 @@ Variant Jinx::operator % (const Variant & left, const Variant & right)
 		return Variant();
 	}
 
-	// Make sure the mod is mathematically correct for negative numbers as well as positive
-	auto x = left.GetInteger();
-	auto m = right.GetInteger();
-	auto r = (x % m + m) % m;
-
-	Variant result;
-	result.SetInteger(r);
-	return result;
+	// Return result from integer mod operation
+	return Variant(left.GetInteger() % right.GetInteger());
 }
 
 bool Jinx::operator == (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != right.GetType())
-	{
-		return false;
-	}
 	switch (left.GetType())
 	{
 	case ValueType::Null:
-		return true;
+		return right.IsNull();
 	case ValueType::Number:
 		return left.GetNumber() == right.GetNumber();
 	case ValueType::Integer:
@@ -874,7 +869,7 @@ bool Jinx::operator == (const Variant & left, const Variant & right)
 	case ValueType::String:
 		return left.GetString() == right.GetString();
 	case ValueType::Collection:
-		break;
+		return left.GetCollection() == right.GetCollection();
 	case ValueType::CollectionItr:
 		return left.GetCollectionItr() == right.GetCollectionItr();
 	case ValueType::UserObject:
@@ -894,14 +889,10 @@ bool Jinx::operator == (const Variant & left, const Variant & right)
 
 bool Jinx::operator < (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != right.GetType())
-	{
-		return false;
-	}
 	switch (left.GetType())
 	{
 	case ValueType::Null:
-		return true;
+		return false;
 	case ValueType::Number:
 		return left.GetNumber() < right.GetNumber();
 	case ValueType::Integer:
@@ -911,7 +902,7 @@ bool Jinx::operator < (const Variant & left, const Variant & right)
 	case ValueType::String:
 		return left.GetString() < right.GetString();
 	case ValueType::Collection:
-		break;
+		return left.GetCollection() < right.GetCollection();
 	case ValueType::CollectionItr:
 		return left.GetCollectionItr() < right.GetCollectionItr();
 	case ValueType::UserObject:
@@ -921,7 +912,7 @@ bool Jinx::operator < (const Variant & left, const Variant & right)
 	case ValueType::Guid:
 		return left.GetGuid() < right.GetGuid();
 	case ValueType::ValType:
-		break;
+		return left.GetValType() < right.GetValType();
 	default:
 		assert(!"Unknown variant type!");
 	};
@@ -931,14 +922,10 @@ bool Jinx::operator < (const Variant & left, const Variant & right)
 
 bool Jinx::operator <= (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != right.GetType())
-	{
-		return false;
-	}
 	switch (left.GetType())
 	{
 	case ValueType::Null:
-		return true;
+		return false;
 	case ValueType::Number:
 		return left.GetNumber() <= right.GetNumber();
 	case ValueType::Integer:
@@ -948,7 +935,7 @@ bool Jinx::operator <= (const Variant & left, const Variant & right)
 	case ValueType::String:
 		return left.GetString() <= right.GetString();
 	case ValueType::Collection:
-		break;
+		return left.GetCollection() <= right.GetCollection();
 	case ValueType::CollectionItr:
 		return left.GetCollectionItr() <= right.GetCollectionItr();
 	case ValueType::UserObject:
@@ -958,7 +945,7 @@ bool Jinx::operator <= (const Variant & left, const Variant & right)
 	case ValueType::Guid:
 		return left.GetGuid() <= right.GetGuid();
 	case ValueType::ValType:
-		break;
+		return left.GetValType() < right.GetValType();
 	default:
 		assert(!"Unknown variant type!");
 	};

@@ -143,7 +143,7 @@ TEST_CASE("Test Statements", "[Statements]")
 			d is b - a
 			e is a * b
 			f is b / 1
-			g is 10 mod b
+			g is 10 % b
 
 			-- Multiple operations with and without parentheses
 			h is 1 + 2 * 3     -- h is 9
@@ -151,13 +151,14 @@ TEST_CASE("Test Statements", "[Statements]")
 
 			-- Floating point assignments
 			j is 123.456
-			k is 234.567
+			k is 23.45
 
 			-- Floating point operations
 			l is j * k
 			m is j / k
 			n is j + k
 			o is j - k
+			p is j % k
 
 			)";
 
@@ -173,11 +174,12 @@ TEST_CASE("Test Statements", "[Statements]")
 		REQUIRE(script->GetVariable("h").GetInteger() == 9);
 		REQUIRE(script->GetVariable("i").GetInteger() == 7);
 		REQUIRE(script->GetVariable("j").GetNumber() == Approx(123.456));
-		REQUIRE(script->GetVariable("k").GetNumber() == Approx(234.567));
-		REQUIRE(script->GetVariable("l").GetNumber() == Approx(28958.703552));
-		REQUIRE(script->GetVariable("m").GetNumber() == Approx(0.52631444320812390489710828888974));
-		REQUIRE(script->GetVariable("n").GetNumber() == Approx(358.023));
-		REQUIRE(script->GetVariable("o").GetNumber() == Approx(-111.111));
+		REQUIRE(script->GetVariable("k").GetNumber() == Approx(23.45));
+		REQUIRE(script->GetVariable("l").GetNumber() == Approx(2895.0432));
+		REQUIRE(script->GetVariable("m").GetNumber() == Approx(5.2646));
+		REQUIRE(script->GetVariable("n").GetNumber() == Approx(146.906));
+		REQUIRE(script->GetVariable("o").GetNumber() == Approx(100.006));
+		REQUIRE(script->GetVariable("p").GetNumber() == Approx(6.206));
 	}
 
 	SECTION("Test equality and inequality operators")
@@ -187,9 +189,6 @@ TEST_CASE("Test Statements", "[Statements]")
 			
 			a is true = true		-- true
 			b is true != true		-- false
-			c is not true = true	-- false
-			d is true and false  	-- false
-			e is true or false		-- true
 
 			)";
 
@@ -197,9 +196,35 @@ TEST_CASE("Test Statements", "[Statements]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").GetBoolean() == true);
 		REQUIRE(script->GetVariable("b").GetBoolean() == false);
+	}
+
+	SECTION("Test logical operators")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			a is true and false			-- false	
+			b is true and true			-- true
+			c is false or false			-- false
+			d is true or false			-- true		
+
+			e is 1 < 2 or 4 != 5        -- true
+			f is not 1 < 2 or 4 != 5    -- false
+			g is not (1 < 2 or 4 != 5)  -- false
+			h is (not 1 < 2) or 4 != 5  -- true
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").GetBoolean() == false);
+		REQUIRE(script->GetVariable("b").GetBoolean() == true);
 		REQUIRE(script->GetVariable("c").GetBoolean() == false);
-		REQUIRE(script->GetVariable("d").GetBoolean() == false);
+		REQUIRE(script->GetVariable("d").GetBoolean() == true);
 		REQUIRE(script->GetVariable("e").GetBoolean() == true);
+		REQUIRE(script->GetVariable("f").GetBoolean() == false);
+		REQUIRE(script->GetVariable("g").GetBoolean() == false);
+		REQUIRE(script->GetVariable("h").GetBoolean() == true);
 	}
 
 	SECTION("Test less than or greater than operators")

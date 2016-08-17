@@ -191,8 +191,6 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 				LogWrite("%s", GetValueTypeName(type));
 			}
 			break;
-			case Opcode::Decrement:
-			case Opcode::Increment:
 			case Opcode::Library:
 			case Opcode::PushVar:
 			case Opcode::PushVarKey:

@@ -48,30 +48,37 @@ int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::VersionString);
 
-	GlobalParams globalParams;
-	globalParams.logSymbols = true;
-	globalParams.logBytecode = true;
-	globalParams.allocBlockSize = 1024 * 256;
-	globalParams.allocFn = [](size_t size) { return malloc(size); };
-	globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-	globalParams.freeFn = [](void * p) { free(p); };
-	Jinx::Initialize(globalParams);
+	// Add scope block to ensure all objects are destroyed for shutdown test
+	{
+		GlobalParams globalParams;
+		globalParams.logSymbols = true;
+		globalParams.logBytecode = true;
+		globalParams.allocBlockSize = 1024 * 256;
+		globalParams.allocFn = [](size_t size) { return malloc(size); };
+		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
+		globalParams.freeFn = [](void * p) { free(p); };
+		Jinx::Initialize(globalParams);
 	
-	auto runtime = Jinx::CreateRuntime();
+		auto runtime = Jinx::CreateRuntime();
 
-	static const char * scriptText =
-	u8R"(
+		static const char * scriptText =
+		u8R"(
 
-		いろは is "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
+			a is 1 < 2 or 4 != 5       -- true
+			b is not 1 < 2 or 4 != 5   -- false
+			c is not (1 < 2 or 4 != 5) -- false
+			d is (not 1 < 2) or 4 != 5 -- true
+		)";
 
-	)";
-
-	auto script = TestExecuteScript(scriptText);
-	REQUIRE(script);
-	REQUIRE(script->GetVariable(u8"いろは").GetString() == u8"いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす");
-
-	script = nullptr;
-	runtime = nullptr;
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto a = script->GetVariable("a");
+		auto b = script->GetVariable("b");
+		auto c = script->GetVariable("c");
+		auto d = script->GetVariable("d");
+		int i = 0;
+		++i;
+	}
 
 	Jinx::ShutDown();
 

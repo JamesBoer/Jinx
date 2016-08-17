@@ -9,6 +9,7 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+static GlobalParams s_globalParams;
 static std::atomic<uint64_t> s_uniqueId = {0};
 
 struct HashData
@@ -96,6 +97,7 @@ static const char * s_symbolTypeName[] =
 	"-", 
 	"=", 
 	"!=",
+	"%",
 	",",
 	"(", 
 	")", 
@@ -133,7 +135,6 @@ static const char * s_symbolTypeName[] =
 	"library",
 	"loop",
 	"new",
-	"mod",
 	"not",
 	"null",
 	"number",
@@ -215,8 +216,19 @@ RuntimeID Jinx::GetRandomId()
 	return GetHash(reinterpret_cast<const uint8_t *>(&hd), sizeof(hd));
 }
 
+uint32_t Jinx::MaxInstructions()
+{
+	return s_globalParams.maxInstructions;
+}
+
+bool Jinx::ErrorOnMaxInstrunction()
+{
+	return s_globalParams.errorOnMaxInstrunctions;
+}
+
 void Jinx::Initialize(const GlobalParams & params)
 {
+	s_globalParams = params;
 	InitializeMemory(params);
 	InitializeLogging(params);
 }

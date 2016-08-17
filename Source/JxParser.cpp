@@ -309,7 +309,7 @@ bool Parser::CheckBinaryOperator() const
 		type == SymbolType::LessThan ||
 		type == SymbolType::LessThanEquals ||
 		type == SymbolType::Minus ||
-		type == SymbolType::Mod ||
+		type == SymbolType::Percent ||
 		type == SymbolType::Plus;
 }
 
@@ -680,7 +680,7 @@ Opcode Parser::ParseBinaryOperator()
 	case SymbolType::Minus:
 		opcode = Opcode::Subtract;
 		break;
-	case SymbolType::Mod:
+	case SymbolType::Percent:
 		opcode = Opcode::Mod;
 		break;
 	case SymbolType::Plus:
@@ -1431,9 +1431,7 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 			EmitOpcode(Opcode::PushList);
 			EmitCount(count);
 		}
-
 	}
-
 }
 
 void Parser::ParseIncDec()
@@ -1441,12 +1439,30 @@ void Parser::ParseIncDec()
 	bool increment = Accept(SymbolType::Increment);
 	if (!increment)
 		Expect(SymbolType::Decrement);
-	if (!CheckName())
+	PropertyName propName;
+	String varName;
+	if (CheckProperty())
 	{
-		Error("Valid name expected after increment keyword");
+		propName = ParsePropertyName();
+		if (propName.IsReadOnly())
+		{
+			Error("Can't %s a readonly property", increment ? "increment" : "decrement");
+			return;
+		}
+		EmitOpcode(Opcode::PushProp);
+		EmitId(propName.GetId());
+	}
+	else if (CheckName())
+	{
+		varName = ParseName();
+		EmitOpcode(Opcode::PushVar);
+		EmitName(varName);
+	}
+	else
+	{
+		Error("Valid property or variable name expected after %s keyword", increment ? "increment" : "decrement");
 		return;
 	}
-	String name = ParseName();
 	if (Accept(SymbolType::By))
 	{
 		ParseExpression();
@@ -1457,7 +1473,16 @@ void Parser::ParseIncDec()
 		EmitValue(1);
 	}
 	EmitOpcode(increment ? Opcode::Increment : Opcode::Decrement);
-	EmitName(name);
+	if (!propName.GetName().empty())
+	{
+		EmitOpcode(Opcode::SetProp);
+		EmitId(propName.GetId());
+	}
+	else
+	{
+		EmitOpcode(Opcode::SetVar);
+		EmitName(varName);
+	}
 	Expect(SymbolType::NewLine);
 }
 

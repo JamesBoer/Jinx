@@ -312,7 +312,7 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 		REQUIRE(!success);
 	}
 
-	SECTION("Test serialized property readonly attribute")
+	SECTION("Test property readonly attribute #1")
 	{
 		static const char * scriptText1 =
 			u8R"(
@@ -344,6 +344,37 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 		REQUIRE(!script2);
 	}
 
+	SECTION("Test property readonly attribute #2")
+	{
+		static const char * scriptText1 =
+			u8R"(
+    
+			library test
+
+			readonly public prop is 333
+
+			)";
+
+		static const char * scriptText2 =
+			u8R"(
+    
+			import test
+     
+			decrement prop
+
+			)";
+
+		auto runtime1 = TestCreateRuntime();
+		auto scriptBytecode1 = runtime1->Compile(scriptText1);
+		REQUIRE(scriptBytecode1);
+
+		auto runtime2 = TestCreateRuntime();
+		auto script1 = runtime2->CreateScript(scriptBytecode1);
+		script1->Execute();
+		auto script2 = TestExecuteScript(scriptText2, runtime2);
+		REQUIRE(script1);
+		REQUIRE(!script2);
+	}
 
 	SECTION("Test collection initialization list error #1")
 	{

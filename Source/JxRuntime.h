@@ -36,7 +36,7 @@ namespace Jinx
 		void SetProperty(RuntimeID id, const Variant & value);
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		void AddScriptExecutionTime(uint64_t timeNs);
-		
+
 	private:
 
 		typedef std::map<String, LibraryIPtr, std::less<String>, Allocator<std::pair<String, LibraryIPtr>>> LibraryMap;

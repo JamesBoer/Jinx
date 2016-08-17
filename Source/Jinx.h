@@ -76,18 +76,17 @@ by James Boer, and distributed under the MIT license.
 /*! \namespace */
 namespace Jinx
 {
-
 	/// Major version number
-	const uint32_t MajorVersion = 0;
+	static const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 0;
+	static const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 4;
+	static const uint32_t PatchNumber = 1;
 
 	/// Version string
-	static const char * VersionString = "0.0.4";
+	static const char * VersionString = "0.1.1";
 
 	// Forward declaration
 	class IScript;
@@ -347,7 +346,9 @@ namespace Jinx
 			enableLogging(true), 
 			logSymbols(false),
 			logBytecode(false),
-			allocBlockSize(8192) 
+			allocBlockSize(8192),
+			maxInstructions(2000),
+			errorOnMaxInstrunctions(true)
 		{}
 		/// Logging function 
 		LogFn logFn;
@@ -365,6 +366,10 @@ namespace Jinx
 		FreeFn freeFn;
 		/// Size of each individual block allocation in bytes
 		size_t allocBlockSize;
+		/// Maximum number of instructions per tick
+		uint32_t maxInstructions;
+		/// Maximum total script instrunctions
+		bool errorOnMaxInstrunctions;
 	};
 
 	/// Initializes global Jinx parameters
