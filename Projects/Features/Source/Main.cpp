@@ -64,24 +64,20 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 		u8R"(
 
-				-- Create collection using an initialization list
-				a is 3, 2, 1
-
+			a is 1 < 2 or 4 != 5       -- true
+			b is not 1 < 2 or 4 != 5   -- false
+			c is not (1 < 2 or 4 != 5) -- false
+			d is (not 1 < 2) or 4 != 5 -- true
 		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection());
-		auto collection = script->GetVariable("a").GetCollection();
-		REQUIRE(collection);
-		REQUIRE(collection->size() == 3);
-		REQUIRE(collection->find(1) != collection->end());
-		REQUIRE(collection->find(1)->second.GetInteger() == 3);
-		REQUIRE(collection->find(2) != collection->end());
-		REQUIRE(collection->find(2)->second.GetInteger() == 2);
-		REQUIRE(collection->find(3) != collection->end());
-		REQUIRE(collection->find(3)->second.GetInteger() == 1);
-
+		auto a = script->GetVariable("a");
+		auto b = script->GetVariable("b");
+		auto c = script->GetVariable("c");
+		auto d = script->GetVariable("d");
+		int i = 0;
+		++i;
 	}
 
 	Jinx::ShutDown();

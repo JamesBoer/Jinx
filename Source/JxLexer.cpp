@@ -193,6 +193,9 @@ bool Lexer::Execute()
 				break;
 			}
 			break;
+		case '%':
+			CreateSymbol(SymbolType::Percent);
+			break;
 		case ',':
 			CreateSymbol(SymbolType::Comma);
 			break;

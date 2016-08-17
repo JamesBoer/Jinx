@@ -309,7 +309,7 @@ bool Parser::CheckBinaryOperator() const
 		type == SymbolType::LessThan ||
 		type == SymbolType::LessThanEquals ||
 		type == SymbolType::Minus ||
-		type == SymbolType::Mod ||
+		type == SymbolType::Percent ||
 		type == SymbolType::Plus;
 }
 
@@ -680,7 +680,7 @@ Opcode Parser::ParseBinaryOperator()
 	case SymbolType::Minus:
 		opcode = Opcode::Subtract;
 		break;
-	case SymbolType::Mod:
+	case SymbolType::Percent:
 		opcode = Opcode::Mod;
 		break;
 	case SymbolType::Plus:
