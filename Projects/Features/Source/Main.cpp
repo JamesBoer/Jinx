@@ -63,21 +63,21 @@ int main(int argc, char ** argv)
 
 		static const char * scriptText =
 		u8R"(
+			import core
 
-			a is 1 < 2 or 4 != 5       -- true
-			b is not 1 < 2 or 4 != 5   -- false
-			c is not (1 < 2 or 4 != 5) -- false
-			d is (not 1 < 2) or 4 != 5 -- true
+			public a is []
+			public b is []
+
+			a ["coll"] is b
+			b ["coll"] is a
+
 		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		auto a = script->GetVariable("a");
-		auto b = script->GetVariable("b");
-		auto c = script->GetVariable("c");
-		auto d = script->GetVariable("d");
-		int i = 0;
-		++i;
+		//auto a = script->GetVariable("a");
+		//REQUIRE(a.IsCollection());
+		//auto c = a.GetCollection();
 	}
 
 	Jinx::ShutDown();

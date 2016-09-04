@@ -31,6 +31,22 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode) :
 	}
 }
 
+Script::~Script()
+{
+	// Clear potential circular references by explicitly destroying collection values
+	for (auto & s : m_stack)
+	{
+		if (s.IsCollection())
+		{
+			auto c = s.GetCollection();
+			for (auto & e : *c)
+			{
+				e.second.SetNull();
+			}
+		}
+	}
+}
+
 void Script::Error(const char * message)
 {
 	LogWriteLine("%s", message);

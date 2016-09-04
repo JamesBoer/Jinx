@@ -17,6 +17,7 @@ namespace Jinx
 	{
 	public:
 		Script(RuntimeIPtr runtime, BufferPtr bytecode);
+		virtual ~Script();
 
 		bool Execute() override;
 		bool IsFinished() const override;

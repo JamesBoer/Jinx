@@ -9,6 +9,22 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+Runtime::~Runtime()
+{
+	// Clear potential circular references by explicitly destroying collection values
+	for (auto & s : m_propertyMap)
+	{
+		if (s.second.IsCollection())
+		{
+			auto c = s.second.GetCollection();
+			for (auto & e : *c)
+			{
+				e.second.SetNull();
+			}
+		}
+	}
+}
+
 void Runtime::AddScriptExecutionTime(uint64_t timeNs)
 {
 	std::lock_guard<Mutex> lock(m_perfMutex);

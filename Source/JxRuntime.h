@@ -16,6 +16,7 @@ namespace Jinx
 	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
 	public:
+		virtual ~Runtime();
 
 		// IRuntime interface
 		BufferPtr Compile(const char * scriptText, String uniqueName) override;
