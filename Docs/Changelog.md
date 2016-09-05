@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 
 
 ## [0.1.3] - 2016-09-04
+### Added
+- Default library import API
 
 ### Fixed
 - Prevent memory leaks due to circular references by collections
