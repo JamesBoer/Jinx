@@ -65,11 +65,7 @@ int main(int argc, char ** argv)
 		u8R"(
 			import core
 
-			public a is []
-			public b is []
-
-			a ["coll"] is b
-			b ["coll"] is a
+			a is ["test a", ["test b", [1, 2]]]
 
 		)";
 

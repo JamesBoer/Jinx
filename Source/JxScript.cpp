@@ -214,10 +214,6 @@ bool Script::Execute()
 				m_runtime->RegisterFunction(signature, m_execution.back().bytecode, m_execution.back().reader.Tell() + 5);
 			}
 			break;
-			case Opcode::Global:
-			{
-			}
-			break;
 			case Opcode::Greater:
 			{
 				auto op2 = Pop();
@@ -423,6 +419,11 @@ bool Script::Execute()
 						return false;
 					}
 					Variant key = m_stack[index];
+					if (!key.IsKeyType())
+					{
+						Error("Invalid key type");
+						return false;
+					}
 					Variant value = m_stack[index + 1];
 					collection.GetCollection()->insert(std::make_pair(key, value));
 				}
@@ -627,6 +628,11 @@ bool Script::Execute()
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
 				Variant key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					break;
+				}
 				Variant prop = m_runtime->GetProperty(id);
 				if (!prop.IsCollection())
 				{
@@ -651,6 +657,11 @@ bool Script::Execute()
 				m_execution.back().reader.Read(&name);
 				Variant val = Pop();
 				Variant key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					break;
+				}
 				Variant prop = GetVariable(name);
 				if (!prop.IsCollection())
 				{

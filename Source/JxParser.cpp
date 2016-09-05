@@ -1373,12 +1373,12 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 		}
 		else
 		{
-			ParseSubexpression();
+			ParseSubexpression(suppressFunctionCall);
 
 			// If we see a comma after a square open bracket, we're parsing a key-value pair
 			if (Accept(SymbolType::Comma))
 			{
-				ParseSubexpression();
+				ParseExpression(suppressFunctionCall);
 				Expect(SymbolType::SquareClose);
 
 				// Parse all subsequent key-value pairs

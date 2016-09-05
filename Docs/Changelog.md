@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.1.3] - 2016-09-04
+
+### Fixed
+- Prevent memory leaks due to circular references by collections
+- Validate collection key types at runtime
+- Allow initialization lists inside initialization lists
+
 ## [0.1.2] - 2016-08-14
 ### Added
 - PDF version of tutorial and LibCore library doc

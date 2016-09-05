@@ -83,10 +83,10 @@ namespace Jinx
 	static const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 1;
+	static const uint32_t PatchNumber = 3;
 
 	/// Version string
-	static const char * VersionString = "0.1.1";
+	static const char * VersionString = "0.1.3";
 
 	// Forward declaration
 	class IScript;
