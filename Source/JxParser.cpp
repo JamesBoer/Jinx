@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & uniqueName) :
+Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & uniqueName, std::initializer_list<String> libraries) :
 	m_runtime(runtime),
 	m_uniqueName(uniqueName),
 	m_symbolList(symbolList),
@@ -22,6 +22,7 @@ Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String 
 	m_returnedValue(false)
 {
 	m_currentSymbol = symbolList.begin();
+	m_importList = libraries;
 }
 
 bool Parser::Execute()
@@ -1932,6 +1933,7 @@ void Parser::ParseBlock()
 
 void Parser::ParseLibraryImports()
 {
+	std::set<String, std::less<String>, Allocator<String>> importSet;
 	while (true)
 	{
 		if (!Accept(SymbolType::Import))
@@ -1947,17 +1949,17 @@ void Parser::ParseLibraryImports()
 			Error("Expected new line after library import name");
 			return;
 		}
+
+		// Check to make sure we're not adding duplicates
 		for (auto & importName : m_importList)
 		{
 			if (importName == name)
-			{
-				Error("Import library %s listed more than once", name.c_str());
-				return;
-			}
+				continue;
 		}
 
 		// Add library to the list of imported libraries for this script
 		m_importList.push_back(name);
+		importSet.insert(name);
 	}
 }
 

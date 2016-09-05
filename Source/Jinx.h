@@ -253,10 +253,11 @@ namespace Jinx
 		\param scriptText A C string containing text to compile to bytecode
 		\param uniqueName The name of the script, typically the filename, used for debugging
 		and diagnostic purposes.
+		\param libraries A list of libraries to import by default.
 		\return A BufferPtr containing compiled bytecode on success or a nullptr on failure.
 		\sa CreateScript()
 		*/
-		virtual BufferPtr Compile(const char * scriptText, String uniqueName = String()) = 0;
+		virtual BufferPtr Compile(const char * scriptText, String uniqueName = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Create a script from bytecode
 		/**
@@ -274,9 +275,10 @@ namespace Jinx
 		\param scriptText A C string containing text to compile to bytecode
 		\param uniqueName The name of the script, typically the filename, used for debugging
 		and diagnostic purposes.
+		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, String uniqueName = String()) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, String uniqueName = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -285,9 +287,10 @@ namespace Jinx
 		\param scriptText A C string containing text to compile to bytecode
 		\param uniqueName The name of the script, typically the filename, used for debugging
 		and diagnostic purposes.
+		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, String uniqueName = String()) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, String uniqueName = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**

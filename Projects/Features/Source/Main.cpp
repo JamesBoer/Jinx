@@ -26,7 +26,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 		runtime = CreateRuntime();
 
 	// Compile the text to bytecode
-	auto bytecode = runtime->Compile(scriptText, "Test Script");
+	auto bytecode = runtime->Compile(scriptText, "Test Script", {"core"});
 	if (!bytecode)
 		return nullptr;
 
@@ -63,17 +63,13 @@ int main(int argc, char ** argv)
 
 		static const char * scriptText =
 		u8R"(
-			import core
 
-			a is ["test a", ["test b", [1, 2]]]
+			write line "test"
 
 		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		//auto a = script->GetVariable("a");
-		//REQUIRE(a.IsCollection());
-		//auto c = a.GetCollection();
 	}
 
 	Jinx::ShutDown();

@@ -32,7 +32,7 @@ void Runtime::AddScriptExecutionTime(uint64_t timeNs)
 	m_perfStats.scriptExecutionCount++;
 }
 
-BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName)
+BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName, std::initializer_list<String> libraries)
 {
 	// Mark script execution start time
 	auto begin = std::chrono::high_resolution_clock::now();
@@ -49,7 +49,7 @@ BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName)
 		LogSymbols(lexer.GetSymbolList());
 
 	// Create parser with symbol list
-	Parser parser(shared_from_this(), lexer.GetSymbolList(), uniqueName);
+	Parser parser(shared_from_this(), lexer.GetSymbolList(), uniqueName, libraries);
 
 	// Generate bytecode from symbol list
 	if (!parser.Execute())
@@ -70,11 +70,11 @@ BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName)
 	return parser.GetBytecode();
 }
 
-BufferPtr Runtime::Compile(const char * scriptText, String uniqueName)
+BufferPtr Runtime::Compile(const char * scriptText, String uniqueName, std::initializer_list<String> libraries)
 {
 	auto scriptBuffer = CreateBuffer();
 	scriptBuffer->Write(scriptText, strlen(scriptText) + 1);
-	return Compile(scriptBuffer, uniqueName);
+	return Compile(scriptBuffer, uniqueName, libraries);
 }
 
 ScriptPtr Runtime::CreateScript(BufferPtr bytecode)
@@ -82,10 +82,10 @@ ScriptPtr Runtime::CreateScript(BufferPtr bytecode)
 	return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode));
 }
 
-ScriptPtr Runtime::CreateScript(const char * scriptText, String uniqueName)
+ScriptPtr Runtime::CreateScript(const char * scriptText, String uniqueName, std::initializer_list<String> libraries)
 {
 	// Compile script text to bytecode
-	auto bytecode = Compile(scriptText, uniqueName);
+	auto bytecode = Compile(scriptText, uniqueName, libraries);
 	if (!bytecode)
 		return nullptr;
 
@@ -93,10 +93,10 @@ ScriptPtr Runtime::CreateScript(const char * scriptText, String uniqueName)
 	return CreateScript(bytecode);
 }
 
-ScriptPtr Runtime::ExecuteScript(const char * scriptcode, String uniqueName)
+ScriptPtr Runtime::ExecuteScript(const char * scriptcode, String uniqueName, std::initializer_list<String> libraries)
 {
 	// Compile the text to bytecode
-	auto bytecode = Compile(scriptcode, uniqueName);
+	auto bytecode = Compile(scriptcode, uniqueName, libraries);
 	if (!bytecode)
 		return nullptr;
 

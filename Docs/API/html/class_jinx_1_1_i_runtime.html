@@ -100,18 +100,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a24aa7f613da5feeaeb4b7537b40fe642"><td class="memItemLeft" align="right" valign="top">virtual BufferPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a24aa7f613da5feeaeb4b7537b40fe642">Compile</a> (const char *scriptText, String uniqueName=String())=0</td></tr>
-<tr class="memdesc:a24aa7f613da5feeaeb4b7537b40fe642"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile text string into bytecode.  <a href="#a24aa7f613da5feeaeb4b7537b40fe642">More...</a><br /></td></tr>
-<tr class="separator:a24aa7f613da5feeaeb4b7537b40fe642"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48cee1961798f4870f7eb005ab17c6da"><td class="memItemLeft" align="right" valign="top">virtual BufferPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da">Compile</a> (const char *scriptText, String uniqueName=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:a48cee1961798f4870f7eb005ab17c6da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile text string into bytecode.  <a href="#a48cee1961798f4870f7eb005ab17c6da">More...</a><br /></td></tr>
+<tr class="separator:a48cee1961798f4870f7eb005ab17c6da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa49f23c5bd90c225c5ec5bf4e1f1af79"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#aa49f23c5bd90c225c5ec5bf4e1f1af79">CreateScript</a> (BufferPtr bytecode)=0</td></tr>
 <tr class="memdesc:aa49f23c5bd90c225c5ec5bf4e1f1af79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a script from bytecode.  <a href="#aa49f23c5bd90c225c5ec5bf4e1f1af79">More...</a><br /></td></tr>
 <tr class="separator:aa49f23c5bd90c225c5ec5bf4e1f1af79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a464927aa2a470ec51b787b83b5805f3a"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a464927aa2a470ec51b787b83b5805f3a">CreateScript</a> (const char *scriptText, String uniqueName=String())=0</td></tr>
-<tr class="memdesc:a464927aa2a470ec51b787b83b5805f3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and create script from text.  <a href="#a464927aa2a470ec51b787b83b5805f3a">More...</a><br /></td></tr>
-<tr class="separator:a464927aa2a470ec51b787b83b5805f3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a37ccfca9bd0c0c122398a3a174a6b708"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a37ccfca9bd0c0c122398a3a174a6b708">ExecuteScript</a> (const char *scriptText, String uniqueName=String())=0</td></tr>
-<tr class="memdesc:a37ccfca9bd0c0c122398a3a174a6b708"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile, create, and execute a script.  <a href="#a37ccfca9bd0c0c122398a3a174a6b708">More...</a><br /></td></tr>
-<tr class="separator:a37ccfca9bd0c0c122398a3a174a6b708"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a020dfbe9beeb5a30213346a862a9b405"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a020dfbe9beeb5a30213346a862a9b405">CreateScript</a> (const char *scriptText, String uniqueName=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:a020dfbe9beeb5a30213346a862a9b405"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and create script from text.  <a href="#a020dfbe9beeb5a30213346a862a9b405">More...</a><br /></td></tr>
+<tr class="separator:a020dfbe9beeb5a30213346a862a9b405"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67e73fa03bda628ada9dab1e61eedfc3"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a67e73fa03bda628ada9dab1e61eedfc3">ExecuteScript</a> (const char *scriptText, String uniqueName=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:a67e73fa03bda628ada9dab1e61eedfc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile, create, and execute a script.  <a href="#a67e73fa03bda628ada9dab1e61eedfc3">More...</a><br /></td></tr>
+<tr class="separator:a67e73fa03bda628ada9dab1e61eedfc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_jinx_8h.html#aec5ab3b563503ea605b4197e3da148de">LibraryPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#ade7ef682dd686f45c59a6ca94d3ef85e">GetLibrary</a> (const String &amp;name)=0</td></tr>
 <tr class="memdesc:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve library by name or create empty library if not found.  <a href="#ade7ef682dd686f45c59a6ca94d3ef85e">More...</a><br /></td></tr>
 <tr class="separator:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -123,7 +123,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Jinx runtime interface. </p>
 <p>The Jinx runtime interface represents the entire runtime scripting environment. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a24aa7f613da5feeaeb4b7537b40fe642"></a>
+<a class="anchor" id="a48cee1961798f4870f7eb005ab17c6da"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -140,7 +140,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>uniqueName</em> = <code>String()</code>&#160;</td>
+          <td class="paramname"><em>uniqueName</em> = <code>String()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::initializer_list&lt; String &gt;&#160;</td>
+          <td class="paramname"><em>libraries</em> = <code>{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -160,6 +166,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
     <tr><td class="paramname">uniqueName</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
+    <tr><td class="paramname">libraries</td><td>A list of libraries to import by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -191,18 +198,18 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Create a script from bytecode. </p>
-<p>Create script from compiled bytecode retrieved from the <a class="el" href="class_jinx_1_1_i_runtime.html#a24aa7f613da5feeaeb4b7537b40fe642" title="Compile text string into bytecode. ">Compile()</a> function. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Create script from compiled bytecode retrieved from the <a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a> function. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">bytecode</td><td>A BufferPtr containing the compiled bytecode generated by the output of the <a class="el" href="class_jinx_1_1_i_runtime.html#a24aa7f613da5feeaeb4b7537b40fe642" title="Compile text string into bytecode. ">Compile()</a> function. </td></tr>
+    <tr><td class="paramname">bytecode</td><td>A BufferPtr containing the compiled bytecode generated by the output of the <a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a> function. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A ScriptPtr ready for execution. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a24aa7f613da5feeaeb4b7537b40fe642" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_script.html" title="Script interface. ">IScript</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_script.html" title="Script interface. ">IScript</a> </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a464927aa2a470ec51b787b83b5805f3a"></a>
+<a class="anchor" id="a020dfbe9beeb5a30213346a862a9b405"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -219,7 +226,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>uniqueName</em> = <code>String()</code>&#160;</td>
+          <td class="paramname"><em>uniqueName</em> = <code>String()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::initializer_list&lt; String &gt;&#160;</td>
+          <td class="paramname"><em>libraries</em> = <code>{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -239,6 +252,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
     <tr><td class="paramname">uniqueName</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
+    <tr><td class="paramname">libraries</td><td>A list of libraries to import by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -246,7 +260,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a37ccfca9bd0c0c122398a3a174a6b708"></a>
+<a class="anchor" id="a67e73fa03bda628ada9dab1e61eedfc3"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -263,7 +277,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>uniqueName</em> = <code>String()</code>&#160;</td>
+          <td class="paramname"><em>uniqueName</em> = <code>String()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::initializer_list&lt; String &gt;&#160;</td>
+          <td class="paramname"><em>libraries</em> = <code>{}</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -283,6 +303,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
     <tr><td class="paramname">uniqueName</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
+    <tr><td class="paramname">libraries</td><td>A list of libraries to import by default. </td></tr>
   </table>
   </dd>
 </dl>
@@ -320,7 +341,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A LibraryPtr pointer to an <a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> interface. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a24aa7f613da5feeaeb4b7537b40fe642" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> </dd></dl>
 
 </div>
 </div>
