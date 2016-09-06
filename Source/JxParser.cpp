@@ -1933,7 +1933,6 @@ void Parser::ParseBlock()
 
 void Parser::ParseLibraryImports()
 {
-	std::set<String, std::less<String>, Allocator<String>> importSet;
 	while (true)
 	{
 		if (!Accept(SymbolType::Import))
@@ -1959,7 +1958,6 @@ void Parser::ParseLibraryImports()
 
 		// Add library to the list of imported libraries for this script
 		m_importList.push_back(name);
-		importSet.insert(name);
 	}
 }
 
