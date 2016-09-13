@@ -16,16 +16,17 @@ namespace Jinx
 	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
 	public:
+		virtual ~Runtime();
 
 		// IRuntime interface
-		BufferPtr Compile(const char * scriptText, String uniqueName) override;
+		BufferPtr Compile(const char * scriptText, String uniqueName, std::initializer_list<String> libraries) override;
 		ScriptPtr CreateScript(BufferPtr bytecode) override;
-		ScriptPtr CreateScript(const char * scriptText, String uniqueName) override;
-		ScriptPtr ExecuteScript(const char * scriptcode, String uniqueName) override;
+		ScriptPtr CreateScript(const char * scriptText, String uniqueName, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptcode, String uniqueName, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
 
 		// Internal interface
-		BufferPtr Compile(BufferPtr scriptBuffer, String uniqueName);
+		BufferPtr Compile(BufferPtr scriptBuffer, String uniqueName, std::initializer_list<String> libraries);
 		inline LibraryIPtr GetLibraryInternal(const String & name) { return std::static_pointer_cast<Library>(GetLibrary(name)); }
 		FunctionDefinitionPtr FindFunction(RuntimeID id) const;
 		bool LibraryExists(const String & name) const;

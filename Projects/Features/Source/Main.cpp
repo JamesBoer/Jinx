@@ -26,7 +26,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 		runtime = CreateRuntime();
 
 	// Compile the text to bytecode
-	auto bytecode = runtime->Compile(scriptText, "Test Script");
+	auto bytecode = runtime->Compile(scriptText, "Test Script", {"core"});
 	if (!bytecode)
 		return nullptr;
 
@@ -64,20 +64,12 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 		u8R"(
 
-			a is 1 < 2 or 4 != 5       -- true
-			b is not 1 < 2 or 4 != 5   -- false
-			c is not (1 < 2 or 4 != 5) -- false
-			d is (not 1 < 2) or 4 != 5 -- true
+			write line "test"
+
 		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		auto a = script->GetVariable("a");
-		auto b = script->GetVariable("b");
-		auto c = script->GetVariable("c");
-		auto d = script->GetVariable("d");
-		int i = 0;
-		++i;
 	}
 
 	Jinx::ShutDown();

@@ -16,7 +16,7 @@ namespace Jinx
 	class Parser
 	{
 	public:
-		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & uniqueName);
+		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & uniqueName, std::initializer_list<String> libraries);
 		
 		// Convert the symbol list into bytecode
 		bool Execute();

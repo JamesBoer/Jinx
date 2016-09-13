@@ -109,6 +109,9 @@ namespace Jinx
 		// Type getter
 		ValueType GetType() const { return m_type; }
 
+		// Is this a valid collection key?
+		bool IsKeyType() const;
+
 		// Type checks
 		bool IsType(ValueType type) { return m_type == type ? true : false; }
 		bool IsNull() const { return m_type == ValueType::Null ? true : false; }

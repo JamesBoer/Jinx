@@ -29,7 +29,6 @@ namespace Jinx
 		Equals,
 		Exit,
 		Function,
-		Global,
 		Greater,
 		GreaterEq,
 		Increment,

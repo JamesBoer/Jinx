@@ -31,6 +31,22 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode) :
 	}
 }
 
+Script::~Script()
+{
+	// Clear potential circular references by explicitly destroying collection values
+	for (auto & s : m_stack)
+	{
+		if (s.IsCollection())
+		{
+			auto c = s.GetCollection();
+			for (auto & e : *c)
+			{
+				e.second.SetNull();
+			}
+		}
+	}
+}
+
 void Script::Error(const char * message)
 {
 	LogWriteLine("%s", message);
@@ -196,10 +212,6 @@ bool Script::Execute()
 					m_library->Functions().Register(signature, false);
 				// Note: we add 5 bytes to the current position to skip over the jump command and offset value
 				m_runtime->RegisterFunction(signature, m_execution.back().bytecode, m_execution.back().reader.Tell() + 5);
-			}
-			break;
-			case Opcode::Global:
-			{
 			}
 			break;
 			case Opcode::Greater:
@@ -407,6 +419,11 @@ bool Script::Execute()
 						return false;
 					}
 					Variant key = m_stack[index];
+					if (!key.IsKeyType())
+					{
+						Error("Invalid key type");
+						return false;
+					}
 					Variant value = m_stack[index + 1];
 					collection.GetCollection()->insert(std::make_pair(key, value));
 				}
@@ -611,6 +628,11 @@ bool Script::Execute()
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
 				Variant key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					break;
+				}
 				Variant prop = m_runtime->GetProperty(id);
 				if (!prop.IsCollection())
 				{
@@ -635,6 +657,11 @@ bool Script::Execute()
 				m_execution.back().reader.Read(&name);
 				Variant val = Pop();
 				Variant key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					break;
+				}
 				Variant prop = GetVariable(name);
 				if (!prop.IsCollection())
 				{

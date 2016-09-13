@@ -95,7 +95,7 @@ static const char * s_testScripts[] =
 		d is b - a
 		e is a * b
 		f is b / 1
-		g is 10 mod b
+		g is 10 % b
 
 		-- Multiple operations with and without parentheses
 		h is 1 + 2 * 3     -- h is 9

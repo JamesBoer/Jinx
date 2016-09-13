@@ -30,7 +30,6 @@ static const char * s_opcodeName[] =
 	"equals",
 	"exit",
 	"function",
-	"global",
 	"greater",
 	"greatereq",
 	"increment",

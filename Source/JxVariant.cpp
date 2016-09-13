@@ -527,6 +527,22 @@ ValueType Variant::GetValType() const
 	return ValueType::Null;
 }
 
+bool Variant::IsKeyType() const
+{
+	switch (m_type)
+	{
+	case ValueType::Number:
+	case ValueType::Integer:
+	case ValueType::Boolean:
+	case ValueType::String:
+	case ValueType::Guid:
+		return true;
+	default:
+		break;
+	};
+	return false;
+}
+
 void Variant::SetBuffer(const BufferPtr & value)
 {
 	Destroy();
