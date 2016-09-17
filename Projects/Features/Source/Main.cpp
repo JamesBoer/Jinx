@@ -64,7 +64,14 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 		u8R"(
 
-			write line "test"
+			private counter is 0
+			
+			function return counter is finished
+				increment counter
+				return counter > 10000
+			end
+
+			yield while not counter is finished
 
 		)";
 
@@ -75,6 +82,8 @@ int main(int argc, char ** argv)
 	Jinx::ShutDown();
 
 	auto stats = GetMemoryStats();
+	REQUIRE(stats.currentAllocatedMemory == 0);
+	REQUIRE(stats.currentUsedMemory == 0);
 
 #ifdef _WINDOWS
 	printf("Press any key to continue...");

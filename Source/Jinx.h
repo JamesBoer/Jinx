@@ -80,13 +80,13 @@ namespace Jinx
 	static const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	static const uint32_t MinorVersion = 1;
+	static const uint32_t MinorVersion = 2;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 3;
+	static const uint32_t PatchNumber = 0;
 
 	/// Version string
-	static const char * VersionString = "0.1.3";
+	static const char * VersionString = "0.2.0";
 
 	// Forward declaration
 	class IScript;
@@ -174,7 +174,7 @@ namespace Jinx
 
 		/// Execute the script
 		/**
-		The client is responsible for calling Execute() once per game tick until the
+		The client is responsible for calling Execute() once per simulation tick until the
 		script is finished executing, which is checked with the IsFinished() function.
 		\return true if executed successfully and false if an error has occured.
 		*/
