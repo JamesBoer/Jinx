@@ -384,10 +384,7 @@ bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Varia
 	if (!variant.IsCollection())
 		return false;
 	auto collPtr = variant.GetCollection();
-	if (value.IsNull())
-		collPtr->erase(key);
-	else
-		(*collPtr)[key] = value;
+	(*collPtr)[key] = value;
 	return true;
 }
 

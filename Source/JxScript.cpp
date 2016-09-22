@@ -650,10 +650,7 @@ bool Script::Execute()
 					break;
 				}
 				auto collection = prop.GetCollection();
-				if (val.IsNull())
-					collection->erase(key);
-				else
-					(*collection)[key] = val;
+				(*collection)[key] = val;
 			}
 			break;
 			case Opcode::Subtract:
