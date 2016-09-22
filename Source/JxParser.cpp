@@ -1262,7 +1262,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 						return;
 					}
 					bool subscript = ParseSubscript();
-					EmitOpcode(subscript ? Opcode::PushPropKey : Opcode::PushProp);
+					EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
 					EmitId(propertyName.GetId());
 					operand = true;
 					if (Accept(SymbolType::Type))
@@ -1816,7 +1816,7 @@ void Parser::ParseStatement()
 					Expect(SymbolType::NewLine);
 
 					// Assign property
-					EmitOpcode(subscript ? Opcode::SetPropKey : Opcode::SetProp);
+					EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
 					EmitId(propertyName.GetId());
 				}
 				// Otherwise we're just dealing with an ordinary variable

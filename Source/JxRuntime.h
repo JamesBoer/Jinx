@@ -33,8 +33,10 @@ namespace Jinx
 		void RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset);
 		void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
 		Variant GetProperty(RuntimeID id) const;
+		Variant GetPropertyKeyValue(RuntimeID id, const Variant & key);
 		bool PropertyExists(RuntimeID id) const;
 		void SetProperty(RuntimeID id, const Variant & value);
+		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		void AddScriptExecutionTime(uint64_t timeNs);
 

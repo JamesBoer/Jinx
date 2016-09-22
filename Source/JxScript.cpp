@@ -490,29 +490,13 @@ bool Script::Execute()
 				Push(val);
 			}
 			break;
-			case Opcode::PushPropKey:
+			case Opcode::PushPropKeyVal:
 			{
 				uint64_t id;
 				m_execution.back().reader.Read(&id);
-				auto var = m_runtime->GetProperty(id);
 				auto key = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
+				auto var = m_runtime->GetPropertyKeyValue(id, key);
+				Push(var);
 			}
 			break;
 			case Opcode::PushTop:
@@ -622,7 +606,7 @@ bool Script::Execute()
 				m_runtime->SetProperty(id, val);
 			}
 			break;
-			case Opcode::SetPropKey:
+			case Opcode::SetPropKeyVal:
 			{
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
@@ -633,14 +617,11 @@ bool Script::Execute()
 					Error("Invalid key type");
 					break;
 				}
-				Variant prop = m_runtime->GetProperty(id);
-				if (!prop.IsCollection())
+				if (!m_runtime->SetPropertyKeyValue(id, key, val))
 				{
 					Error("Expected collection when accessing by key");
 					break;
 				}
-				auto collection = prop.GetCollection();
-				(*collection)[key] = val;
 			}
 			break;
 			case Opcode::SetVar:
@@ -669,7 +650,10 @@ bool Script::Execute()
 					break;
 				}
 				auto collection = prop.GetCollection();
-				(*collection)[key] = val;
+				if (val.IsNull())
+					collection->erase(key);
+				else
+					(*collection)[key] = val;
 			}
 			break;
 			case Opcode::Subtract:

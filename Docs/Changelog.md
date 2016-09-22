@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [0.2.1] - 2016-09-21
+### Fixed
+- Improved thread-safety of collection operators
+
 ## [0.2.0] - 2016-09-14
 ### Added
 - yield while {conditional} support
