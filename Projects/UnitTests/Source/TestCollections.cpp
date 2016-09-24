@@ -51,6 +51,34 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(3)->second.GetInteger() == 1);
 	}
 
+
+	SECTION("Test collection addition of elements using assignment")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			-- Create empty collection and add three elements
+			a is []
+			a [1] is 3
+			a [2] is 2
+			a [3] is 1
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 3);
+		REQUIRE(collection->find(1) != collection->end());
+		REQUIRE(collection->find(1)->second.GetInteger() == 3);
+		REQUIRE(collection->find(2) != collection->end());
+		REQUIRE(collection->find(2)->second.GetInteger() == 2);
+		REQUIRE(collection->find(3) != collection->end());
+		REQUIRE(collection->find(3)->second.GetInteger() == 1);
+	}
+
 	SECTION("Test collection initialization list of key-value pairs")
 	{
 		static const char * scriptText =
