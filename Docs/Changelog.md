@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Improved thread-safety of collection operators
 
+### Added
+- Add new test case for collections
+
+### Changed
+- Changed OSX to macOS
+
 ## [0.2.0] - 2016-09-14
 ### Added
 - yield while {conditional} support
