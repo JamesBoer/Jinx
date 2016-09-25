@@ -1262,7 +1262,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 						return;
 					}
 					bool subscript = ParseSubscript();
-					EmitOpcode(subscript ? Opcode::PushPropKey : Opcode::PushProp);
+					EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
 					EmitId(propertyName.GetId());
 					operand = true;
 					if (Accept(SymbolType::Type))
@@ -1816,7 +1816,7 @@ void Parser::ParseStatement()
 					Expect(SymbolType::NewLine);
 
 					// Assign property
-					EmitOpcode(subscript ? Opcode::SetPropKey : Opcode::SetProp);
+					EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
 					EmitId(propertyName.GetId());
 				}
 				// Otherwise we're just dealing with an ordinary variable
@@ -1899,9 +1899,35 @@ void Parser::ParseStatement()
 			}
 			else if (Accept(SymbolType::Yield))
 			{
-				// It's a yield statement
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::Yield);
+				// Check for basic yield statement
+				if (Accept(SymbolType::NewLine))
+					EmitOpcode(Opcode::Yield);
+				else if (Accept(SymbolType::While))
+				{
+					// Store expression address
+					auto expressionAddress = m_writer.Tell();
+
+					// Parse the expression to check for yield
+					ParseExpression();
+					if (!Expect(SymbolType::NewLine))
+						return;
+
+					// Add jump if false over yield statement
+					EmitOpcode(Opcode::JumpFalse);
+					auto addressPlaceholder = EmitAddressPlaceholder();
+
+					// Yield statement is executed if expression is true
+					EmitOpcode(Opcode::Yield);
+					EmitOpcode(Opcode::Jump);
+					EmitAddress(expressionAddress);
+
+					// Backfill placeholder at end of conditional yield statement
+					EmitAddressBackfill(addressPlaceholder);
+				}
+				else
+				{
+					Error("Unexpected symbol after yield");
+				}
 			}
 			else
 			{

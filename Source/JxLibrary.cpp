@@ -186,7 +186,7 @@ bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & n
 
 	// Register the property name with the library
 	PropertyName prop(readOnly, publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), name);
-	if (!RegisterPropertyName(prop, false))
+	if (!RegisterPropertyNameInternal(prop, false))
 		return false;
 
 	// Set the property with the runtime value
@@ -202,10 +202,15 @@ bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & n
 bool Library::RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates)
 {
 	std::lock_guard<Mutex> lock(m_propertyMutex);
-	if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
-		return false;
-	m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
-	return true;
+    return RegisterPropertyNameInternal(propertyName, checkForDuplicates);
+}
+
+bool Library::RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates)
+{
+    if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
+        return false;
+    m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
+    return true;
 }
 
 void Library::SetProperty(const String & name, const Variant & value)

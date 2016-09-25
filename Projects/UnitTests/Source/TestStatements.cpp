@@ -291,4 +291,50 @@ TEST_CASE("Test Statements", "[Statements]")
 	}
 
 
+	SECTION("Test yield statement")
+	{
+		const char * scriptText =
+			u8R"(
+    
+			private counter is 0
+			
+			function return counter is finished
+				increment counter
+				return counter >= 10
+			end
+
+			loop while not counter is finished
+				yield
+			end
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
+	}
+
+	SECTION("Test yield while statement")
+	{
+		const char * scriptText =
+			u8R"(
+    
+			private counter is 0
+			
+			function return counter is finished
+				increment counter
+				return counter >= 10
+			end
+
+			yield while not counter is finished
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
+	}
+
 }

@@ -21,6 +21,7 @@ TEST_CASE("Test Unicode", "[Unicode]")
 			いろは is "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
 			Üben is "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
 			Да is "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
+			i18n is "Iñtërnâtiônàlizætiøn☃💩"
 
 			)";
 
@@ -30,6 +31,7 @@ TEST_CASE("Test Unicode", "[Unicode]")
 		REQUIRE(script->GetVariable(u8"いろは").GetString() == u8"いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす");
 		REQUIRE(script->GetVariable(u8"Üben").GetString() == u8"Falsches Üben von Xylophonmusik quält jeden größeren Zwerg");
 		REQUIRE(script->GetVariable(u8"Да").GetString() == u8"В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!");
+		REQUIRE(script->GetVariable(u8"i18n").GetString() == u8"Iñtërnâtiônàlizætiøn☃💩");
 	}
 
 	SECTION("Test variant string Unicode conversion #1")

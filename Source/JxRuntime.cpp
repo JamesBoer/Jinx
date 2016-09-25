@@ -139,6 +139,22 @@ Variant Runtime::GetProperty(RuntimeID id) const
 	return itr->second;
 }
 
+Variant Runtime::GetPropertyKeyValue(RuntimeID id, const Variant & key)
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	auto itr = m_propertyMap.find(id);
+	if (itr == m_propertyMap.end())
+		return Variant();
+	auto & var = itr->second;
+	if (!var.IsCollection())
+		return Variant();
+	auto collPtr = var.GetCollection();
+	auto vitr = collPtr->find(key);
+	if (vitr == collPtr->end())
+		return Variant();
+	return vitr->second;
+}
+
 LibraryPtr Runtime::GetLibrary(const String & name)
 {
 	std::lock_guard<Mutex> lock(m_libraryMutex);
@@ -191,9 +207,9 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 		{
 			case Opcode::CallFunc:
 			case Opcode::PushProp:
-			case Opcode::PushPropKey:
+			case Opcode::PushPropKeyVal:
 			case Opcode::SetProp:
-			case Opcode::SetPropKey:
+			case Opcode::SetPropKeyVal:
 			{
 				RuntimeID id;
 				reader.Read(&id);
@@ -356,6 +372,20 @@ void Runtime::SetProperty(RuntimeID id, const Variant & value)
 {
 	std::lock_guard<Mutex> lock(m_propertyMutex);
 	m_propertyMap[id] = value;
+}
+
+bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value)
+{
+	std::lock_guard<Mutex> lock(m_propertyMutex);
+	auto itr = m_propertyMap.find(id);
+	if (itr == m_propertyMap.end())
+		return false;
+	auto & variant = itr->second;
+	if (!variant.IsCollection())
+		return false;
+	auto collPtr = variant.GetCollection();
+	(*collPtr)[key] = value;
+	return true;
 }
 
 RuntimePtr Jinx::CreateRuntime()

@@ -2,6 +2,26 @@
 All notable changes to this project will be documented in this file.
 
 
+
+## [0.2.1] - 2016-09-21
+### Fixed
+- Improved thread-safety of collection operators
+
+### Added
+- Add new test case for collections
+
+### Changed
+- Changed OSX to macOS
+
+## [0.2.0] - 2016-09-14
+### Added
+- yield while {conditional} support
+- Documentation for yield while conditional
+- Test cases for yield
+
+### Fixed
+- Minor documentation errors
+
 ## [0.1.3] - 2016-09-04
 ### Added
 - Default library import API

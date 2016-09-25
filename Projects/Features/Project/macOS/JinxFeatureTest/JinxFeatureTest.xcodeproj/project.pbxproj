@@ -7,14 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA23487A1D6163AB00395F2C /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AAEB8C931D61633700AFBF08 /* libJinx.a */; };
-		AAEB8C8D1D61632200AFBF08 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AAEB8C8C1D61632200AFBF08 /* Main.cpp */; };
+		AA62D3F01D96FA2100F263BB /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA62D3EF1D96FA1900F263BB /* libJinx.a */; };
+		AA7D1C951D4D23B600A5AAF3 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C941D4D23B600A5AAF3 /* Main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		AAEB8C921D61633700AFBF08 /* PBXContainerItemProxy */ = {
+		AA62D3EE1D96FA1900F263BB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */;
+			containerPortal = AA62D3EA1D96FA1900F263BB /* Jinx.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = AA93A26B1CE2CE5900104611;
 			remoteInfo = Jinx;
@@ -22,7 +22,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		AA0BC2D11D615C3500F7F01B /* CopyFiles */ = {
+		AA81E1F91CE2D62B00123CA5 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -34,52 +34,52 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		AA0BC2D31D615C3500F7F01B /* FuzzTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FuzzTests; sourceTree = BUILT_PRODUCTS_DIR; };
-		AAEB8C8C1D61632200AFBF08 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../../Source/Main.cpp; sourceTree = "<group>"; };
-		AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Jinx/OSX/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
+		AA62D3EA1D96FA1900F263BB /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Jinx/macOS/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
+		AA7D1C941D4D23B600A5AAF3 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../../Source/Main.cpp; sourceTree = "<group>"; };
+		AA81E1FB1CE2D62B00123CA5 /* JinxFeatureTest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = JinxFeatureTest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		AA0BC2D01D615C3500F7F01B /* Frameworks */ = {
+		AA81E1F81CE2D62B00123CA5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA23487A1D6163AB00395F2C /* libJinx.a in Frameworks */,
+				AA62D3F01D96FA2100F263BB /* libJinx.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		AA0BC2CA1D615C3500F7F01B = {
+		AA62D3EB1D96FA1900F263BB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */,
-				AA0BC2D51D615C3500F7F01B /* FuzzTests */,
-				AA0BC2D41D615C3500F7F01B /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		AA0BC2D41D615C3500F7F01B /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				AA0BC2D31D615C3500F7F01B /* FuzzTests */,
+				AA62D3EF1D96FA1900F263BB /* libJinx.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AA0BC2D51D615C3500F7F01B /* FuzzTests */ = {
+		AA7D1C931D4D236200A5AAF3 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				AAEB8C8C1D61632200AFBF08 /* Main.cpp */,
+				AA7D1C941D4D23B600A5AAF3 /* Main.cpp */,
 			);
-			path = FuzzTests;
+			name = Source;
 			sourceTree = "<group>";
 		};
-		AAEB8C8F1D61633700AFBF08 /* Products */ = {
+		AA81E1F21CE2D62B00123CA5 = {
 			isa = PBXGroup;
 			children = (
-				AAEB8C931D61633700AFBF08 /* libJinx.a */,
+				AA62D3EA1D96FA1900F263BB /* Jinx.xcodeproj */,
+				AA7D1C931D4D236200A5AAF3 /* Source */,
+				AA81E1FC1CE2D62B00123CA5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA81E1FC1CE2D62B00123CA5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA81E1FB1CE2D62B00123CA5 /* JinxFeatureTest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -87,83 +87,83 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AA0BC2D21D615C3500F7F01B /* FuzzTests */ = {
+		AA81E1FA1CE2D62B00123CA5 /* JinxFeatureTest */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AA0BC2DA1D615C3500F7F01B /* Build configuration list for PBXNativeTarget "FuzzTests" */;
+			buildConfigurationList = AA81E2021CE2D62B00123CA5 /* Build configuration list for PBXNativeTarget "JinxFeatureTest" */;
 			buildPhases = (
-				AA0BC2CF1D615C3500F7F01B /* Sources */,
-				AA0BC2D01D615C3500F7F01B /* Frameworks */,
-				AA0BC2D11D615C3500F7F01B /* CopyFiles */,
+				AA81E1F71CE2D62B00123CA5 /* Sources */,
+				AA81E1F81CE2D62B00123CA5 /* Frameworks */,
+				AA81E1F91CE2D62B00123CA5 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = FuzzTests;
-			productName = FuzzTests;
-			productReference = AA0BC2D31D615C3500F7F01B /* FuzzTests */;
+			name = JinxFeatureTest;
+			productName = JinxFeatureTest;
+			productReference = AA81E1FB1CE2D62B00123CA5 /* JinxFeatureTest */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		AA0BC2CB1D615C3500F7F01B /* Project object */ = {
+		AA81E1F31CE2D62B00123CA5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "James Boer";
 				TargetAttributes = {
-					AA0BC2D21D615C3500F7F01B = {
+					AA81E1FA1CE2D62B00123CA5 = {
 						CreatedOnToolsVersion = 7.3.1;
 					};
 				};
 			};
-			buildConfigurationList = AA0BC2CE1D615C3500F7F01B /* Build configuration list for PBXProject "FuzzTests" */;
+			buildConfigurationList = AA81E1F61CE2D62B00123CA5 /* Build configuration list for PBXProject "JinxFeatureTest" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = AA0BC2CA1D615C3500F7F01B;
-			productRefGroup = AA0BC2D41D615C3500F7F01B /* Products */;
+			mainGroup = AA81E1F21CE2D62B00123CA5;
+			productRefGroup = AA81E1FC1CE2D62B00123CA5 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = AAEB8C8F1D61633700AFBF08 /* Products */;
-					ProjectRef = AAEB8C8E1D61633700AFBF08 /* Jinx.xcodeproj */;
+					ProductGroup = AA62D3EB1D96FA1900F263BB /* Products */;
+					ProjectRef = AA62D3EA1D96FA1900F263BB /* Jinx.xcodeproj */;
 				},
 			);
 			projectRoot = "";
 			targets = (
-				AA0BC2D21D615C3500F7F01B /* FuzzTests */,
+				AA81E1FA1CE2D62B00123CA5 /* JinxFeatureTest */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		AAEB8C931D61633700AFBF08 /* libJinx.a */ = {
+		AA62D3EF1D96FA1900F263BB /* libJinx.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libJinx.a;
-			remoteRef = AAEB8C921D61633700AFBF08 /* PBXContainerItemProxy */;
+			remoteRef = AA62D3EE1D96FA1900F263BB /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AA0BC2CF1D615C3500F7F01B /* Sources */ = {
+		AA81E1F71CE2D62B00123CA5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AAEB8C8D1D61632200AFBF08 /* Main.cpp in Sources */,
+				AA7D1C951D4D23B600A5AAF3 /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		AA0BC2D81D615C3500F7F01B /* Debug */ = {
+		AA81E2001CE2D62B00123CA5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -177,8 +177,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -207,7 +209,7 @@
 			};
 			name = Debug;
 		};
-		AA0BC2D91D615C3500F7F01B /* Release */ = {
+		AA81E2011CE2D62B00123CA5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -221,8 +223,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
@@ -244,14 +248,14 @@
 			};
 			name = Release;
 		};
-		AA0BC2DB1D615C3500F7F01B /* Debug */ = {
+		AA81E2031CE2D62B00123CA5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		AA0BC2DC1D615C3500F7F01B /* Release */ = {
+		AA81E2041CE2D62B00123CA5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -261,25 +265,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AA0BC2CE1D615C3500F7F01B /* Build configuration list for PBXProject "FuzzTests" */ = {
+		AA81E1F61CE2D62B00123CA5 /* Build configuration list for PBXProject "JinxFeatureTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA0BC2D81D615C3500F7F01B /* Debug */,
-				AA0BC2D91D615C3500F7F01B /* Release */,
+				AA81E2001CE2D62B00123CA5 /* Debug */,
+				AA81E2011CE2D62B00123CA5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AA0BC2DA1D615C3500F7F01B /* Build configuration list for PBXNativeTarget "FuzzTests" */ = {
+		AA81E2021CE2D62B00123CA5 /* Build configuration list for PBXNativeTarget "JinxFeatureTest" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				AA0BC2DB1D615C3500F7F01B /* Debug */,
-				AA0BC2DC1D615C3500F7F01B /* Release */,
+				AA81E2031CE2D62B00123CA5 /* Debug */,
+				AA81E2041CE2D62B00123CA5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = AA0BC2CB1D615C3500F7F01B /* Project object */;
+	rootObject = AA81E1F31CE2D62B00123CA5 /* Project object */;
 }
