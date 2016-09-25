@@ -69,7 +69,7 @@ by James Boer, and distributed under the MIT license.
 
 #ifdef __APPLE__
 #ifdef __MACH__
-#define JINX_OSX
+#define JINX_MACOS
 #endif
 #endif
 

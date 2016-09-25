@@ -33,9 +33,10 @@ namespace Jinx
 		PropertyName GetPropertyName(const String & name);
 
 	private:
-
+        
 		// Private internal functions
 		FunctionSignature CreateFunctionSignature(bool publicScope, bool returnValue, std::initializer_list<String> name) const;
+        bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
 		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<String, PropertyName>>> PropertyNameTable;
 
