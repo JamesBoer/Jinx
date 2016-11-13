@@ -53,6 +53,10 @@ namespace Jinx
 	bool StringToNumber(const String & value, double * outValue);
 	bool StringToInteger(const String & value, int64_t * outValue);
 	bool StringToValueType(const String & value, ValueType * outValue);
+	bool StringToGuid(const String & value, Guid * outValue);
+
+	// GUID conversions
+	String GuidToString(const Guid & value);
 };
 
 #endif // JX_CONVERSION_H__

@@ -31,6 +31,7 @@ namespace Jinx
 		bool RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates);
 		bool PropertyNameExists(const String & name) const;
 		PropertyName GetPropertyName(const String & name);
+		size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
 
 	private:
         
@@ -49,6 +50,7 @@ namespace Jinx
 		// Properties
 		mutable Mutex m_propertyMutex;
 		PropertyNameTable m_propertyNameTable;
+		size_t m_maxPropertyParts;
 
 		// Weak ptr to runtime system
 		RuntimeWPtr m_runtime;

@@ -181,16 +181,30 @@ Variant & Variant::operator -= (const Variant & right)
 	return *this;
 }
 
+bool Variant::CanConvertTo(ValueType type) const
+{
+	if (m_type == type || type == ValueType::Null)
+		return true;
+	Variant v = *this;
+	return v.ConvertTo(type);
+}
+
 bool Variant::ConvertTo(ValueType type)
 {
+	if (m_type == type)
+		return true;
+	if (type == ValueType::Null)
+	{
+		SetNull();
+		return true;
+	}
+
 	switch (m_type)
 	{
 	case ValueType::Null:
 		{
 			switch (type)
 			{
-			case ValueType::Null:
-				return true;
 			case ValueType::Number:
 				SetNumber(NullToNumber());
 				return true;
@@ -212,11 +226,6 @@ bool Variant::ConvertTo(ValueType type)
 	{
 		switch (type)
 		{
-		case ValueType::Null:
-			SetNull();
-			return true;
-		case ValueType::Number:
-			return true;
 		case ValueType::Integer:
 			SetInteger(NumberToInteger(m_number));
 			return true;
@@ -235,13 +244,8 @@ bool Variant::ConvertTo(ValueType type)
 	{
 		switch (type)
 		{
-		case ValueType::Null:
-			SetNull();
-			return true;
 		case ValueType::Number:
 			SetNumber(IntegerToNumber(m_integer));
-			return true;
-		case ValueType::Integer:
 			return true;
 		case ValueType::Boolean:
 			SetBoolean(IntegerToBoolean(m_integer));
@@ -258,16 +262,11 @@ bool Variant::ConvertTo(ValueType type)
 	{
 		switch (type)
 		{
-		case ValueType::Null:
-			SetNull();
-			return true;
 		case ValueType::Number:
 			SetNumber(BooleanToNumber(m_boolean));
 			return true;
 		case ValueType::Integer:
 			SetInteger(BooleanToInteger(m_boolean));
-			return true;
-		case ValueType::Boolean:
 			return true;
 		case ValueType::String:
 			SetString(BooleanToString(m_boolean));
@@ -281,9 +280,6 @@ bool Variant::ConvertTo(ValueType type)
 	{
 		switch (type)
 		{
-		case ValueType::Null:
-			SetNull();
-			return true;
 		case ValueType::Number:
 		{
 			double number;
@@ -317,24 +313,56 @@ bool Variant::ConvertTo(ValueType type)
 			SetBoolean(boolean);
 			return true;
 		}
-		case ValueType::String:
+		case ValueType::Guid:
+		{
+			Guid guid;
+			if (!StringToGuid(m_string, &guid))
+			{
+				LogWriteLine("Error converting string %s to Guid", m_string.c_str());
+				return false;
+			}
+			SetGuid(guid);
 			return true;
+		}
+		case ValueType::ValType:
+		{
+			ValueType valType;
+			if (!StringToValueType(m_string, &valType))
+			{
+				LogWriteLine("Error converting string %s to value type", m_string.c_str());
+				return false;
+			}
+			SetValType(valType);
+			return true;
+		}
 		default:
 			break;
 		};
 	}
 	break;
 	case ValueType::Collection:
-		break;
-	case ValueType::CollectionItr:
-		break;
-	case ValueType::UserObject:
-		break;
-	case ValueType::Buffer:
+		switch (type)
+		{
+		case ValueType::Boolean:
+			SetBoolean(!m_collection->empty());
+			return true;
+		};
 		break;
 	case ValueType::Guid:
+		switch (type)
+		{
+		case ValueType::String:
+			SetString(GuidToString(m_guid));
+			return true;
+		};
 		break;
 	case ValueType::ValType:
+		switch (type)
+		{
+		case ValueType::String:
+			SetString(GetValueTypeName(m_valType));
+			return true;
+		};
 		break;
 	default:
 		break;
@@ -370,144 +398,92 @@ void Variant::Destroy()
 
 bool Variant::GetBoolean() const
 {
-	switch (m_type)
-	{
-	case ValueType::Null:
-		return false;
-	case ValueType::Number:
-		return m_number != 0.0;
-	case ValueType::Integer:
-		return m_integer != 0;
-	case ValueType::Boolean:
+	if (IsBoolean())
 		return m_boolean;
-	case ValueType::String:
-		return m_string.length() != 0;
-	case ValueType::Collection:
-		return !m_collection->empty();
-	case ValueType::CollectionItr:
-		break;
-	default:
-		break;
-	};
-	return false;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::Boolean))
+		return false;
+	return v.GetBoolean();
 }
 
 CollectionPtr Variant::GetCollection() const
 {
-	switch (m_type)
-	{
-	case ValueType::Collection:
+	if (IsCollection())
 		return m_collection;
-	default:
-		break;
-	};
-	return nullptr;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::Collection))
+		return nullptr;
+	return v.GetCollection();
 }
 
 CollectionItr Variant::GetCollectionItr() const
 {
-	switch (m_type)
-	{
-	case ValueType::CollectionItr:
+	if (IsCollectionItr())
 		return m_collectionItr;
-	default:
-		break;
-	};
-	return CollectionItr();
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::CollectionItr))
+		return CollectionItr();
+	return v.GetCollectionItr();
 }
 
 UserObjectPtr Variant::GetUserObject() const
 {
-	if (m_type == ValueType::UserObject)
+	if (IsUserObject())
 		return m_userObject;
-	return nullptr;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::UserObject))
+		return nullptr;
+	return v.GetUserObject();
 }
 
 BufferPtr Variant::GetBuffer() const
 {
-	if (m_type == ValueType::Buffer)
+	if (IsBuffer())
 		return m_buffer;
-	return nullptr;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::Buffer))
+		return nullptr;
+	return v.GetBuffer();
 }
 
 Guid Variant::GetGuid() const
 {
-	switch (m_type)
-	{
-	case ValueType::Guid:
+	if (IsGuid())
 		return m_guid;
-	default:
-		break;
-	};
-	return NullGuid;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::Guid))
+		return NullGuid;
+	return v.GetGuid();
 }
 
 int64_t Variant::GetInteger() const
 {
-	switch (m_type)
-	{
-	case ValueType::Number:
-		return static_cast<int64_t>(m_number);
-	case ValueType::Integer:
+	if (IsInteger())
 		return m_integer;
-	case ValueType::Boolean:
-		return m_boolean ? 1 : 0;
-	case ValueType::String:
-	{
-		int64_t integer;
-		if (!StringToInteger(m_string, &integer))
-			return 0;
-		return integer;
-	}
-	default:
-		break;
-	};
-	return 0;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::Integer))
+		return 0;
+	return v.GetInteger();
 }
 
 double Variant::GetNumber() const
 {
-	switch (m_type)
-	{
-	case ValueType::Number:
+	if (IsNumber())
 		return m_number;
-	case ValueType::Integer:
-		return static_cast<double>(m_integer);
-	case ValueType::Boolean:
-		return m_boolean ? 1.0 : 0.0;
-	case ValueType::String:
-	{
-		double number;
-		if (!StringToNumber(m_string, &number))
-			return 0.0;
-		return number;
-	}
-	default:
-		break;
-	};
-	return 0.0;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::Number))
+		return 0.0;
+	return v.GetNumber();
 }
 
 String Variant::GetString() const
 {
-	switch (m_type)
-	{
-	case ValueType::Null:
-		return NullToString();
-	case ValueType::Number:
-		return NumberToString(m_number);
-	case ValueType::Integer:
-		return IntegerToString(m_integer);
-	case ValueType::Boolean:
-		return BooleanToString(m_boolean);
-	case ValueType::String:
+	if (IsString())
 		return m_string;
-	case ValueType::ValType:
-		return GetValueTypeName(m_valType);
-	default:
-		break;
-	};
-	return String();
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::String))
+		return String();
+	return v.GetString();
 }
 
 StringU16 Variant::GetStringU16() const
@@ -517,14 +493,12 @@ StringU16 Variant::GetStringU16() const
 
 ValueType Variant::GetValType() const
 {
-	switch (m_type)
-	{
-	case ValueType::ValType:
+	if (IsValType())
 		return m_valType;
-	default:
-		break;
-	};
-	return ValueType::Null;
+	Variant v = *this;
+	if (!v.ConvertTo(ValueType::ValType))
+		return ValueType::Null;
+	return v.GetValType();
 }
 
 bool Variant::IsKeyType() const

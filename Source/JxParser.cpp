@@ -27,9 +27,6 @@ Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String 
 
 bool Parser::Execute()
 {
-	m_variableFrame.clear();
-	m_variableFrame.push_back(VariableStack());
-	m_variableFrame.back().push_back(VariableSet());
 
 	// Reserve 1K space
 	m_bytecode->Reserve(1024);
@@ -47,103 +44,38 @@ bool Parser::Execute()
 
 void Parser::VariableAssign(const String & name)
 {
-	// Sanity check
-	if (m_variableFrame.empty())
-	{
-		Error("Unexpected empty variable frame");
-		return;
-	}
-
-	// Retrieve the current variable stack
-	VariableStack & variableStack = m_variableFrame.back();
-	if (variableStack.empty())
-	{
-		Error("Attempting to assign a variable to an empty stack");
-		return;
-	}
-
-	// Work from the top of the stack down, and attempt to find an existing name
-	for (auto ritr = variableStack.rbegin(); ritr != variableStack.rend(); ++ritr)
-	{
-		const auto & itr = ritr->find(name);
-		if (itr != ritr->end())
-			return;
-	}
-
-	// If we don't find the name, create a new variable on the top of the stack
-	auto & map = variableStack.back();
-	map.insert(name);
+	if (!m_variableStackFrame.VariableAssign(name))
+		Error("%s", m_variableStackFrame.GetErrorMessage());
 }
 
 bool Parser::VariableExists(const String & name) const
 {
-	// Sanity check
-	if (m_variableFrame.empty())
-		return false;
-
-	const VariableStack & variableStack = m_variableFrame.back();
-	for (auto ritr = variableStack.rbegin(); ritr != variableStack.rend(); ++ritr)
-	{
-		auto itr = ritr->find(name);
-		if (itr != ritr->end())
-			return true;
-	}
-	return false;
+	return m_variableStackFrame.VariableExists(name);
 }
 
 void Parser::FrameBegin()
 {
-	m_variableFrame.push_back(VariableStack());
-	m_variableFrame.back().push_back(VariableSet());
+	m_variableStackFrame.FrameBegin();
 }
 
 void Parser::FrameEnd()
 {
-	if (m_variableFrame.empty())
-	{
-		Error("Attempted to pop empty variable frame");
-		return;
-	}
-	m_variableFrame.pop_back();
+	if (!m_variableStackFrame.FrameEnd())
+		Error("%", m_variableStackFrame.GetErrorMessage());
 }
 
 void Parser::ScopeBegin()
 {
-	if (m_variableFrame.empty())
-	{
-		Error("Unexpected empty variable frame");
-		return;
-	}
-	VariableStack & variableStack = m_variableFrame.back();
-	variableStack.push_back(VariableSet());
+	if (!m_variableStackFrame.ScopeBegin())
+		Error("%s", m_variableStackFrame.GetErrorMessage());
 	EmitOpcode(Opcode::ScopeBegin);
 }
 
 void Parser::ScopeEnd()
 {
-	if (m_variableFrame.empty())
-	{
-		Error("Unexpected empty variable frame");
-		return;
-	}
-	VariableStack & variableStack = m_variableFrame.back();
-	if (variableStack.empty())
-	{
-		LogWriteLine("Attempted to pop empty variable stack");
-		return;
-	}
-	variableStack.pop_back();
+	if (!m_variableStackFrame.ScopeEnd())
+		Error("%s", m_variableStackFrame.GetErrorMessage());
 	EmitOpcode(Opcode::ScopeEnd);
-}
-
-bool Parser::IsRootScope() const
-{
-	return (m_variableFrame.back().size() == 1) ? true : false;
-}
-
-bool Parser::IsRootFrame() const
-{
-	return (m_variableFrame.size() == 1) ? true : false;
 }
 
 bool Parser::IsSymbolValid(SymbolListCItr symbol) const
@@ -416,21 +348,37 @@ const FunctionSignature * Parser::CheckFunctionCall() const
 		{
 			String name = currentSymbol->text;
 			FunctionSignaturePart part;
-			if (IsLibraryName(name))
+			size_t partSize = 0;
+			if (CheckVariable(currentSymbol, &partSize))
 			{
-				String libName = name;
-				++currentSymbol;
-				if (!IsSymbolValid(currentSymbol))
-					return nullptr;
-				name = currentSymbol->text;
-				if (!IsPropertyName(libName, name))
-					return nullptr;
-				part.partType = FunctionSignaturePartType::Name;
+				// Advance if more than one symbol used for variable
+				for (size_t i = 1; i < partSize; ++i)
+				{
+					++currentSymbol;
+					name += " ";
+					name += currentSymbol->text;
+				}
+				part.partType = FunctionSignaturePartType::Parameter;
 			}
-			else if (IsPropertyName("", name))
+			else if (CheckProperty(currentSymbol, &partSize))
+			{
+				if (IsLibraryName(name))
+				{
+					String libName = name;
+					++currentSymbol;
+					if (!IsSymbolValid(currentSymbol))
+						return nullptr;
+				}
+				// Advance if more than one symbol used for variable
+				for (size_t i = 1; i < partSize; ++i)
+				{
+					++currentSymbol;
+					name += " ";
+					name += currentSymbol->text;
+				}
 				part.partType = FunctionSignaturePartType::Parameter;
-			else if (VariableExists(name))
-				part.partType = FunctionSignaturePartType::Parameter;
+
+			}
 			else
 				part.partType = FunctionSignaturePartType::Name;
 			part.names.push_back(name);
@@ -554,21 +502,52 @@ const FunctionSignature * Parser::CheckFunctionCall() const
 	return functionSignature;
 }
 
-bool Parser::CheckVariable() const
+bool Parser::CheckVariable(SymbolListCItr currSym, size_t * symCount) const
 {
-	if (m_error || m_currentSymbol == m_symbolList.end())
+	if (m_error || currSym == m_symbolList.end())
 		return false;
-	if (m_currentSymbol->type != SymbolType::NameValue)
+	if (currSym->type != SymbolType::NameValue)
 		return false;
-	return VariableExists(m_currentSymbol->text);
+
+	// Check up to the max number of parts
+	auto maxParts = m_variableStackFrame.GetMaxVariableParts();
+	for (size_t s = maxParts; s > 0; --s)
+	{
+		auto curr = currSym;
+		String name = curr->text;
+		size_t sc = 1;
+		for (size_t i = 1; i < s; ++i)
+		{
+			++curr;
+			if (!IsSymbolValid(curr) || curr->text.empty())
+				continue;
+			name += " ";
+			name += curr->text;
+			++sc;
+		}
+		bool exists = VariableExists(name);
+		if (exists)
+		{
+			if (symCount)
+				*symCount = sc;
+			return true;
+		}
+	}
+	return false;
+
 }
 
-bool Parser::CheckProperty() const
+bool Parser::CheckVariable() const
+{
+	return CheckVariable(m_currentSymbol);
+}
+
+bool Parser::CheckProperty(SymbolListCItr currSym, size_t * symCount) const
 {
 	// Check symbol validity
-	if (m_error || m_currentSymbol == m_symbolList.end())
+	if (m_error || currSym == m_symbolList.end())
 		return false;
-	if (m_currentSymbol->type != SymbolType::NameValue)
+	if (currSym->type != SymbolType::NameValue)
 		return false;
 
 	// Check to see if this begins with a library name
@@ -576,7 +555,7 @@ bool Parser::CheckProperty() const
 	if (!libraryName.empty())
 	{
 		// Get next symbol and check validity
-		auto currentSymbol = m_currentSymbol;
+		auto currentSymbol = currSym;
 		++currentSymbol;
 		if (currentSymbol == m_symbolList.end())
 			return false;
@@ -586,20 +565,63 @@ bool Parser::CheckProperty() const
 		// Check for property name in this specific library
 		auto library = m_runtime->GetLibraryInternal(libraryName);
 		assert(library);
-		return library->PropertyNameExists(currentSymbol->text);
+		return CheckPropertyName(library, currentSymbol, symCount);
 	}
 
 	// Check for property name in the current library
 	assert(m_library);
-	if (m_library->PropertyNameExists(m_currentSymbol->text))
+	if (CheckPropertyName(m_library, currSym, symCount))
 		return true;
 
 	// Check against all imported libraries
 	for (auto & importName : m_importList)
 	{
 		auto library = m_runtime->GetLibraryInternal(importName);
-		if (library->PropertyNameExists(m_currentSymbol->text))
+		if (library != m_library && CheckPropertyName(library, currSym, symCount))
 			return true;
+	}
+	return false;
+}
+
+bool Parser::CheckProperty(size_t * symCount) const
+{
+	return CheckProperty(m_currentSymbol, symCount);
+}
+
+bool Parser::CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const
+{
+	// Internal function called once we've established a library to check
+	// Check up to the max number of parts
+
+	// Initial error checks
+	if (m_error || currSym == m_symbolList.end())
+		return false;
+	if (currSym->type != SymbolType::NameValue)
+		return false;
+
+	// Check for names starting with max property count
+	auto maxParts = library->GetMaxPropertyParts();
+	for (size_t s = maxParts; s > 0; --s)
+	{
+		auto curr = currSym;
+		String name = curr->text;
+		size_t sc = 1;
+		for (size_t i = 1; i < s; ++i)
+		{
+			++curr;
+			if (!IsSymbolValid(curr) || curr->text.empty())
+				continue;
+			name += " ";
+			name += curr->text;
+			++sc;
+		}
+		bool exists = library->PropertyNameExists(name);
+		if (exists)
+		{
+			if (symCount)
+				*symCount = sc;
+			return true;
+		}
 	}
 	return false;
 }
@@ -776,9 +798,36 @@ String Parser::ParseVariable()
 		Error("Unexpected symbol type when parsing variable");
 		return String();
 	}
-	String s = m_currentSymbol->text;
-	NextSymbol();
-	return s;
+
+	// Check up to the max number of parts until we find a variable match
+	auto maxParts = m_variableStackFrame.GetMaxVariableParts();
+	for (size_t s = maxParts; s > 0; --s)
+	{
+		auto curr = m_currentSymbol;
+		String name = curr->text;
+		size_t symbolCount = 1;
+		for (size_t i = 1; i < s; ++i)
+		{
+			++curr;
+			if (!IsSymbolValid(curr) || curr->text.empty())
+				continue;
+			name += " ";
+			name += curr->text;
+			++symbolCount;
+		}
+		bool exists = VariableExists(name);
+		if (exists)
+		{
+			// Now that we know the longest variable count that matches, advance this number of symbols
+			for (size_t i = 0; i < symbolCount; ++i)
+				NextSymbol();
+
+			// Return the variable name
+			return name;
+		}
+	}
+	Error("Could not parse variable name");
+	return String();
 }
 
 bool Parser::ParseSubscript()
@@ -807,12 +856,25 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 		return;
 	}
 
-	// Make sure the property doesn't already exist
-	if (CheckProperty())
+	// Check if first keyword matches a library name
+	for (auto libName : m_importList)
 	{
-		Error("Property is already defined");
-		return;
+		if (libName == m_currentSymbol->text)
+		{
+			Error("Property name cannot start with an import library name");
+			return;
+		}
 	}
+
+
+
+
+	// Make sure the property doesn't already exist
+	//if (CheckProperty())
+	//{
+	//	Error("Property is already defined");
+	//	return;
+	//}
 
 	// Find out which library this property belongs to
 	auto propertyLibrary = m_library;
@@ -829,7 +891,20 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 		Error("Property name expected");
 		return;
 	}
+
+	// Search for multi-part property names
 	auto name = ParseName();
+	while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::Is) && !m_currentSymbol->text.empty())
+	{
+		name += " ";
+		name += ParseName();
+	}
+
+	if (m_library->PropertyNameExists(name))
+	{
+		Error("Property is already defined");
+		return;
+	}
 
 	// Create a PropertyName object for registration
 	PropertyName propertyName(readOnly, scope, propertyLibrary->GetName(), name);
@@ -858,7 +933,6 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 		return;
 	}
 	Expect(SymbolType::NewLine);
-
 }
 
 PropertyName Parser::ParsePropertyName()
@@ -871,8 +945,7 @@ PropertyName Parser::ParsePropertyName()
 	{
 		libraryName = ParseName();
 		library = m_runtime->GetLibraryInternal(libraryName);
-		auto name = ParseName();
-		propertyName = library->GetPropertyName(name);
+		propertyName = ParsePropertyNameParts(library);
 		if (!propertyName.IsValid())
 		{
 			Error("Could not find property name");
@@ -888,8 +961,8 @@ PropertyName Parser::ParsePropertyName()
 	// No library name, so we have to search for the best match
 	else
 	{
-		auto name = ParseName();
-		propertyName = m_library->GetPropertyName(name);
+		// Check default library for property first
+		propertyName = ParsePropertyNameParts(m_library);
 
 		// Check import names if we can't find the property name locally.
 		if (!propertyName.IsValid())
@@ -897,14 +970,23 @@ PropertyName Parser::ParsePropertyName()
 			bool foundProperty = false;
 			for (const auto & import : m_importList)
 			{
+				// Get import library by name
 				library = m_runtime->GetLibraryInternal(import);
-				propertyName = library->GetPropertyName(name);
+
+				// Don't bother checking the default library again
+				if (library == m_library)
+					continue;
+
+				// Attempt to find valid import library name
+				propertyName = ParsePropertyNameParts(library);
 				if (propertyName.IsValid())
 				{
 					// If we haven't specified the library name explicitly, we can assume we're looking
 					// for a different library.
 					if (m_library->GetName() != libraryName && propertyName.GetVisibility() != VisibilityType::Public)
 						continue;
+
+					// Check for multiple found property names, which indicates this name is ambiguous
 					if (foundProperty)
 					{
 						Error("Ambiguous property name found");
@@ -913,6 +995,8 @@ PropertyName Parser::ParsePropertyName()
 					foundProperty = true;
 				}
 			}
+
+			// Check for invalid scope
 			if (propertyName.IsValid() && library != m_library && propertyName.GetVisibility() != VisibilityType::Public)
 			{
 				Error("Unable to access private property");
@@ -921,6 +1005,43 @@ PropertyName Parser::ParsePropertyName()
 		}
 	}
 	return propertyName;
+}
+
+PropertyName Parser::ParsePropertyNameParts(LibraryIPtr library)
+{
+	// Check for initial errors
+	if (m_error || m_currentSymbol == m_symbolList.end() || m_currentSymbol->type != SymbolType::NameValue)
+		return PropertyName();
+
+	// Check up to the max number of parts until we find a variable match
+	auto maxParts = library->GetMaxPropertyParts();
+	for (size_t s = maxParts; s > 0; --s)
+	{
+		auto curr = m_currentSymbol;
+		String name = curr->text;
+		size_t symbolCount = 1;
+		for (size_t i = 1; i < s; ++i)
+		{
+			++curr;
+			if (!IsSymbolValid(curr) || curr->text.empty())
+				continue;
+			name += " ";
+			name += curr->text;
+			++symbolCount;
+		}
+		bool exists = library->PropertyNameExists(name);
+		if (exists)
+		{
+			// Now that we know the longest variable count that matches, advance this number of symbols
+			for (size_t i = 0; i < symbolCount; ++i)
+				NextSymbol();
+
+			// Return the property name
+			return library->GetPropertyName(name);
+		}
+	}
+	return PropertyName();
+
 }
 
 String Parser::ParseFunctionNamePart()
@@ -967,6 +1088,11 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			if (CheckName())
 			{
 				auto paramName = ParseName();
+				while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::CurlyClose))
+				{
+					paramName += " ";
+					paramName += ParseName();
+				}
 				part.names.push_back(paramName);
 			}
 			else
@@ -1039,14 +1165,14 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 void Parser::ParseFunctionDefinition(VisibilityType scope)
 {
 	// Check to make sure we're at the root frame
-	if (!IsRootFrame())
+	if (!m_variableStackFrame.IsRootFrame())
 	{
 		Error("Can't define a function inside another class or function");
 		return;
 	}
 
 	// Check to make sure we're at the root scope
-	if (!IsRootScope())
+	if (!m_variableStackFrame.IsRootScope())
 	{
 		Error("Can't define a function inside a scoped execution block");
 		return;
@@ -1453,9 +1579,9 @@ void Parser::ParseIncDec()
 		EmitOpcode(Opcode::PushProp);
 		EmitId(propName.GetId());
 	}
-	else if (CheckName())
+	else if (CheckVariable())
 	{
-		varName = ParseName();
+		varName = ParseVariable();
 		EmitOpcode(Opcode::PushVar);
 		EmitName(varName);
 	}
@@ -1571,8 +1697,18 @@ void Parser::ParseLoop()
 	// Check to see if we're using an explicitly named variable for the loop counter
 	String name;
 	if (CheckName())
+	{
+		// Parse initial name part
 		name = ParseName();
-	
+
+		// Parse potential multi-part variable names
+		while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::From) && !Check(SymbolType::Over) && !Check(SymbolType::While))
+		{
+			name += " ";
+			name += ParseName();
+		}
+	}
+
 	// We're looping using a counter
 	if (Accept(SymbolType::From))
 	{
@@ -1825,6 +1961,13 @@ void Parser::ParseStatement()
 					// Get the variable name
 					String name = ParseName();
 
+					// Parse potential multi-part variable names
+					while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::Is) && !Check(SymbolType::SquareOpen))
+					{
+						name += " ";
+						name += ParseName();
+					}
+
 					// Check for subscript operator
 					bool subscript = ParseSubscript();
 
@@ -1936,7 +2079,7 @@ void Parser::ParseStatement()
 		}
 		else
 		{
-			Error("Invalid symbol after scope specifier '%'", scope == VisibilityType::Public ? "public" : "private");
+			Error("Invalid symbol after scope specifier '%s'", scope == VisibilityType::Public ? "public" : "private");
 		}
 	}
 }
@@ -1976,14 +2119,19 @@ void Parser::ParseLibraryImports()
 		}
 
 		// Check to make sure we're not adding duplicates
+		bool foundDup = false;
 		for (auto & importName : m_importList)
 		{
 			if (importName == name)
+			{
+				foundDup = true;
 				continue;
+			}
 		}
 
 		// Add library to the list of imported libraries for this script
-		m_importList.push_back(name);
+		if (!foundDup)
+			m_importList.push_back(name);
 	}
 }
 

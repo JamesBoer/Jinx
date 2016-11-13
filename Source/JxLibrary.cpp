@@ -12,6 +12,7 @@ using namespace Jinx;
 
 Library::Library(RuntimeWPtr runtime, const String & name) :
 	m_name(name),
+	m_maxPropertyParts(0),
 	m_runtime(runtime)
 {
 }
@@ -210,6 +211,8 @@ bool Library::RegisterPropertyNameInternal(const PropertyName & propertyName, bo
     if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
         return false;
     m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
+	if (propertyName.GetPartCount() > m_maxPropertyParts)
+		m_maxPropertyParts = propertyName.GetPartCount();
     return true;
 }
 

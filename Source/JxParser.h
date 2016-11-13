@@ -63,12 +63,6 @@ namespace Jinx
 		void ScopeBegin();
 		void ScopeEnd();
 
-		// Are we at the lowest frame level within the current frame (i.e. not in a scoped execution block)?
-		bool IsRootScope() const;
-
-		// Are we in the original execution frame (i.e. not in a function)?
-		bool IsRootFrame() const;
-
 		// Check to see if the symbol is a newline or at the end of the list
 		bool IsSymbolValid(SymbolListCItr symbol) const;
 
@@ -109,8 +103,11 @@ namespace Jinx
 		bool CheckValue() const;
 		bool CheckValueType() const;
 		bool CheckFunctionNamePart() const;
+		bool CheckVariable(SymbolListCItr currSym, size_t * symCount = nullptr) const;
 		bool CheckVariable() const;
-		bool CheckProperty() const;
+		bool CheckProperty(SymbolListCItr currSym, size_t * symCount = nullptr) const;
+		bool CheckProperty(size_t * symCount = nullptr) const;
+		bool CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const;
 		String CheckLibraryName() const;
 		const FunctionSignature * CheckFunctionCall() const;
 
@@ -143,6 +140,7 @@ namespace Jinx
 
 		// Parse property name
 		PropertyName ParsePropertyName();
+		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 
 		// Identifier parsing routines
 		String ParseFunctionNamePart();
@@ -220,11 +218,8 @@ namespace Jinx
 		// Library import list
 		std::list<String, Allocator<String>> m_importList;
 
-		// Keep track of variables currently in names
-		typedef std::set<String, std::less<String>, Allocator<String>> VariableSet;
-		typedef std::vector<VariableSet, Allocator<VariableSet>> VariableStack;
-		typedef std::vector<VariableStack, Allocator<VariableStack>> VariableFrame;
-		VariableFrame m_variableFrame;
+		// Keep track of variables currently in scope
+		VariableStackFrame m_variableStackFrame;
 
 		// We're parsing a function that requires a return value
 		bool m_requireReturnValue;

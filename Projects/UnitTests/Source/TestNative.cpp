@@ -100,4 +100,13 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").GetInteger() == 42);
 	}
+
+	SECTION("Test native variant Guid-String conversions")
+	{
+		static const char * guidStr = "06DF8818-07DB-4AAB-9BF6-3365D0F2D4C9";
+		Variant gs = guidStr;	
+		Variant gv = gs.GetGuid();
+		Variant gs2 = gv.GetString();
+		REQUIRE(gs == gs2);
+	}
 }

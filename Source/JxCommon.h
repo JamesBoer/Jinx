@@ -214,6 +214,9 @@ namespace Jinx
 #endif
 	}
 
+	// Get number of parts in name
+	size_t GetNamePartCount(const String & name);
+
 	RuntimeID GetRandomId();
 	uint32_t MaxInstructions();
 	bool ErrorOnMaxInstrunction();

@@ -298,6 +298,38 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 		REQUIRE(!script2);
 	}
 
+	SECTION("Test duplicate property error #1")
+	{
+		static const char * scriptText =
+			u8R"(
+			
+			import test
+
+			private a is 123
+			public a is 345
+			
+			)";
+
+		auto success = TestCompileScript(scriptText);
+		REQUIRE(!success);
+	}
+
+	SECTION("Test duplicate property error #2")
+	{
+		static const char * scriptText =
+			u8R"(
+			
+			import test
+
+			private a a is 123
+			public a a is 345
+			
+			)";
+
+		auto success = TestCompileScript(scriptText);
+		REQUIRE(!success);
+	}
+
 	SECTION("Test property readonly attribute")
 	{
 		static const char * scriptText =

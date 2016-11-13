@@ -204,7 +204,26 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").GetInteger() == 3);
 	}
-	
+
+	SECTION("Test multi-part named parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			function return {var a} plus {var b}  
+				return var a + var b
+			end
+
+			x is 1
+			a is x plus 2
+		
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").GetInteger() == 3);
+	}
+
 	SECTION("Test properties as function parameters")
 	{
 		static const char * scriptText =
@@ -224,7 +243,27 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").GetInteger() == 3);
 	}
-	
+
+	SECTION("Test multi-part properties as function parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			readonly public x x is 1
+
+			function return {a} plus {b}  
+				return a + b
+			end
+
+			a is x x plus 2
+		
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").GetInteger() == 3);
+	}
+
 	SECTION("Test simple chained functions")
 	{
 		static const char * scriptText =
@@ -308,6 +347,8 @@ TEST_CASE("Test Functions", "[Functions]")
 
 			a is convert 123
 			b is convertback a
+			test a is convert 1234567890
+			test b is convertback test a
 
 			)";
 
@@ -317,6 +358,10 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a").GetString() == "123");
 		REQUIRE(script->GetVariable("b").IsInteger());
 		REQUIRE(script->GetVariable("b").GetInteger() == 123);
+		REQUIRE(script->GetVariable("test a").IsString());
+		REQUIRE(script->GetVariable("test a").GetString() == "1234567890");
+		REQUIRE(script->GetVariable("test b").IsInteger());
+		REQUIRE(script->GetVariable("test b").GetInteger() == 1234567890);
 	}
 
 	SECTION("Test potential function collision test")

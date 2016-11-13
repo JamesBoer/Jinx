@@ -58,6 +58,28 @@ TEST_CASE("Test Statements", "[Statements]")
 		REQUIRE(script->GetVariable("e").IsNull() == true);
 	}
 
+	SECTION("Test multiple word variables and basic statements")
+	{
+		const char * scriptText =
+			u8R"(
+
+			a a is "Hello world!"
+			b b is 5.5
+			c c is 123
+			d d is true
+			e e is null
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a a").GetString() == "Hello world!");
+		REQUIRE(script->GetVariable("b b").GetNumber() == 5.5);
+		REQUIRE(script->GetVariable("c c").GetInteger() == 123);
+		REQUIRE(script->GetVariable("d d").GetBoolean() == true);
+		REQUIRE(script->GetVariable("e e").IsNull() == true);
+	}
+
 	SECTION("Test variable and property type")
 	{
 		const char * scriptText =
