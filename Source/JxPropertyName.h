@@ -24,6 +24,7 @@ namespace Jinx
 		RuntimeID GetId() const { return m_id; }
 		const String & GetName() const { return m_name; }
 		VisibilityType GetVisibility() const { return m_visibility; }
+		size_t GetPartCount() const { return m_partCount; }
 		const Variant & GetDefaultValue() const { return m_defaultValue; }
 
 		// Serialization
@@ -37,6 +38,7 @@ namespace Jinx
 		String m_name;
 		VisibilityType m_visibility;
 		Variant m_defaultValue;
+		size_t m_partCount;
 	};
 
 

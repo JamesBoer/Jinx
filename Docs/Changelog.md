@@ -2,10 +2,22 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.3.0] - 2016-11-04
+### Added
+- Support for multi-word variable and property support without requiring enclosing quotes
 
+## [0.2.2] - 2016-11-01
+### Fixed
+- Improved variant conversion function
+
+### Added
+- New variant conversion tests and methods
+- Variant conversion unit test
+- 
 ## [0.2.1] - 2016-09-21
 ### Fixed
 - Improved thread-safety of collection operators
+- Fixed mutex issues on macOS and Linux
 
 ### Added
 - Add new test case for collections

@@ -81,8 +81,10 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 			library test
 
 			public x is 5
+			public x x is 5
 
 			a is x
+			a a is x x
 			
 			)";
 
@@ -92,8 +94,10 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 			library test
      
 			public y is 2
+			public y y is 2
 
 			b is x		
+			b b is x x	
 
 			)";
 
@@ -103,7 +107,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 			import test
      
 			c is y
+			c c is y y
 			d is test y
+			d d is test y y
 
 			)";
 
@@ -113,6 +119,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 			import test
      
 			increment test y by 2
+			increment test y y by 2
 			
 			)";
 
@@ -126,14 +133,21 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 		REQUIRE(script3);
 		REQUIRE(script4);
 		REQUIRE(script1->GetVariable("a").GetInteger() == 5);
+		REQUIRE(script1->GetVariable("a a").GetInteger() == 5);
 		REQUIRE(script2->GetVariable("b").GetInteger() == 5);
+		REQUIRE(script2->GetVariable("b b").GetInteger() == 5);
 		REQUIRE(script3->GetVariable("c").GetInteger() == 2);
+		REQUIRE(script3->GetVariable("c c").GetInteger() == 2);
 		REQUIRE(script3->GetVariable("d").GetInteger() == 2);
+		REQUIRE(script3->GetVariable("d d").GetInteger() == 2);
 		auto library = runtime->GetLibrary("test");
 		REQUIRE(library->GetProperty("x").GetInteger() == 5);
 		library->SetProperty("x", "str");
+		library->SetProperty("x x", "str");
 		REQUIRE(library->GetProperty("x").GetString() == "str");
+		REQUIRE(library->GetProperty("x x").GetString() == "str");
 		REQUIRE(library->GetProperty("y").GetInteger() == 4);
+		REQUIRE(library->GetProperty("y y").GetInteger() == 4);
 	}
 
 	SECTION("Test library property from bytecode")

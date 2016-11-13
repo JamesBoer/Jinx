@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\..\..\Source\JxScript.h" />
     <ClInclude Include="..\..\..\..\Source\JxSerialize.h" />
     <ClInclude Include="..\..\..\..\Source\JxUnicode.h" />
+    <ClInclude Include="..\..\..\..\Source\JxVariableStackFrame.h" />
     <ClInclude Include="..\..\..\..\Source\JxVariant.h" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +65,7 @@
     <ClCompile Include="..\..\..\..\Source\JxScript.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxSerialize.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxUnicode.cpp" />
+    <ClCompile Include="..\..\..\..\Source\JxVariableStackFrame.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxVariant.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

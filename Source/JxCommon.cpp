@@ -202,6 +202,17 @@ bool Jinx::IsKeyword(SymbolType symbol)
 	return static_cast<int>(symbol) >= static_cast<int>(SymbolType::And);
 }
 
+size_t Jinx::GetNamePartCount(const String & name)
+{
+	size_t parts = 1;
+	for (auto itr = name.begin(); itr != name.end(); ++itr)
+	{
+		if (*itr == ' ')
+			++parts;
+	}
+	return parts;
+}
+
 RuntimeID Jinx::GetRandomId()
 {
 	// Create hash source of current time, a unique id, and a string

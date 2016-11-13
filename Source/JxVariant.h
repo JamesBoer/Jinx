@@ -140,6 +140,9 @@ namespace Jinx
 		void SetGuid(const Guid & value);
 		void SetValType(ValueType type);
 
+		// Check to see if a successful type conversion can be made
+		bool CanConvertTo(ValueType type) const;
+
 		// Conversion casts.  True if successful, false if invalid cast
 		bool ConvertTo(ValueType type);
 
@@ -187,4 +190,4 @@ namespace Jinx
 	inline bool operator >= (const Variant & left, const Variant & right) { return (left < right) ? false : true; }
 };
 
-#endif // JX_SERIALIZE_H__
+#endif // JX_VARIANT_H__
