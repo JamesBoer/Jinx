@@ -50,6 +50,8 @@
       <itemPath>../../../../Source/JxSerialize.h</itemPath>
       <itemPath>../../../../Source/JxUnicode.cpp</itemPath>
       <itemPath>../../../../Source/JxUnicode.h</itemPath>
+      <itemPath>../../../../Source/JxVariableStackFrame.cpp</itemPath>
+      <itemPath>../../../../Source/JxVariableStackFrame.h</itemPath>
       <itemPath>../../../../Source/JxVariant.cpp</itemPath>
       <itemPath>../../../../Source/JxVariant.h</itemPath>
     </logicalFolder>
@@ -191,6 +193,16 @@
       </item>
       <item path="../../../../Source/JxUnicode.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../../../../Source/JxVariableStackFrame.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariableStackFrame.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../../../Source/JxVariant.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../../../Source/JxVariant.h" ex="false" tool="3" flavor2="0">
@@ -329,6 +341,16 @@
       <item path="../../../../Source/JxUnicode.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../../../Source/JxUnicode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariableStackFrame.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxVariableStackFrame.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../../../Source/JxVariant.cpp" ex="false" tool="1" flavor2="0">
       </item>
