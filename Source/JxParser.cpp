@@ -1702,7 +1702,7 @@ void Parser::ParseLoop()
 		name = ParseName();
 
 		// Parse potential multi-part variable names
-		while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::From) && !Check(SymbolType::Over) && !Check(SymbolType::While))
+		while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::From) && !Check(SymbolType::Over) && !Check(SymbolType::Until) && !Check(SymbolType::While))
 		{
 			name += " ";
 			name += ParseName();
@@ -1808,11 +1808,16 @@ void Parser::ParseLoop()
 		ScopeEnd();
 
 	}	
-	// Loops while a condition is true
-	else if (Accept(SymbolType::While))
+	// Loops while a condition is true or false
+	else if (Check(SymbolType::Until) || Check(SymbolType::While))
 	{
 		// Store where the loop logic begins
 		auto loopBeginAddress = m_writer.Tell();
+
+		// Check for keyword
+		bool jumpTrue = Accept(SymbolType::Until);
+		if (!jumpTrue)
+			Expect(SymbolType::While);
 
 		// Parse the expression to control the loop's jump branch
 		ParseExpression();
@@ -1820,7 +1825,7 @@ void Parser::ParseLoop()
 			return;
 
 		// Add jump instruction, making sure to store the jump address for later backfilling
-		EmitOpcode(Opcode::JumpFalse);
+		EmitOpcode(jumpTrue ? Opcode::JumpTrue : Opcode::JumpFalse);
 		auto loopJumpAddress = EmitAddressPlaceholder();
 
 		// Parse the while loop block
@@ -1835,22 +1840,26 @@ void Parser::ParseLoop()
 		// Backfill loop jump target address
 		EmitAddressBackfill(loopJumpAddress);
 	}
-	// Executes once and then loops again while a condition is true
+	// Executes once and then loops again while a condition is true/false, depending on keyword used
 	else if (Accept(SymbolType::NewLine))
 	{
 		// Store where the loop logic begins
 		auto loopBeginAddress = m_writer.Tell();
 
-		// Parse the while loop block
+		// Parse the until/while loop block
 		ParseBlock();
-		Expect(SymbolType::While);
+
+		// Check the keyword is used
+		bool jumpTrue = Accept(SymbolType::While);
+		if (!jumpTrue)
+			Expect(SymbolType::Until);
 
 		// Parse expression used to determine if loop should execute again
 		ParseExpression();
 		Expect(SymbolType::NewLine);
 
 		// Conditionally jump to top of loop
-		EmitOpcode(Opcode::JumpTrue);
+		EmitOpcode(jumpTrue ? Opcode::JumpTrue : Opcode::JumpFalse);
 		EmitAddress(loopBeginAddress);
 	}
 	else
@@ -2040,36 +2049,43 @@ void Parser::ParseStatement()
 				EmitOpcode(Opcode::Jump);
 				m_breakAddress = EmitAddressPlaceholder();
 			}
-			else if (Accept(SymbolType::Yield))
+			else if (Accept(SymbolType::Wait))
 			{
-				// Check for basic yield statement
+				// Check for basic wait statement
 				if (Accept(SymbolType::NewLine))
-					EmitOpcode(Opcode::Yield);
-				else if (Accept(SymbolType::While))
+					EmitOpcode(Opcode::Wait);
+				else if (Check(SymbolType::Until) || Check(SymbolType::While))
 				{
 					// Store expression address
 					auto expressionAddress = m_writer.Tell();
 
-					// Parse the expression to check for yield
+					// Check which keyword was used
+					bool jumpTrue = Accept(SymbolType::Until);
+					if (!jumpTrue)
+						Expect(SymbolType::While);
+
+					// Parse the expression to check for wait
 					ParseExpression();
 					if (!Expect(SymbolType::NewLine))
 						return;
 
-					// Add jump if false over yield statement
-					EmitOpcode(Opcode::JumpFalse);
+					// Add jump if false/true over wait statement depending on keyword
+					EmitOpcode(jumpTrue ? Opcode::JumpTrue : Opcode::JumpFalse);
+
+					// Mark placeholder for later jump address insertion
 					auto addressPlaceholder = EmitAddressPlaceholder();
 
-					// Yield statement is executed if expression is true
-					EmitOpcode(Opcode::Yield);
+					// Wait statement is executed if expression is true
+					EmitOpcode(Opcode::Wait);
 					EmitOpcode(Opcode::Jump);
 					EmitAddress(expressionAddress);
 
-					// Backfill placeholder at end of conditional yield statement
+					// Backfill placeholder at end of conditional wait statement
 					EmitAddressBackfill(addressPlaceholder);
 				}
 				else
 				{
-					Error("Unexpected symbol after yield");
+					Error("Unexpected symbol after wait");
 				}
 			}
 			else
@@ -2093,7 +2109,7 @@ void Parser::ParseBlock()
 	ScopeBegin();
 
 	// Parse each statement until we reach a terminating symbol
-	while (!(Check(SymbolType::End) || Check(SymbolType::Else) || Check(SymbolType::While)) && !m_error)
+	while (!(Check(SymbolType::End) || Check(SymbolType::Else) || Check(SymbolType::Until) || Check(SymbolType::While)) && !m_error)
 		ParseStatement();
 
 	// Pop local variable stack frame

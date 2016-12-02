@@ -667,7 +667,7 @@ bool Script::Execute()
 				Push(val.GetType());
 			}
 			break;
-			case Opcode::Yield:
+			case Opcode::Wait:
 			{
 			}
 			break;
@@ -680,7 +680,7 @@ bool Script::Execute()
 		}
 
 	} 
-	while (opcode != Opcode::Exit && opcode != Opcode::Yield);
+	while (opcode != Opcode::Exit && opcode != Opcode::Wait);
 
 	// Track accumulated script execution time
 	auto end = std::chrono::high_resolution_clock::now();

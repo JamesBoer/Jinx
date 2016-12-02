@@ -70,7 +70,7 @@ static const char * s_opcodeName[] =
 	"setvarkey",
 	"subtract",
 	"type",
-	"yield",
+	"wait",
 };
 
 static_assert(countof(s_opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
@@ -115,12 +115,8 @@ static const char * s_symbolTypeName[] =
 	"boolean",
 	"break",
 	"by",
-	"class",
 	"collection",
-	"constructor",
-	"count",
 	"decrement",
-	"destructor",
 	"else",
 	"end",
 	"from",
@@ -133,7 +129,6 @@ static const char * s_symbolTypeName[] =
 	"is",
 	"library",
 	"loop",
-	"new",
 	"not",
 	"null",
 	"number",
@@ -144,12 +139,12 @@ static const char * s_symbolTypeName[] =
 	"public",
 	"readonly",
 	"return",
-	"self",
 	"string",
 	"to",
 	"type",
+	"until",
+	"wait",
 	"while",
-	"yield",
 };
 
 static_assert(countof(s_symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");

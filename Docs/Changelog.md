@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.4.0] - 2016-12-01
+### Added
+- New keyword 'until' used similarly to 'while' in loops and conditional wait statements, but with inverted conditional logic
+- New test cases for 'until' keyword
+- New 'until' keyword added to Jinx editor
+
+### Changed
+- 'yield' keyword is now 'wait', a more user-friendly term
+
+### Removed
+- Deleted unused keywords in source
+
 ## [0.3.0] - 2016-11-04
 ### Added
 - Support for multi-word variable and property support without requiring enclosing quotes
@@ -13,7 +25,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - New variant conversion tests and methods
 - Variant conversion unit test
-- 
+
 ## [0.2.1] - 2016-09-21
 ### Fixed
 - Improved thread-safety of collection operators
