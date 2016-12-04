@@ -428,8 +428,8 @@ namespace JinxTools
         private HashSet<string> m_keywords = new HashSet<string>
         {
             "import", "library", "is", "not", "and", "or", "null", "number", "integer", "boolean", "string",
-            "collection", "as", "mod", "increment", "decrement", "by", "if", "else", "begin", "end", "over",
-            "loop", "from", "to", "while", "function", "return", "break", "type", "yield", "public", "private", "readonly"
+            "collection", "as", "mod", "increment", "decrement", "by", "if", "else", "begin", "end", "over", "until",
+            "loop", "from", "to", "while", "function", "return", "break", "type", "wait", "public", "private", "readonly"
         };
         private HashSet<string> m_values = new HashSet<string>
         {

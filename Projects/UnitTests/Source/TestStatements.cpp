@@ -313,7 +313,7 @@ TEST_CASE("Test Statements", "[Statements]")
 	}
 
 
-	SECTION("Test yield statement")
+	SECTION("Test wait statement")
 	{
 		const char * scriptText =
 			u8R"(
@@ -326,7 +326,7 @@ TEST_CASE("Test Statements", "[Statements]")
 			end
 
 			loop while not counter is finished
-				yield
+				wait
 			end
 
 			)";
@@ -337,7 +337,7 @@ TEST_CASE("Test Statements", "[Statements]")
 		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
 	}
 
-	SECTION("Test yield while statement")
+	SECTION("Test wait while statement")
 	{
 		const char * scriptText =
 			u8R"(
@@ -349,7 +349,29 @@ TEST_CASE("Test Statements", "[Statements]")
 				return counter >= 10
 			end
 
-			yield while not counter is finished
+			wait while not counter is finished
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
+	}
+
+	SECTION("Test wait until statement")
+	{
+		const char * scriptText =
+			u8R"(
+    
+			private counter is 0
+			
+			function return counter is finished
+				increment counter
+				return counter >= 10
+			end
+
+			wait until counter is finished
 
 			)";
 

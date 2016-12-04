@@ -71,7 +71,7 @@ int main(int argc, char ** argv)
 				return counter > 10000
 			end
 
-			yield while not counter is finished
+			wait until counter is finished
 
 		)";
 

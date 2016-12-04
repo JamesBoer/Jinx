@@ -38,6 +38,32 @@ TEST_CASE("Test Loops", "[Loops]")
 		REQUIRE(script->GetVariable("b").GetInteger() == 10);
 	}
 
+	SECTION("Test loop until")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			a is 1
+			loop until a >= 10
+				increment a
+			end	
+		
+			b is 1
+			loop until false
+				increment b
+				if b = 10
+					break
+				end
+			end	
+		
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").GetInteger() == 10);
+		REQUIRE(script->GetVariable("b").GetInteger() == 10);
+	}
+
 	SECTION("Test loop do while")
 	{
 		static const char * scriptText =
@@ -63,7 +89,33 @@ TEST_CASE("Test Loops", "[Loops]")
 		REQUIRE(script->GetVariable("a").GetInteger() == 10);
 		REQUIRE(script->GetVariable("b").GetInteger() == 10);
 	}
+	
+	SECTION("Test loop do until")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			a is 1
+			loop
+				increment a
+			until a >= 10
+		
+			b is 1
+			loop
+				increment b
+				if b = 10
+					break
+				end
+			until false
+		
+			)";
 
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").GetInteger() == 10);
+		REQUIRE(script->GetVariable("b").GetInteger() == 10);
+	}
+	
 	SECTION("Test loop count")
 	{
 		static const char * scriptText =
