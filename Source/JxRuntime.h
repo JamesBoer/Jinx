@@ -38,7 +38,7 @@ namespace Jinx
 		void SetProperty(RuntimeID id, const Variant & value);
 		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
-		void AddScriptExecutionTime(uint64_t timeNs);
+		void AddPerformanceParams(uint64_t timeNs, uint64_t instCount);
 
 	private:
 

@@ -1,10 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-
 ## [0.4.1] - 2016-12-08
+### Added
+- Instruction count performance metric
+
 ### Changed
 - Cleaned up expression parsing code
+- Add Variant class documentation
 
 ### Fixed
 - Bug in block parsing

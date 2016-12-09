@@ -18,6 +18,7 @@ namespace Jinx
 	class BinaryReader;
 	class BinaryWriter;
 	
+	/// Interface for user objects in scripts
 	class IUserObject
 	{
 	public:
@@ -44,6 +45,12 @@ namespace Jinx
 		Any = NumValueTypes, // Internal use only
 	};
 
+	/// Variant stores value/type pairs in a convenient class.
+	/**
+	The Variant class is both used to store and manipulate values internally.  It can convert
+	between different value types dynamically.  It also provides a convenient mechanism to pass 
+	and retrieve values from the native Jinx API in a type-agnostic fashion.
+	*/
 	class Variant
 	{
 	public:
