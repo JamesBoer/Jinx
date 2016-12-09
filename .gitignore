@@ -24,11 +24,7 @@ xcuserdata
 profile
 *.moved-aside
 
+# NetBeans
+dist/
+private/
 
-
-/Library/Project/Linux/Jinx/dist/
-/UnitTests/Project/Linux/UnitTests/dist/
-/Samples/Features/Project/Linux/Features/dist/
-/Projects/Jinx/Linux/Jinx/dist/
-/Projects/UnitTests/Project/Linux/UnitTests/dist/
-/Projects/Features/Project/Linux/Features/dist/
