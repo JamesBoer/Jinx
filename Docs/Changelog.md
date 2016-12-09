@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.4.1] - 2016-12-08
+### Changed
+- Cleaned up expression parsing code
+
+### Fixed
+- Bug in block parsing
+- Improved documentation to better describe complex function parameters
+
 ## [0.4.0] - 2016-12-01
 ### Added
 - New keyword 'until' used similarly to 'while' in loops and conditional wait statements, but with inverted conditional logic

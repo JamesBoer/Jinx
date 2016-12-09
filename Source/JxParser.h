@@ -154,7 +154,13 @@ namespace Jinx
 		// Parse a function call with the given signature
 		void ParseFunctionCall(const FunctionSignature * signature);
 
-		// Parse expression components
+        // Parse a subexpression operand
+        void ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall = false);
+
+        // Parse a subexpression operation
+        void ParseSubexpressionOperation(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall = false);
+
+        // Parse expression components
 		void ParseSubexpression(bool suppressFunctionCall = false);
 
 		// Parse a complete expression, which generally follows an assignment or conditional statement
