@@ -150,6 +150,34 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 		REQUIRE(!success);
 	}
 
+
+	SECTION("Test too few operands #1 error")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			a is 3 +
+
+			)";
+
+		auto success = TestCompileScript(scriptText);
+		REQUIRE(!success);
+	}
+
+
+	SECTION("Test too few operands #2 error")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			a is 3 * (4 / )
+
+			)";
+
+		auto success = TestCompileScript(scriptText);
+		REQUIRE(!success);
+	}
+
 	SECTION("Test function declaration scope error")
 	{
 		static const char * scriptText =

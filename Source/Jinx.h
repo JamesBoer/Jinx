@@ -83,10 +83,10 @@ namespace Jinx
 	static const uint32_t MinorVersion = 4;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 0;
+	static const uint32_t PatchNumber = 1;
 
 	/// Version string
-	static const char * VersionString = "0.4.0";
+	static const char * VersionString = "0.4.1";
 
 	// Forward declaration
 	class IScript;
@@ -225,7 +225,8 @@ namespace Jinx
 			compilationTimeNs(0),
 			executionTimeNs(0),
 			scriptCompilationCount(0),
-			scriptExecutionCount(0)
+			scriptExecutionCount(0),
+			instructionCount(0)
 		{}
 		/// Total compilation time of all scripts in nanoseconds
 		uint64_t compilationTimeNs;
@@ -235,6 +236,8 @@ namespace Jinx
 		uint32_t scriptCompilationCount;
 		/// Number of scripts executed
 		uint32_t scriptExecutionCount;
+		/// Number of instructions executed
+		uint64_t instructionCount;
 	};
 
 	/// Jinx runtime interface

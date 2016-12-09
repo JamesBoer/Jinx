@@ -685,7 +685,7 @@ bool Script::Execute()
 	// Track accumulated script execution time
 	auto end = std::chrono::high_resolution_clock::now();
 	uint64_t executionTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
-	m_runtime->AddScriptExecutionTime(executionTimeNs);
+	m_runtime->AddPerformanceParams(executionTimeNs, tickInstCount);
 
 	return true;
 }

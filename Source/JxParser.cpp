@@ -866,16 +866,6 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 		}
 	}
 
-
-
-
-	// Make sure the property doesn't already exist
-	//if (CheckProperty())
-	//{
-	//	Error("Property is already defined");
-	//	return;
-	//}
-
 	// Find out which library this property belongs to
 	auto propertyLibrary = m_library;
 	auto libraryName = CheckLibraryName();
@@ -1317,6 +1307,118 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	EmitId(signature->GetId());
 }
 
+void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
+{
+    if (m_error)
+        return;
+
+    const FunctionSignature * signature = nullptr;
+    if (!suppressFunctionCall)
+        signature = CheckFunctionCall();
+    suppressFunctionCall = false;
+    if (signature)
+    {
+        if (signature->HasReturnParameter() == false)
+        {
+            Error("Function in expression requires a return parameter");
+            return;
+        }
+        ParseFunctionCall(signature);
+    }
+    else if (CheckProperty())
+    {
+        auto propertyName = ParsePropertyName();
+        if (!propertyName.IsValid())
+        {
+            Error("Unable to find property name in library");
+            return;
+        }
+        bool subscript = ParseSubscript();
+        EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
+        EmitId(propertyName.GetId());
+		if (Accept(SymbolType::Type))
+			EmitOpcode(Opcode::Type);
+    }
+    else if (CheckVariable())
+    {
+        String name = ParseVariable();
+        bool subscript = ParseSubscript();
+        EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
+        EmitName(name);
+        if (Accept(SymbolType::Type))
+			EmitOpcode(Opcode::Type);
+	}
+    else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
+    {
+        return;
+    }
+    else if (Accept(SymbolType::ParenOpen))
+    {
+        ParseExpression();
+        Expect(SymbolType::ParenClose);
+    }
+    else if (CheckValue())
+    {
+        auto val = ParseValue();
+        EmitOpcode(Opcode::PushVal);
+        EmitValue(val);
+    }
+    else if (CheckValueType())
+    {
+        auto val = ParseValueType();
+        EmitOpcode(Opcode::PushVal);
+        EmitValue(val);
+    }
+	else
+	{
+		Error("Expected operand");
+	}
+
+    if (!opcodeStack.empty())
+    {
+        EmitOpcode(opcodeStack.back());
+        opcodeStack.pop_back();
+    }
+}
+
+void Parser::ParseSubexpressionOperation(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
+{
+    if (m_error)
+        return;
+
+    while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
+    {
+        // Parse operand
+        ParseSubexpressionOperand(opcodeStack, suppressFunctionCall);
+		
+        // Check for casts
+        if (Accept(SymbolType::As))
+        {
+            EmitOpcode(Opcode::Cast);
+            auto valueType = ParseValueType();
+            if (m_error)
+                return;
+            EmitValueType(valueType);
+        }
+		
+        // Parse binary operator
+        if (CheckBinaryOperator())
+        {
+            auto opcode = ParseBinaryOperator();
+            opcodeStack.push_back(opcode);
+        }
+        else if (Check(SymbolType::And) || Check(SymbolType::Or))
+        {
+            auto t = m_currentSymbol->type;
+            NextSymbol();
+            ParseExpression();
+            EmitOpcode(t == SymbolType::And ? Opcode::And : Opcode::Or);
+        }
+        else
+            break;
+    }
+}
+
 void Parser::ParseSubexpression(bool suppressFunctionCall)
 {
 	if (m_error)
@@ -1340,144 +1442,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	}
 	else
 	{
-		// Check for two operands in a row without an intervening operator
-		// Note: there must be a cleaner way of parsing this while ensuring
-		// ordering consistency of operands and operators.  This method seeems
-		// sort of clunky.
-		bool operand = false;
-		while (!Check(SymbolType::NewLine))
-		{
-			if (CheckBinaryOperator())
-			{
-				auto opcode = ParseBinaryOperator();
-				opcodeStack.push_back(opcode);
-				operand = false;
-			}
-			else
-			{
-				const FunctionSignature * signature = nullptr;
-				if (!suppressFunctionCall)
-					signature = CheckFunctionCall();
-				suppressFunctionCall = false;
-				if (signature)
-				{
-					if (operand == true)
-					{
-						Error("Expecting operator in expression");
-						return;
-					}
-					if (signature->HasReturnParameter() == false)
-					{
-						Error("Function in expression requires a return parameter");
-						return;
-					}
-					ParseFunctionCall(signature);
-					operand = true;
-				}
-				else if (CheckProperty())
-				{
-					if (operand == true)
-					{
-						Error("Expecting operator in expression");
-						return;
-					}
-					auto propertyName = ParsePropertyName();
-					if (!propertyName.IsValid())
-					{
-						Error("Unable to find property name in library");
-						return;
-					}
-					bool subscript = ParseSubscript();
-					EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
-					EmitId(propertyName.GetId());
-					operand = true;
-					if (Accept(SymbolType::Type))
-						EmitOpcode(Opcode::Type);
-				}
-				else if (CheckVariable())
-				{
-					if (operand == true)
-					{
-						Error("Expecting operator in expression");
-						return;
-					}
-					String name = ParseVariable();
-					bool subscript = ParseSubscript();
-					EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-					EmitName(name);
-					operand = true;
-					if (Accept(SymbolType::Type))
-						EmitOpcode(Opcode::Type);
-				}
-				else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
-				{
-					break;
-				}
-				else if (Accept(SymbolType::ParenOpen))
-				{
-					if (operand == true)
-					{
-						Error("Expecting operator in expression");
-						return;
-					}
-					ParseExpression();
-					Expect(SymbolType::ParenClose);
-					operand = true;
-				}
-				else if (Check(SymbolType::And) || Check(SymbolType::Or))
-				{
-					auto t = m_currentSymbol->type;
-					NextSymbol();
-					ParseExpression();
-					EmitOpcode(t == SymbolType::And ? Opcode::And : Opcode::Or);
-					break;
-				}
-				else if (Accept(SymbolType::As))
-				{
-					EmitOpcode(Opcode::Cast);
-					auto valueType = ParseValueType();
-					if (m_error)
-						return;
-					EmitValueType(valueType);
-				}
-				else if (CheckValue())
-				{
-					if (operand == true)
-					{
-						Error("Expecting operator in expression");
-						return;
-					}
-					auto val = ParseValue();
-					EmitOpcode(Opcode::PushVal);
-					EmitValue(val);
-					operand = true;
-				}
-				else if (CheckValueType())
-				{
-					if (operand == true)
-					{
-						Error("Expecting operator in expression");
-						return;
-					}
-					auto val = ParseValueType();
-					EmitOpcode(Opcode::PushVal);
-					EmitValue(val);
-					operand = true;
-				}
-				else
-				{
-					// We're finished with the expression
-					return;
-				}
-				
-
-				if (!opcodeStack.empty())
-				{
-					EmitOpcode(opcodeStack.back());
-					opcodeStack.pop_back();
-				}
-			}
-		}
+        ParseSubexpressionOperation(opcodeStack, suppressFunctionCall);
 	}
 
 	// Check for leftover operators
