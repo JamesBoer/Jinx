@@ -27,6 +27,11 @@ TEST_CASE("Test Statements", "[Statements]")
 			comment
 			---------
 
+---------
+No indentation
+multiline comment
+---------
+
 			a --- some comment --- is 123
    
 			)";

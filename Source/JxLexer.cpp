@@ -325,7 +325,8 @@ void Lexer::ParseComment()
 				return;
 			else if (IsNewline(*m_current))
 				ParseEndOfLine();
-			AdvanceCurrent();
+            else
+				AdvanceCurrent();
 		}
 		Error("Mismatched block comments");
 	}
