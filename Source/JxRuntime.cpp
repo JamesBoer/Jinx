@@ -29,6 +29,7 @@ void Runtime::AddPerformanceParams(uint64_t timeNs, uint64_t instCount)
 {
 	std::lock_guard<Mutex> lock(m_perfMutex);
 	m_perfStats.executionTimeNs += timeNs;
+	m_perfStats.instructionCount += instCount;
 	m_perfStats.scriptExecutionCount++;
 }
 
