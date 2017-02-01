@@ -386,4 +386,21 @@ multiline comment
 		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
 	}
 
+	SECTION("Test external statement")
+	{
+		const char * scriptText =
+			u8R"(
+    
+			external some var
+			another var is some var
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		script->SetVariable("some var", 123);
+		script->Execute();
+		REQUIRE(script->GetVariable("another var") == 123);
+	}
+
 }

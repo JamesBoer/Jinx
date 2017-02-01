@@ -137,24 +137,4 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
 	}
 	
-	SECTION("Test variable functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is variable "p"
-			set variable "p" to "new"
-            
-            )";
-
-		auto runtime = TestCreateRuntime();
-		auto script = runtime->CreateScript(scriptText);
-		REQUIRE(script);
-		script->SetVariable("p", "test");
-		REQUIRE(script->Execute());
-		REQUIRE(script->GetVariable("a").GetString() == "test");
-		REQUIRE(script->GetVariable("p").GetString() == "new");
-	}
 }

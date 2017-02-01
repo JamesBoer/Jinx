@@ -29,14 +29,18 @@ Jinx::RuntimePtr TestCreateRuntime()
 	return Jinx::CreateRuntime();
 }
 
-bool TestCompileScript(const char * scriptText, Jinx::RuntimePtr runtime)
+ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();
 
-	// Compile the text to bytecode
+	// Compile the script text to bytecode
 	auto bytecode = runtime->Compile(scriptText);
-	return bytecode ? true : false;
+	if (!bytecode)
+		return nullptr;
+
+	// Create a script with the compiled bytecode
+	return runtime->CreateScript(bytecode);
 }
 
 Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime)
@@ -44,15 +48,15 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	if (!runtime)
 		runtime = TestCreateRuntime();
 
-	// Compile the text to bytecode
+	// Compile the script text to bytecode
 	auto bytecode = runtime->Compile(scriptText);
 	if (!bytecode)
 		return nullptr;
 
-	// Create a runtime script with the given bytecode
+	// Create a script with the compiled bytecode
 	auto script = runtime->CreateScript(bytecode);
 
-	// Execute script and update runtime until script is finished
+	// Execute script until finished
 	do
 	{
 		if (!script->Execute())

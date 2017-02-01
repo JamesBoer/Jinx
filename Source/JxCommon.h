@@ -115,6 +115,7 @@ namespace Jinx
 		Decrement,
 		Else,
 		End,
+		External,
 		From,
 		Function,
 		Guid,

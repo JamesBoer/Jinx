@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-TEST_CASE("Test Syntax Errors", "[Errors]")
+TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 {
 	SECTION("Test number parsing error error")
 	{
@@ -21,8 +21,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test unassigned variable error")
@@ -34,8 +34,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test mismatched quote error")
@@ -47,8 +47,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operators #1 error")
@@ -60,8 +60,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operators #2 error")
@@ -73,8 +73,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operands #1 error")
@@ -86,8 +86,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operands #2 error")
@@ -99,8 +99,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operands #3 error")
@@ -112,8 +112,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operands #4 error")
@@ -129,8 +129,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test too many operands #5 error")
@@ -146,10 +146,9 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
-
 
 	SECTION("Test too few operands #1 error")
 	{
@@ -160,10 +159,9 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
-
 
 	SECTION("Test too few operands #2 error")
 	{
@@ -174,8 +172,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test function declaration scope error")
@@ -190,8 +188,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test function declaration execution frame error")
@@ -206,8 +204,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test function declaration duplicate error")
@@ -223,8 +221,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test multi-script function declaration duplicate error")
@@ -252,8 +250,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			)";
 
 		auto runtime = TestCreateRuntime();
-		auto script1 = TestCompileScript(scriptText1, runtime);
-		auto script2 = TestCompileScript(scriptText2, runtime);
+		auto script1 = TestCreateScript(scriptText1, runtime);
+		auto script2 = TestCreateScript(scriptText2, runtime);
 		REQUIRE(script1);
 		REQUIRE(!script2);
 	}
@@ -268,8 +266,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test library property scope error #1")
@@ -338,8 +336,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test duplicate property error #2")
@@ -354,8 +352,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test property readonly attribute")
@@ -368,8 +366,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test property readonly attribute #1")
@@ -445,8 +443,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test collection initialization list error #2")
@@ -458,8 +456,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 			
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test collection initialization list of key-value pairs error #1")
@@ -472,8 +470,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test collection initialization list of key-value pairs error #2")
@@ -486,8 +484,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test collection initialization list of key-value pairs error #3")
@@ -500,8 +498,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test missing return valid in function error #1")
@@ -516,8 +514,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 	
 	SECTION("Test missing return valid in function error #2")
@@ -536,8 +534,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 	
 	SECTION("Test missing return valid in function error #3")
@@ -556,8 +554,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test missing return valid in function error #4")
@@ -578,8 +576,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test missing return valid in function error #5")
@@ -602,8 +600,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test no return validation")
@@ -619,8 +617,8 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test no return function assignment")
@@ -635,7 +633,69 @@ TEST_CASE("Test Syntax Errors", "[Errors]")
 
 			)";
 
-		auto success = TestCompileScript(scriptText);
-		REQUIRE(!success);
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
+
+	SECTION("Test external variable with variable name collision")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			some var is 345
+			external some var
+			another var is some var
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test external variable with property name collision")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			private some var is 345
+			external some var
+			another var is some var
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test external variable scope")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			begin
+				external some var
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+
+	SECTION("Test external variable frame")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function something
+				external some var
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 }

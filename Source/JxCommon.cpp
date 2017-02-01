@@ -119,6 +119,7 @@ static const char * s_symbolTypeName[] =
 	"decrement",
 	"else",
 	"end",
+	"external",
 	"from",
 	"function",
 	"guid",
