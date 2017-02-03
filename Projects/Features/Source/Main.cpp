@@ -20,20 +20,28 @@ using namespace Jinx;
 
 #define REQUIRE assert
 
-Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
+Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
 {
 	if (!runtime)
 		runtime = CreateRuntime();
 
 	// Compile the text to bytecode
-	auto bytecode = runtime->Compile(scriptText, "Test Script", {"core"});
+	auto bytecode = runtime->Compile(scriptText, "Test Script", { "core" });
 	if (!bytecode)
 		return nullptr;
 
 	// Create a runtime script with the given bytecode
-	auto script = runtime->CreateScript(bytecode);
+	return runtime->CreateScript(bytecode);
+}
 
-	// Execute script and update runtime until script is finished
+Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
+{
+	// Create a runtime script 
+	auto script = TestCreateScript(scriptText, runtime);
+	if (!script)
+		return nullptr;
+
+	// Execute script until finished
 	do
 	{
 		if (!script->Execute())
@@ -63,20 +71,15 @@ int main(int argc, char ** argv)
 
 		static const char * scriptText =
 		u8R"(
-
-			private counter is 0
-			
-			function return counter is finished
-				increment counter
-				return counter > 10000
-			end
-
-			wait until counter is finished
-
+			external some var
+			another var is some var
 		)";
 
-		auto script = TestExecuteScript(scriptText);
+		auto script = TestCreateScript(scriptText, runtime);
 		REQUIRE(script);
+		script->SetVariable("some var", 123);
+		script->Execute();
+		REQUIRE(script->GetVariable("another var") == 123);
 	}
 
 	Jinx::ShutDown();

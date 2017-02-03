@@ -31,7 +31,7 @@ THE SOFTWARE.
 #include "catch.hpp"
 
 Jinx::RuntimePtr TestCreateRuntime();
-bool TestCompileScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr);
+Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr);
 Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr);
 
 

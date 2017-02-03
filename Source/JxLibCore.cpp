@@ -185,17 +185,6 @@ static Variant RemoveValuesFrom(ScriptPtr, Parameters params)
 	return nullptr;
 }
 
-static Variant Variable(ScriptPtr script, Parameters params)
-{
-	return script->GetVariable(params[0].GetString());
-}
-
-static Variant SetVariable(ScriptPtr script, Parameters params)
-{
-	script->SetVariable(params[0].GetString(), params[1]);
-	return nullptr;
-}
-
 void Jinx::RegisterLibCore(RuntimePtr runtime)
 {
 	auto library = runtime->GetLibrary("core");
@@ -208,8 +197,6 @@ void Jinx::RegisterLibCore(RuntimePtr runtime)
 	library->RegisterFunction(true, false, { "add", "{}", "to", "{}" }, AddTo);
 	library->RegisterFunction(true, false, { "remove", "{}", "from", "{}" }, RemoveFrom);
 	library->RegisterFunction(true, false, { "remove", "value/values", "{}", "from", "{}" }, RemoveValuesFrom);
-	library->RegisterFunction(true, true, { "variable", "{}" }, Variable);
-	library->RegisterFunction(true, false, { "set", "variable", "{}", "to", "{}" }, SetVariable);
 
 	// Register core properties
 	library->RegisterProperty(true, true, { "newline" }, "\n");

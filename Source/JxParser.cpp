@@ -2053,6 +2053,35 @@ void Parser::ParseStatement()
 					Error("Unexpected symbol after wait");
 				}
 			}
+			else if (Accept(SymbolType::External))
+			{
+				// First check to see if this collides with an existing property name
+				bool propExists = CheckProperty();
+
+				// Get the variable name
+				String name = ParseName();
+
+				// Parse potential multi-part variable names
+				while (IsSymbolValid(m_currentSymbol))
+				{
+					name += " ";
+					name += ParseName();
+				}
+
+				// Validate the name is legal and register it as a variable name
+				if (!m_variableStackFrame.IsRootFrame())
+					Error("External variable '%s' can't be declared in a function", name.c_str());
+				else if (!m_variableStackFrame.IsRootScope())
+					Error("External variable '%s' must be declared at the root scope", name.c_str());
+				else if (propExists)
+					Error("External variable '%s' is already a property name", name.c_str());
+				else if (m_variableStackFrame.VariableExists(name))
+					Error("Variable '%s' already exists", name.c_str());
+				else if (!m_variableStackFrame.VariableAssign(name))
+					Error("Error creating external variable '%s'", name.c_str());
+
+				Expect(SymbolType::NewLine);
+			}
 			else
 			{
 				Error("Unknown symbol in statement");

@@ -1,6 +1,16 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.2] - 2017-01-31
+### Added
+- New 'external' keyword for variables set via API
+
+### Removed
+- Obsolete library functions dealing with externally set variables have been removed
+
+### Changed
+- Tutorial updated with 'external' keyword use and examples
+
 ## [0.4.1] - 2016-12-08
 ### Added
 - Instruction count performance metric
