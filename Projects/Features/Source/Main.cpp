@@ -71,15 +71,20 @@ int main(int argc, char ** argv)
 
 		static const char * scriptText =
 		u8R"(
-			external some var
-			another var is some var
+			function return (is) something enabled
+				return true
+			end
+
+			var is something enabled
+			if is something enabled
+				write line "something is enabled"
+			end
+
 		)";
 
-		auto script = TestCreateScript(scriptText, runtime);
+		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
-		script->SetVariable("some var", 123);
-		script->Execute();
-		REQUIRE(script->GetVariable("another var") == 123);
+		REQUIRE(script->GetVariable("var") == true);
 	}
 
 	Jinx::ShutDown();

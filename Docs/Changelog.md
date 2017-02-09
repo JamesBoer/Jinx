@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.3] - 2017-02-08
+### Added
+- Function name parts can now be added
+
+### Fixed
+- Function name registration was incorrectly converting to lower case
+- Function as last parameter of another function call was not being handled correctly
+
 ## [0.4.2] - 2017-01-31
 ### Added
 - New 'external' keyword for variables set via API

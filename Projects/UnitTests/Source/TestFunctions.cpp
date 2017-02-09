@@ -48,7 +48,28 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 	}
 
-	SECTION("Test local variable name collision with function")
+    SECTION("Test optional names function")
+    {
+        static const char * scriptText =
+            u8R"(
+    
+			function (opt/optional) (blah) {num} stuff
+				-- do nothing
+            end
+
+            optional 123 stuff
+            opt 456 stuff
+            789 stuff
+            blah 000 stuff
+            opt blah 111 stuff
+
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script);
+    }
+
+    SECTION("Test local variable name collision with function")
 	{
 		static const char * scriptText =
 			u8R"(

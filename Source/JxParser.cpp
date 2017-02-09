@@ -1059,6 +1059,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 	bool parsedParameter = false;
 	bool parsedNonKeywordName = false;
 	int parsedNameCount = 0;
+    int optionalNameCount = 0;
 	FunctionSignatureParts signatureParts;
 	while (!Check(SymbolType::NewLine))
 	{
@@ -1095,6 +1096,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 		}
 		else
 		{
+            part.optional = Accept(SymbolType::ParenOpen);
 			if (!CheckFunctionNamePart())
 			{
 				Error("Invalid name in function signature");
@@ -1123,7 +1125,16 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 				}
 				part.names.push_back(name);
 			}
-			parsedParameter = false;
+            if (part.optional)
+            {
+                optionalNameCount++;
+                if (!Expect(SymbolType::ParenClose))
+                {
+                    Error("Expected closing parentheses for optional function name part");
+                    return FunctionSignature();
+                }
+            }
+            parsedParameter = false;
 		}
 		signatureParts.push_back(part);
 	}
@@ -1133,7 +1144,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 		return FunctionSignature();
 	}
 
-	// Check for function signature validity
+	// Check for function signature validity with matching keywords
 	if (!parsedNonKeywordName)
 	{
 		if (parsedNameCount == 1 && signatureParts.size() == 1)
@@ -1142,6 +1153,13 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			return FunctionSignature();
 		}
 	}
+
+    // Check to make sure the function has at least one non-optional keyword part
+    if (parsedNameCount == optionalNameCount)
+    {
+        Error("Function signature must have at least one non-optional name part");
+        return FunctionSignature();
+    }
 
 	// Emit function definition opcode
 	EmitOpcode(Opcode::Function);
@@ -1255,33 +1273,52 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	// We only need to suppress potential recursive function calls if the first 
 	// token is a parameter.
 	int count = 0;
+    int optionalCount = 0;
 
 	// Match each token or token set to a part of the function signature
-	for (const auto & part : signature->GetParts())
+    const auto & parts = signature->GetParts();
+	for (auto partsItr = parts.begin(); partsItr != parts.end();)
 	{
-		if (part.partType == FunctionSignaturePartType::Name)
+        if (partsItr->optional)
+            optionalCount++;
+
+		if (partsItr->partType == FunctionSignaturePartType::Name)
 		{
 			// Validate each part of the function name
 			if (CheckFunctionNamePart())
 			{
 				auto name = ParseFunctionNamePart();
 				bool match = false;
-				for (const auto & n : part.names)
+				while (!match)
 				{
-					if (name == n)
-					{
-						match = true;
-						break;
-					}
-				}
-				if (!match)
-				{
+				    for (const auto & n : partsItr->names)
+				    {
+					    if (name == n)
+					    {
+						    match = true;
+						    break;
+					    }
+				    }
+                    if (match)
+                        break;
+                    if (partsItr->optional)
+                    {
+                        ++partsItr;
+                        if (partsItr == parts.end())
+                            break;
+                        continue;
+                    }
 					Error("Mismatch in function name");
 					return;
 				}
 			}
 			else
 			{
+                if (partsItr->optional)
+                {
+                    ++partsItr;
+                    continue;
+                }
 				Error("Expecting function name");
 				return;
 			}
@@ -1296,10 +1333,12 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 			}
 			else
 			{
-				ParseExpression(count == 0);
-			}
+				ParseExpression(count <= optionalCount);
+                //ParseExpression(count == 0);
+            }
 		}
 		count++;
+        ++partsItr;
 	}
 
 	// When finished validating the function and pushing parameters, call the function
