@@ -55,7 +55,7 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 				}
 				else if (*p != ' ')
 				{
-					np += (char)(std::tolower(*p));
+					np += (char)(*p);
 					part.names.push_back(np);
 				}
 				++p;
@@ -91,6 +91,17 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 			np.reserve(32);
 			const char * p = n.c_str();
 			const char * e = p + n.size();
+            bool optional = *p == '(';
+            if (optional)
+            {
+                if (n.size() < 3 || n[n.size() - 1] != ')')
+                {
+                    LogWriteLine("Error when parsing optional name component");
+                    return FunctionSignature();
+                }
+                ++p;
+                --e;
+            }
 			while (p != e)
 			{
 				if (*p == '/')
@@ -105,11 +116,12 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 				}
 				else
 				{
-					np += (char)(std::tolower(*p));
+					np += (char)(*p);
 				}
 				++p;
 			}
 			part.partType = FunctionSignaturePartType::Name;
+            part.optional = optional;
 			part.names.push_back(np);
 		}
 		parts.push_back(part);
