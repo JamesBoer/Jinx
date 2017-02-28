@@ -105,6 +105,8 @@ static Variant AddTo(ScriptPtr, Parameters params)
 	{
 		auto collToInsert = params[0].GetCollection();
 		auto collPtr = params[1].GetCollection();
+		if (collToInsert == collPtr)
+			return nullptr;
 		for (auto itr = collToInsert->begin(); itr != collToInsert->end(); ++itr)
 		{
 			if (collPtr->find(itr->first) != collPtr->end())

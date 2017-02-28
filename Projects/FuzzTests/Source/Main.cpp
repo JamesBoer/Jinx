@@ -483,13 +483,9 @@ constexpr size_t countof(T(&)[s])
 class Fuzzer
 {
 public:
-	Fuzzer(unsigned int seed = 0)
+	const char * Fuzz(const char * str, int seed)
 	{
-		m_seed = seed;
-	}
-	const char * Fuzz(const char * str)
-	{
-		m_rng.seed(m_seed);
+		m_rng.seed(static_cast<unsigned int>(seed));
 		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
 		mutation = mutation * mutation * mutation;
 		m_string = str;
@@ -502,13 +498,12 @@ public:
 				m_string[i] = static_cast<char>(rval);
 			}
 		}
-		++m_seed;
 		return m_string.c_str();
 	}
 
-	BufferPtr Fuzz(BufferPtr buffer)
+	BufferPtr Fuzz(BufferPtr buffer, int seed)
 	{
-		m_rng.seed(m_seed);
+		m_rng.seed(static_cast<unsigned int>(seed));
 		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
 		mutation = mutation * mutation * mutation;
 		for (size_t i = 0; i < m_string.length(); ++i)
@@ -520,16 +515,16 @@ public:
 				buffer->Ptr()[i] = static_cast<char>(rval);
 			}
 		}
-		++m_seed;
 		return buffer;
 	}
 
 private:
 	std::mt19937 m_rng;
 	std::string m_string;
-	unsigned int m_seed;
 };
 
+// Comment out to test sequentially
+#define PARALLEL_EXECUTION
 
 int main(int argc, char * argv[])
 {
@@ -538,6 +533,9 @@ int main(int argc, char * argv[])
 	globalParams.logBytecode = false;
 	globalParams.enableLogging = false;
 	Jinx::Initialize(globalParams);
+
+	const int StartingPermutation = 0;
+	const int StartingScript = 0;
 
 	// Validate that all scripts compile and execute successfully
 	for (auto i = 0u; i < countof(s_testScripts); ++i)
@@ -554,14 +552,17 @@ int main(int argc, char * argv[])
 	}
 
 	// Run fuzz permutations on source
-	Fuzzer sourceFuzzer;
-	for (auto c = 0; c < NumPermutations; ++c)
+#ifdef PARALLEL_EXECUTION
+	#pragma omp parallel for
+#endif
+	for (int c = StartingPermutation; c < NumPermutations; ++c)
 	{
+		Fuzzer sourceFuzzer;
 		auto runtime = CreateRuntime();
-		for (auto i = 0u; i < countof(s_testScripts); ++i)
+		for (int i = StartingScript; i < static_cast<int>(countof(s_testScripts)); ++i)
 		{
 			// Compile the text to bytecode
-			auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i]), "Test Script");
+			auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], c), "Test Script");
 			if (!bytecode)
 				continue;
 
@@ -575,11 +576,14 @@ int main(int argc, char * argv[])
 	}
 
 	// Run fuzz permutations on bytecode
-	Fuzzer bytecodeFuzzer;
-	for (auto c = 0; c < NumPermutations; ++c)
+#ifdef PARALLEL_EXECUTION
+	#pragma omp parallel for
+#endif
+	for (int c = StartingPermutation; c < NumPermutations; ++c)
 	{
+		Fuzzer bytecodeFuzzer;
 		auto runtime = CreateRuntime();
-		for (auto i = 0u; i < countof(s_testScripts); ++i)
+		for (int i = StartingScript; i < static_cast<int>(countof(s_testScripts)); ++i)
 		{
 			// Compile the text to bytecode
 			auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
@@ -587,7 +591,7 @@ int main(int argc, char * argv[])
 				continue;
 
 			// Create a runtime script with the given bytecode if it exists
-			auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode));
+			auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode, c));
 			assert(script);
 			script->Execute();
 		}

@@ -1,9 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.4] - 2017-02-27
+
+### Fixed
+- Error when parsing multi-part variables
+- Potential infinite loop in core library
+- Potential for incorrect memory values in multi-threaded programs 
+
+### Changed
+- Improved fuzz testing program for better performance and easier debugging
+
 ## [0.4.3] - 2017-02-08
 ### Added
-- Function name parts can now be added
+- Function name parts can now be optional
 
 ### Fixed
 - Function name registration was incorrectly converting to lower case

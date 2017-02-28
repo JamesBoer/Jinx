@@ -516,15 +516,21 @@ bool Parser::CheckVariable(SymbolListCItr currSym, size_t * symCount) const
 		auto curr = currSym;
 		String name = curr->text;
 		size_t sc = 1;
+		bool error = false;
 		for (size_t i = 1; i < s; ++i)
 		{
 			++curr;
 			if (!IsSymbolValid(curr) || curr->text.empty())
-				continue;
+			{
+				error = true;
+				break;
+			}
 			name += " ";
 			name += curr->text;
 			++sc;
 		}
+		if (error)
+			continue;
 		bool exists = VariableExists(name);
 		if (exists)
 		{
