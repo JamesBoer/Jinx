@@ -42,7 +42,7 @@ TEST_CASE("Test Core Library", "[Core]")
 			b is "test"
 
 			c is a size
-			d is b size
+			d is b get size
 			
             
             )";
@@ -63,7 +63,7 @@ TEST_CASE("Test Core Library", "[Core]")
 			a is []
 			b is ""
 
-			c is a is empty
+			c is a empty
 			d is b is empty
 			
             )";
@@ -72,69 +72,6 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("c").GetBoolean() == true);
 		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-	}
-
-	SECTION("Test add to functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is [1, "one"]
-			add ("two", "three") to a
-            add "four" to a
-
-            )";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection() == true);
-		REQUIRE(script->GetVariable("a").GetCollection()->size() == 4);
-		REQUIRE(script->GetVariable("a").GetCollection()->at(1).GetString() == "one");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(2).GetString() == "two");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(4).GetString() == "four");
-	}
-
-	SECTION("Test remove from functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is "one", "two", "three", "four"
-			remove (1, 2) from a
-			remove 4 from a
-            
-            )";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection() == true);
-		REQUIRE(script->GetVariable("a").GetCollection()->size() == 1);
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
-	}
-
-	SECTION("Test remove values from functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is "one", "two", "three", "four"
-			remove values ("one", "two") from a
-			remove value "four" from a
-            
-            )";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection() == true);
-		REQUIRE(script->GetVariable("a").GetCollection()->size() == 1);
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
 	}
 	
 }

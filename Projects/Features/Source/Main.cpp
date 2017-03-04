@@ -70,21 +70,24 @@ int main(int argc, char ** argv)
 		auto runtime = Jinx::CreateRuntime();
 
 		static const char * scriptText =
-		u8R"(
-			function return (is) something enabled
-				return true
-			end
+			u8R"(
+			import core
 
-			var is something enabled
-			if is something enabled
-				write line "something is enabled"
-			end
+			-- Create collection using an initialization list of key-value pairs		
+			a is [1, "red"], [2, "green"], [3, "blue"]
+			
+			-- Remove element by key
+			a[2] is null
 
-		)";
+			)";
 
-		auto script = TestExecuteScript(scriptText, runtime);
+		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("var") == true);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 2);
+		REQUIRE(collection->find(2) == collection->end());	
 	}
 
 	Jinx::ShutDown();

@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.4.5] - 2017-03-04
+
+### Fixed
+- Jinxpad keyword list corrected
+
+### Changed
+- Collection elements are removed by setting value to null
+
+### Removed
+- Removed some potentially problematic library functions
+
 ## [0.4.4] - 2017-02-27
 
 ### Fixed
