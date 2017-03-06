@@ -1786,9 +1786,8 @@ void Parser::ParseLoop()
 		EmitOpcode(Opcode::JumpFalse);
 		auto emptyLoopJumpAddress = EmitAddressPlaceholder();
 
-		// Retrieve collection from top of stack and push iterator and value from beginning position
+		// Retrieve collection from top of stack and push iterator from beginning position
 		EmitOpcode(Opcode::PushItr);
-		EmitOpcode(Opcode::PushItrVal);
 
 		// Assign the iterator to a variable name if it exists
 		if (!name.empty())

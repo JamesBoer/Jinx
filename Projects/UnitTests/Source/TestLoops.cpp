@@ -171,7 +171,8 @@ TEST_CASE("Test Loops", "[Loops]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+			import core
+
 			a is 0
 			loop over 1, 2, 3
 				increment a
@@ -185,7 +186,7 @@ TEST_CASE("Test Loops", "[Loops]")
 
 			c is 0
 			loop i over 1, 2, 3
-				increment c by i
+				increment c by i value
 			end
 
 			)";

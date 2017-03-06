@@ -70,24 +70,28 @@ int main(int argc, char ** argv)
 		auto runtime = Jinx::CreateRuntime();
 
 		static const char * scriptText =
-			u8R"(
-			import core
+		u8R"(
+---
+			c is "red", "green", "blue"
+			loop i over c
+				if i value = "red"
+					i is erase i from c
+				end
+			end
+---
 
-			-- Create collection using an initialization list of key-value pairs		
-			a is [1, "red"], [2, "green"], [3, "blue"]
-			
-			-- Remove element by key
-			a[2] is null
-
-			)";
+			c is 0
+			loop i over 1, 2, 3
+				increment c by i value
+			end
+		
+		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection());
-		auto collection = script->GetVariable("a").GetCollection();
-		REQUIRE(collection);
-		REQUIRE(collection->size() == 2);
-		REQUIRE(collection->find(2) == collection->end());	
+		//REQUIRE(script->GetVariable("c").GetCollection()->size() == 2);
+		REQUIRE(script->GetVariable("c") == 6);
+
 	}
 
 	Jinx::ShutDown();

@@ -149,6 +149,8 @@ bool Script::Execute()
 						auto param = m_stack[index];
 						params.push_back(param);
 					}
+					for (size_t i = 0; i < numParams; ++i)
+						m_stack.pop_back();			
 					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
 					if (functionDef->HasReturnParameter())
 						Push(retVal);
@@ -322,15 +324,13 @@ bool Script::Execute()
 			{
 				assert(m_stack.size() >= 3);
 				auto top = m_stack.size() - 1;
-				auto itr = m_stack[top - 1];
+				auto itr = m_stack[top];
 				assert(itr.IsCollectionItr());
-				auto coll = m_stack[top - 2];
+				auto coll = m_stack[top - 1];
 				assert(coll.IsCollection() && coll.GetCollection());
 				++itr;
 				bool finished = itr.GetCollectionItr() == coll.GetCollection()->end();
-				m_stack[top - 1] = itr;
-				if (!finished)
-					m_stack[top] = itr.GetCollectionItr()->second;
+				m_stack[top] = itr;
 				Push(finished);
 			}
 			break;
