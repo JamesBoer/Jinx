@@ -71,26 +71,16 @@ int main(int argc, char ** argv)
 
 		static const char * scriptText =
 		u8R"(
----
-			c is "red", "green", "blue"
-			loop i over c
-				if i value = "red"
-					i is erase i from c
-				end
-			end
----
-
-			c is 0
-			loop i over 1, 2, 3
-				increment c by i value
-			end
+			
+			set a to 7
+			set readonly private b to "seven"
 		
 		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		//REQUIRE(script->GetVariable("c").GetCollection()->size() == 2);
-		REQUIRE(script->GetVariable("c") == 6);
+		REQUIRE(script->GetVariable("a") == 7);
+		REQUIRE(script->GetLibrary()->GetProperty("b") == "seven");
 
 	}
 

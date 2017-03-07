@@ -38,40 +38,40 @@ TEST_CASE("Test Core Library", "[Core]")
 			
 			import core
 
-			a is 1, 2, 3
-			b is "test"
+			set a to 1, 2, 3
+			set b to "test"
 
-			c is a size
-			d is b get size
+			set c to a size
+			set d to b get size
 			
             
             )";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("c").GetInteger() == 3);
-		REQUIRE(script->GetVariable("d").GetInteger() == 4);
+		REQUIRE(script->GetVariable("c") == 3);
+		REQUIRE(script->GetVariable("d") == 4);
 	}
 
-	SECTION("Test is empty functions")
+	SECTION("Test to empty functions")
 	{
 		const char * scriptText =
 			u8R"(
 			
 			import core
 
-			a is []
-			b is ""
+			set a to []
+			set b to ""
 
-			c is a empty
-			d is b is empty
+			set c to a empty
+			set d to b is empty
 			
             )";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("c").GetBoolean() == true);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
+		REQUIRE(script->GetVariable("c") == true);
+		REQUIRE(script->GetVariable("d") == true);
 	}
 	
 }

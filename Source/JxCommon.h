@@ -136,6 +136,7 @@ namespace Jinx
 		Public,
 		Readonly,
 		Return,
+		Set,
 		String,
 		To,
 		Type,

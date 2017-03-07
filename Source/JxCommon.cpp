@@ -140,6 +140,7 @@ static const char * s_symbolTypeName[] =
 	"public",
 	"readonly",
 	"return",
+	"set",
 	"string",
 	"to",
 	"type",

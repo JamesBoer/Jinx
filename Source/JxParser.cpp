@@ -890,7 +890,7 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 
 	// Search for multi-part property names
 	auto name = ParseName();
-	while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::Is) && !m_currentSymbol->text.empty())
+	while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::To) && !m_currentSymbol->text.empty())
 	{
 		name += " ";
 		name += ParseName();
@@ -916,7 +916,7 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 	EmitOpcode(Opcode::Property);
 	propertyName.Write(m_writer);
 
-	if (Accept(SymbolType::Is))
+	if (Accept(SymbolType::To))
 	{
 		ParseExpression();
 		EmitOpcode(Opcode::SetProp);
@@ -1907,6 +1907,8 @@ void Parser::ParseStatement()
 	}
 	else
 	{
+
+		bool set = Accept(SymbolType::Set);
 		
 		// Parse optional readonly
 		bool readOnly = Accept(SymbolType::Readonly);
@@ -1929,7 +1931,7 @@ void Parser::ParseStatement()
 			// We're parsing a function definition
 			ParseFunctionDefinition(scope);
 		}
-		else if (CheckName())
+		else if (set && CheckName())
 		{
 			// Can't use the current library name or preface the variable with it
 			if (m_currentSymbol->text == m_library->GetName())
@@ -1962,8 +1964,8 @@ void Parser::ParseStatement()
 					// Check for subscript operator
 					bool subscript = ParseSubscript();
 
-					// Check for an 'is' statement
-					Expect(SymbolType::Is);
+					// Check for a 'to' statement
+					Expect(SymbolType::To);
 
 					// Parse assignment expression
 					ParseExpression();
@@ -1980,7 +1982,7 @@ void Parser::ParseStatement()
 					String name = ParseName();
 
 					// Parse potential multi-part variable names
-					while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::Is) && !Check(SymbolType::SquareOpen))
+					while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::To) && !Check(SymbolType::SquareOpen))
 					{
 						name += " ";
 						name += ParseName();
@@ -1989,8 +1991,8 @@ void Parser::ParseStatement()
 					// Check for subscript operator
 					bool subscript = ParseSubscript();
 
-					// Check for an 'is' statement
-					Expect(SymbolType::Is);
+					// Check for a 'to' statement
+					Expect(SymbolType::To);
 
 					// Parse assignment expression
 					ParseExpression();

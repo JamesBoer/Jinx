@@ -18,7 +18,7 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create empty collection
-			a is []
+			set a to []
 			
 			)";
 
@@ -33,7 +33,7 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create collection using an initialization list
-			a is 3, 2, 1
+			set a to 3, 2, 1
 			
 			)";
 
@@ -44,11 +44,11 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 3);
 		REQUIRE(collection->find(1) != collection->end());
-		REQUIRE(collection->find(1)->second.GetInteger() == 3);
+		REQUIRE(collection->find(1)->second == 3);
 		REQUIRE(collection->find(2) != collection->end());
-		REQUIRE(collection->find(2)->second.GetInteger() == 2);
+		REQUIRE(collection->find(2)->second == 2);
 		REQUIRE(collection->find(3) != collection->end());
-		REQUIRE(collection->find(3)->second.GetInteger() == 1);
+		REQUIRE(collection->find(3)->second == 1);
 	}
 
 
@@ -58,10 +58,10 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create empty collection and add three elements
-			a is []
-			a [1] is 3
-			a [2] is 2
-			a [3] is 1
+			set a to []
+			set a [1] to 3
+			set a [2] to 2
+			set a [3] to 1
 			
 			)";
 
@@ -72,11 +72,11 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 3);
 		REQUIRE(collection->find(1) != collection->end());
-		REQUIRE(collection->find(1)->second.GetInteger() == 3);
+		REQUIRE(collection->find(1)->second == 3);
 		REQUIRE(collection->find(2) != collection->end());
-		REQUIRE(collection->find(2)->second.GetInteger() == 2);
+		REQUIRE(collection->find(2)->second == 2);
 		REQUIRE(collection->find(3) != collection->end());
-		REQUIRE(collection->find(3)->second.GetInteger() == 1);
+		REQUIRE(collection->find(3)->second == 1);
 	}
 
 	SECTION("Test collection initialization list of key-value pairs")
@@ -85,7 +85,7 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create collection using an initialization list of key-value pairs		
-			a is [1, "red"], [2, "green"], [3, "blue"]
+			set a to [1, "red"], [2, "green"], [3, "blue"]
 
 			)";
 
@@ -96,11 +96,11 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 3);
 		REQUIRE(collection->find(1) != collection->end());
-		REQUIRE(collection->find(1)->second.GetString() == "red");
+		REQUIRE(collection->find(1)->second == "red");
 		REQUIRE(collection->find(2) != collection->end());
-		REQUIRE(collection->find(2)->second.GetString() == "green");
+		REQUIRE(collection->find(2)->second == "green");
 		REQUIRE(collection->find(3) != collection->end());
-		REQUIRE(collection->find(3)->second.GetString() == "blue");
+		REQUIRE(collection->find(3)->second == "blue");
 	}
 
 	SECTION("Test assignment of collection element by index operator for variable")
@@ -109,10 +109,10 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create collection using an initialization list of key-value pairs		
-			a is [1, "red"], [2, "green"], [3, "blue"]
+			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			-- Change one of the elements by index
-			a[2] is "magenta"
+			set a[2] to "magenta"
 
 			)";
 
@@ -123,7 +123,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 3);
 		REQUIRE(collection->find(2) != collection->end());
-		REQUIRE(collection->find(2)->second.GetString() == "magenta");
+		REQUIRE(collection->find(2)->second == "magenta");
 	}
 
 	SECTION("Test assignment of collection element by index operator for property")
@@ -132,10 +132,10 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create collection using an initialization list of key-value pairs		
-			private a is [1, "red"], [2, "green"], [3, "blue"]
+			set private a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			-- Change one of the elements by index
-			a[2] is "magenta"
+			set a[2] to "magenta"
 
 			)";
 
@@ -148,7 +148,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 3);
 		REQUIRE(collection->find(2) != collection->end());
-		REQUIRE(collection->find(2)->second.GetString() == "magenta");
+		REQUIRE(collection->find(2)->second == "magenta");
 	}
 
 	SECTION("Test assignment of collection variable by key")
@@ -157,16 +157,16 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create collection using an initialization list of key-value pairs		
-			a is [1, "red"], [2, "green"], [3, "blue"]
+			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			-- Set variable to one of the collection values
-			b is a[2]
+			set b to a[2]
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("b").GetString() == "green");
+		REQUIRE(script->GetVariable("b") == "green");
 	}
 
 	SECTION("Test assignment of collection property by key")
@@ -175,16 +175,16 @@ TEST_CASE("Test Collections", "[Collections]")
 			u8R"(
     
 			-- Create collection using an initialization list of key-value pairs		
-			private a is [1, "red"], [2, "green"], [3, "blue"]
+			set private a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			-- Set variable to one of the collection values
-			b is a[2]
+			set b to a[2]
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("b").GetString() == "green");
+		REQUIRE(script->GetVariable("b") == "green");
 	}
 
 	SECTION("Test adding auto-indexed value to existing collection")
@@ -194,10 +194,10 @@ TEST_CASE("Test Collections", "[Collections]")
 			import core
 
 			-- Create collection using an initialization list of key-value pairs		
-			a is [1, "red"], [2, "green"], [3, "blue"]
+			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			-- Add single element to a
-			a[(a size + 1)] is "purple"
+			set a[(a size + 1)] to "purple"
 
 			)";
 
@@ -208,7 +208,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 4);
 		REQUIRE(collection->find(4) != collection->end());
-		REQUIRE(collection->find(4)->second.GetString() == "purple");
+		REQUIRE(collection->find(4)->second == "purple");
 	}
 
 	SECTION("Test erasing single element from collection")
@@ -218,10 +218,10 @@ TEST_CASE("Test Collections", "[Collections]")
 			import core
 
 			-- Create collection using an initialization list of key-value pairs		
-			a is [1, "red"], [2, "green"], [3, "blue"]
+			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			-- Remove element by key
-			a[2] is null
+			set a[2] to null
 
 			)";
 
