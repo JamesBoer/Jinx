@@ -72,16 +72,18 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 		u8R"(
 			
-			set a to 7
-			set readonly private b to "seven"
+			set c to "red", "green", "blue"
+			loop i over c
+				if i value = "blue"
+					set i to erase i
+				end
+			end
 		
 		)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 7);
-		REQUIRE(script->GetLibrary()->GetProperty("b") == "seven");
-
+		REQUIRE(script->GetVariable("c").GetCollection()->size() == 2);
 	}
 
 	Jinx::ShutDown();

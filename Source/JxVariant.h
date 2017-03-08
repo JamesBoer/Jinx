@@ -70,7 +70,7 @@ namespace Jinx
 		Variant(const String & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const StringU16 & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
-		Variant(const CollectionItr & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
+		Variant(const CollectionItrPair & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
 		Variant(const BufferPtr & value) : m_type(ValueType::Null) { SetBuffer(value); }
 		Variant(const Guid & value) : m_type(ValueType::Null) { SetGuid(value); }
@@ -107,7 +107,7 @@ namespace Jinx
 		String GetString() const;
 		StringU16 GetStringU16() const;
 		CollectionPtr GetCollection() const;
-		CollectionItr GetCollectionItr() const;
+		CollectionItrPair GetCollectionItr() const;
 		UserObjectPtr GetUserObject() const;
 		BufferPtr GetBuffer() const;
 		Guid GetGuid() const;
@@ -141,7 +141,7 @@ namespace Jinx
 		void SetString(const String & value);
 		void SetString(const StringU16 & value);
 		void SetCollection(const CollectionPtr & value);
-		void SetCollectionItr(const CollectionItr & value);
+		void SetCollectionItr(const CollectionItrPair & value);
 		void SetUserObject(const UserObjectPtr & value);
 		void SetBuffer(const BufferPtr & value);
 		void SetGuid(const Guid & value);
@@ -174,7 +174,7 @@ namespace Jinx
 			ValueType m_valType;
 			String m_string;
 			CollectionPtr m_collection;
-			CollectionItr m_collectionItr;
+			CollectionItrPair m_collectionItrPair;
 			UserObjectPtr m_userObject;
 			BufferPtr m_buffer;
 			Guid m_guid;

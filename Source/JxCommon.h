@@ -50,7 +50,6 @@ namespace Jinx
 		Property,
 		PushColl,
 		PushItr,
-		PushItrVal,
 		PushList,
 		PushProp,
 		PushPropKeyVal,

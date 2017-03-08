@@ -18,8 +18,8 @@ namespace Jinx
 	typedef std::map<Variant, Variant, std::less<Variant>, Allocator<std::pair<Variant, Variant>>> Collection;
 	typedef std::shared_ptr<Collection> CollectionPtr;
 	typedef Collection::iterator CollectionItr;
+	typedef std::pair<CollectionItr, CollectionPtr> CollectionItrPair;
 	CollectionPtr CreateCollection();
-
 };
 
 #endif // JX_COLLECTION_H__

@@ -51,7 +51,6 @@ static const char * s_opcodeName[] =
 	"property",
 	"pushcoll",
 	"pushitr",
-	"pushitrval",
 	"pushlist",
 	"pushprop",
 	"pushpropkey",

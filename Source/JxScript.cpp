@@ -328,8 +328,12 @@ bool Script::Execute()
 				assert(itr.IsCollectionItr());
 				auto coll = m_stack[top - 1];
 				assert(coll.IsCollection() && coll.GetCollection());
-				++itr;
-				bool finished = itr.GetCollectionItr() == coll.GetCollection()->end();
+				bool finished = itr.GetCollectionItr().first == coll.GetCollection()->end();
+				if (!finished)
+				{
+					++itr;
+					finished = itr.GetCollectionItr().first == coll.GetCollection()->end();
+				}
 				m_stack[top] = itr;
 				Push(finished);
 			}
@@ -442,22 +446,8 @@ bool Script::Execute()
 					Error("Expected collection type");
 					return false;
 				}
-				Variant itr = coll.GetCollection()->begin();
+				Variant itr = std::make_pair(coll.GetCollection()->begin(), coll.GetCollection());
 				Push(itr);
-			}
-			break;
-			case Opcode::PushItrVal:
-			{
-				assert(m_stack.size() >= 1);
-				auto top = m_stack.size() - 1;
-				auto coll = m_stack[top];
-				if (!coll.IsCollectionItr())
-				{
-					Error("Expected collection iterator type");
-					return false;
-				}
-				Variant itr = coll.GetCollectionItr();
-				Push(itr.GetCollectionItr()->second);
 			}
 			break;
 			case Opcode::PushList:
