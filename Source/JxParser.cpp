@@ -795,6 +795,36 @@ String Parser::ParseName()
 	return s;
 }
 
+String Parser::ParseMultiName(std::initializer_list<SymbolType> symbols)
+{
+	if (m_error || m_currentSymbol == m_symbolList.end())
+		return String();
+	if (m_currentSymbol->type != SymbolType::NameValue)
+	{
+		Error("Unexpected symbol type when parsing name");
+		return String();
+	}
+	String s = m_currentSymbol->text;
+	NextSymbol();
+
+	while (IsSymbolValid(m_currentSymbol) && !m_currentSymbol->text.empty())
+	{
+		if (m_currentSymbol->type != SymbolType::NameValue)
+		{
+			for (auto symbol : symbols)
+			{
+				if (m_currentSymbol->type == symbol)
+					return s;
+			}
+		}
+		s += " ";
+		s += m_currentSymbol->text;
+		NextSymbol();
+	}
+
+	return s;
+}
+
 String Parser::ParseVariable()
 {
 	if (m_error || m_currentSymbol == m_symbolList.end())
@@ -889,12 +919,7 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 	}
 
 	// Search for multi-part property names
-	auto name = ParseName();
-	while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::To) && !m_currentSymbol->text.empty())
-	{
-		name += " ";
-		name += ParseName();
-	}
+	String name = ParseMultiName({ SymbolType::To });
 
 	if (m_library->PropertyNameExists(name))
 	{
@@ -1084,12 +1109,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			}
 			if (CheckName())
 			{
-				auto paramName = ParseName();
-				while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::CurlyClose))
-				{
-					paramName += " ";
-					paramName += ParseName();
-				}
+				String paramName = ParseMultiName({ SymbolType::CurlyClose });
 				part.names.push_back(paramName);
 			}
 			else
@@ -1757,14 +1777,7 @@ void Parser::ParseLoop()
 	if (CheckName())
 	{
 		// Parse initial name part
-		name = ParseName();
-
-		// Parse potential multi-part variable names
-		while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::From) && !Check(SymbolType::Over) && !Check(SymbolType::Until) && !Check(SymbolType::While))
-		{
-			name += " ";
-			name += ParseName();
-		}
+		name = ParseMultiName({ SymbolType::From, SymbolType::Over, SymbolType::Until, SymbolType::While });
 	}
 
 	// We're looping using a counter
@@ -2027,14 +2040,7 @@ void Parser::ParseStatement()
 				else
 				{
 					// Get the variable name
-					String name = ParseName();
-
-					// Parse potential multi-part variable names
-					while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::To) && !Check(SymbolType::SquareOpen))
-					{
-						name += " ";
-						name += ParseName();
-					}
+					String name = ParseMultiName({ SymbolType::To, SymbolType::SquareOpen });
 
 					// Check for subscript operator
 					bool subscript = ParseSubscript();
@@ -2158,14 +2164,7 @@ void Parser::ParseStatement()
 				bool propExists = CheckProperty();
 
 				// Get the variable name
-				String name = ParseName();
-
-				// Parse potential multi-part variable names
-				while (IsSymbolValid(m_currentSymbol))
-				{
-					name += " ";
-					name += ParseName();
-				}
+				String name = ParseMultiName({ });
 
 				// Validate the name is legal and register it as a variable name
 				if (!m_variableStackFrame.IsRootFrame())

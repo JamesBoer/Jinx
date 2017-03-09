@@ -86,6 +86,30 @@ multiline comment
 		REQUIRE(script->GetVariable("e e") == nullptr);
 	}
 
+	SECTION("Test multiple word variables with keywords")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set some string to "Hello world!"
+			set some number to 5.5
+			set some integer to 123
+			set some boolean to true
+			set some null to null
+
+			external some other string
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("some string") == "Hello world!");
+		REQUIRE(script->GetVariable("some number") == 5.5);
+		REQUIRE(script->GetVariable("some integer") == 123);
+		REQUIRE(script->GetVariable("some boolean") == true);
+		REQUIRE(script->GetVariable("some null") == nullptr);
+	}
+
 	SECTION("Test variable and property type")
 	{
 		const char * scriptText =
