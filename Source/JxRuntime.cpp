@@ -207,7 +207,9 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 		switch (opcode)
 		{
 			case Opcode::CallFunc:
-			case Opcode::PushProp:
+            case Opcode::EraseProp:
+            case Opcode::ErasePropElem:
+            case Opcode::PushProp:
 			case Opcode::PushPropKeyVal:
 			case Opcode::SetProp:
 			case Opcode::SetPropKeyVal:
@@ -224,7 +226,9 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 				LogWrite("%s", GetValueTypeName(type));
 			}
 			break;
-			case Opcode::Library:
+            case Opcode::EraseVar:
+            case Opcode::EraseVarElem:
+            case Opcode::Library:
 			case Opcode::PushVar:
 			case Opcode::PushVarKey:
 			case Opcode::SetVar:
@@ -385,10 +389,7 @@ bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Varia
 	if (!variant.IsCollection())
 		return false;
 	auto collPtr = variant.GetCollection();
-	if (value.IsNull())
-		collPtr->erase(key);
-	else
-		(*collPtr)[key] = value;
+	(*collPtr)[key] = value;
 	return true;
 }
 

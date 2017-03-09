@@ -100,19 +100,6 @@ static Variant GetValue(ScriptPtr, Parameters params)
 	return params[0].GetCollectionItr().first->second;
 }
 
-static Variant Erase(ScriptPtr, Parameters params)
-{
-	if (!params[0].IsCollectionItr())
-	{
-		LogWriteLine("'erase' called with non-iterator param");
-		return nullptr;
-	}
-	auto itr = params[0].GetCollectionItr().first;
-	auto coll = params[0].GetCollectionItr().second;
-	itr = coll->erase(itr);
-	return std::make_pair(itr, coll);
-}
-
 void Jinx::RegisterLibCore(RuntimePtr runtime)
 {
 	auto library = runtime->GetLibrary("core");
@@ -124,7 +111,6 @@ void Jinx::RegisterLibCore(RuntimePtr runtime)
 	library->RegisterFunction(true, true, { "{}", "(is)", "empty" }, IsEmpty);
 	library->RegisterFunction(true, true, { "{}", "(get)", "key" }, GetKey);
 	library->RegisterFunction(true, true, { "{}", "(get)", "value" }, GetValue);
-	library->RegisterFunction(true, true, { "erase", "{}" }, Erase);
 
 	// Register core properties
 	library->RegisterProperty(true, true, { "newline" }, "\n");

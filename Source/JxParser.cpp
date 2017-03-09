@@ -1571,6 +1571,54 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 	}
 }
 
+void Parser::ParseErase()
+{
+    if (CheckProperty())
+    {
+        auto propName = ParsePropertyName();
+        if (propName.IsReadOnly())
+        {
+            Error("Can't delete a readonly property");
+            return;
+        }
+        if (Accept(SymbolType::SquareOpen))
+        {
+            ParseSubexpression();
+            Expect(SymbolType::SquareClose);
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseVarElem);
+        }
+        else
+        {
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseProp);
+        }
+        EmitId(propName.GetId());
+    }
+    else if (CheckVariable())
+    {
+        auto varName = ParseVariable();
+        if (Accept(SymbolType::SquareOpen))
+        {
+            ParseSubexpression();
+            Expect(SymbolType::SquareClose);
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseVarElem);
+        }
+        else
+        {
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseVar);
+        }
+        EmitName(varName);
+    }
+    else
+    {
+        Error("Valid property or variable name expected after delete keyword");
+        return;
+    }
+}
+
 void Parser::ParseIncDec()
 {
 	bool increment = Accept(SymbolType::Increment);
@@ -2027,6 +2075,11 @@ void Parser::ParseStatement()
 				// We're parsing a loop block
 				ParseLoop();
 			}
+            else if (Accept(SymbolType::Erase))
+            {
+                // We're parsing an erase operation
+                ParseErase();
+            }
 			else if (Check(SymbolType::Increment) || Check(SymbolType::Decrement))
 			{
 				// We're parsing an increment or decrement statement

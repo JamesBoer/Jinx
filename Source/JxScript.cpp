@@ -180,7 +180,72 @@ bool Script::Execute()
 				Push(op2);
 			}
 			break;
-			case Opcode::Divide:
+            case Opcode::EraseProp:
+            {
+                RuntimeID propId;
+                m_execution.back().reader.Read(&propId);
+                auto var = m_runtime->GetProperty(propId);
+                if (var.IsCollectionItr())
+                {
+                    auto itr = var.GetCollectionItr().first;
+                    auto coll = var.GetCollectionItr().second;
+                    if (itr != coll->end())
+                        itr = coll->erase(itr);
+                    m_runtime->SetProperty(propId, std::make_pair(itr, coll));
+                }
+            }
+            break;
+            case Opcode::ErasePropElem:
+            {
+                RuntimeID propId;
+                m_execution.back().reader.Read(&propId);
+                auto var = m_runtime->GetProperty(propId);
+                if (var.IsCollectionItr())
+                {
+                    auto itr = var.GetCollectionItr().first;
+                    auto coll = var.GetCollectionItr().second;
+                    if (itr != coll->end())
+                        itr = coll->erase(itr);
+                    m_runtime->SetProperty(propId, std::make_pair(itr, coll));
+                }
+            }
+            break;
+            case Opcode::EraseVar:
+            {
+                String name;
+                m_execution.back().reader.Read(&name);
+                auto var = GetVariable(name);
+                if (var.IsCollectionItr())
+                {
+                    auto itr = var.GetCollectionItr().first;
+                    auto coll = var.GetCollectionItr().second;
+                    if (itr != coll->end())
+                        itr = coll->erase(itr);
+                    SetVariable(name, std::make_pair(itr, coll));
+                }
+            }
+            break;
+            case Opcode::EraseVarElem:
+            {
+                String name;
+                m_execution.back().reader.Read(&name);
+                auto var = GetVariable(name);
+                auto key = Pop();
+                if (var.IsCollection())
+                {
+                    if (!key.IsKeyType())
+                    {
+                        LogWriteLine("Invalid key");
+                        return false;
+                    }
+                    auto coll = var.GetCollection();
+                    auto itr = coll->find(key);
+                    if (itr != coll->end())
+                        coll->erase(itr);
+                }
+            }
+            break;
+            case Opcode::Divide:
 			{
 				auto op2 = Pop();
 				auto op1 = Pop();
@@ -640,10 +705,7 @@ bool Script::Execute()
 					break;
 				}
 				auto collection = prop.GetCollection();
-				if (val.IsNull())
-					collection->erase(key);
-				else
-					(*collection)[key] = val;
+				(*collection)[key] = val;
 			}
 			break;
 			case Opcode::Subtract:

@@ -211,7 +211,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(4)->second == "purple");
 	}
 
-	SECTION("Test erasing single element from collection")
+	SECTION("Test erasing single element from collection by key")
 	{
 		static const char * scriptText =
 			u8R"(
@@ -220,8 +220,8 @@ TEST_CASE("Test Collections", "[Collections]")
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
-			-- Remove element by key
-			set a[2] to null
+			-- Erase element by key
+			erase a[2] 
 
 			)";
 
@@ -233,5 +233,31 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->size() == 2);
 		REQUIRE(collection->find(2) == collection->end());
 	}
-	
+
+    SECTION("Test erasing single element from collection in loop")
+    {
+        static const char * scriptText =
+            u8R"(
+			import core
+
+			-- Create collection using an initialization list of key-value pairs		
+			set a to [1, "red"], [2, "green"], [3, "blue"]
+			
+			loop i over a
+                if i value = "blue"
+                    erase i
+                end
+            end
+
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script);
+        REQUIRE(script->GetVariable("a").IsCollection());
+        auto collection = script->GetVariable("a").GetCollection();
+        REQUIRE(collection);
+        REQUIRE(collection->size() == 2);
+        REQUIRE(collection->find(3) == collection->end());
+    }
+
 }

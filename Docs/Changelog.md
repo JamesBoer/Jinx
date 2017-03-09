@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2017-03-08
+
+### Added
+- Added erase keyword for removing collection elements
+
+### Changed
+- Variable and property assignment now uses set {var} to {expression} pattern
+- Collection iterators now store an iterator/collection pair
+
+### Removed
+- Removed obsolete library functions to erase collection element
+
 ## [0.4.5] - 2017-03-04
 
 ### Fixed
