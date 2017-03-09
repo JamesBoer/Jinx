@@ -129,6 +129,9 @@ namespace Jinx
 		// Identifier parsing routines
 		String ParseName();
 
+		// Multi-identifier parsing routines
+		String ParseMultiName(std::initializer_list<SymbolType> symbols);
+
 		// Parse a variable
 		String ParseVariable();
 

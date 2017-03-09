@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
 - Variable and property assignment now uses set {var} to {expression} pattern
 - Collection iterators now store an iterator/collection pair
 
+### Fixed
+- Multi-part variable names can include keywords as second or later parts
+
 ### Removed
 - Removed obsolete library functions to erase collection element
 

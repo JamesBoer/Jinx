@@ -79,16 +79,16 @@ int main(int argc, char ** argv)
             end
 
             loop i from 1 to 100
-                set print_number to true
+                set print number to true
                 if i is divisible by 3
                     write "Fizz"
-                    set print_number to false
+                    set print number to false
                 end
                 if i is divisible by 5
                     write "Buzz"
-                    set print_number to false
+                    set print number to false
                 end
-                if print_number
+                if print number
                     write i
                 end
                 write newline
