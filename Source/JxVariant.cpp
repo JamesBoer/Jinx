@@ -35,8 +35,8 @@ Variant::Variant(const Variant & copy)
 		m_collection = copy.m_collection;
 		break;
 	case ValueType::CollectionItr:
-		new(&m_collectionItr) CollectionItr();
-		m_collectionItr = copy.m_collectionItr;
+		new(&m_collectionItrPair) CollectionItrPair();
+		m_collectionItrPair = copy.m_collectionItrPair;
 		break;
 	case ValueType::UserObject:
 		new(&m_userObject) UserObjectPtr();
@@ -88,8 +88,8 @@ Variant & Variant::operator= (const Variant & copy)
 		m_collection = copy.m_collection;
 		break;
 	case ValueType::CollectionItr:
-		new(&m_collectionItr) CollectionItr();
-		m_collectionItr = copy.m_collectionItr;
+		new(&m_collectionItrPair) CollectionItrPair();
+		m_collectionItrPair = copy.m_collectionItrPair;
 		break;
 	case ValueType::UserObject:
 		new(&m_userObject) UserObjectPtr();
@@ -122,7 +122,7 @@ Variant & Variant::operator ++()
 		++m_integer;
 		break;
 	case ValueType::CollectionItr:
-		++m_collectionItr;
+		++m_collectionItrPair.first;
 		break;
 	default:
 		break;
@@ -387,7 +387,7 @@ void Variant::Destroy()
 	}
 	else if (m_type == ValueType::CollectionItr)
 	{
-		m_collectionItr.~CollectionItr();
+		m_collectionItrPair.~CollectionItrPair();
 	}
 	else if (m_type == ValueType::UserObject)
 	{
@@ -416,13 +416,13 @@ CollectionPtr Variant::GetCollection() const
 	return v.GetCollection();
 }
 
-CollectionItr Variant::GetCollectionItr() const
+CollectionItrPair Variant::GetCollectionItr() const
 {
 	if (IsCollectionItr())
-		return m_collectionItr;
+		return m_collectionItrPair;
 	Variant v = *this;
 	if (!v.ConvertTo(ValueType::CollectionItr))
-		return CollectionItr();
+		return CollectionItrPair();
 	return v.GetCollectionItr();
 }
 
@@ -550,12 +550,13 @@ void Variant::SetCollection(const CollectionPtr & value)
 	m_collection = value;
 }
 
-void Variant::SetCollectionItr(const CollectionItr & value)
+void Variant::SetCollectionItr(const CollectionItrPair & value)
 {
+	assert(value.second);
 	Destroy();
 	m_type = ValueType::CollectionItr;
-	new(&m_collectionItr) CollectionItr();
-	m_collectionItr = value;
+	new(&m_collectionItrPair) CollectionItrPair();
+	m_collectionItrPair = value;
 }
 
 void Variant::SetGuid(const Guid & value)
@@ -894,7 +895,8 @@ bool Jinx::operator < (const Variant & left, const Variant & right)
 	case ValueType::Collection:
 		return left.GetCollection() < right.GetCollection();
 	case ValueType::CollectionItr:
-		return left.GetCollectionItr() < right.GetCollectionItr();
+		LogWriteLine("Error comparing collectionitr type with < operator");
+		return false;
 	case ValueType::UserObject:
 		return left.GetUserObject() < right.GetUserObject();
 	case ValueType::Buffer:
@@ -927,7 +929,8 @@ bool Jinx::operator <= (const Variant & left, const Variant & right)
 	case ValueType::Collection:
 		return left.GetCollection() <= right.GetCollection();
 	case ValueType::CollectionItr:
-		return left.GetCollectionItr() <= right.GetCollectionItr();
+		LogWriteLine("Error comparing collectionitr type with <= operator");
+		return false;
 	case ValueType::UserObject:
 		return left.GetUserObject() <= right.GetUserObject();
 	case ValueType::Buffer:

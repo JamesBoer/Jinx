@@ -254,7 +254,7 @@ namespace Jinx
 	void ShutDownMemory();
 
 	// Get memory stats
-	const MemoryStats & GetMemoryStats();
+	MemoryStats GetMemoryStats();
 
 	// Log all currently allocated memory (debug only)
 	void LogAllocations();

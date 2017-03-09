@@ -17,12 +17,12 @@ TEST_CASE("Test Casts", "[Casts]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 123.456 as integer
-			b is true as string
-			c is "false" as boolean
-			d is "456" as integer
-			e is "-123.456" as number
-			f is 4 + 5 + 6 as string
+			set a to 123.456 as integer
+			set b to true as string
+			set c to "false" as boolean
+			set d to "456" as integer
+			set e to "-123.456" as number
+			set f to 4 + 5 + 6 as string
 			)";
 
 		auto script = TestExecuteScript(scriptText);
@@ -46,15 +46,15 @@ TEST_CASE("Test Casts", "[Casts]")
         const char * scriptText =
 			u8R"(
         
-			a is 12345
-			b is a as string
-			c is b as integer
-			d is true
-			e is d as string
-			f is e as boolean
-			g is false
+			set a to 12345
+			set b to a as string
+			set c to b as integer
+			set d to true
+			set e to d as string
+			set f to e as boolean
+			set g to false
 			if g type = boolean and g type = d type
-				g is true
+				set g to true
             end
             
             )";

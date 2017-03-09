@@ -47,9 +47,9 @@ TEST_CASE("Test Native", "[Native]")
 			import test			
 
 			this function
-			a is that function
-			b is another function
-			c is yet "one" another "two" function "three"
+			set a to that function
+			set b to another function
+			set c to yet "one" another "two" function "three"
 
 			)";
 
@@ -62,9 +62,9 @@ TEST_CASE("Test Native", "[Native]")
 		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
 		REQUIRE(s_functionCalled == true);
-		REQUIRE(script->GetVariable("a").GetInteger() == 42);
-		REQUIRE(script->GetVariable("b").GetString() == "forty two");
-		REQUIRE(script->GetVariable("c").GetString() == "one two three");
+		REQUIRE(script->GetVariable("a") == 42);
+		REQUIRE(script->GetVariable("b") == "forty two");
+		REQUIRE(script->GetVariable("c") == "one two three");
 	}
 
 	SECTION("Test native function execution")
@@ -89,7 +89,7 @@ TEST_CASE("Test Native", "[Native]")
 			u8R"(
 			import test
 					
-			a is someprop
+			set a to someprop
 			
 			)";
 
@@ -98,7 +98,7 @@ TEST_CASE("Test Native", "[Native]")
 		library->RegisterProperty(false, true, "someprop", 42);
 		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 42);
+		REQUIRE(script->GetVariable("a") == 42);
 	}
 
 	SECTION("Test native variant Guid-String conversions")

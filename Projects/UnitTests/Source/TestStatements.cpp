@@ -9,6 +9,7 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+
 TEST_CASE("Test Statements", "[Statements]")
 {
 	SECTION("Test comments")
@@ -32,13 +33,13 @@ No indentation
 multiline comment
 ---------
 
-			a --- some comment --- is 123
+			set a --- some comment --- to 123
    
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 123);
+		REQUIRE(script->GetVariable("a") == 123);
 	}
 
 	SECTION("Test variables and basic statements")
@@ -46,21 +47,21 @@ multiline comment
 		const char * scriptText =
 			u8R"(
 
-			a is "Hello world!"
-			b is 5.5
-			c is 123
-			d is true
-			e is null
+			set a to "Hello world!"
+			set b to 5.5
+			set c to 123
+			set d to true
+			set e to null
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetString() == "Hello world!");
-		REQUIRE(script->GetVariable("b").GetNumber() == 5.5);
-		REQUIRE(script->GetVariable("c").GetInteger() == 123);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-		REQUIRE(script->GetVariable("e").IsNull() == true);
+		REQUIRE(script->GetVariable("a") == "Hello world!");
+		REQUIRE(script->GetVariable("b") == 5.5);
+		REQUIRE(script->GetVariable("c") == 123);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == nullptr);
 	}
 
 	SECTION("Test multiple word variables and basic statements")
@@ -68,21 +69,21 @@ multiline comment
 		const char * scriptText =
 			u8R"(
 
-			a a is "Hello world!"
-			b b is 5.5
-			c c is 123
-			d d is true
-			e e is null
+			set a a to "Hello world!"
+			set b b to 5.5
+			set c c to 123
+			set d d to true
+			set e e to null
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a a").GetString() == "Hello world!");
-		REQUIRE(script->GetVariable("b b").GetNumber() == 5.5);
-		REQUIRE(script->GetVariable("c c").GetInteger() == 123);
-		REQUIRE(script->GetVariable("d d").GetBoolean() == true);
-		REQUIRE(script->GetVariable("e e").IsNull() == true);
+		REQUIRE(script->GetVariable("a a") == "Hello world!");
+		REQUIRE(script->GetVariable("b b") == 5.5);
+		REQUIRE(script->GetVariable("c c") == 123);
+		REQUIRE(script->GetVariable("d d") == true);
+		REQUIRE(script->GetVariable("e e") == nullptr);
 	}
 
 	SECTION("Test variable and property type")
@@ -90,16 +91,16 @@ multiline comment
 		const char * scriptText =
 			u8R"(
 
-			a is 123
-			private b is 234
-			c is a type
-			d is false
+			set a to 123
+			set private b to 234
+			set c to a type
+			set d to false
 			if a type = b type
-				d is true
+				set d to true
 			end
-			e is false
+			set e to false
 			if a type = integer
-				e is true
+				set e to true
 			end
 			
 			)";
@@ -108,8 +109,8 @@ multiline comment
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("c").IsValType());
 		REQUIRE(script->GetVariable("c").GetValType() == ValueType::Integer);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-		REQUIRE(script->GetVariable("e").GetBoolean() == true);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == true);
 	}
 
 	SECTION("Test alternate numeric form parsing")
@@ -117,19 +118,19 @@ multiline comment
 		const char * scriptText =
 			u8R"(
     
-			a is -375.5
-			b is .11111
-			c is -999
-			d is 00001
+			set a to -375.5
+			set b to .11111
+			set c to -999
+			set d to 00001
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetNumber() == -375.5);
+		REQUIRE(script->GetVariable("a") == -375.5);
 		REQUIRE(script->GetVariable("b").GetNumber() == Approx(.11111));
-		REQUIRE(script->GetVariable("c").GetInteger() == -999);
-		REQUIRE(script->GetVariable("d").GetInteger() == 1);
+		REQUIRE(script->GetVariable("c") == -999);
+		REQUIRE(script->GetVariable("d") == 1);
 	}
 
 	SECTION("Test variable scope")
@@ -139,21 +140,21 @@ multiline comment
 
 			-- Scope test - a will not be visible after end
 			begin
-				a is 42
+				set a to 42
 			end
 
 			-- Scope test - g will be visible inside scope block
-			b is 999
+			set b to 999
 			begin
-				b is 55
+				set b to 55
 			end
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsNull() == true);
-		REQUIRE(script->GetVariable("b").GetInteger() == 55);
+		REQUIRE(script->GetVariable("a") == nullptr);
+		REQUIRE(script->GetVariable("b") == 55);
 	}
 
 	SECTION("Test common math operators")
@@ -162,44 +163,44 @@ multiline comment
 			u8R"(
     
 			-- Basic assignments 
-			a is 2
-			b is 3
+			set a to 2
+			set b to 3
 
 			-- Basic math operations
-			c is a + b
-			d is b - a
-			e is a * b
-			f is b / 1
-			g is 10 % b
+			set c to a + b
+			set d to b - a
+			set e to a * b
+			set f to b / 1
+			set g to 10 % b
 
 			-- Multiple operations with and without parentheses
-			h is 1 + 2 * 3     -- h is 9
-			i is 1 + (2 * 3)   -- i is 7
+			set h to 1 + 2 * 3     -- h = 9
+			set i to 1 + (2 * 3)   -- i = 7
 
 			-- Floating point assignments
-			j is 123.456
-			k is 23.45
+			set j to 123.456
+			set k to 23.45
 
 			-- Floating point operations
-			l is j * k
-			m is j / k
-			n is j + k
-			o is j - k
-			p is j % k
+			set l to j * k
+			set m to j / k
+			set n to j + k
+			set o to j - k
+			set p to j % k
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 2);
-		REQUIRE(script->GetVariable("b").GetInteger() == 3);
-		REQUIRE(script->GetVariable("c").GetInteger() == 5);
-		REQUIRE(script->GetVariable("d").GetInteger() == 1);
-		REQUIRE(script->GetVariable("e").GetInteger() == 6);
-		REQUIRE(script->GetVariable("f").GetInteger() == 3);
-		REQUIRE(script->GetVariable("g").GetInteger() == 1);
-		REQUIRE(script->GetVariable("h").GetInteger() == 9);
-		REQUIRE(script->GetVariable("i").GetInteger() == 7);
+		REQUIRE(script->GetVariable("a") == 2);
+		REQUIRE(script->GetVariable("b") == 3);
+		REQUIRE(script->GetVariable("c") == 5);
+		REQUIRE(script->GetVariable("d") == 1);
+		REQUIRE(script->GetVariable("e") == 6);
+		REQUIRE(script->GetVariable("f") == 3);
+		REQUIRE(script->GetVariable("g") == 1);
+		REQUIRE(script->GetVariable("h") == 9);
+		REQUIRE(script->GetVariable("i") == 7);
 		REQUIRE(script->GetVariable("j").GetNumber() == Approx(123.456));
 		REQUIRE(script->GetVariable("k").GetNumber() == Approx(23.45));
 		REQUIRE(script->GetVariable("l").GetNumber() == Approx(2895.0432));
@@ -214,15 +215,15 @@ multiline comment
 		const char * scriptText =
 			u8R"(
 			
-			a is true = true		-- true
-			b is true != true		-- false
+			set a to true = true		-- true
+			set b to true != true		-- false
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetBoolean() == true);
-		REQUIRE(script->GetVariable("b").GetBoolean() == false);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == false);
 	}
 
 	SECTION("Test logical operators")
@@ -230,28 +231,28 @@ multiline comment
 		const char * scriptText =
 			u8R"(
 			
-			a is true and false			-- false	
-			b is true and true			-- true
-			c is false or false			-- false
-			d is true or false			-- true		
+			set a to true and false			-- false	
+			set b to true and true			-- true
+			set c to false or false			-- false
+			set d to true or false			-- true		
 
-			e is 1 < 2 or 4 != 5        -- true
-			f is not 1 < 2 or 4 != 5    -- false
-			g is not (1 < 2 or 4 != 5)  -- false
-			h is (not 1 < 2) or 4 != 5  -- true
+			set e to 1 < 2 or 4 != 5        -- true
+			set f to not 1 < 2 or 4 != 5    -- false
+			set g to not (1 < 2 or 4 != 5)  -- false
+			set h to (not 1 < 2) or 4 != 5  -- true
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetBoolean() == false);
-		REQUIRE(script->GetVariable("b").GetBoolean() == true);
-		REQUIRE(script->GetVariable("c").GetBoolean() == false);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-		REQUIRE(script->GetVariable("e").GetBoolean() == true);
-		REQUIRE(script->GetVariable("f").GetBoolean() == false);
-		REQUIRE(script->GetVariable("g").GetBoolean() == false);
-		REQUIRE(script->GetVariable("h").GetBoolean() == true);
+		REQUIRE(script->GetVariable("a") == false);
+		REQUIRE(script->GetVariable("b") == true);
+		REQUIRE(script->GetVariable("c") == false);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == true);
+		REQUIRE(script->GetVariable("f") == false);
+		REQUIRE(script->GetVariable("g") == false);
+		REQUIRE(script->GetVariable("h") == true);
 	}
 
 	SECTION("Test less than or greater than operators")
@@ -259,34 +260,34 @@ multiline comment
 		const char * scriptText =
 			u8R"(
 			
-			a is 1 < 2				
-			b is 2 < 1	
+			set a to 1 < 2				
+			set b to 2 < 1	
 			
-			c is 1 > 2				
-			d is 2 > 1	
+			set c to 1 > 2				
+			set d to 2 > 1	
 			
-			e is 1 <= 2
-			f is 1 <= 1
-			g is 2 <= 1
+			set e to 1 <= 2
+			set f to 1 <= 1
+			set g to 2 <= 1
 
-			h is 1 >= 2
-			i is 1 >= 1
-			j is 2 >= 1
+			set h to 1 >= 2
+			set i to 1 >= 1
+			set j to 2 >= 1
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetBoolean() == true);
-		REQUIRE(script->GetVariable("b").GetBoolean() == false);
-		REQUIRE(script->GetVariable("c").GetBoolean() == false);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-		REQUIRE(script->GetVariable("e").GetBoolean() == true);
-		REQUIRE(script->GetVariable("f").GetBoolean() == true);
-		REQUIRE(script->GetVariable("g").GetBoolean() == false);
-		REQUIRE(script->GetVariable("h").GetBoolean() == false);
-		REQUIRE(script->GetVariable("i").GetBoolean() == true);
-		REQUIRE(script->GetVariable("j").GetBoolean() == true);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == false);
+		REQUIRE(script->GetVariable("c") == false);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == true);
+		REQUIRE(script->GetVariable("f") == true);
+		REQUIRE(script->GetVariable("g") == false);
+		REQUIRE(script->GetVariable("h") == false);
+		REQUIRE(script->GetVariable("i") == true);
+		REQUIRE(script->GetVariable("j") == true);
 	}
 
 	SECTION("Test increment and decrement operators")
@@ -295,26 +296,26 @@ multiline comment
 			u8R"(
     
 			-- Increment and decrement test
-			a is 1
+			set a to 1
 			increment a
-			b is 1
+			set b to 1
 			decrement b
-			c is 1
+			set c to 1
 			increment c by 4
-			d is 1
+			set d to 1
 			decrement d by 3
-			e is 1
+			set e to 1
 			increment e by 4 * (2 + 2)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 2);
-		REQUIRE(script->GetVariable("b").GetInteger() == 0);
-		REQUIRE(script->GetVariable("c").GetInteger() == 5);
-		REQUIRE(script->GetVariable("d").GetInteger() == -2);
-		REQUIRE(script->GetVariable("e").GetInteger() == 17);
+		REQUIRE(script->GetVariable("a") == 2);
+		REQUIRE(script->GetVariable("b") == 0);
+		REQUIRE(script->GetVariable("c") == 5);
+		REQUIRE(script->GetVariable("d") == -2);
+		REQUIRE(script->GetVariable("e") == 17);
 	}
 
 
@@ -323,14 +324,14 @@ multiline comment
 		const char * scriptText =
 			u8R"(
     
-			private counter is 0
+			set private counter to 0
 			
-			function return counter is finished
+			function return counter to finished
 				increment counter
 				return counter >= 10
 			end
 
-			loop while not counter is finished
+			loop while not counter to finished
 				wait
 			end
 
@@ -339,7 +340,7 @@ multiline comment
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		auto library = script->GetLibrary();
-		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
+		REQUIRE(library->GetProperty("counter") == 10);
 	}
 
 	SECTION("Test wait while statement")
@@ -347,21 +348,21 @@ multiline comment
 		const char * scriptText =
 			u8R"(
     
-			private counter is 0
+			set private counter to 0
 			
-			function return counter is finished
+			function return counter to finished
 				increment counter
 				return counter >= 10
 			end
 
-			wait while not counter is finished
+			wait while not counter to finished
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		auto library = script->GetLibrary();
-		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
+		REQUIRE(library->GetProperty("counter") == 10);
 	}
 
 	SECTION("Test wait until statement")
@@ -369,21 +370,21 @@ multiline comment
 		const char * scriptText =
 			u8R"(
     
-			private counter is 0
+			set private counter to 0
 			
-			function return counter is finished
+			function return counter to finished
 				increment counter
 				return counter >= 10
 			end
 
-			wait until counter is finished
+			wait until counter to finished
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		auto library = script->GetLibrary();
-		REQUIRE(library->GetProperty("counter").GetInteger() == 10);
+		REQUIRE(library->GetProperty("counter") == 10);
 	}
 
 	SECTION("Test external statement")
@@ -392,7 +393,7 @@ multiline comment
 			u8R"(
     
 			external some var
-			another var is some var
+			set another var to some var
 
 			)";
 

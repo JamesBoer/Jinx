@@ -1,9 +1,42 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2017-03-08
+
+### Added
+- Added erase keyword for removing collection elements
+
+### Changed
+- Variable and property assignment now uses set {var} to {expression} pattern
+- Collection iterators now store an iterator/collection pair
+
+### Removed
+- Removed obsolete library functions to erase collection element
+
+## [0.4.5] - 2017-03-04
+
+### Fixed
+- Jinxpad keyword list corrected
+
+### Changed
+- Collection elements are removed by setting value to null
+
+### Removed
+- Removed some potentially problematic library functions
+
+## [0.4.4] - 2017-02-27
+
+### Fixed
+- Error when parsing multi-part variables
+- Potential infinite loop in core library
+- Potential for incorrect memory values in multi-threaded programs 
+
+### Changed
+- Improved fuzz testing program for better performance and easier debugging
+
 ## [0.4.3] - 2017-02-08
 ### Added
-- Function name parts can now be added
+- Function name parts can now be optional
 
 ### Fixed
 - Function name registration was incorrectly converting to lower case

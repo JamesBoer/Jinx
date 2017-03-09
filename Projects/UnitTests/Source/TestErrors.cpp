@@ -17,7 +17,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 34.56.78
+			set a to 34.56.78
 			
 			)";
 
@@ -30,7 +30,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3 + x
+			set a to 3 + x
 			
 			)";
 
@@ -43,7 +43,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is "Invalid string
+			set a to "Invalid string
 			
 			)";
 
@@ -56,7 +56,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3 + - 4
+			set a to 3 + - 4
 			
 			)";
 
@@ -69,7 +69,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is (3 +) - 4
+			set a to (3 +) - 4
 			
 			)";
 
@@ -82,7 +82,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3 4
+			set a to 3 4
 
 			)";
 
@@ -95,7 +95,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3 (4)
+			set a to 3 (4)
 
 			)";
 
@@ -108,7 +108,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is (((3)) 4)
+			set a to (((3)) 4)
 
 			)";
 
@@ -125,7 +125,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				return 23
 			end
     
-			a is 3 f
+			set a to 3 f
 
 			)";
 
@@ -142,7 +142,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				return 23
 			end
     
-			a is 3(f)
+			set a to 3(f)
 
 			)";
 
@@ -155,7 +155,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3 +
+			set a to 3 +
 
 			)";
 
@@ -168,7 +168,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3 * (4 / )
+			set a to 3 * (4 / )
 
 			)";
 
@@ -234,7 +234,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				return 123
 			end
 
-			a is collisiontest
+			set a to collisiontest
 
 			)";
 
@@ -245,7 +245,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				return 456
 			end
 
-			a is collisiontest
+			set a to collisiontest
 
 			)";
 
@@ -277,7 +277,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			library test
 
-			private x is 5
+			set private x to 5
 			
 			)";
 
@@ -286,7 +286,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			import test
      
-			b is x		
+			set b to x		
 
 			)";
 
@@ -304,7 +304,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			library test
 
-			private x is 5
+			set private x to 5
 			
 			)";
 
@@ -313,7 +313,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			import test
      
-			b is test x		
+			set b to test x		
 
 			)";
 
@@ -331,8 +331,8 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			
 			import test
 
-			private a is 123
-			public a is 345
+			set private a to 123
+			set public a to 345
 			
 			)";
 
@@ -347,8 +347,8 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			
 			import test
 
-			private a a is 123
-			public a a is 345
+			set private a a to 123
+			set public a a to 345
 			
 			)";
 
@@ -361,8 +361,8 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			readonly private a is 123
-			a is 456
+			set readonly private a to 123
+			set a to 456
 			
 			)";
 
@@ -377,7 +377,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			library test
 
-			readonly public prop is 333
+			set readonly public prop to 333
 
 			)";
 
@@ -386,7 +386,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			import test
      
-			prop is 12345
+			set prop to 12345
 
 			)";
 
@@ -409,7 +409,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
     
 			library test
 
-			readonly public prop is 333
+			set readonly public prop to 333
 
 			)";
 
@@ -439,7 +439,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3, 2, 1,
+			set a to 3, 2, 1,
 			
 			)";
 
@@ -452,7 +452,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
     
-			a is 3, 2 1
+			set a to 3, 2 1
 			
 			)";
 
@@ -466,7 +466,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			u8R"(
     
 			-- Missing bracket
-			a is [1, "red"], [2, "green", [3, "blue"]
+			set a to [1, "red"], [2, "green", [3, "blue"]
 
 			)";
 
@@ -480,7 +480,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			u8R"(
     
 			-- Missing key
-			a is [1, "red"], [2, "green"], ["blue"]
+			set a to [1, "red"], [2, "green"], ["blue"]
 
 			)";
 
@@ -494,7 +494,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			u8R"(
     
 			-- Missing comma
-			a is [1, "red"], [2, "green"] [3, "blue"]
+			set a to [1, "red"], [2, "green"] [3, "blue"]
 
 			)";
 
@@ -510,7 +510,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			function return somefunc
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
@@ -530,7 +530,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				end
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
@@ -550,7 +550,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				end
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
@@ -572,7 +572,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				return "some string"
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
@@ -596,7 +596,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 				end
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
@@ -629,7 +629,7 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 			function somefunc
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
@@ -642,9 +642,9 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		const char * scriptText =
 			u8R"(
 			
-			some var is 345
+			set some var to 345
 			external some var
-			another var is some var
+			set another var to some var
 
 			)";
 
@@ -657,9 +657,9 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		const char * scriptText =
 			u8R"(
 			
-			private some var is 345
+			set private some var to 345
 			external some var
-			another var is some var
+			set another var to some var
 
 			)";
 
@@ -697,5 +697,4 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
 }

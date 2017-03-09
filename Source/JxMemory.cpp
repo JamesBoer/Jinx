@@ -153,7 +153,7 @@ namespace Jinx
 		void * Realloc(void * ptr, size_t bytes);
 		void Free(void * ptr);
 		void Free(MemoryHeader * header);
-		const MemoryStats & GetMemoryStats() const { return m_stats; }
+		MemoryStats GetMemoryStats();
 		void LogAllocations();
 		void ShutDown();
 
@@ -466,6 +466,14 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 	}
 }
 
+MemoryStats BlockHeap::GetMemoryStats()
+{
+	// Ensure thread-safe access to the allocated blocks
+	std::lock_guard<Mutex> lock(m_mutex);
+
+	return m_stats;
+}
+
 void BlockHeap::Initialize(const GlobalParams & params)
 {
 	if (params.allocFn || params.reallocFn || params.freeFn)
@@ -699,7 +707,7 @@ void Jinx::ShutDownMemory()
 	s_heap.ShutDown();
 }
 
-const MemoryStats & Jinx::GetMemoryStats()
+MemoryStats Jinx::GetMemoryStats()
 {
 	return s_heap.GetMemoryStats();
 }

@@ -30,42 +30,42 @@ static const char * s_testScripts[] =
 		comment
 		---------
 
-		a --- some comment --- is 123
+		set a --- some comment --- to 123
    
 	)",
 
 	u8R"(
 
-		a is "Hello world!"
-		b is 5.5
-		c is 123
-		d is true
-		e is null
+		set a to "Hello world!"
+		set b to 5.5
+		set c to 123
+		set d to true
+		set e to null
 
 	)",
 	
 	u8R"(
 
-		a is 123
-		b is 234
-		c is a type
-		d is false
+		set a to 123
+		set b to 234
+		set c to a type
+		set d to false
 		if a type = b type
-			d is true
+			set d to true
 		end
-		e is false
+		set e to false
 		if a type = integer
-			e is true
+			set e to true
 		end
 
 	)",
 	
 	u8R"(
 
-		a is -375.5
-		b is .11111
-		c is -999
-		d is 00001
+		set a to -375.5
+		set b to .11111
+		set c to -999
+		set d to 00001
 
 	)",
 
@@ -73,13 +73,13 @@ static const char * s_testScripts[] =
 
 		-- Scope test - a will not be visible after end
 		begin
-			a is 42
+			set a to 42
 		end
 
-		-- Scope test - g will be visible inside scope block
-		b is 999
+		-- Scope test - b will be visible inside scope block
+		set b to 999
 		begin
-			b is 55
+			set b to 55
 		end
 
 	)",
@@ -87,98 +87,98 @@ static const char * s_testScripts[] =
 	u8R"(
 
 		-- Basic assignments 
-		a is 2
-		b is 3
+		set a to 2
+		set b to 3
 
 		-- Basic math operations
-		c is a + b
-		d is b - a
-		e is a * b
-		f is b / 1
-		g is 10 % b
+		set c to a + b
+		set d to b - a
+		set e to a * b
+		set f to b / 1
+		set g to 10 % b
 
 		-- Multiple operations with and without parentheses
-		h is 1 + 2 * 3     -- h is 9
-		i is 1 + (2 * 3)   -- i is 7
+		set h to 1 + 2 * 3     -- h = 9
+		set i to 1 + (2 * 3)   -- i = 7
 
 		-- Floating point assignments
-		j is 123.456
-		k is 234.567
+		set j to 123.456
+		set k to 234.567
 
 		-- Floating point operations
-		l is j * k
-		m is j / k
-		n is j + k
-		o is j - k
+		set l to j * k
+		set m to j / k
+		set n to j + k
+		set o to j - k
 
 	)",
 
 	u8R"(
 
-		a is true = true		-- true
-		b is true != true		-- false
-		c is not true = true	-- false
-		d is true and false  	-- false
-		e is true or false		-- true
+		set a to true = true		-- true
+		set b to true != true		-- false
+		set c to not true = true	-- false
+		set d to true and false  	-- false
+		set e to true or false		-- true
 
 	)",
 
 	u8R"(
 
-		a is 1 < 2				
-		b is 2 < 1	
+		set a to 1 < 2				
+		set b to 2 < 1	
 			
-		c is 1 > 2				
-		d is 2 > 1	
+		set c to 1 > 2				
+		set d to 2 > 1	
 			
-		e is 1 <= 2
-		f is 1 <= 1
-		g is 2 <= 1
+		set e to 1 <= 2
+		set f to 1 <= 1
+		set g to 2 <= 1
 
-		h is 1 >= 2
-		i is 1 >= 1
-		j is 2 >= 1
+		set h to 1 >= 2
+		set i to 1 >= 1
+		set j to 2 >= 1
 
 	)",
 
 	u8R"(
 
 		-- Increment and decrement test
-		a is 1
+		set a to 1
 		increment a
-		b is 1
+		set b to 1
 		decrement b
-		c is 1
+		set c to 1
 		increment c by 4
-		d is 1
+		set d to 1
 		decrement d by 3
-		e is 1
+		set e to 1
 		increment e by 4 * (2 + 2)
 
 	)",
 
 	u8R"(
 
-		a is 123.456 as integer
-		b is true as string
-		c is "false" as boolean
-		d is "456" as integer
-		e is "-123.456" as number
-		f is 4 + 5 + 6 as string
+		set a to 123.456 as integer
+		set b to true as string
+		set c to "false" as boolean
+		set d to "456" as integer
+		set e to "-123.456" as number
+		set f to 4 + 5 + 6 as string
 
 	)",
 
 	u8R"(
 
-		a is 12345
-		b is a as string
-		c is b as integer
-		d is true
-		e is d as string
-		f is e as boolean
-		g is false
+		set a to 12345
+		set b to a as string
+		set c to b as integer
+		set d to true
+		set e to d as string
+		set f to e as boolean
+		set g to false
 		if g type = boolean and g type = d type
-			g is true
+			set g to true
         end
 
 	)",
@@ -187,68 +187,68 @@ static const char * s_testScripts[] =
 
 		-- Simple if/else tests
 
-		a is false
+		set a to false
 		if true
-			a is true
+			set a to true
 		end
 
-		b is false
+		set b to false
 		if true
-			b is true
+			set b to true
 		else
-			b is false
+			set b to false
 		end
 
-		c is false
+		set c to false
 		if false
-			c is false
+			set c to false
 		else
-			c is true
+			set c to true
 		end
 
-		d is false
+		set d to false
 		if false
-			d is false
+			set d to false
 		else if true
-			d is true
+			set d to true
 		else
-			d is false
+			set d to false
 		end
 
-		e is false
+		set e to false
 		if false
-			e is false
+			set e to false
 		else if false
-			e is false
+			set e to false
 		else if true
-			e is true
+			set e to true
 		else
-			e is false
+			set e to false
 		end
 
-		f is false
+		set f to false
 		if false
-			f is false
+			set f to false
 		else if false
-			f is false
+			set f to false
 		else if false
-			f is false
+			set f to false
 		else
-			f is true
+			set f to true
 		end
 
-		g is false
+		set g to false
 		if true
 			if true
-				g is true
+				set g to true
 			end
 		end
 
-		h is false
+		set h to false
 		if false
 		else
 			if true
-				h is true
+				set h to true
 			end
 		end
 
@@ -256,12 +256,12 @@ static const char * s_testScripts[] =
 	
 	u8R"(
 
-		a is 1
+		set a to 1
 		loop while a < 10
 			increment a
 		end	
 		
-		b is 1
+		set b to 1
 		loop while true
 			increment b
 			if b = 10
@@ -273,12 +273,12 @@ static const char * s_testScripts[] =
 	
 	u8R"(
 
-		a is 1
+		set a to 1
 		loop
 			increment a
 		while a < 10
 		
-		b is 1
+		set b to 1
 		loop
 			increment b
 			if b = 10
@@ -290,33 +290,33 @@ static const char * s_testScripts[] =
 
 	u8R"(
 
-		a is 0
+		set a to 0
 		loop from 1 to 10
 			increment a
 		end	
 
-		b is 0
+		set b to 0
 		loop from 1 to 10 by 2
 			increment b
 		end	
 
-		c is 0
+		set c to 0
 		loop from 10 to 1
 			increment c
 		end	
 
-		d is 0
+		set d to 0
 		loop i from 1 to 3
 			increment d by i
 		end
 
-		e is 0
+		set e to 0
 		loop from 1 to 10
 			increment e
 			break
 		end
 		
-		f is 0
+		set f to 0
 		loop from 1 to 10
 			increment f
 			if f = 5
@@ -328,20 +328,20 @@ static const char * s_testScripts[] =
 
 	u8R"(
 
-		a is 0
+		set a to 0
 		loop over 1, 2, 3
 			increment a
 		end
 
-		b is 0
-		x is 1, 2, 3
+		set b to 0
+		set x to 1, 2, 3
 		loop over x
 			increment b
 		end
 
-		c is 0
+		set c to 0
 		loop i over 1, 2, 3
-			increment c by i
+			increment c by i value
 		end
 
 	)",
@@ -349,41 +349,41 @@ static const char * s_testScripts[] =
 	u8R"(
 
 		-- Create empty collection
-		a is []
+		set a to []
 
 	)",
 
 	u8R"(
 
 		-- Create collection using an initialization list
-		a is 3, 2, 1
+		set a to 3, 2, 1
 
 	)",
 
 	u8R"(
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 
 	)",
 
 	u8R"(
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Change one of the elements by index
-		a[2] is "magenta"
+		set a[2] to "magenta"
 
 	)",
 
 	u8R"(
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Set variable to one of the collection values
-		b is a[2]
+		set b to a[2]
 
 	)",
 
@@ -392,10 +392,10 @@ static const char * s_testScripts[] =
 		import core
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Add single element to a
-		add "purple" to a
+		set a [4] to "purple"
 
 	)",
 
@@ -404,13 +404,10 @@ static const char * s_testScripts[] =
 		import core
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Set variable to one of the collection values
-		b is [4, "purple"]
-
-		-- Add elements in b to a
-		add b to a
+		set b to [4, "purple"]
 
 	)",
 
@@ -419,10 +416,10 @@ static const char * s_testScripts[] =
 		import core
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Remove element by key
-		remove 2 from a
+		set a[2] to null
 
 	)",
 
@@ -431,10 +428,10 @@ static const char * s_testScripts[] =
 		import core
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Remove elements by key
-		remove (1, 2) from a
+		--remove (1, 2) from a
 
 	)",
 
@@ -443,10 +440,10 @@ static const char * s_testScripts[] =
 		import core
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Remove element by value
-		remove value "red" from a
+		--remove value "red" from a
 
 	)",
 
@@ -455,19 +452,19 @@ static const char * s_testScripts[] =
 		import core
 
 		-- Create collection using an initialization list of key-value pairs		
-		a is [1, "red"], [2, "green"], [3, "blue"]
+		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Remove multiple elements by value
-		remove values ("red", "green") from a
+		--remove values ("red", "green") from a
 
 	)",
 
 	u8R"(
 
-		resumé is "my resumé text" 	
-		いろは is "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
-		Üben is "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
-		Да is "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
+		set resumé to "my resumé text" 	
+		set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
+		set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
+		set Да to "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
 
 	)",
 
@@ -483,13 +480,9 @@ constexpr size_t countof(T(&)[s])
 class Fuzzer
 {
 public:
-	Fuzzer(unsigned int seed = 0)
+	const char * Fuzz(const char * str, int seed)
 	{
-		m_seed = seed;
-	}
-	const char * Fuzz(const char * str)
-	{
-		m_rng.seed(m_seed);
+		m_rng.seed(static_cast<unsigned int>(seed));
 		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
 		mutation = mutation * mutation * mutation;
 		m_string = str;
@@ -502,13 +495,12 @@ public:
 				m_string[i] = static_cast<char>(rval);
 			}
 		}
-		++m_seed;
 		return m_string.c_str();
 	}
 
-	BufferPtr Fuzz(BufferPtr buffer)
+	BufferPtr Fuzz(BufferPtr buffer, int seed)
 	{
-		m_rng.seed(m_seed);
+		m_rng.seed(static_cast<unsigned int>(seed));
 		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
 		mutation = mutation * mutation * mutation;
 		for (size_t i = 0; i < m_string.length(); ++i)
@@ -520,16 +512,16 @@ public:
 				buffer->Ptr()[i] = static_cast<char>(rval);
 			}
 		}
-		++m_seed;
 		return buffer;
 	}
 
 private:
 	std::mt19937 m_rng;
 	std::string m_string;
-	unsigned int m_seed;
 };
 
+// Comment out to test sequentially
+#define PARALLEL_EXECUTION
 
 int main(int argc, char * argv[])
 {
@@ -539,29 +531,35 @@ int main(int argc, char * argv[])
 	globalParams.enableLogging = false;
 	Jinx::Initialize(globalParams);
 
+	const int StartingPermutation = 0;
+	const int StartingScript = 0;
+
 	// Validate that all scripts compile and execute successfully
 	for (auto i = 0u; i < countof(s_testScripts); ++i)
 	{
 		auto runtime = CreateRuntime();
 		// Compile the text to bytecode
-		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
+		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script", { "core" });
 		assert(bytecode);
 
 		// Create a runtime script with the given bytecode
 		auto script = runtime->CreateScript(bytecode);
-		if (script)
-			script->Execute();
+		assert(bytecode);
+		assert(script->Execute());
 	}
 
 	// Run fuzz permutations on source
-	Fuzzer sourceFuzzer;
-	for (auto c = 0; c < NumPermutations; ++c)
+#ifdef PARALLEL_EXECUTION
+	#pragma omp parallel for
+#endif
+	for (int c = StartingPermutation; c < NumPermutations; ++c)
 	{
+		Fuzzer sourceFuzzer;
 		auto runtime = CreateRuntime();
-		for (auto i = 0u; i < countof(s_testScripts); ++i)
+		for (int i = StartingScript; i < static_cast<int>(countof(s_testScripts)); ++i)
 		{
 			// Compile the text to bytecode
-			auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i]), "Test Script");
+			auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], c), "Test Script");
 			if (!bytecode)
 				continue;
 
@@ -575,11 +573,14 @@ int main(int argc, char * argv[])
 	}
 
 	// Run fuzz permutations on bytecode
-	Fuzzer bytecodeFuzzer;
-	for (auto c = 0; c < NumPermutations; ++c)
+#ifdef PARALLEL_EXECUTION
+	#pragma omp parallel for
+#endif
+	for (int c = StartingPermutation; c < NumPermutations; ++c)
 	{
+		Fuzzer bytecodeFuzzer;
 		auto runtime = CreateRuntime();
-		for (auto i = 0u; i < countof(s_testScripts); ++i)
+		for (int i = StartingScript; i < static_cast<int>(countof(s_testScripts)); ++i)
 		{
 			// Compile the text to bytecode
 			auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
@@ -587,7 +588,7 @@ int main(int argc, char * argv[])
 				continue;
 
 			// Create a runtime script with the given bytecode if it exists
-			auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode));
+			auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode, c));
 			assert(script);
 			script->Execute();
 		}

@@ -61,6 +61,7 @@ int main(int argc, char ** argv)
 		GlobalParams globalParams;
 		globalParams.logSymbols = true;
 		globalParams.logBytecode = true;
+        globalParams.maxInstructions = 10000;
 		globalParams.allocBlockSize = 1024 * 256;
 		globalParams.allocFn = [](size_t size) { return malloc(size); };
 		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
@@ -69,23 +70,35 @@ int main(int argc, char ** argv)
 	
 		auto runtime = Jinx::CreateRuntime();
 
-		static const char * scriptText =
-		u8R"(
-			function return (is) something enabled
-				return true
-			end
+        static const char * scriptText =
+            u8R"(
+			import core
 
-			var is something enabled
-			if is something enabled
-				write line "something is enabled"
-			end
+            function return {integer x} is divisible by {integer y}
+                return x % y = 0
+            end
 
-		)";
+            loop i from 1 to 100
+                set print_number to true
+                if i is divisible by 3
+                    write "Fizz"
+                    set print_number to false
+                end
+                if i is divisible by 5
+                    write "Buzz"
+                    set print_number to false
+                end
+                if print_number
+                    write i
+                end
+                write newline
+            end
 
-		auto script = TestExecuteScript(scriptText, runtime);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("var") == true);
-	}
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script);
+    }
 
 	Jinx::ShutDown();
 

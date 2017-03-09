@@ -38,103 +38,40 @@ TEST_CASE("Test Core Library", "[Core]")
 			
 			import core
 
-			a is 1, 2, 3
-			b is "test"
+			set a to 1, 2, 3
+			set b to "test"
 
-			c is a size
-			d is b size
+			set c to a size
+			set d to b get size
 			
             
             )";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("c").GetInteger() == 3);
-		REQUIRE(script->GetVariable("d").GetInteger() == 4);
+		REQUIRE(script->GetVariable("c") == 3);
+		REQUIRE(script->GetVariable("d") == 4);
 	}
 
-	SECTION("Test is empty functions")
+	SECTION("Test to empty functions")
 	{
 		const char * scriptText =
 			u8R"(
 			
 			import core
 
-			a is []
-			b is ""
+			set a to []
+			set b to ""
 
-			c is a is empty
-			d is b is empty
+			set c to a empty
+			set d to b is empty
 			
             )";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("c").GetBoolean() == true);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-	}
-
-	SECTION("Test add to functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is [1, "one"]
-			add ("two", "three") to a
-            add "four" to a
-
-            )";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection() == true);
-		REQUIRE(script->GetVariable("a").GetCollection()->size() == 4);
-		REQUIRE(script->GetVariable("a").GetCollection()->at(1).GetString() == "one");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(2).GetString() == "two");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(4).GetString() == "four");
-	}
-
-	SECTION("Test remove from functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is "one", "two", "three", "four"
-			remove (1, 2) from a
-			remove 4 from a
-            
-            )";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection() == true);
-		REQUIRE(script->GetVariable("a").GetCollection()->size() == 1);
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
-	}
-
-	SECTION("Test remove values from functions")
-	{
-		const char * scriptText =
-			u8R"(
-			
-			import core
-
-			a is "one", "two", "three", "four"
-			remove values ("one", "two") from a
-			remove value "four" from a
-            
-            )";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection() == true);
-		REQUIRE(script->GetVariable("a").GetCollection()->size() == 1);
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetString() == "three");
+		REQUIRE(script->GetVariable("c") == true);
+		REQUIRE(script->GetVariable("d") == true);
 	}
 	
 }

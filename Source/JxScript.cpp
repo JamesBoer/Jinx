@@ -149,6 +149,8 @@ bool Script::Execute()
 						auto param = m_stack[index];
 						params.push_back(param);
 					}
+					for (size_t i = 0; i < numParams; ++i)
+						m_stack.pop_back();			
 					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
 					if (functionDef->HasReturnParameter())
 						Push(retVal);
@@ -178,7 +180,72 @@ bool Script::Execute()
 				Push(op2);
 			}
 			break;
-			case Opcode::Divide:
+            case Opcode::EraseProp:
+            {
+                RuntimeID propId;
+                m_execution.back().reader.Read(&propId);
+                auto var = m_runtime->GetProperty(propId);
+                if (var.IsCollectionItr())
+                {
+                    auto itr = var.GetCollectionItr().first;
+                    auto coll = var.GetCollectionItr().second;
+                    if (itr != coll->end())
+                        itr = coll->erase(itr);
+                    m_runtime->SetProperty(propId, std::make_pair(itr, coll));
+                }
+            }
+            break;
+            case Opcode::ErasePropElem:
+            {
+                RuntimeID propId;
+                m_execution.back().reader.Read(&propId);
+                auto var = m_runtime->GetProperty(propId);
+                if (var.IsCollectionItr())
+                {
+                    auto itr = var.GetCollectionItr().first;
+                    auto coll = var.GetCollectionItr().second;
+                    if (itr != coll->end())
+                        itr = coll->erase(itr);
+                    m_runtime->SetProperty(propId, std::make_pair(itr, coll));
+                }
+            }
+            break;
+            case Opcode::EraseVar:
+            {
+                String name;
+                m_execution.back().reader.Read(&name);
+                auto var = GetVariable(name);
+                if (var.IsCollectionItr())
+                {
+                    auto itr = var.GetCollectionItr().first;
+                    auto coll = var.GetCollectionItr().second;
+                    if (itr != coll->end())
+                        itr = coll->erase(itr);
+                    SetVariable(name, std::make_pair(itr, coll));
+                }
+            }
+            break;
+            case Opcode::EraseVarElem:
+            {
+                String name;
+                m_execution.back().reader.Read(&name);
+                auto var = GetVariable(name);
+                auto key = Pop();
+                if (var.IsCollection())
+                {
+                    if (!key.IsKeyType())
+                    {
+                        LogWriteLine("Invalid key");
+                        return false;
+                    }
+                    auto coll = var.GetCollection();
+                    auto itr = coll->find(key);
+                    if (itr != coll->end())
+                        coll->erase(itr);
+                }
+            }
+            break;
+            case Opcode::Divide:
 			{
 				auto op2 = Pop();
 				auto op1 = Pop();
@@ -322,15 +389,17 @@ bool Script::Execute()
 			{
 				assert(m_stack.size() >= 3);
 				auto top = m_stack.size() - 1;
-				auto itr = m_stack[top - 1];
+				auto itr = m_stack[top];
 				assert(itr.IsCollectionItr());
-				auto coll = m_stack[top - 2];
+				auto coll = m_stack[top - 1];
 				assert(coll.IsCollection() && coll.GetCollection());
-				++itr;
-				bool finished = itr.GetCollectionItr() == coll.GetCollection()->end();
-				m_stack[top - 1] = itr;
+				bool finished = itr.GetCollectionItr().first == coll.GetCollection()->end();
 				if (!finished)
-					m_stack[top] = itr.GetCollectionItr()->second;
+				{
+					++itr;
+					finished = itr.GetCollectionItr().first == coll.GetCollection()->end();
+				}
+				m_stack[top] = itr;
 				Push(finished);
 			}
 			break;
@@ -442,22 +511,8 @@ bool Script::Execute()
 					Error("Expected collection type");
 					return false;
 				}
-				Variant itr = coll.GetCollection()->begin();
+				Variant itr = std::make_pair(coll.GetCollection()->begin(), coll.GetCollection());
 				Push(itr);
-			}
-			break;
-			case Opcode::PushItrVal:
-			{
-				assert(m_stack.size() >= 1);
-				auto top = m_stack.size() - 1;
-				auto coll = m_stack[top];
-				if (!coll.IsCollectionItr())
-				{
-					Error("Expected collection iterator type");
-					return false;
-				}
-				Variant itr = coll.GetCollectionItr();
-				Push(itr.GetCollectionItr()->second);
 			}
 			break;
 			case Opcode::PushList:

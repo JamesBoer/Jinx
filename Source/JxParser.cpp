@@ -516,15 +516,21 @@ bool Parser::CheckVariable(SymbolListCItr currSym, size_t * symCount) const
 		auto curr = currSym;
 		String name = curr->text;
 		size_t sc = 1;
+		bool error = false;
 		for (size_t i = 1; i < s; ++i)
 		{
 			++curr;
 			if (!IsSymbolValid(curr) || curr->text.empty())
-				continue;
+			{
+				error = true;
+				break;
+			}
 			name += " ";
 			name += curr->text;
 			++sc;
 		}
+		if (error)
+			continue;
 		bool exists = VariableExists(name);
 		if (exists)
 		{
@@ -884,7 +890,7 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 
 	// Search for multi-part property names
 	auto name = ParseName();
-	while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::Is) && !m_currentSymbol->text.empty())
+	while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::To) && !m_currentSymbol->text.empty())
 	{
 		name += " ";
 		name += ParseName();
@@ -910,7 +916,7 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 	EmitOpcode(Opcode::Property);
 	propertyName.Write(m_writer);
 
-	if (Accept(SymbolType::Is))
+	if (Accept(SymbolType::To))
 	{
 		ParseExpression();
 		EmitOpcode(Opcode::SetProp);
@@ -1565,6 +1571,54 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 	}
 }
 
+void Parser::ParseErase()
+{
+    if (CheckProperty())
+    {
+        auto propName = ParsePropertyName();
+        if (propName.IsReadOnly())
+        {
+            Error("Can't delete a readonly property");
+            return;
+        }
+        if (Accept(SymbolType::SquareOpen))
+        {
+            ParseSubexpression();
+            Expect(SymbolType::SquareClose);
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseVarElem);
+        }
+        else
+        {
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseProp);
+        }
+        EmitId(propName.GetId());
+    }
+    else if (CheckVariable())
+    {
+        auto varName = ParseVariable();
+        if (Accept(SymbolType::SquareOpen))
+        {
+            ParseSubexpression();
+            Expect(SymbolType::SquareClose);
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseVarElem);
+        }
+        else
+        {
+            Expect(SymbolType::NewLine);
+            EmitOpcode(Opcode::EraseVar);
+        }
+        EmitName(varName);
+    }
+    else
+    {
+        Error("Valid property or variable name expected after delete keyword");
+        return;
+    }
+}
+
 void Parser::ParseIncDec()
 {
 	bool increment = Accept(SymbolType::Increment);
@@ -1780,9 +1834,8 @@ void Parser::ParseLoop()
 		EmitOpcode(Opcode::JumpFalse);
 		auto emptyLoopJumpAddress = EmitAddressPlaceholder();
 
-		// Retrieve collection from top of stack and push iterator and value from beginning position
+		// Retrieve collection from top of stack and push iterator from beginning position
 		EmitOpcode(Opcode::PushItr);
-		EmitOpcode(Opcode::PushItrVal);
 
 		// Assign the iterator to a variable name if it exists
 		if (!name.empty())
@@ -1902,6 +1955,8 @@ void Parser::ParseStatement()
 	}
 	else
 	{
+
+		bool set = Accept(SymbolType::Set);
 		
 		// Parse optional readonly
 		bool readOnly = Accept(SymbolType::Readonly);
@@ -1924,7 +1979,7 @@ void Parser::ParseStatement()
 			// We're parsing a function definition
 			ParseFunctionDefinition(scope);
 		}
-		else if (CheckName())
+		else if (set && CheckName())
 		{
 			// Can't use the current library name or preface the variable with it
 			if (m_currentSymbol->text == m_library->GetName())
@@ -1957,8 +2012,8 @@ void Parser::ParseStatement()
 					// Check for subscript operator
 					bool subscript = ParseSubscript();
 
-					// Check for an 'is' statement
-					Expect(SymbolType::Is);
+					// Check for a 'to' statement
+					Expect(SymbolType::To);
 
 					// Parse assignment expression
 					ParseExpression();
@@ -1975,7 +2030,7 @@ void Parser::ParseStatement()
 					String name = ParseName();
 
 					// Parse potential multi-part variable names
-					while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::Is) && !Check(SymbolType::SquareOpen))
+					while (IsSymbolValid(m_currentSymbol) && !Check(SymbolType::To) && !Check(SymbolType::SquareOpen))
 					{
 						name += " ";
 						name += ParseName();
@@ -1984,8 +2039,8 @@ void Parser::ParseStatement()
 					// Check for subscript operator
 					bool subscript = ParseSubscript();
 
-					// Check for an 'is' statement
-					Expect(SymbolType::Is);
+					// Check for a 'to' statement
+					Expect(SymbolType::To);
 
 					// Parse assignment expression
 					ParseExpression();
@@ -2020,6 +2075,11 @@ void Parser::ParseStatement()
 				// We're parsing a loop block
 				ParseLoop();
 			}
+            else if (Accept(SymbolType::Erase))
+            {
+                // We're parsing an erase operation
+                ParseErase();
+            }
 			else if (Check(SymbolType::Increment) || Check(SymbolType::Decrement))
 			{
 				// We're parsing an increment or decrement statement

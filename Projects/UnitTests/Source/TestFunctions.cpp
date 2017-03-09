@@ -74,15 +74,15 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
     
-			do is 1
+			set do to 1
 
 			function do nothing/nada/ziltch
 				-- do nothing
 			end
 
-			nothing is 2
-			nada is 3
-			ziltch is 3
+			set nothing to 2
+			set nada to 3
+			set ziltch to 3
 
 			do nothing
 			do nada
@@ -107,15 +107,15 @@ TEST_CASE("Test Functions", "[Functions]")
 				return "some string"
 			end
 
-			a is some constant integer
-			b is some string val
+			set a to some constant integer
+			set b to some string val
 		
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 42);
-		REQUIRE(script->GetVariable("b").GetString() == "some string");
+		REQUIRE(script->GetVariable("a") == 42);
+		REQUIRE(script->GetVariable("b") == "some string");
 	}
 
 	SECTION("Test return value validation #1")
@@ -124,20 +124,20 @@ TEST_CASE("Test Functions", "[Functions]")
 			u8R"(
     
 			function return somefunc
-				if (true)
+				if true
 					return "some string"
 				else
 					return "some string"
 				end
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetString() == "some string");
+		REQUIRE(script->GetVariable("a") == "some string");
 	}
 
 
@@ -147,20 +147,20 @@ TEST_CASE("Test Functions", "[Functions]")
 			u8R"(
     
 			function return somefunc
-				if (true)
+				if true
 					return "some string"
 				else
 				end
 				return "some string"
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetString() == "some string");
+		REQUIRE(script->GetVariable("a") == "some string");
 	}
 
 	SECTION("Test return value validation #3")
@@ -176,13 +176,13 @@ TEST_CASE("Test Functions", "[Functions]")
 				return "some string"
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetString() == "some string");
+		REQUIRE(script->GetVariable("a") == "some string");
 	}
 
 	SECTION("Test return value validation #4")
@@ -198,13 +198,13 @@ TEST_CASE("Test Functions", "[Functions]")
 				return "some string"
 			end
 
-			a is somefunc
+			set a to somefunc
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetString() == "some string");
+		REQUIRE(script->GetVariable("a") == "some string");
 	}
 
 	SECTION("Test simple parameters")
@@ -216,14 +216,14 @@ TEST_CASE("Test Functions", "[Functions]")
 				return a + b
 			end
 
-			x is 1
-			a is x plus 2
+			set x to 1
+			set a to x plus 2
 		
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 3);
+		REQUIRE(script->GetVariable("a") == 3);
 	}
 
 	SECTION("Test multi-part named parameters")
@@ -235,14 +235,14 @@ TEST_CASE("Test Functions", "[Functions]")
 				return var a + var b
 			end
 
-			x is 1
-			a is x plus 2
+			set x to 1
+			set a to x plus 2
 		
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 3);
+		REQUIRE(script->GetVariable("a") == 3);
 	}
 
 	SECTION("Test properties as function parameters")
@@ -250,19 +250,19 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
     
-			readonly public x is 1
+			set readonly public x to 1
 
 			function return {a} plus {b}  
 				return a + b
 			end
 
-			a is x plus 2
+			set a to x plus 2
 		
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 3);
+		REQUIRE(script->GetVariable("a") == 3);
 	}
 
 	SECTION("Test multi-part properties as function parameters")
@@ -270,19 +270,19 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
     
-			readonly public x x is 1
+			set readonly public x x to 1
 
 			function return {a} plus {b}  
 				return a + b
 			end
 
-			a is x x plus 2
+			set a to x x plus 2
 		
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 3);
+		REQUIRE(script->GetVariable("a") == 3);
 	}
 
 	SECTION("Test simple chained functions")
@@ -294,17 +294,17 @@ TEST_CASE("Test Functions", "[Functions]")
 				return a - b
 			end
      
-			a is (5 minus 3) minus 1	
-			b is 5 minus 3 minus 1
-			c is (4 + 3) minus (3 minus 1)
+			set a to (5 minus 3) minus 1	
+			set b to 5 minus 3 minus 1
+			set c to (4 + 3) minus (3 minus 1)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 1);
-		REQUIRE(script->GetVariable("b").GetInteger() == 3);
-		REQUIRE(script->GetVariable("c").GetInteger() == 5);
+		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 3);
+		REQUIRE(script->GetVariable("c") == 5);
 	}
 
 	SECTION("Test functional recursion")
@@ -319,13 +319,13 @@ TEST_CASE("Test Functions", "[Functions]")
 				return x * factorial (x - 1)
 			end
 
-			a is factorial 7
+			set a to factorial 7
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 5040);
+		REQUIRE(script->GetVariable("a") == 5040);
 	}
 
 	SECTION("Test keyword-named functions")
@@ -338,19 +338,19 @@ TEST_CASE("Test Functions", "[Functions]")
 				return 42
 			end
 
-			function return begin is while
+			function return begin to while
 				return 99
 			end
      
-			a is loop function while
-			b is begin is while
+			set a to loop function while
+			set b to begin to while
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetInteger() == 42);
-		REQUIRE(script->GetVariable("b").GetInteger() == 99);
+		REQUIRE(script->GetVariable("a") == 42);
+		REQUIRE(script->GetVariable("b") == 99);
 	}
 
 	SECTION("Test parameter casts in functions")
@@ -366,23 +366,23 @@ TEST_CASE("Test Functions", "[Functions]")
 				return x
 			end
 
-			a is convert 123
-			b is convertback a
-			test a is convert 1234567890
-			test b is convertback test a
+			set a to convert 123
+			set b to convertback a
+			set test a to convert 1234567890
+			set test b to convertback test a
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").IsString());
-		REQUIRE(script->GetVariable("a").GetString() == "123");
+		REQUIRE(script->GetVariable("a") == "123");
 		REQUIRE(script->GetVariable("b").IsInteger());
-		REQUIRE(script->GetVariable("b").GetInteger() == 123);
+		REQUIRE(script->GetVariable("b") == 123);
 		REQUIRE(script->GetVariable("test a").IsString());
-		REQUIRE(script->GetVariable("test a").GetString() == "1234567890");
+		REQUIRE(script->GetVariable("test a") == "1234567890");
 		REQUIRE(script->GetVariable("test b").IsInteger());
-		REQUIRE(script->GetVariable("test b").GetInteger() == 1234567890);
+		REQUIRE(script->GetVariable("test b") == 1234567890);
 	}
 
 	SECTION("Test potential function collision test")
@@ -390,7 +390,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText1 =
 			u8R"(
     
-			-- This local function should be called from both scripts
+			-- Thto local function should be called from both scripts
 			function return localfunc
 				return 123
 			end
@@ -399,7 +399,7 @@ TEST_CASE("Test Functions", "[Functions]")
 				return localfunc
 			end
 			
-			a is privatefunc
+			set a to privatefunc
 
 			)";
 
@@ -412,7 +412,7 @@ TEST_CASE("Test Functions", "[Functions]")
 				return 456
 			end
 			
-			a is privatefunc
+			set a to privatefunc
 
 			)";
 
@@ -421,8 +421,8 @@ TEST_CASE("Test Functions", "[Functions]")
 		auto script2 = TestExecuteScript(scriptText2, runtime);
 		REQUIRE(script1);
 		REQUIRE(script2);
-		REQUIRE(script1->GetVariable("a").GetInteger() == 123);
-		REQUIRE(script2->GetVariable("a").GetInteger() == 123);
+		REQUIRE(script1->GetVariable("a") == 123);
+		REQUIRE(script2->GetVariable("a") == 123);
 	}
 
 }

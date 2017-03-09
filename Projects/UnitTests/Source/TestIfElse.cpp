@@ -19,68 +19,68 @@ TEST_CASE("Test If/Else Branching", "[IfElse]")
     
 			-- Simple if/else tests
 
-			a is false
+			set a to false
 			if true
-				a is true
+				set a to true
 			end
 
-			b is false
+			set b to false
 			if true
-				b is true
+				set b to true
 			else
-				b is false
+				set b to false
 			end
 
-			c is false
+			set c to false
 			if false
-				c is false
+				set c to false
 			else
-				c is true
+				set c to true
 			end
 
-			d is false
+			set d to false
 			if false
-				d is false
+				set d to false
 			else if true
-				d is true
+				set d to true
 			else
-				d is false
+				set d to false
 			end
 
-			e is false
+			set e to false
 			if false
-				e is false
+				set e to false
 			else if false
-				e is false
+				set e to false
 			else if true
-				e is true
+				set e to true
 			else
-				e is false
+				set e to false
 			end
 
-			f is false
+			set f to false
 			if false
-				f is false
+				set f to false
 			else if false
-				f is false
+				set f to false
 			else if false
-				f is false
+				set f to false
 			else
-				f is true
+				set f to true
 			end
 
-			g is false
+			set g to false
 			if true
 				if true
-					g is true
+					set g to true
 				end
 			end
 
-			h is false
+			set h to false
 			if false
 			else
 				if true
-					h is true
+					set h to true
 				end
 			end
 
@@ -88,14 +88,14 @@ TEST_CASE("Test If/Else Branching", "[IfElse]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").GetBoolean() == true);
-		REQUIRE(script->GetVariable("b").GetBoolean() == true);
-		REQUIRE(script->GetVariable("c").GetBoolean() == true);
-		REQUIRE(script->GetVariable("d").GetBoolean() == true);
-		REQUIRE(script->GetVariable("e").GetBoolean() == true);
-		REQUIRE(script->GetVariable("f").GetBoolean() == true);
-		REQUIRE(script->GetVariable("g").GetBoolean() == true);
-		REQUIRE(script->GetVariable("h").GetBoolean() == true);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == true);
+		REQUIRE(script->GetVariable("c") == true);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == true);
+		REQUIRE(script->GetVariable("f") == true);
+		REQUIRE(script->GetVariable("g") == true);
+		REQUIRE(script->GetVariable("h") == true);
 	}
 
 }

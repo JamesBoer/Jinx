@@ -166,6 +166,9 @@ namespace Jinx
 		// Parse a complete expression, which generally follows an assignment or conditional statement
 		void ParseExpression(bool suppressFunctionCall = false);
 
+        // Parse erase statement
+        void ParseErase();
+
 		// Parse increment or decrement statement
 		void ParseIncDec();
 

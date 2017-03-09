@@ -17,11 +17,11 @@ TEST_CASE("Test Unicode", "[Unicode]")
 		static const char * scriptText =
 			u8R"(
     
-			resumé is "my resumé text" 	
-			いろは is "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
-			Üben is "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
-			Да is "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
-			i18n is "Iñtërnâtiônàlizætiøn☃💩"
+			set resumé to "my resumé text" 	
+			set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
+			set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
+			set Да to "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
+			set i18n to "Iñtërnâtiônàlizætiøn☃💩"
 
 			)";
 
@@ -125,3 +125,4 @@ TEST_CASE("Test Unicode", "[Unicode]")
 	}
 
 }
+
