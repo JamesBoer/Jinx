@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA58FEDF1EE208D7004168BB /* JxUnicodeCaseFolding.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA58FEDD1EE208D7004168BB /* JxUnicodeCaseFolding.cpp */; };
+		AA58FEE01EE208D7004168BB /* JxUnicodeCaseFolding.h in Headers */ = {isa = PBXBuildFile; fileRef = AA58FEDE1EE208D7004168BB /* JxUnicodeCaseFolding.h */; };
 		AA7D1C5F1D4D229000A5AAF3 /* Jinx.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C331D4D229000A5AAF3 /* Jinx.h */; };
 		AA7D1C601D4D229000A5AAF3 /* JxBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C341D4D229000A5AAF3 /* JxBuffer.cpp */; };
 		AA7D1C611D4D229000A5AAF3 /* JxBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C351D4D229000A5AAF3 /* JxBuffer.h */; };
@@ -56,6 +58,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA58FEDD1EE208D7004168BB /* JxUnicodeCaseFolding.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxUnicodeCaseFolding.cpp; path = ../../../../Source/JxUnicodeCaseFolding.cpp; sourceTree = "<group>"; };
+		AA58FEDE1EE208D7004168BB /* JxUnicodeCaseFolding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxUnicodeCaseFolding.h; path = ../../../../Source/JxUnicodeCaseFolding.h; sourceTree = "<group>"; };
 		AA7D1C331D4D229000A5AAF3 /* Jinx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Jinx.h; path = ../../../../Source/Jinx.h; sourceTree = "<group>"; };
 		AA7D1C341D4D229000A5AAF3 /* JxBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxBuffer.cpp; path = ../../../../Source/JxBuffer.cpp; sourceTree = "<group>"; };
 		AA7D1C351D4D229000A5AAF3 /* JxBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxBuffer.h; path = ../../../../Source/JxBuffer.h; sourceTree = "<group>"; };
@@ -177,6 +181,8 @@
 				AA7D1C5A1D4D229000A5AAF3 /* JxSerialize.h */,
 				AA7D1C5B1D4D229000A5AAF3 /* JxUnicode.cpp */,
 				AA7D1C5C1D4D229000A5AAF3 /* JxUnicode.h */,
+				AA58FEDD1EE208D7004168BB /* JxUnicodeCaseFolding.cpp */,
+				AA58FEDE1EE208D7004168BB /* JxUnicodeCaseFolding.h */,
 				AABE2E331DDAC21500F38E05 /* JxVariableStackFrame.cpp */,
 				AABE2E341DDAC21500F38E05 /* JxVariableStackFrame.h */,
 				AA7D1C5D1D4D229000A5AAF3 /* JxVariant.cpp */,
@@ -194,6 +200,7 @@
 			files = (
 				AA7D1C8A1D4D229000A5AAF3 /* JxVariant.h in Headers */,
 				AA7D1C611D4D229000A5AAF3 /* JxBuffer.h in Headers */,
+				AA58FEE01EE208D7004168BB /* JxUnicodeCaseFolding.h in Headers */,
 				AA7D1C7E1D4D229000A5AAF3 /* JxParser.h in Headers */,
 				AA7D1C7C1D4D229000A5AAF3 /* JxMutex.h in Headers */,
 				AA7D1C881D4D229000A5AAF3 /* JxUnicode.h in Headers */,
@@ -287,6 +294,7 @@
 				AA7D1C831D4D229000A5AAF3 /* JxScript.cpp in Sources */,
 				AA7D1C891D4D229000A5AAF3 /* JxVariant.cpp in Sources */,
 				AA7D1C601D4D229000A5AAF3 /* JxBuffer.cpp in Sources */,
+				AA58FEDF1EE208D7004168BB /* JxUnicodeCaseFolding.cpp in Sources */,
 				AA7D1C661D4D229000A5AAF3 /* JxConversion.cpp in Sources */,
 				AA7D1C771D4D229000A5AAF3 /* JxLogging.cpp in Sources */,
 				AABE2E351DDAC21500F38E05 /* JxVariableStackFrame.cpp in Sources */,
