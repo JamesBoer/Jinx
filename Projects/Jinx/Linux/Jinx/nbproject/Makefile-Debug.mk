@@ -54,6 +54,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/5555977b/JxScript.o \
 	${OBJECTDIR}/_ext/5555977b/JxSerialize.o \
 	${OBJECTDIR}/_ext/5555977b/JxUnicode.o \
+	${OBJECTDIR}/_ext/5555977b/JxUnicodeCaseFolding.o \
 	${OBJECTDIR}/_ext/5555977b/JxVariableStackFrame.o \
 	${OBJECTDIR}/_ext/5555977b/JxVariant.o
 
@@ -178,6 +179,11 @@ ${OBJECTDIR}/_ext/5555977b/JxUnicode.o: ../../../../Source/JxUnicode.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxUnicode.o ../../../../Source/JxUnicode.cpp
+
+${OBJECTDIR}/_ext/5555977b/JxUnicodeCaseFolding.o: ../../../../Source/JxUnicodeCaseFolding.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxUnicodeCaseFolding.o ../../../../Source/JxUnicodeCaseFolding.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxVariableStackFrame.o: ../../../../Source/JxVariableStackFrame.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
