@@ -1,4 +1,4 @@
-/*
+﻿/*
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
@@ -9,6 +9,10 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+// Disable false positive warning regarding encoding non-ASCII characters in source
+#ifdef JINX_WINDOWS
+#pragma warning( disable : 4566 )
+#endif
 
 TEST_CASE("Test Unicode", "[Unicode]")
 {
@@ -17,7 +21,7 @@ TEST_CASE("Test Unicode", "[Unicode]")
 		static const char * scriptText =
 			u8R"(
     
-			set resumé to "my resumé text" 	
+			set resumÉ to "my resumé text" 	
 			set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
 			set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
 			set Да to "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
@@ -122,6 +126,38 @@ TEST_CASE("Test Unicode", "[Unicode]")
 
 		REQUIRE(s1 == str8);
 		REQUIRE(s2 == str16);
+	}
+
+    SECTION("Test simple case folding")
+    {
+        static const char * scriptText =
+            u8R"(
+    
+			set ABCDEFGHIJKLMNOPQRSTUVWXYZ to 321
+
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script);
+        REQUIRE(script->GetVariable("abcdefghijklmnopqrstuvwxyz") == 321);
+    }
+
+	SECTION("Test complex case folding")
+	{
+		static const char * scriptText =
+			u8R"(
+    
+			set resumÉ to 321 	
+			set légume to 123
+			set Üben to 555
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable(u8"resumé") == 321);
+		REQUIRE(script->GetVariable(u8"lÉgume") == 123);
+		REQUIRE(script->GetVariable(u8"üben") == 555);
 	}
 
 }

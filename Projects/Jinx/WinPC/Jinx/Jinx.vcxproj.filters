@@ -82,6 +82,9 @@
     <ClInclude Include="..\..\..\..\Source\JxVariableStackFrame.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\Source\JxUnicodeCaseFolding.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Source\JxBuffer.cpp">
@@ -145,6 +148,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\Source\JxVariableStackFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\Source\JxUnicodeCaseFolding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

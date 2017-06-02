@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2017-06-02
+
+### Changed
+- Implemented Unicode-aware case folding algorithm to make Jinx case insensitive
+
 ## [0.5.0] - 2017-03-08
 
 ### Added

@@ -1,4 +1,4 @@
-/*
+﻿/*
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
@@ -72,32 +72,18 @@ int main(int argc, char ** argv)
 
         static const char * scriptText =
             u8R"(
-			import core
-
-            function return {integer x} is divisible by {integer y}
-                return x % y = 0
-            end
-
-            loop i from 1 to 100
-                set print number to true
-                if i is divisible by 3
-                    write "Fizz"
-                    set print number to false
-                end
-                if i is divisible by 5
-                    write "Buzz"
-                    set print number to false
-                end
-                if print number
-                    write i
-                end
-                write newline
-            end
+    
+			set resumÉ to "my resumé text" 	
+			set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
+			set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
+			set Да to "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
+			set i18n to "Iñtërnâtiônàlizætiøn☃💩"
 
 			)";
 
         auto script = TestExecuteScript(scriptText);
         REQUIRE(script);
+        REQUIRE(script->GetVariable(u8"resumé").GetString() == u8"my resumé text");
     }
 
 	Jinx::ShutDown();
