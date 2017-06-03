@@ -1418,11 +1418,11 @@ static const CaseFoldingData s_caseFoldingTable[] =
 
 bool Jinx::FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
 {
-	size_t lower = 0;
-	size_t upper = countof(s_caseFoldingTable) - 1;
+	int32_t lower = 0;
+	int32_t upper = static_cast<int32_t>(countof(s_caseFoldingTable)) - 1;
 	while (lower <= upper)
 	{
-		size_t split = (lower + upper) / 2;
+		int32_t split = (lower + upper) / 2;
 		char32_t currPoint = s_caseFoldingTable[split].sourceCodePoint;
 		if (currPoint < sourceCodePoint)
 			lower = split + 1;
@@ -1440,3 +1440,4 @@ bool Jinx::FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoin
 	}
 	return false;
 }
+
