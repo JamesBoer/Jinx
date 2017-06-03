@@ -73,17 +73,22 @@ int main(int argc, char ** argv)
         static const char * scriptText =
             u8R"(
     
-			set resumÉ to "my resumé text" 	
-			set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
-			set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
-			set Да to "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
-			set i18n to "Iñtërnâtiônàlizætiøn☃💩"
+			function convert test {integer x}
+			end
+
+			convert test "string"
+
+			--set x to 3
+			--set y to "3"
+			--set z to x < y -- as integer
 
 			)";
 
         auto script = TestExecuteScript(scriptText);
         REQUIRE(script);
-        REQUIRE(script->GetVariable(u8"resumé").GetString() == u8"my resumé text");
+
+		//TODO: Configure Jinx and unit test for ways to check for runtime errors
+        //REQUIRE(script->GetVariable("z") == false);
     }
 
 	Jinx::ShutDown();

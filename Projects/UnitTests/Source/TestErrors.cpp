@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
+TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 {
 	SECTION("Test number parsing error error")
 	{
@@ -697,4 +697,102 @@ TEST_CASE("Test Syntax and Parsing Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
+
+	SECTION("Test invalid addition")
+	{
+		const char * scriptText =
+			u8R"(
+        
+			set x to 3
+			set y to "3"
+			set z to x + y
+            
+            )";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid subtraction")
+	{
+		const char * scriptText =
+			u8R"(
+        
+			set x to 3
+			set y to "3"
+			set z to x - y
+            
+            )";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid multiplication")
+	{
+		const char * scriptText =
+			u8R"(
+        
+			set x to 3
+			set y to "3"
+			set z to x * y
+            
+            )";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid division")
+	{
+		const char * scriptText =
+			u8R"(
+        
+			set x to 3
+			set y to "3"
+			set z to x / y
+            
+            )";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid mod")
+	{
+		const char * scriptText =
+			u8R"(
+        
+			set x to 3
+			set y to "3"
+			set z to x % y
+            
+            )";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid function parameter cast")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function convert test {integer x}
+			end
+
+			convert test "string"
+            
+            )";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
 }

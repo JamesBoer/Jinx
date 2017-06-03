@@ -59,7 +59,7 @@ TEST_CASE("Test Casts", "[Casts]")
             
             )";
             
-            auto script = TestExecuteScript(scriptText);
+        auto script = TestExecuteScript(scriptText);
         REQUIRE(script);
         REQUIRE(script->GetVariable("a").GetNumber() == 12345);
         REQUIRE(script->GetVariable("b").GetString() == "12345");
@@ -69,5 +69,5 @@ TEST_CASE("Test Casts", "[Casts]")
         REQUIRE(script->GetVariable("f").GetBoolean() == true);
         REQUIRE(script->GetVariable("g").GetBoolean() == true);
     }
-    
+
 }

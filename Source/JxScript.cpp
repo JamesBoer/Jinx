@@ -111,6 +111,11 @@ bool Script::Execute()
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 + op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for addition");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -255,6 +260,11 @@ bool Script::Execute()
 					return false;
 				}
 				auto result = op1 / op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for division");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -413,6 +423,11 @@ bool Script::Execute()
 					return false;
 				}
 				auto result = op1 % op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for mod");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -421,6 +436,11 @@ bool Script::Execute()
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 * op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for mod");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -649,7 +669,13 @@ bool Script::Execute()
 				m_execution.back().reader.Read<ValueType, uint8_t>(&type);
 				size_t index = m_stack.size() + stackIndex;
 				if (type != ValueType::Any)
-					m_stack[index].ConvertTo(type);
+				{
+					if (!m_stack[index].ConvertTo(type))
+					{
+						Error("Invalid function parameter cast");
+						return false;
+					}
+				}
 				SetVariableAtIndex(name, index);
 			}
 			break;
@@ -713,6 +739,11 @@ bool Script::Execute()
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 - op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for subraction");
+					return false;
+				}
 				Push(result);
 			}
 			break;
