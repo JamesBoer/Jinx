@@ -284,9 +284,11 @@ String Jinx::FoldCase(const String & source)
 				s.append(buffer);
 				if (cp2)
 				{
+					size_t charsOut2;
 					char buffer2[5] = { 0, 0, 0, 0, 0 };
-					ConvertUtf32ToUtf8(cp2, buffer2, countof(buffer2), &charsOut);
+					ConvertUtf32ToUtf8(cp2, buffer2, countof(buffer2), &charsOut2);
 					s.append(buffer);
+					charsOut += charsOut2;
 				}
 			}
 			else
