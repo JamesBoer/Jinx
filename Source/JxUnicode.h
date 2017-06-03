@@ -21,9 +21,6 @@ namespace Jinx
 	bool IsCaseFolded(const String & source);
 	String FoldCase(const String & source);
 
-    void InitializeUnicode();
-    void ShutDownUnicode();
-
 };
 
 #endif // JX_UNICODE_H__

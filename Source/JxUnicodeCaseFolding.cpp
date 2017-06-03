@@ -1416,14 +1416,27 @@ static const CaseFoldingData s_caseFoldingTable[] =
 	{ 0x1E921, 0x1E943, 0x0000},
 };
 
-size_t Jinx::GetCaseFoldingTableSize()
+bool Jinx::FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
 {
-    return countof(s_caseFoldingTable);
+	size_t lower = 0;
+	size_t upper = countof(s_caseFoldingTable) - 1;
+	while (lower <= upper)
+	{
+		size_t split = (lower + upper) / 2;
+		char32_t currPoint = s_caseFoldingTable[split].sourceCodePoint;
+		if (currPoint < sourceCodePoint)
+			lower = split + 1;
+		else if (currPoint > sourceCodePoint)
+			upper = split - 1;
+		else
+		{
+			const auto & result = s_caseFoldingTable[split];
+			if (destCodePoint1)
+				*destCodePoint1 = result.destCodePoint1;
+			if (destCodePoint2)
+				*destCodePoint2 = result.destCodePoint2;
+			return true;
+		}
+	}
+	return false;
 }
-
-const CaseFoldingData & Jinx::GetCaseFoldingData(size_t index)
-{
-    assert(index < countof(s_caseFoldingTable));
-    return s_caseFoldingTable[index];
-}
-

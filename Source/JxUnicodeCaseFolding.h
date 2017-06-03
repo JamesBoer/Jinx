@@ -20,9 +20,7 @@ namespace Jinx
 		char32_t destCodePoint2;
     };
 
-    size_t GetCaseFoldingTableSize();
-    const CaseFoldingData & GetCaseFoldingData(size_t index);
-
+	bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2);
 };
 
 #endif // JX_UNICODE_CASE_FOLDING_H__

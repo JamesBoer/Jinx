@@ -31,12 +31,6 @@ static uint32_t s_fastFold[128] = {
     0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7A,0x7B,0x7C,0x7D,0x7E,0x7F,
 };
 
-typedef std::map<char32_t, std::pair<char32_t, char32_t>, std::less<char32_t>, Allocator<std::pair<char32_t, std::pair<char32_t, char32_t>>>> FoldingMap;
-typedef std::unique_ptr<FoldingMap, Jinx::Deleter<FoldingMap>> FoldingMapPtr;
-
-static FoldingMapPtr s_foldingMap;
-
-
 
 static void ConvertUtf8ToUtf32(const char * utf8In, size_t inBufferCount, char32_t * utf32CodePoint, size_t * numCharsOut)
 {
@@ -240,8 +234,7 @@ bool Jinx::IsCaseFolded(const String & source)
 			char32_t codepoint;
 			size_t charsOut;
 			ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
-			auto itr = s_foldingMap->find(codepoint);
-			if (itr != s_foldingMap->end())
+			if (FindCaseFoldingData(codepoint, nullptr, nullptr))
 				return false;
 			curr += charsOut;
 		}
@@ -274,11 +267,11 @@ String Jinx::FoldCase(const String & source)
 			char32_t codepoint;
 			size_t charsOut;
 			ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
-			auto itr = s_foldingMap->find(codepoint);
-			if (itr != s_foldingMap->end())
+			
+			char32_t cp1;
+			char32_t cp2;
+			if (FindCaseFoldingData(codepoint, &cp1, &cp2))
 			{
-				char32_t cp1 = itr->second.first;
-				char32_t cp2 = itr->second.second;
 				char buffer[5] = { 0, 0, 0, 0, 0 };
 				ConvertUtf32ToUtf8(cp1, buffer, countof(buffer), &charsOut);
 				s.append(buffer);
@@ -302,21 +295,6 @@ String Jinx::FoldCase(const String & source)
     return s;
 }
 
-void Jinx::InitializeUnicode()
-{
-    s_foldingMap = FoldingMapPtr(JinxNew(FoldingMap));
-    const auto size = GetCaseFoldingTableSize();
-    for (size_t i = 0; i < size; ++i)
-    {
-        const auto & fd = GetCaseFoldingData(i);
-        s_foldingMap->insert(std::make_pair(fd.sourceCodePoint, std::make_pair(fd.destCodePoint1, fd.destCodePoint2)));
-    }
-}
-
-void Jinx::ShutDownUnicode()
-{
-    s_foldingMap = nullptr;
-}
 
 
 

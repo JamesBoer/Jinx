@@ -242,11 +242,9 @@ void Jinx::Initialize(const GlobalParams & params)
 	s_globalParams = params;
 	InitializeMemory(params);
 	InitializeLogging(params);
-	InitializeUnicode();
 }
 
 void Jinx::ShutDown()
 {
-	ShutDownUnicode();
 	ShutDownMemory();
 }
