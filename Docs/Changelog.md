@@ -1,6 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.6.0] - 2017-06-02
+
+### Changed
+- Implemented Unicode-aware case folding algorithm to make Jinx case insensitive
+
+### Fixed
+- Runtime type conversion errors properly checked, and unit tests added
+
 ## [0.5.0] - 2017-03-08
 
 ### Added
@@ -174,7 +182,7 @@ All notable changes to this project will be documented in this file.
 - Added unit tests for Unicode conversion and variable names
 
 ### Fixed
-- Potention memory corruption bug when using Jinx::Shutdown() and not all memory has been freed
+- Potential memory corruption bug when using Jinx::Shutdown() and not all memory has been freed
 - Identifiers now have fewer naming restrictions
 
 ### Changed

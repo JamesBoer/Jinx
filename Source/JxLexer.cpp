@@ -62,8 +62,8 @@ void Lexer::CreateSymbol(int64_t integer)
 void Lexer::CreateSymbol(const String & name)
 {
 	Symbol symbol(SymbolType::NameValue, m_lineNumber, m_columnMarker);
-	symbol.text = name;
-	auto itr = m_symbolTypeMap.find(name);
+	symbol.text = FoldCase(name);
+    auto itr = m_symbolTypeMap.find(name);
 	if (itr != m_symbolTypeMap.end())
 	{
 		symbol.type = itr->second;

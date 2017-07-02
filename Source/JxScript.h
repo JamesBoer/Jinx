@@ -30,9 +30,11 @@ namespace Jinx
 	private:
 		void Error(const char * message);
 
+		Variant GetVariableInternal(const String & name) const;
 		Variant Pop();
 		void Push(const Variant & value);
 		void SetVariableAtIndex(const String & name, size_t index);
+		void SetVariableInternal(const String & name, const Variant & value);
 
 	private:
 		typedef std::map<String, size_t, std::less<String>, Allocator<std::pair<String, size_t>>> NameIndexMap;

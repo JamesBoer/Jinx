@@ -1,4 +1,4 @@
-/*
+﻿/*
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
@@ -72,32 +72,23 @@ int main(int argc, char ** argv)
 
         static const char * scriptText =
             u8R"(
-			import core
+    
+			function convert test {integer x}
+			end
 
-            function return {integer x} is divisible by {integer y}
-                return x % y = 0
-            end
+			convert test "string"
 
-            loop i from 1 to 100
-                set print number to true
-                if i is divisible by 3
-                    write "Fizz"
-                    set print number to false
-                end
-                if i is divisible by 5
-                    write "Buzz"
-                    set print number to false
-                end
-                if print number
-                    write i
-                end
-                write newline
-            end
+			--set x to 3
+			--set y to "3"
+			--set z to x < y -- as integer
 
 			)";
 
         auto script = TestExecuteScript(scriptText);
         REQUIRE(script);
+
+		//TODO: Configure Jinx and unit test for ways to check for runtime errors
+        //REQUIRE(script->GetVariable("z") == false);
     }
 
 	Jinx::ShutDown();

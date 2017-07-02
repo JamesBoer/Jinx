@@ -389,8 +389,6 @@ static const char * s_testScripts[] =
 
 	u8R"(
 
-		import core
-
 		-- Create collection using an initialization list of key-value pairs		
 		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
@@ -400,8 +398,6 @@ static const char * s_testScripts[] =
 	)",
 
 	u8R"(
-
-		import core
 
 		-- Create collection using an initialization list of key-value pairs		
 		set a to [1, "red"], [2, "green"], [3, "blue"]
@@ -413,49 +409,11 @@ static const char * s_testScripts[] =
 
 	u8R"(
 
-		import core
-
 		-- Create collection using an initialization list of key-value pairs		
 		set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 		-- Remove element by key
-		set a[2] to null
-
-	)",
-
-	u8R"(
-
-		import core
-
-		-- Create collection using an initialization list of key-value pairs		
-		set a to [1, "red"], [2, "green"], [3, "blue"]
-			
-		-- Remove elements by key
-		--remove (1, 2) from a
-
-	)",
-
-	u8R"(
-
-		import core
-
-		-- Create collection using an initialization list of key-value pairs		
-		set a to [1, "red"], [2, "green"], [3, "blue"]
-			
-		-- Remove element by value
-		--remove value "red" from a
-
-	)",
-
-	u8R"(
-
-		import core
-
-		-- Create collection using an initialization list of key-value pairs		
-		set a to [1, "red"], [2, "green"], [3, "blue"]
-			
-		-- Remove multiple elements by value
-		--remove values ("red", "green") from a
+		erase a[2]
 
 	)",
 
@@ -465,6 +423,33 @@ static const char * s_testScripts[] =
 		set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
 		set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
 		set Да to "В чащах юга жил бы цитрус? Да, но фальшивый экземпляр!"
+
+	)",
+
+	u8R"(
+
+		import core
+
+        function return {integer x} is divisible by {integer y}
+            return x % y = 0
+        end
+
+        loop i from 1 to 100
+            set print number to true
+            if i is divisible by 3
+                write "Fizz"
+                set print number to false
+            end
+            if i is divisible by 5
+                write "Buzz"
+                set print number to false
+            end
+            if print number
+                write i
+            end
+            write newline
+			wait
+        end
 
 	)",
 

@@ -111,6 +111,11 @@ bool Script::Execute()
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 + op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for addition");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -221,7 +226,7 @@ bool Script::Execute()
                     auto coll = var.GetCollectionItr().second;
                     if (itr != coll->end())
                         itr = coll->erase(itr);
-                    SetVariable(name, std::make_pair(itr, coll));
+                    SetVariableInternal(name, std::make_pair(itr, coll));
                 }
             }
             break;
@@ -255,6 +260,11 @@ bool Script::Execute()
 					return false;
 				}
 				auto result = op1 / op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for division");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -413,6 +423,11 @@ bool Script::Execute()
 					return false;
 				}
 				auto result = op1 % op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for mod");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -421,6 +436,11 @@ bool Script::Execute()
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 * op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for mod");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -649,7 +669,13 @@ bool Script::Execute()
 				m_execution.back().reader.Read<ValueType, uint8_t>(&type);
 				size_t index = m_stack.size() + stackIndex;
 				if (type != ValueType::Any)
-					m_stack[index].ConvertTo(type);
+				{
+					if (!m_stack[index].ConvertTo(type))
+					{
+						Error("Invalid function parameter cast");
+						return false;
+					}
+				}
 				SetVariableAtIndex(name, index);
 			}
 			break;
@@ -684,7 +710,7 @@ bool Script::Execute()
 				String name;
 				m_execution.back().reader.Read(&name);
 				Variant val = Pop();
-				SetVariable(name, val);
+				SetVariableInternal(name, val);
 			}
 			break;
 			case Opcode::SetVarKey:
@@ -713,6 +739,11 @@ bool Script::Execute()
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 - op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for subraction");
+					return false;
+				}
 				Push(result);
 			}
 			break;
@@ -746,6 +777,11 @@ bool Script::Execute()
 }
 
 Variant Script::GetVariable(const String & name) const
+{
+	return GetVariableInternal(FoldCase(name));
+}
+
+Variant Script::GetVariableInternal(const String & name) const
 {
 	auto & names = m_execution.back().names;
 	for (auto ritr = names.rbegin(); ritr != names.rend(); ++ritr)
@@ -789,6 +825,11 @@ void Script::Push(const Variant & value)
 
 void Script::SetVariable(const String & name, const Variant & value)
 {
+	SetVariableInternal(FoldCase(name), value);
+}
+
+void Script::SetVariableInternal(const String & name, const Variant & value)
+{
 	// Search down the variable stack for the variable
 	auto & names = m_execution.back().names;
 	for (auto ritr = names.rbegin(); ritr != names.rend(); ++ritr)
@@ -800,7 +841,7 @@ void Script::SetVariable(const String & name, const Variant & value)
 			if (index >= m_stack.size())
 			{
 				LogWriteLine("Attempted to access stack at invalid index");
-				return ;
+				return;
 			}
 			m_stack[itr->second] = value;
 			return;

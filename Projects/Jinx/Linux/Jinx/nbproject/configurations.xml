@@ -50,6 +50,8 @@
       <itemPath>../../../../Source/JxSerialize.h</itemPath>
       <itemPath>../../../../Source/JxUnicode.cpp</itemPath>
       <itemPath>../../../../Source/JxUnicode.h</itemPath>
+      <itemPath>../../../../Source/JxUnicodeCaseFolding.cpp</itemPath>
+      <itemPath>../../../../Source/JxUnicodeCaseFolding.h</itemPath>
       <itemPath>../../../../Source/JxVariableStackFrame.cpp</itemPath>
       <itemPath>../../../../Source/JxVariableStackFrame.h</itemPath>
       <itemPath>../../../../Source/JxVariant.cpp</itemPath>
@@ -192,6 +194,16 @@
       <item path="../../../../Source/JxUnicode.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../../../Source/JxUnicode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicodeCaseFolding.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicodeCaseFolding.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../../../Source/JxVariableStackFrame.cpp"
             ex="false"
@@ -341,6 +353,16 @@
       <item path="../../../../Source/JxUnicode.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../../../Source/JxUnicode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicodeCaseFolding.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../../../Source/JxUnicodeCaseFolding.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../../../../Source/JxVariableStackFrame.cpp"
             ex="false"
