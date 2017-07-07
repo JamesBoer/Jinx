@@ -17,7 +17,7 @@ namespace Jinx
 
 	class BinaryReader;
 	class BinaryWriter;
-	
+
 	/// Interface for user objects in scripts
 	class IUserObject
 	{
@@ -67,8 +67,10 @@ namespace Jinx
 		Variant(double value) : m_type(ValueType::Null) { SetNumber(value); }
 		Variant(const char * value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const char16_t * value) : m_type(ValueType::Null) { SetString(value); }
+		Variant(const wchar_t * value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const String & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const StringU16 & value) : m_type(ValueType::Null) { SetString(value); }
+		Variant(const WString & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
 		Variant(const CollectionItrPair & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
@@ -106,6 +108,7 @@ namespace Jinx
 		double GetNumber() const;
 		String GetString() const;
 		StringU16 GetStringU16() const;
+		WString GetWString() const;
 		CollectionPtr GetCollection() const;
 		CollectionItrPair GetCollectionItr() const;
 		UserObjectPtr GetUserObject() const;
@@ -140,6 +143,7 @@ namespace Jinx
 		void SetNumber(double value);
 		void SetString(const String & value);
 		void SetString(const StringU16 & value);
+		void SetString(const WString & value);
 		void SetCollection(const CollectionPtr & value);
 		void SetCollectionItr(const CollectionItrPair & value);
 		void SetUserObject(const UserObjectPtr & value);
@@ -195,6 +199,13 @@ namespace Jinx
 	inline bool operator != (const Variant & left, const Variant & right) { return (left == right) ? false : true; }
 	inline bool operator > (const Variant & left, const Variant & right) { return (left <= right) ? false : true; }
 	inline bool operator >= (const Variant & left, const Variant & right) { return (left < right) ? false : true; }
+
+	/// Helper function convertion to utf-8 string from other types using a Variant object
+	inline String Str(const char16_t * str) { return Variant(str).GetString(); }
+	inline String Str(const wchar_t * str) { return Variant(str).GetString(); }
+	inline String Str(const StringU16 & str) { return Variant(str).GetString(); }
+	inline String Str(const WString & str) { return Variant(str).GetString(); }
+
 };
 
 #endif // JX_VARIANT_H__

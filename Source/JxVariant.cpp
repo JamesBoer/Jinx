@@ -497,6 +497,11 @@ StringU16 Variant::GetStringU16() const
 	return ConvertUtf8ToUtf16(GetString());
 }
 
+WString Variant::GetWString() const
+{
+	return ConvertUtf8ToWString(GetString());
+}
+
 ValueType Variant::GetValType() const
 {
 	if (IsValType())
@@ -611,6 +616,11 @@ void Variant::SetString(const String & value)
 void Variant::SetString(const StringU16 & value)
 {
 	SetString(ConvertUtf16ToUtf8(value));
+}
+
+void Variant::SetString(const WString & value)
+{
+	SetString(ConvertWStringToUtf8(value));
 }
 
 void Variant::SetValType(ValueType value)

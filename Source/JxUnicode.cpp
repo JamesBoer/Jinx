@@ -186,18 +186,35 @@ size_t Jinx::GetUtf8CharSize(const char * utf8Str)
 
 // Workaround for VS 2015 bug
 #if _MSC_VER == 1900
+
 StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t, Allocator<int16_t>, Allocator<char>> convert;
 	auto str = convert.from_bytes(utf8Str);
 	return StringU16(reinterpret_cast<const char16_t *>(str.data()));
 }
+
 String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16Str)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t, Allocator<int16_t>, Allocator<char>> convert;
 	auto p = reinterpret_cast<const int16_t *>(utf16Str.data());
 	return convert.to_bytes(p, p + utf16Str.size());
 }
+
+WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+	auto str = convert.from_bytes(utf8Str);
+	return WString(reinterpret_cast<const wchar_t *>(str.data()));
+}
+
+String Jinx::ConvertWStringToUtf8(const WString & wStr)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+	auto p = reinterpret_cast<const wchar_t *>(wStr.data());
+	return convert.to_bytes(p, p + wStr.size());
+}
+
 #else
 
 StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
@@ -210,6 +227,18 @@ String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t, Allocator<char16_t>, Allocator<char>> convert;
 	return convert.to_bytes(utf16_string);
+}
+
+WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
+{
+	ref(utf8Str);
+	return WString();
+}
+
+String Jinx::ConvertWStringToUtf8(const WString & wStr)
+{
+	ref(wStr);
+	return String();
 }
 
 #endif

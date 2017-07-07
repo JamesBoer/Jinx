@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2017-07-07
+
+### Changed
+- Added convenience methods to support alternate string encodings more seamlessly
+- Changed function registration with more explicit parameters
+
 ## [0.6.0] - 2017-06-02
 
 ### Changed

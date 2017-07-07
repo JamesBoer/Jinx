@@ -265,6 +265,9 @@ namespace Jinx
 	// Define a custom UTF-16 string using internal allocator
 	typedef std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>> StringU16;
 
+	// Define a custom wide character string using internal allocator
+	typedef std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>> WString;
+
 };
 
 #endif // JX_MEMORY_H__
