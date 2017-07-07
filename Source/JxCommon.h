@@ -18,20 +18,20 @@ namespace Jinx
 	const uint32_t LogTabWidth = 4;
 
 	// All script opcodes
-    enum class Opcode
-    {
-        Add,
-        And,
-        CallFunc,
-        Cast,
-        Decrement,
+	enum class Opcode
+	{
+		Add,
+		And,
+		CallFunc,
+		Cast,
+		Decrement,
 		Divide,
 		Equals,
-        EraseProp,
-        ErasePropElem,
-        EraseVar,
-        EraseVarElem,
-        Exit,
+		EraseProp,
+		ErasePropElem,
+		EraseVar,
+		EraseVarElem,
+		Exit,
 		Function,
 		Greater,
 		GreaterEq,
@@ -118,7 +118,7 @@ namespace Jinx
 		Decrement,
 		Else,
 		End,
-        Erase,
+		Erase,
 		External,
 		From,
 		Function,

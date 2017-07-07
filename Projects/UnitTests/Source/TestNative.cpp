@@ -71,7 +71,7 @@ TEST_CASE("Test Native", "[Native]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			public function return getvalue
 				return 123
 			end			

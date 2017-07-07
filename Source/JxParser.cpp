@@ -1090,7 +1090,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 	bool parsedParameter = false;
 	bool parsedNonKeywordName = false;
 	int parsedNameCount = 0;
-    int optionalNameCount = 0;
+	int optionalNameCount = 0;
 	FunctionSignatureParts signatureParts;
 	while (!Check(SymbolType::NewLine))
 	{
@@ -1122,7 +1122,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 		}
 		else
 		{
-            part.optional = Accept(SymbolType::ParenOpen);
+			part.optional = Accept(SymbolType::ParenOpen);
 			if (!CheckFunctionNamePart())
 			{
 				Error("Invalid name in function signature");
@@ -1151,16 +1151,16 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 				}
 				part.names.push_back(name);
 			}
-            if (part.optional)
-            {
-                optionalNameCount++;
-                if (!Expect(SymbolType::ParenClose))
-                {
-                    Error("Expected closing parentheses for optional function name part");
-                    return FunctionSignature();
-                }
-            }
-            parsedParameter = false;
+			if (part.optional)
+			{
+				optionalNameCount++;
+				if (!Expect(SymbolType::ParenClose))
+				{
+					Error("Expected closing parentheses for optional function name part");
+					return FunctionSignature();
+				}
+			}
+			parsedParameter = false;
 		}
 		signatureParts.push_back(part);
 	}
@@ -1180,12 +1180,12 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 		}
 	}
 
-    // Check to make sure the function has at least one non-optional keyword part
-    if (parsedNameCount == optionalNameCount)
-    {
-        Error("Function signature must have at least one non-optional name part");
-        return FunctionSignature();
-    }
+	// Check to make sure the function has at least one non-optional keyword part
+	if (parsedNameCount == optionalNameCount)
+	{
+		Error("Function signature must have at least one non-optional name part");
+		return FunctionSignature();
+	}
 
 	// Emit function definition opcode
 	EmitOpcode(Opcode::Function);
@@ -1299,14 +1299,14 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	// We only need to suppress potential recursive function calls if the first 
 	// token is a parameter.
 	int count = 0;
-    int optionalCount = 0;
+	int optionalCount = 0;
 
 	// Match each token or token set to a part of the function signature
-    const auto & parts = signature->GetParts();
+	const auto & parts = signature->GetParts();
 	for (auto partsItr = parts.begin(); partsItr != parts.end();)
 	{
-        if (partsItr->optional)
-            optionalCount++;
+		if (partsItr->optional)
+			optionalCount++;
 
 		if (partsItr->partType == FunctionSignaturePartType::Name)
 		{
@@ -1317,34 +1317,34 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 				bool match = false;
 				while (!match)
 				{
-				    for (const auto & n : partsItr->names)
-				    {
-					    if (name == n)
-					    {
-						    match = true;
-						    break;
-					    }
-				    }
-                    if (match)
-                        break;
-                    if (partsItr->optional)
-                    {
-                        ++partsItr;
-                        if (partsItr == parts.end())
-                            break;
-                        continue;
-                    }
+					for (const auto & n : partsItr->names)
+					{
+						if (name == n)
+						{
+							match = true;
+							break;
+						}
+					}
+					if (match)
+						break;
+					if (partsItr->optional)
+					{
+						++partsItr;
+						if (partsItr == parts.end())
+							break;
+						continue;
+					}
 					Error("Mismatch in function name");
 					return;
 				}
 			}
 			else
 			{
-                if (partsItr->optional)
-                {
-                    ++partsItr;
-                    continue;
-                }
+				if (partsItr->optional)
+				{
+					++partsItr;
+					continue;
+				}
 				Error("Expecting function name");
 				return;
 			}
@@ -1360,11 +1360,10 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 			else
 			{
 				ParseExpression(count <= optionalCount);
-                //ParseExpression(count == 0);
-            }
+			}
 		}
 		count++;
-        ++partsItr;
+		++partsItr;
 	}
 
 	// When finished validating the function and pushing parameters, call the function
@@ -1374,114 +1373,114 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 
 void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
 {
-    if (m_error)
-        return;
+	if (m_error)
+		return;
 
-    const FunctionSignature * signature = nullptr;
-    if (!suppressFunctionCall)
-        signature = CheckFunctionCall();
-    suppressFunctionCall = false;
-    if (signature)
-    {
-        if (signature->HasReturnParameter() == false)
-        {
-            Error("Function in expression requires a return parameter");
-            return;
-        }
-        ParseFunctionCall(signature);
-    }
-    else if (CheckProperty())
-    {
-        auto propertyName = ParsePropertyName();
-        if (!propertyName.IsValid())
-        {
-            Error("Unable to find property name in library");
-            return;
-        }
-        bool subscript = ParseSubscript();
-        EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
-        EmitId(propertyName.GetId());
+	const FunctionSignature * signature = nullptr;
+	if (!suppressFunctionCall)
+		signature = CheckFunctionCall();
+	suppressFunctionCall = false;
+	if (signature)
+	{
+		if (signature->HasReturnParameter() == false)
+		{
+			Error("Function in expression requires a return parameter");
+			return;
+		}
+		ParseFunctionCall(signature);
+	}
+	else if (CheckProperty())
+	{
+		auto propertyName = ParsePropertyName();
+		if (!propertyName.IsValid())
+		{
+			Error("Unable to find property name in library");
+			return;
+		}
+		bool subscript = ParseSubscript();
+		EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
+		EmitId(propertyName.GetId());
 		if (Accept(SymbolType::Type))
 			EmitOpcode(Opcode::Type);
-    }
-    else if (CheckVariable())
-    {
-        String name = ParseVariable();
-        bool subscript = ParseSubscript();
-        EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-        EmitName(name);
-        if (Accept(SymbolType::Type))
+	}
+	else if (CheckVariable())
+	{
+		String name = ParseVariable();
+		bool subscript = ParseSubscript();
+		EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
+		EmitName(name);
+		if (Accept(SymbolType::Type))
 			EmitOpcode(Opcode::Type);
 	}
-    else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
-    {
-        return;
-    }
-    else if (Accept(SymbolType::ParenOpen))
-    {
-        ParseExpression();
-        Expect(SymbolType::ParenClose);
-    }
-    else if (CheckValue())
-    {
-        auto val = ParseValue();
-        EmitOpcode(Opcode::PushVal);
-        EmitValue(val);
-    }
-    else if (CheckValueType())
-    {
-        auto val = ParseValueType();
-        EmitOpcode(Opcode::PushVal);
-        EmitValue(val);
-    }
+	else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
+	{
+		return;
+	}
+	else if (Accept(SymbolType::ParenOpen))
+	{
+		ParseExpression();
+		Expect(SymbolType::ParenClose);
+	}
+	else if (CheckValue())
+	{
+		auto val = ParseValue();
+		EmitOpcode(Opcode::PushVal);
+		EmitValue(val);
+	}
+	else if (CheckValueType())
+	{
+		auto val = ParseValueType();
+		EmitOpcode(Opcode::PushVal);
+		EmitValue(val);
+	}
 	else
 	{
 		Error("Expected operand");
 	}
 
-    if (!opcodeStack.empty())
-    {
-        EmitOpcode(opcodeStack.back());
-        opcodeStack.pop_back();
-    }
+	if (!opcodeStack.empty())
+	{
+		EmitOpcode(opcodeStack.back());
+		opcodeStack.pop_back();
+	}
 }
 
 void Parser::ParseSubexpressionOperation(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
 {
-    if (m_error)
-        return;
+	if (m_error)
+		return;
 
-    while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
-    {
-        // Parse operand
-        ParseSubexpressionOperand(opcodeStack, suppressFunctionCall);
+	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
+	{
+		// Parse operand
+		ParseSubexpressionOperand(opcodeStack, suppressFunctionCall);
 		
-        // Check for casts
-        if (Accept(SymbolType::As))
-        {
-            EmitOpcode(Opcode::Cast);
-            auto valueType = ParseValueType();
-            if (m_error)
-                return;
-            EmitValueType(valueType);
-        }
+		// Check for casts
+		if (Accept(SymbolType::As))
+		{
+			EmitOpcode(Opcode::Cast);
+			auto valueType = ParseValueType();
+			if (m_error)
+				return;
+			EmitValueType(valueType);
+		}
 		
-        // Parse binary operator
-        if (CheckBinaryOperator())
-        {
-            auto opcode = ParseBinaryOperator();
-            opcodeStack.push_back(opcode);
-        }
-        else if (Check(SymbolType::And) || Check(SymbolType::Or))
-        {
-            auto t = m_currentSymbol->type;
-            NextSymbol();
-            ParseExpression();
-            EmitOpcode(t == SymbolType::And ? Opcode::And : Opcode::Or);
-        }
-        else
-            break;
-    }
+		// Parse binary operator
+		if (CheckBinaryOperator())
+		{
+			auto opcode = ParseBinaryOperator();
+			opcodeStack.push_back(opcode);
+		}
+		else if (Check(SymbolType::And) || Check(SymbolType::Or))
+		{
+			auto t = m_currentSymbol->type;
+			NextSymbol();
+			ParseExpression();
+			EmitOpcode(t == SymbolType::And ? Opcode::And : Opcode::Or);
+		}
+		else
+			break;
+	}
 }
 
 void Parser::ParseSubexpression(bool suppressFunctionCall)
@@ -1507,7 +1506,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	}
 	else
 	{
-        ParseSubexpressionOperation(opcodeStack, suppressFunctionCall);
+		ParseSubexpressionOperation(opcodeStack, suppressFunctionCall);
 	}
 
 	// Check for leftover operators
@@ -1593,50 +1592,50 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 
 void Parser::ParseErase()
 {
-    if (CheckProperty())
-    {
-        auto propName = ParsePropertyName();
-        if (propName.IsReadOnly())
-        {
-            Error("Can't delete a readonly property");
-            return;
-        }
-        if (Accept(SymbolType::SquareOpen))
-        {
-            ParseSubexpression();
-            Expect(SymbolType::SquareClose);
-            Expect(SymbolType::NewLine);
-            EmitOpcode(Opcode::EraseVarElem);
-        }
-        else
-        {
-            Expect(SymbolType::NewLine);
-            EmitOpcode(Opcode::EraseProp);
-        }
-        EmitId(propName.GetId());
-    }
-    else if (CheckVariable())
-    {
-        auto varName = ParseVariable();
-        if (Accept(SymbolType::SquareOpen))
-        {
-            ParseSubexpression();
-            Expect(SymbolType::SquareClose);
-            Expect(SymbolType::NewLine);
-            EmitOpcode(Opcode::EraseVarElem);
-        }
-        else
-        {
-            Expect(SymbolType::NewLine);
-            EmitOpcode(Opcode::EraseVar);
-        }
-        EmitName(varName);
-    }
-    else
-    {
-        Error("Valid property or variable name expected after delete keyword");
-        return;
-    }
+	if (CheckProperty())
+	{
+		auto propName = ParsePropertyName();
+		if (propName.IsReadOnly())
+		{
+			Error("Can't delete a readonly property");
+			return;
+		}
+		if (Accept(SymbolType::SquareOpen))
+		{
+			ParseSubexpression();
+			Expect(SymbolType::SquareClose);
+			Expect(SymbolType::NewLine);
+			EmitOpcode(Opcode::EraseVarElem);
+		}
+		else
+		{
+			Expect(SymbolType::NewLine);
+			EmitOpcode(Opcode::EraseProp);
+		}
+		EmitId(propName.GetId());
+	}
+	else if (CheckVariable())
+	{
+		auto varName = ParseVariable();
+		if (Accept(SymbolType::SquareOpen))
+		{
+			ParseSubexpression();
+			Expect(SymbolType::SquareClose);
+			Expect(SymbolType::NewLine);
+			EmitOpcode(Opcode::EraseVarElem);
+		}
+		else
+		{
+			Expect(SymbolType::NewLine);
+			EmitOpcode(Opcode::EraseVar);
+		}
+		EmitName(varName);
+	}
+	else
+	{
+		Error("Valid property or variable name expected after delete keyword");
+		return;
+	}
 }
 
 void Parser::ParseIncDec()
@@ -2081,11 +2080,11 @@ void Parser::ParseStatement()
 				// We're parsing a loop block
 				ParseLoop();
 			}
-            else if (Accept(SymbolType::Erase))
-            {
-                // We're parsing an erase operation
-                ParseErase();
-            }
+			else if (Accept(SymbolType::Erase))
+			{
+				// We're parsing an erase operation
+				ParseErase();
+			}
 			else if (Check(SymbolType::Increment) || Check(SymbolType::Decrement))
 			{
 				// We're parsing an increment or decrement statement

@@ -16,7 +16,7 @@ TEST_CASE("Test Loops", "[Loops]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set a to 1
 			loop while a < 10
 				increment a
@@ -42,7 +42,7 @@ TEST_CASE("Test Loops", "[Loops]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set a to 1
 			loop until a >= 10
 				increment a
@@ -68,7 +68,7 @@ TEST_CASE("Test Loops", "[Loops]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set a to 1
 			loop
 				increment a
@@ -94,7 +94,7 @@ TEST_CASE("Test Loops", "[Loops]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set a to 1
 			loop
 				increment a
@@ -120,7 +120,7 @@ TEST_CASE("Test Loops", "[Loops]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set a to 0
 			loop from 1 to 10
 				increment a

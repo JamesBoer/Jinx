@@ -346,8 +346,8 @@ bool Variant::ConvertTo(ValueType type)
 		case ValueType::Boolean:
 			SetBoolean(!m_collection->empty());
 			return true;
-        default:
-            break;
+		default:
+			break;
 		};
 		break;
 	case ValueType::Guid:
@@ -356,8 +356,8 @@ bool Variant::ConvertTo(ValueType type)
 		case ValueType::String:
 			SetString(GuidToString(m_guid));
 			return true;
-        default:
-            break;
+		default:
+			break;
 		};
 		break;
 	case ValueType::ValType:
@@ -366,8 +366,8 @@ bool Variant::ConvertTo(ValueType type)
 		case ValueType::String:
 			SetString(GetValueTypeName(m_valType));
 			return true;
-        default:
-            break;
+		default:
+			break;
 		};
 		break;
 	default:

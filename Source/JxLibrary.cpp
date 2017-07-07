@@ -91,17 +91,17 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 			np.reserve(32);
 			const char * p = n.c_str();
 			const char * e = p + n.size();
-            bool optional = *p == '(';
-            if (optional)
-            {
-                if (n.size() < 3 || n[n.size() - 1] != ')')
-                {
-                    LogWriteLine("Error when parsing optional name component");
-                    return FunctionSignature();
-                }
-                ++p;
-                --e;
-            }
+			bool optional = *p == '(';
+			if (optional)
+			{
+				if (n.size() < 3 || n[n.size() - 1] != ')')
+				{
+					LogWriteLine("Error when parsing optional name component");
+					return FunctionSignature();
+				}
+				++p;
+				--e;
+			}
 			while (p != e)
 			{
 				if (*p == '/')
@@ -121,7 +121,7 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 				++p;
 			}
 			part.partType = FunctionSignaturePartType::Name;
-            part.optional = optional;
+			part.optional = optional;
 			part.names.push_back(np);
 		}
 		parts.push_back(part);
@@ -215,17 +215,17 @@ bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & n
 bool Library::RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates)
 {
 	std::lock_guard<Mutex> lock(m_propertyMutex);
-    return RegisterPropertyNameInternal(propertyName, checkForDuplicates);
+	return RegisterPropertyNameInternal(propertyName, checkForDuplicates);
 }
 
 bool Library::RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates)
 {
-    if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
-        return false;
-    m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
+	if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
+		return false;
+	m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
 	if (propertyName.GetPartCount() > m_maxPropertyParts)
 		m_maxPropertyParts = propertyName.GetPartCount();
-    return true;
+	return true;
 }
 
 void Library::SetProperty(const String & name, const Variant & value)

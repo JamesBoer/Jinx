@@ -16,7 +16,7 @@ TEST_CASE("Test If/Else Branching", "[IfElse]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Simple if/else tests
 
 			set a to false

@@ -13,12 +13,12 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-    struct CaseFoldingData
-    {
+	struct CaseFoldingData
+	{
 		char32_t sourceCodePoint;
 		char32_t destCodePoint1;
 		char32_t destCodePoint2;
-    };
+	};
 
 	bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2);
 };

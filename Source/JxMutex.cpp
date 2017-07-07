@@ -36,7 +36,7 @@ Mutex::Mutex()
 #elif defined(JINX_MACOS) || defined(JINX_LINUX)
 	pthread_mutex_init(reinterpret_cast<pthread_mutex_t *>(&m_data), NULL);
 #else
-    assert(!"Platform-specific mutex not defined");
+	assert(!"Platform-specific mutex not defined");
 #endif
 }
 
@@ -47,7 +47,7 @@ Mutex::~Mutex()
 #elif defined(JINX_MACOS) || defined(JINX_LINUX)
 	pthread_mutex_destroy(reinterpret_cast<pthread_mutex_t *>(&m_data));
 #else
-    assert(!"Platform-specific mutex not defined");
+	assert(!"Platform-specific mutex not defined");
 #endif
 }
 
@@ -58,7 +58,7 @@ void Mutex::lock()
 #elif defined(JINX_MACOS) || defined(JINX_LINUX)
 	pthread_mutex_lock(reinterpret_cast<pthread_mutex_t *>(&m_data));
 #else
-    assert(!"Platform-specific mutex not defined");
+	assert(!"Platform-specific mutex not defined");
 #endif
 }
 
@@ -69,7 +69,7 @@ void Mutex::unlock()
 #elif defined(JINX_MACOS) || defined(JINX_LINUX)
 	pthread_mutex_unlock(reinterpret_cast<pthread_mutex_t *>(&m_data));
 #else
-    assert(!"Platform-specific mutex not defined");
+	assert(!"Platform-specific mutex not defined");
 #endif
 }
 

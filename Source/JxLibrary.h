@@ -34,10 +34,10 @@ namespace Jinx
 		size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
 
 	private:
-        
+		
 		// Private internal functions
 		FunctionSignature CreateFunctionSignature(bool publicScope, bool returnValue, std::initializer_list<String> name) const;
-        bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
+		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
 		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<String, PropertyName>>> PropertyNameTable;
 

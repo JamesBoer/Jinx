@@ -52,14 +52,14 @@ static Variant GetSize(ScriptPtr, Parameters params)
 {
 	switch (params[0].GetType())
 	{
-        case ValueType::Collection:
-            return static_cast<int64_t>(params[0].GetCollection()->size());
-        case ValueType::String:
-            return static_cast<int64_t>(params[0].GetString().length());
-        case ValueType::Buffer:
-            return static_cast<int64_t>(params[0].GetBuffer()->Size());
-        default:
-            break;
+		case ValueType::Collection:
+			return static_cast<int64_t>(params[0].GetCollection()->size());
+		case ValueType::String:
+			return static_cast<int64_t>(params[0].GetString().length());
+		case ValueType::Buffer:
+			return static_cast<int64_t>(params[0].GetBuffer()->Size());
+		default:
+			break;
 	}
 	return nullptr;
 }
@@ -68,14 +68,14 @@ static Variant IsEmpty(ScriptPtr, Parameters params)
 {
 	switch (params[0].GetType())
 	{
-        case ValueType::Collection:
-            return params[0].GetCollection()->empty();
-        case ValueType::String:
-            return params[0].GetString().empty();
-        case ValueType::Buffer:
-            return params[0].GetBuffer()->Size() == 0;
-        default:
-            break;
+		case ValueType::Collection:
+			return params[0].GetCollection()->empty();
+		case ValueType::String:
+			return params[0].GetString().empty();
+		case ValueType::Buffer:
+			return params[0].GetBuffer()->Size() == 0;
+		default:
+			break;
 	}
 	return nullptr;
 }

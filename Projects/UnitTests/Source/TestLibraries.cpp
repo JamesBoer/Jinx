@@ -16,7 +16,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 	{
 		static const char * scriptText1 =
 			u8R"(
-    
+	
 			library test
 
 			public function return {a} plus {b}
@@ -38,9 +38,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText2 =
 			u8R"(
-    
+	
 			library test
-     
+	 
 			-- Test private functions
 			set a to 4 minus 3
 
@@ -51,9 +51,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText3 =
 			u8R"(
-    
+	
 			import test
-     
+	 
 			-- Test public function
 			set a to 5 plus 1
 			
@@ -77,7 +77,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 	{
 		static const char * scriptText1 =
 			u8R"(
-    
+	
 			library test
 
 			set public x to 5
@@ -90,9 +90,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText2 =
 			u8R"(
-    
+	
 			library test
-     
+	 
 			set public y to 2
 			set public y y to 2
 
@@ -103,9 +103,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText3 =
 			u8R"(
-    
+	
 			import test
-     
+	 
 			set c to y
 			set c c to y y
 			set d to test y
@@ -115,9 +115,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText4 =
 			u8R"(
-    
+	
 			import test
-     
+	 
 			increment test y by 2
 			increment test y y by 2
 			
@@ -154,7 +154,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 	{
 		static const char * scriptText1 =
 			u8R"(
-    
+	
 			library test
 
 			set public prop to 333
@@ -164,9 +164,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText2 =
 			u8R"(
-    
+	
 			import test
-     
+	 
 			set a to prop
 			set b to prop2
 
@@ -190,7 +190,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 	{
 		static const char * scriptText1 =
 			u8R"(
-    
+	
 			library test
 
 			public function return {a} plus {b}
@@ -201,9 +201,9 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		static const char * scriptText2 =
 			u8R"(
-    
+	
 			import test
-     
+	 
 			set a to 5 plus 1
 			
 			)";

@@ -20,7 +20,7 @@ TEST_CASE("Test Unicode", "[Unicode]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set resumÉ to "my resumé text" 	
 			set いろは to "いろはにほへとちりぬるをわかよたれそつねならむうゐのおくやまけふこえてあさきゆめみしゑひもせす"
 			set Üben to "Falsches Üben von Xylophonmusik quält jeden größeren Zwerg"
@@ -128,25 +128,25 @@ TEST_CASE("Test Unicode", "[Unicode]")
 		REQUIRE(s2 == str16);
 	}
 
-    SECTION("Test simple case folding")
-    {
-        static const char * scriptText =
-            u8R"(
-    
+	SECTION("Test simple case folding")
+	{
+		static const char * scriptText =
+			u8R"(
+	
 			set ABCDEFGHIJKLMNOPQRSTUVWXYZ to 321
 
 			)";
 
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
-        REQUIRE(script->GetVariable("abcdefghijklmnopqrstuvwxyz") == 321);
-    }
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("abcdefghijklmnopqrstuvwxyz") == 321);
+	}
 
 	SECTION("Test complex case folding")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set resumÉ to 321 	
 			set légume to 123
 			set Üben to 555
