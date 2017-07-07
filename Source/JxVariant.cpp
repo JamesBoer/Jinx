@@ -346,8 +346,8 @@ bool Variant::ConvertTo(ValueType type)
 		case ValueType::Boolean:
 			SetBoolean(!m_collection->empty());
 			return true;
-        default:
-            break;
+		default:
+			break;
 		};
 		break;
 	case ValueType::Guid:
@@ -356,8 +356,8 @@ bool Variant::ConvertTo(ValueType type)
 		case ValueType::String:
 			SetString(GuidToString(m_guid));
 			return true;
-        default:
-            break;
+		default:
+			break;
 		};
 		break;
 	case ValueType::ValType:
@@ -366,8 +366,8 @@ bool Variant::ConvertTo(ValueType type)
 		case ValueType::String:
 			SetString(GetValueTypeName(m_valType));
 			return true;
-        default:
-            break;
+		default:
+			break;
 		};
 		break;
 	default:
@@ -497,6 +497,11 @@ StringU16 Variant::GetStringU16() const
 	return ConvertUtf8ToUtf16(GetString());
 }
 
+WString Variant::GetWString() const
+{
+	return ConvertUtf8ToWString(GetString());
+}
+
 ValueType Variant::GetValType() const
 {
 	if (IsValType())
@@ -611,6 +616,11 @@ void Variant::SetString(const String & value)
 void Variant::SetString(const StringU16 & value)
 {
 	SetString(ConvertUtf16ToUtf8(value));
+}
+
+void Variant::SetString(const WString & value)
+{
+	SetString(ConvertWStringToUtf8(value));
 }
 
 void Variant::SetValType(ValueType value)

@@ -19,8 +19,8 @@ namespace Jinx
 		Library(RuntimeWPtr runtime, const String & name);
 
 		// ILibrary interface
-		bool RegisterFunction(bool publicScope, bool returnValue, std::initializer_list<String> name, FunctionCallback function) override;
-		bool RegisterProperty(bool readOnly, bool publicScope, const String & name, const Variant & value) override;
+		bool RegisterFunction(Visibility visibility, ReturnValue returnValue, std::initializer_list<String> name, FunctionCallback function) override;
+		bool RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value) override;
 		Variant GetProperty(const String & name) const override;
 		void SetProperty(const String & name, const Variant & value) override;
 
@@ -34,10 +34,10 @@ namespace Jinx
 		size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
 
 	private:
-        
+		
 		// Private internal functions
 		FunctionSignature CreateFunctionSignature(bool publicScope, bool returnValue, std::initializer_list<String> name) const;
-        bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
+		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
 		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<String, PropertyName>>> PropertyNameTable;
 

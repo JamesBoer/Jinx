@@ -141,7 +141,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			set a to -375.5
 			set b to .11111
 			set c to -999
@@ -185,7 +185,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			-- Basic assignments 
 			set a to 2
 			set b to 3
@@ -318,7 +318,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			-- Increment and decrement test
 			set a to 1
 			increment a
@@ -347,7 +347,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			set private counter to 0
 			
 			function return counter to finished
@@ -371,7 +371,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			set private counter to 0
 			
 			function return counter to finished
@@ -393,7 +393,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			set private counter to 0
 			
 			function return counter to finished
@@ -415,7 +415,7 @@ multiline comment
 	{
 		const char * scriptText =
 			u8R"(
-    
+	
 			external some var
 			set another var to some var
 

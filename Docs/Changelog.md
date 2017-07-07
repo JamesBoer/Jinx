@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.7.0] - 2017-07-07
+
+### Changed
+- Added better support for alternative string character encodings / types
+- Changed function registration with more explicit parameters
+- Changed required ordering of readonly parameter for properties
+
 ## [0.6.0] - 2017-06-02
 
 ### Changed

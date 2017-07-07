@@ -91,17 +91,17 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 			np.reserve(32);
 			const char * p = n.c_str();
 			const char * e = p + n.size();
-            bool optional = *p == '(';
-            if (optional)
-            {
-                if (n.size() < 3 || n[n.size() - 1] != ')')
-                {
-                    LogWriteLine("Error when parsing optional name component");
-                    return FunctionSignature();
-                }
-                ++p;
-                --e;
-            }
+			bool optional = *p == '(';
+			if (optional)
+			{
+				if (n.size() < 3 || n[n.size() - 1] != ')')
+				{
+					LogWriteLine("Error when parsing optional name component");
+					return FunctionSignature();
+				}
+				++p;
+				--e;
+			}
 			while (p != e)
 			{
 				if (*p == '/')
@@ -121,15 +121,14 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 				++p;
 			}
 			part.partType = FunctionSignaturePartType::Name;
-            part.optional = optional;
+			part.optional = optional;
 			part.names.push_back(np);
 		}
 		parts.push_back(part);
 	}
 
 	// Create functions signature
-	VisibilityType scope = publicScope ? VisibilityType::Public : VisibilityType::Private;
-	FunctionSignature functionSignature(scope, returnValue, GetName(), parts);
+	FunctionSignature functionSignature(publicScope ? VisibilityType::Public : VisibilityType::Private, returnValue, GetName(), parts);
 	return functionSignature;
 }
 
@@ -160,7 +159,7 @@ bool Library::PropertyNameExists(const String & name) const
 	return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
 }
 
-bool Library::RegisterFunction(bool publicScope, bool returnValue, std::initializer_list<String> name, FunctionCallback function)
+bool Library::RegisterFunction(Visibility visibility, ReturnValue returnValue, std::initializer_list<String> name, FunctionCallback function)
 {
 	if (name.size() < 1)
 	{
@@ -174,7 +173,7 @@ bool Library::RegisterFunction(bool publicScope, bool returnValue, std::initiali
 	}
 
 	// Calculate the function signature
-	FunctionSignature functionSignature = CreateFunctionSignature(publicScope, returnValue, name);
+	FunctionSignature functionSignature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, returnValue == ReturnValue::Required ? true : false, name);
 	if (!functionSignature.IsValid())
 		return false;
 
@@ -193,12 +192,12 @@ bool Library::RegisterFunction(bool publicScope, bool returnValue, std::initiali
 	return true;
 }
 
-bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & name, const Variant & value)
+bool Library::RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value)
 {
 	std::lock_guard<Mutex> lock(m_propertyMutex);
 
 	// Register the property name with the library
-	PropertyName prop(readOnly, publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), name);
+	PropertyName prop(visibility == Visibility::Public ? VisibilityType::Public : VisibilityType::Private, access == Access::ReadOnly ? true : false, GetName(), name);
 	if (!RegisterPropertyNameInternal(prop, false))
 		return false;
 
@@ -215,17 +214,17 @@ bool Library::RegisterProperty(bool readOnly, bool publicScope, const String & n
 bool Library::RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates)
 {
 	std::lock_guard<Mutex> lock(m_propertyMutex);
-    return RegisterPropertyNameInternal(propertyName, checkForDuplicates);
+	return RegisterPropertyNameInternal(propertyName, checkForDuplicates);
 }
 
 bool Library::RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates)
 {
-    if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
-        return false;
-    m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
+	if (checkForDuplicates && (m_propertyNameTable.find(propertyName.GetName()) != m_propertyNameTable.end()))
+		return false;
+	m_propertyNameTable.insert(std::make_pair(propertyName.GetName(), propertyName));
 	if (propertyName.GetPartCount() > m_maxPropertyParts)
 		m_maxPropertyParts = propertyName.GetPartCount();
-    return true;
+	return true;
 }
 
 void Library::SetProperty(const String & name, const Variant & value)

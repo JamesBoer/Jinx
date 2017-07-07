@@ -63,7 +63,7 @@ void Lexer::CreateSymbol(const String & name)
 {
 	Symbol symbol(SymbolType::NameValue, m_lineNumber, m_columnMarker);
 	symbol.text = FoldCase(name);
-    auto itr = m_symbolTypeMap.find(name);
+	auto itr = m_symbolTypeMap.find(name);
 	if (itr != m_symbolTypeMap.end())
 	{
 		symbol.type = itr->second;
@@ -325,7 +325,7 @@ void Lexer::ParseComment()
 				return;
 			else if (IsNewline(*m_current))
 				ParseEndOfLine();
-            else
+			else
 				AdvanceCurrent();
 		}
 		Error("Mismatched block comments");

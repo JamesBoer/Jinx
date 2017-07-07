@@ -16,7 +16,7 @@ TEST_CASE("Test Casts", "[Casts]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			set a to 123.456 as integer
 			set b to true as string
 			set c to "false" as boolean
@@ -28,24 +28,24 @@ TEST_CASE("Test Casts", "[Casts]")
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").IsInteger());
-		REQUIRE(script->GetVariable("a").GetInteger() == 123);
+		REQUIRE(script->GetVariable("a") == 123);
 		REQUIRE(script->GetVariable("b").IsString());
-		REQUIRE(script->GetVariable("b").GetString() == "true");
+		REQUIRE(script->GetVariable("b") == "true");
 		REQUIRE(script->GetVariable("c").IsBoolean());
-		REQUIRE(script->GetVariable("c").GetBoolean() == false);
+		REQUIRE(script->GetVariable("c") == false);
 		REQUIRE(script->GetVariable("d").IsInteger());
-		REQUIRE(script->GetVariable("d").GetInteger() == 456);
+		REQUIRE(script->GetVariable("d") == 456);
 		REQUIRE(script->GetVariable("e").IsNumber());
 		REQUIRE(script->GetVariable("e").GetNumber() == Approx(-123.456));
 		REQUIRE(script->GetVariable("f").IsString());
-		REQUIRE(script->GetVariable("f").GetString() == "15");
+		REQUIRE(script->GetVariable("f") == "15");
 	}
-    
-    SECTION("Test additional casts")
-    {
-        const char * scriptText =
+	
+	SECTION("Test additional casts")
+	{
+		const char * scriptText =
 			u8R"(
-        
+		
 			set a to 12345
 			set b to a as string
 			set c to b as integer
@@ -55,19 +55,19 @@ TEST_CASE("Test Casts", "[Casts]")
 			set g to false
 			if g type = boolean and g type = d type
 				set g to true
-            end
-            
-            )";
-            
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
-        REQUIRE(script->GetVariable("a").GetNumber() == 12345);
-        REQUIRE(script->GetVariable("b").GetString() == "12345");
-        REQUIRE(script->GetVariable("c").GetInteger() == 12345);
-        REQUIRE(script->GetVariable("d").GetBoolean() == true);
-        REQUIRE(script->GetVariable("e").GetString() == "true");
-        REQUIRE(script->GetVariable("f").GetBoolean() == true);
-        REQUIRE(script->GetVariable("g").GetBoolean() == true);
-    }
+			end
+			
+			)";
+			
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 12345);
+		REQUIRE(script->GetVariable("b") == "12345");
+		REQUIRE(script->GetVariable("c") == 12345);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == "true");
+		REQUIRE(script->GetVariable("f") == true);
+		REQUIRE(script->GetVariable("g") == true);
+	}
 
 }

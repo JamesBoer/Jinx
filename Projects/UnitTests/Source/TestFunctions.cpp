@@ -16,7 +16,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function do nothing
 				-- do nothing
 			end
@@ -33,7 +33,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function do nothing/nada/ziltch
 				-- do nothing
 			end
@@ -48,32 +48,32 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 	}
 
-    SECTION("Test optional names function")
-    {
-        static const char * scriptText =
-            u8R"(
-    
-			function (opt/optional) (blah) {num} stuff
-				-- do nothing
-            end
-
-            optional 123 stuff
-            opt 456 stuff
-            789 stuff
-            blah 000 stuff
-            opt blah 111 stuff
-
-			)";
-
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
-    }
-
-    SECTION("Test local variable name collision with function")
+	SECTION("Test optional names function")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
+			function (opt/optional) (blah) {num} stuff
+				-- do nothing
+			end
+
+			optional 123 stuff
+			opt 456 stuff
+			789 stuff
+			blah 000 stuff
+			opt blah 111 stuff
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+	}
+
+	SECTION("Test local variable name collision with function")
+	{
+		static const char * scriptText =
+			u8R"(
+	
 			set do to 1
 
 			function do nothing/nada/ziltch
@@ -98,7 +98,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return some constant integer
 				return 42
 			end
@@ -122,7 +122,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return somefunc
 				if true
 					return "some string"
@@ -145,7 +145,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return somefunc
 				if true
 					return "some string"
@@ -167,7 +167,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return somefunc
 				if (true)
 				else
@@ -189,7 +189,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return somefunc
 				if (true)
 				else if (false)
@@ -211,7 +211,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return {a} plus {b}  
 				return a + b
 			end
@@ -230,7 +230,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return {var a} plus {var b}  
 				return var a + var b
 			end
@@ -249,8 +249,8 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
-			set readonly public x to 1
+	
+			set public readonly x to 1
 
 			function return {a} plus {b}  
 				return a + b
@@ -269,8 +269,8 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
-			set readonly public x x to 1
+	
+			set public readonly x x to 1
 
 			function return {a} plus {b}  
 				return a + b
@@ -289,11 +289,11 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return {a} minus {b}  
 				return a - b
 			end
-     
+	 
 			set a to (5 minus 3) minus 1	
 			set b to 5 minus 3 minus 1
 			set c to (4 + 3) minus (3 minus 1)
@@ -311,7 +311,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return factorial { x }
 				if x <= 1
 					return 1
@@ -332,7 +332,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Functions can be made up of keywords
 			function return loop function while
 				return 42
@@ -341,7 +341,7 @@ TEST_CASE("Test Functions", "[Functions]")
 			function return begin to while
 				return 99
 			end
-     
+	 
 			set a to loop function while
 			set b to begin to while
 
@@ -357,7 +357,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			function return convert {string x}
 				return x
 			end
@@ -389,7 +389,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	{
 		static const char * scriptText1 =
 			u8R"(
-    
+	
 			-- Thto local function should be called from both scripts
 			function return localfunc
 				return 123
@@ -405,7 +405,7 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		static const char * scriptText2 =
 			u8R"(
-    
+	
 			-- This function should not be called, even though it
 			-- has the same name.
 			function return localfunc

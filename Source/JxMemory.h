@@ -30,12 +30,12 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-    // Fix unreferenced variable warnings
-    template<typename T>
-    constexpr int ref(const T &) { return 0; }
-    
-    
-    // Stand-alone global allocation functions (debug and release version)
+	// Fix unreferenced variable warnings
+	template<typename T>
+	constexpr int ref(const T &) { return 0; }
+	
+	
+	// Stand-alone global allocation functions (debug and release version)
 
 #ifdef JINX_DEBUG_ALLOCATION
 
@@ -259,11 +259,14 @@ namespace Jinx
 	// Log all currently allocated memory (debug only)
 	void LogAllocations();
 
-    // Define a custom UTF-8 string using internal allocator
-    typedef std::basic_string <char, std::char_traits<char>, Allocator<char>> String;
+	// Define a custom UTF-8 string using internal allocator
+	typedef std::basic_string <char, std::char_traits<char>, Allocator<char>> String;
 
 	// Define a custom UTF-16 string using internal allocator
 	typedef std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>> StringU16;
+
+	// Define a custom wide character string using internal allocator
+	typedef std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>> WString;
 
 };
 

@@ -23,11 +23,11 @@ namespace Jinx
 	{
 		FunctionSignaturePart() :
 			partType(FunctionSignaturePartType::Name),
-            optional(false),
+			optional(false),
 			valueType(ValueType::Any)
 		{}
 		FunctionSignaturePartType partType;
-        bool optional;
+		bool optional;
 		ValueType valueType;
 		std::vector<String, Allocator<String>> names;
 	};

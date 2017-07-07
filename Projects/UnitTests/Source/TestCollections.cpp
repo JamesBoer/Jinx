@@ -16,7 +16,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create empty collection
 			set a to []
 			
@@ -31,7 +31,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create collection using an initialization list
 			set a to 3, 2, 1
 			
@@ -56,7 +56,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create empty collection and add three elements
 			set a to []
 			set a [1] to 3
@@ -83,7 +83,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
 
@@ -107,7 +107,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
@@ -130,7 +130,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create collection using an initialization list of key-value pairs		
 			set private a to [1, "red"], [2, "green"], [3, "blue"]
 			
@@ -155,7 +155,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
@@ -173,7 +173,7 @@ TEST_CASE("Test Collections", "[Collections]")
 	{
 		static const char * scriptText =
 			u8R"(
-    
+	
 			-- Create collection using an initialization list of key-value pairs		
 			set private a to [1, "red"], [2, "green"], [3, "blue"]
 			
@@ -234,30 +234,30 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(2) == collection->end());
 	}
 
-    SECTION("Test erasing single element from collection in loop")
-    {
-        static const char * scriptText =
-            u8R"(
+	SECTION("Test erasing single element from collection in loop")
+	{
+		static const char * scriptText =
+			u8R"(
 			import core
 
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
 			
 			loop i over a
-                if i value = "blue"
-                    erase i
-                end
-            end
+				if i value = "blue"
+					erase i
+				end
+			end
 
 			)";
 
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
-        REQUIRE(script->GetVariable("a").IsCollection());
-        auto collection = script->GetVariable("a").GetCollection();
-        REQUIRE(collection);
-        REQUIRE(collection->size() == 2);
-        REQUIRE(collection->find(3) == collection->end());
-    }
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 2);
+		REQUIRE(collection->find(3) == collection->end());
+	}
 
 }

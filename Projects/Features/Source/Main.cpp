@@ -61,7 +61,7 @@ int main(int argc, char ** argv)
 		GlobalParams globalParams;
 		globalParams.logSymbols = true;
 		globalParams.logBytecode = true;
-        globalParams.maxInstructions = 10000;
+        globalParams.maxInstructions = 5000;
 		globalParams.allocBlockSize = 1024 * 256;
 		globalParams.allocFn = [](size_t size) { return malloc(size); };
 		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
@@ -85,10 +85,8 @@ int main(int argc, char ** argv)
 			)";
 
         auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
+        REQUIRE(!script);
 
-		//TODO: Configure Jinx and unit test for ways to check for runtime errors
-        //REQUIRE(script->GetVariable("z") == false);
     }
 
 	Jinx::ShutDown();

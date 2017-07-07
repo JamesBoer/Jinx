@@ -179,7 +179,7 @@ static const char * s_testScripts[] =
 		set g to false
 		if g type = boolean and g type = d type
 			set g to true
-        end
+		end
 
 	)",
 
@@ -430,26 +430,26 @@ static const char * s_testScripts[] =
 
 		import core
 
-        function return {integer x} is divisible by {integer y}
-            return x % y = 0
-        end
+		function return {integer x} is divisible by {integer y}
+			return x % y = 0
+		end
 
-        loop i from 1 to 100
-            set print number to true
-            if i is divisible by 3
-                write "Fizz"
-                set print number to false
-            end
-            if i is divisible by 5
-                write "Buzz"
-                set print number to false
-            end
-            if print number
-                write i
-            end
-            write newline
+		loop i from 1 to 100
+			set print number to true
+			if i is divisible by 3
+				write "Fizz"
+				set print number to false
+			end
+			if i is divisible by 5
+				write "Buzz"
+				set print number to false
+			end
+			if print number
+				write i
+			end
+			write newline
 			wait
-        end
+		end
 
 	)",
 

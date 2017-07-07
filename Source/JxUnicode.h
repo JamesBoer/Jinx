@@ -18,6 +18,9 @@ namespace Jinx
 	StringU16 ConvertUtf8ToUtf16(const String & utf8Str);
 	String ConvertUtf16ToUtf8(const StringU16 & utf16Str);
 	
+	WString ConvertUtf8ToWString(const String & utf8Str);
+	String ConvertWStringToUtf8(const WString & wStr);
+
 	bool IsCaseFolded(const String & source);
 	String FoldCase(const String & source);
 

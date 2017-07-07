@@ -97,41 +97,41 @@ bool FunctionSignature::IsMatch(const FunctionSignatureParts & parts) const
 		if (partCmpItr == parts.end())
 			return false;
 		auto & partCmp = *partCmpItr;
-        auto & part = *partItr;
-        if (part.partType == FunctionSignaturePartType::Name && part.optional && partCmp.partType != FunctionSignaturePartType::Name)
-        {
-            partItr++;
-            continue;
-        }
+		auto & part = *partItr;
+		if (part.partType == FunctionSignaturePartType::Name && part.optional && partCmp.partType != FunctionSignaturePartType::Name)
+		{
+			partItr++;
+			continue;
+		}
 		if (part.partType != FunctionSignaturePartType::Parameter || partCmp.partType != FunctionSignaturePartType::Parameter)
 		{
 			if (partCmp.partType == FunctionSignaturePartType::Parameter && partCmp.names.empty())
 				return false;
 			if (!(part.partType == FunctionSignaturePartType::Parameter && partCmp.partType == FunctionSignaturePartType::Name))
-            {
-                if (part.partType == FunctionSignaturePartType::Name)
-			    {
-				    bool foundMatch = false;
-				    for (const auto & name : part.names)
-				    {
-					    if (name == partCmp.names.front())
-					    {
-						    foundMatch = true;
-						    break;
-					    }
-				    }
-                    if (!foundMatch)
-                    {
-                        if (!part.optional)
-					        return false;
-                        partItr++;
-                        continue;
-                    }
-                }
+			{
+				if (part.partType == FunctionSignaturePartType::Name)
+				{
+					bool foundMatch = false;
+					for (const auto & name : part.names)
+					{
+						if (name == partCmp.names.front())
+						{
+							foundMatch = true;
+							break;
+						}
+					}
+					if (!foundMatch)
+					{
+						if (!part.optional)
+							return false;
+						partItr++;
+						continue;
+					}
+				}
 			}
 		}
 		++partCmpItr;
-        ++partItr;
+		++partItr;
 	}
 	return true;
 }
@@ -148,7 +148,7 @@ void FunctionSignature::Read(BinaryReader & reader)
 	{
 		FunctionSignaturePart part;
 		reader.Read<FunctionSignaturePartType, uint8_t>(&part.partType);
-        reader.Read(&part.optional);
+		reader.Read(&part.optional);
 		reader.Read<ValueType, uint8_t>(&part.valueType);
 		uint8_t nameSize;
 		reader.Read(&nameSize);
@@ -172,7 +172,7 @@ void FunctionSignature::Write(BinaryWriter & writer) const
 	for (const auto & part : m_parts)
 	{
 		writer.Write<FunctionSignaturePartType, uint8_t>(part.partType);
-        writer.Write(part.optional);
+		writer.Write(part.optional);
 		writer.Write<ValueType, uint8_t>(part.valueType);
 		writer.Write(static_cast<uint8_t>(part.names.size()));
 		for (const auto & name : part.names)

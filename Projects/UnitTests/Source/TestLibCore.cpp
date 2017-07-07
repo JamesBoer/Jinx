@@ -23,8 +23,8 @@ TEST_CASE("Test Core Library", "[Core]")
 			write "test 1, ", "test 2, ", "test 3", newline
 			write line "test 1, ", "test 2 ", "test 3"
 			
-            
-            )";
+			
+			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
@@ -44,8 +44,8 @@ TEST_CASE("Test Core Library", "[Core]")
 			set c to a size
 			set d to b get size
 			
-            
-            )";
+			
+			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
@@ -66,7 +66,7 @@ TEST_CASE("Test Core Library", "[Core]")
 			set c to a empty
 			set d to b is empty
 			
-            )";
+			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
