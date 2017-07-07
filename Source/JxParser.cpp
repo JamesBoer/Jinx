@@ -876,7 +876,7 @@ bool Parser::ParseSubscript()
 	return Expect(SymbolType::SquareClose);
 }
 
-void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
+void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
 {
 	if (m_error)
 		return;
@@ -928,7 +928,7 @@ void Parser::ParsePropertyDeclaration(bool readOnly, VisibilityType scope)
 	}
 
 	// Create a PropertyName object for registration
-	PropertyName propertyName(readOnly, scope, propertyLibrary->GetName(), name);
+	PropertyName propertyName(scope, readOnly, propertyLibrary->GetName(), name);
 
 	// Register the property name, and check for duplicates
 	if (!propertyLibrary->RegisterPropertyName(propertyName, true))
@@ -1970,18 +1970,16 @@ void Parser::ParseStatement()
 
 		bool set = Accept(SymbolType::Set);
 		
-		// Parse optional readonly
-		bool readOnly = Accept(SymbolType::Readonly);
-
 		// Parse scope level
 		VisibilityType scope = ParseScope();
 
-		// Read only can only apply to properties
+		// Parse optional readonly, which can only apply to properties
+		bool readOnly = Accept(SymbolType::Readonly);
 		if (readOnly)
 		{
 			if (scope == VisibilityType::Local)
 			{
-				Error("The 'readonly' keyword must precede a private or public property");
+				Error("The 'readonly' keyword must follow a private or public keyword");
 				return;
 			}
 		}
@@ -2003,7 +2001,7 @@ void Parser::ParseStatement()
 			// We're declaring a new property if we see a non-local scope declaration
 			if (scope != VisibilityType::Local)
 			{
-				ParsePropertyDeclaration(readOnly, scope);
+				ParsePropertyDeclaration(scope, readOnly);
 			}
 			// Either this is an existing property or a variable
 			else

@@ -100,6 +100,23 @@ namespace Jinx
 	// Signature for native function callback
 	typedef std::function<Variant(ScriptPtr, const Parameters &)> FunctionCallback;
 
+	enum class Visibility
+	{
+		Public,
+		Private
+	};
+
+	enum class Access
+	{
+		ReadWrite,
+		ReadOnly,
+	};
+
+	enum class ReturnValue
+	{
+		None,
+		Required,
+	};
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -115,26 +132,26 @@ namespace Jinx
 		/// Register a native function for use by scripts
 		/**
 		This method registers a native function for use by script code.
-		\param publicScope true value makes this function visible outside the library, while false means it is a private function.
-		\param returnValue true indicates that this function returns a value.
+		\param visibility Indicates whether property is public or private.
+		\param returnValue Indicates whether this function requires a return value or not.
 		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
 		standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(bool publicScope, bool returnValue, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, ReturnValue returnValue, std::initializer_list<String> name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**
 		This method registers a library property.
-		\param readOnly Indicates whether the property is read-only.
-		\param publicScope true value makes this function visible outside the library, while false means it is a private function. 
+		\param visibility Indicates whether property is public or private. 
+		\param access Indicates whether the property is read-only or read/write.
 		\param name Property name
 		\param value Default property value
 		\return Returns true on success or false on failure.
-		\sa FunctionCallback
+		\sa FunctionCallback, Visibility, Access
 		*/
-		virtual bool RegisterProperty(bool readOnly, bool publicScope, const String & name, const Variant & value) = 0;
+		virtual bool RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value) = 0;
 
 		/// Get property value
 		/**

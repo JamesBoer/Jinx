@@ -356,12 +356,25 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
-	SECTION("Test property readonly attribute")
+	SECTION("Test property readonly syntax order")
 	{
 		static const char * scriptText =
 			u8R"(
 	
 			set readonly private a to 123
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test property readonly attribute")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set private readonly a to 123
 			set a to 456
 			
 			)";
@@ -377,7 +390,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 	
 			library test
 
-			set readonly public prop to 333
+			set public readonly prop to 333
 
 			)";
 
@@ -409,7 +422,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 	
 			library test
 
-			set readonly public prop to 333
+			set public readonly prop to 333
 
 			)";
 

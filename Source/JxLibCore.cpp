@@ -105,16 +105,14 @@ void Jinx::RegisterLibCore(RuntimePtr runtime)
 	auto library = runtime->GetLibrary("core");
 
 	// Register core functions
-	library->RegisterFunction(true, false, { "write", "{}" }, Write);
-	library->RegisterFunction(true, false, { "write", "line", "{}" }, WriteLine);
-	library->RegisterFunction(true, true, { "{}", "(get)", "size" }, GetSize);
-	library->RegisterFunction(true, true, { "{}", "(is)", "empty" }, IsEmpty);
-	library->RegisterFunction(true, true, { "{}", "(get)", "key" }, GetKey);
-	library->RegisterFunction(true, true, { "{}", "(get)", "value" }, GetValue);
+	library->RegisterFunction(Visibility::Public, ReturnValue::None, { "write", "{}" }, Write);
+	library->RegisterFunction(Visibility::Public, ReturnValue::None, { "write", "line", "{}" }, WriteLine);
+	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(get)", "size" }, GetSize);
+	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(is)", "empty" }, IsEmpty);
+	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(get)", "key" }, GetKey);
+	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(get)", "value" }, GetValue);
 
 	// Register core properties
-	library->RegisterProperty(true, true, { "newline" }, "\n");
+	library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
 }
-
-
 

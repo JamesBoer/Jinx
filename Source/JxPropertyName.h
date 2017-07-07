@@ -17,7 +17,7 @@ namespace Jinx
 	{
 	public:
 		PropertyName();
-		PropertyName(bool readOnly, VisibilityType visibility, const String & moduleName, const String & propertyName, Variant defaultValue = nullptr);
+		PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, Variant defaultValue = nullptr);
 
 		bool IsValid() const { return m_visibility != VisibilityType::Local; }
 		bool IsReadOnly() const { return m_readOnly; }
@@ -34,9 +34,9 @@ namespace Jinx
 	private:
 
 		RuntimeID m_id;
+		VisibilityType m_visibility;
 		bool m_readOnly;
 		String m_name;
-		VisibilityType m_visibility;
 		Variant m_defaultValue;
 		size_t m_partCount;
 	};

@@ -139,7 +139,7 @@ namespace Jinx
 		bool ParseSubscript();
 
 		// Parse a new property declaration
-		void ParsePropertyDeclaration(bool readOnly, VisibilityType scope);
+		void ParsePropertyDeclaration(VisibilityType scope, bool readOnly);
 
 		// Parse property name
 		PropertyName ParsePropertyName();

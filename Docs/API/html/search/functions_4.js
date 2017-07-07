@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['registerfunction',['RegisterFunction',['../class_jinx_1_1_i_library.html#a7fe80895d328feaef272bda6cec3b5d9',1,'Jinx::ILibrary']]],
-  ['registerproperty',['RegisterProperty',['../class_jinx_1_1_i_library.html#a968f0464cf24d791920563af00703179',1,'Jinx::ILibrary']]]
+  ['registerfunction',['RegisterFunction',['../class_jinx_1_1_i_library.html#a1f9d85a1be41a6ebc482b698f038f76e',1,'Jinx::ILibrary']]],
+  ['registerproperty',['RegisterProperty',['../class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825',1,'Jinx::ILibrary']]]
 ];

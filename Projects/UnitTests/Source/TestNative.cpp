@@ -55,10 +55,10 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto runtime = TestCreateRuntime();
 		auto library = runtime->GetLibrary("test");
-		library->RegisterFunction(true, false, {"this", "function"}, ThisFunction);
-		library->RegisterFunction(true, true, { "that", "function" }, ThatFunction);
-		library->RegisterFunction(true, true, { "another", "function" }, AnotherFunction);
-		library->RegisterFunction(true, true, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
+		library->RegisterFunction(Visibility::Public, ReturnValue::None, {"this", "function"}, ThisFunction);
+		library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "that", "function" }, ThatFunction);
+		library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "another", "function" }, AnotherFunction);
+		library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
 		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
 		REQUIRE(s_functionCalled == true);
@@ -95,7 +95,7 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto runtime = TestCreateRuntime();
 		auto library = runtime->GetLibrary("test");
-		library->RegisterProperty(false, true, "someprop", 42);
+		library->RegisterProperty(Visibility::Public, Access::ReadWrite, "someprop", 42);
 		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 42);

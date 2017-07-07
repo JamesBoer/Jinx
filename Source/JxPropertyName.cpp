@@ -17,9 +17,9 @@ PropertyName::PropertyName() :
 {
 }
 
-PropertyName::PropertyName(bool readOnly, VisibilityType visibility, const String & moduleName, const String & propertyName, Variant defaultValue) :
-	m_readOnly(readOnly),
+PropertyName::PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, Variant defaultValue) :
 	m_visibility(visibility),
+	m_readOnly(readOnly),
 	m_name(propertyName),
 	m_defaultValue(defaultValue)
 {

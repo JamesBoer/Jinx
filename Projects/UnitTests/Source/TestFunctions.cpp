@@ -250,7 +250,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			set readonly public x to 1
+			set public readonly x to 1
 
 			function return {a} plus {b}  
 				return a + b
@@ -270,7 +270,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			set readonly public x x to 1
+			set public readonly x x to 1
 
 			function return {a} plus {b}  
 				return a + b

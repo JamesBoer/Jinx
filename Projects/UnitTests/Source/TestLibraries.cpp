@@ -158,7 +158,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 			library test
 
 			set public prop to 333
-			set readonly public prop2 to 444			
+			set public readonly prop2 to 444			
 
 			)";
 
