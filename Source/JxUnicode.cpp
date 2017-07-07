@@ -231,14 +231,30 @@ String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 
 WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
 {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-    return convert.from_bytes(utf8Str);
+	if (sizeof(wchar_t) == 4)
+	{
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+		return convert.from_bytes(utf8Str);      
+	}
+	else
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+		return convert.from_bytes(utf8Str);    
+	}
 }
 
 String Jinx::ConvertWStringToUtf8(const WString & wStr)
 {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-    return convert.to_bytes(wStr);
+	if (sizeof(wchar_t) == 4)
+	{
+		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+		return convert.to_bytes(wStr);
+	}
+	else
+	{
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+		return convert.to_bytes(wStr);		
+	}
 }
 
 #endif
