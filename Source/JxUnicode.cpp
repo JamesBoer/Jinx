@@ -231,6 +231,11 @@ String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 
 WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
 {
+	// Disable warning about constant if expression, as this is intentional.  Note that when C++ 17 is more widely
+	// supported, we could use if constexpr instead.
+#pragma warning(push)
+#pragma warning(disable:4127)	
+
 	if (sizeof(wchar_t) == 4)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
@@ -241,10 +246,17 @@ WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
 		return convert.from_bytes(utf8Str);    
 	}
+
+#pragma warning(pop)
 }
 
 String Jinx::ConvertWStringToUtf8(const WString & wStr)
 {
+	// Disable warning about constant if expression, as this is intentional.  Note that when C++ 17 is more widely
+	// supported, we could use if constexpr instead.
+#pragma warning(push)
+#pragma warning(disable:4127)	
+
 	if (sizeof(wchar_t) == 4)
 	{
 		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
@@ -255,6 +267,8 @@ String Jinx::ConvertWStringToUtf8(const WString & wStr)
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
 		return convert.to_bytes(wStr);		
 	}
+
+#pragma warning(pop)
 }
 
 #endif
