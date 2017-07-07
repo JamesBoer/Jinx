@@ -231,14 +231,14 @@ String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 
 WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
 {
-	ref(utf8Str);
-	return WString();
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+    return convert.from_bytes(utf8Str);
 }
 
 String Jinx::ConvertWStringToUtf8(const WString & wStr)
 {
-	ref(wStr);
-	return String();
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
+    return convert.to_bytes(wStr);
 }
 
 #endif
