@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/1ad155ca/TestCasts.o \
 	${OBJECTDIR}/_ext/1ad155ca/TestCollections.o \
 	${OBJECTDIR}/_ext/1ad155ca/TestErrors.o \
+	${OBJECTDIR}/_ext/1ad155ca/TestExpressions.o \
 	${OBJECTDIR}/_ext/1ad155ca/TestFunctions.o \
 	${OBJECTDIR}/_ext/1ad155ca/TestIfElse.o \
 	${OBJECTDIR}/_ext/1ad155ca/TestLibCore.o \
@@ -95,6 +96,11 @@ ${OBJECTDIR}/_ext/1ad155ca/TestErrors.o: ../../../Source/TestErrors.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/1ad155ca
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1ad155ca/TestErrors.o ../../../Source/TestErrors.cpp
+
+${OBJECTDIR}/_ext/1ad155ca/TestExpressions.o: ../../../Source/TestExpressions.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1ad155ca
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1ad155ca/TestExpressions.o ../../../Source/TestExpressions.cpp
 
 ${OBJECTDIR}/_ext/1ad155ca/TestFunctions.o: ../../../Source/TestFunctions.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1ad155ca
