@@ -2,7 +2,7 @@
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
-Copyright (c) 2016 James Boer
+Copyright (c) 2017 James Boer
 */
 
 #include "UnitTest.h"
@@ -22,7 +22,7 @@ TEST_CASE("Test Casts", "[Casts]")
 			set c to "false" as boolean
 			set d to "456" as integer
 			set e to "-123.456" as number
-			set f to 4 + 5 + 6 as string
+			set f to (4 + 5 + 6) as string
 			)";
 
 		auto script = TestExecuteScript(scriptText);
@@ -56,7 +56,7 @@ TEST_CASE("Test Casts", "[Casts]")
 			if g type = boolean and g type = d type
 				set g to true
 			end
-			
+			set h to (3 / 2) as integer   -- 1
 			)";
 			
 		auto script = TestExecuteScript(scriptText);

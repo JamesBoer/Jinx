@@ -78,6 +78,29 @@ void Parser::ScopeEnd()
 	EmitOpcode(Opcode::ScopeEnd);
 }
 
+uint32_t Parser::GetOperatorPrecedence(Opcode opcode) const
+{
+	switch (opcode)
+	{
+	case Opcode::Multiply: return 1;
+	case Opcode::Divide: return 1;
+	case Opcode::Mod: return 1;
+	case Opcode::Add: return 2;
+	case Opcode::Subtract: return 2;
+	case Opcode::Less: return 3;
+	case Opcode::LessEq: return 3;
+	case Opcode::Greater: return 3;
+	case Opcode::GreaterEq: return 3;
+	case Opcode::Equals: return 3;
+	case Opcode::NotEquals: return 3;
+	case Opcode::And: return 4;
+	case Opcode::Or: return 4;
+	default:
+		assert(!"Unknown opcode used in binary expression");
+		return 0;
+	};
+}
+
 bool Parser::IsSymbolValid(SymbolListCItr symbol) const
 {
 	if (m_error)
@@ -216,23 +239,13 @@ bool Parser::Check(SymbolType symbol) const
 	return (symbol == m_currentSymbol->type);
 }
 
-bool Parser::CheckLogicalOperator() const
-{
-	if (m_error || m_currentSymbol == m_symbolList.end())
-		return false;
-	auto type = m_currentSymbol->type;
-	return 
-		type == SymbolType::And ||
-		type == SymbolType::Or ||
-		type == SymbolType::Not;
-}
-
 bool Parser::CheckBinaryOperator() const
 {
 	if (m_error || m_currentSymbol == m_symbolList.end())
 		return false;
 	auto type = m_currentSymbol->type;
 	return 
+		type == SymbolType::And ||
 		type == SymbolType::Asterisk ||
 		type == SymbolType::Equals ||
 		type == SymbolType::NotEquals ||
@@ -242,6 +255,7 @@ bool Parser::CheckBinaryOperator() const
 		type == SymbolType::LessThan ||
 		type == SymbolType::LessThanEquals ||
 		type == SymbolType::Minus ||
+		type == SymbolType::Or ||
 		type == SymbolType::Percent ||
 		type == SymbolType::Plus;
 }
@@ -682,6 +696,9 @@ Opcode Parser::ParseBinaryOperator()
 	Opcode opcode = Opcode::NumOpcodes;
 	switch (m_currentSymbol->type)
 	{
+	case SymbolType::And:
+		opcode = Opcode::And;
+		break;
 	case SymbolType::Asterisk:
 		opcode = Opcode::Multiply;
 		break;
@@ -708,6 +725,9 @@ Opcode Parser::ParseBinaryOperator()
 		break;
 	case SymbolType::Minus:
 		opcode = Opcode::Subtract;
+		break;
+	case SymbolType::Or:
+		opcode = Opcode::Or;
 		break;
 	case SymbolType::Percent:
 		opcode = Opcode::Mod;
@@ -1371,7 +1391,14 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	EmitId(signature->GetId());
 }
 
-void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
+void Parser::ParseCast()
+{
+	EmitOpcode(Opcode::Cast);
+	auto valueType = ParseValueType();
+	EmitValueType(valueType);
+}
+
+void Parser::ParseSubexpressionOperand(bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
@@ -1437,49 +1464,54 @@ void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & 
 	{
 		Error("Expected operand");
 	}
-
-	if (!opcodeStack.empty())
-	{
-		EmitOpcode(opcodeStack.back());
-		opcodeStack.pop_back();
-	}
 }
 
-void Parser::ParseSubexpressionOperation(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
+void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
 
+	// Opcode stack for operators 
+	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
+
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
 		// Parse operand
-		ParseSubexpressionOperand(opcodeStack, suppressFunctionCall);
-		
+		ParseSubexpressionOperand(suppressFunctionCall);
+	
 		// Check for casts
 		if (Accept(SymbolType::As))
-		{
-			EmitOpcode(Opcode::Cast);
-			auto valueType = ParseValueType();
-			if (m_error)
-				return;
-			EmitValueType(valueType);
-		}
-		
+			ParseCast();
+
 		// Parse binary operator
 		if (CheckBinaryOperator())
 		{
 			auto opcode = ParseBinaryOperator();
+
+			// Check precedence if we've already parsed a binary math expression
+			while (!opcodeStack.empty() && GetOperatorPrecedence(opcode) >= GetOperatorPrecedence(opcodeStack.back()))
+			{
+				EmitOpcode(opcodeStack.back());
+				opcodeStack.pop_back();
+			}
 			opcodeStack.push_back(opcode);
 		}
-		else if (Check(SymbolType::And) || Check(SymbolType::Or))
+		else if (!opcodeStack.empty())
 		{
-			auto t = m_currentSymbol->type;
-			NextSymbol();
-			ParseExpression();
-			EmitOpcode(t == SymbolType::And ? Opcode::And : Opcode::Or);
+			while (!opcodeStack.empty())
+			{
+				EmitOpcode(opcodeStack.back());
+				opcodeStack.pop_back();
+			}
 		}
 		else
 			break;
+	}
+
+	// Check for leftover operators
+	if (!opcodeStack.empty())
+	{
+		Error("Syntax error when parsing expression");
 	}
 }
 
@@ -1495,9 +1527,6 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 		return;
 	}
 
-	// Opcode stack for operators 
-	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
-
 	// Check for a logical not at the beginning of the expression
 	if (Accept(SymbolType::Not))
 	{
@@ -1506,14 +1535,9 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	}
 	else
 	{
-		ParseSubexpressionOperation(opcodeStack, suppressFunctionCall);
+		ParseSubexpressionOperation(suppressFunctionCall);
 	}
 
-	// Check for leftover operators
-	if (!opcodeStack.empty())
-	{
-		Error("Syntax error when parsing expression");
-	}
 }
 
 void Parser::ParseExpression(bool suppressFunctionCall)

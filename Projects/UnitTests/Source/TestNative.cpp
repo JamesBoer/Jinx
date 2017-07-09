@@ -2,7 +2,7 @@
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
-Copyright (c) 2016 James Boer
+Copyright (c) 2017 James Boer
 */
 
 #include "UnitTest.h"

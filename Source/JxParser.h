@@ -63,6 +63,9 @@ namespace Jinx
 		void ScopeBegin();
 		void ScopeEnd();
 
+		// Retrieve a precedence value for the specified operator
+		uint32_t GetOperatorPrecedence(Opcode opcode) const;
+
 		// Check to see if the symbol is a newline or at the end of the list
 		bool IsSymbolValid(SymbolListCItr symbol) const;
 
@@ -97,7 +100,6 @@ namespace Jinx
 		// Check for existance of the specified symbol type or content at the current position.  
 		// The state of the parser is guaranteed not to be altered.  Returns true or non-null on success.
 		bool Check(SymbolType symbol) const;
-		bool CheckLogicalOperator() const;
 		bool CheckBinaryOperator() const;
 		bool CheckName() const;
 		bool CheckValue() const;
@@ -111,89 +113,37 @@ namespace Jinx
 		String CheckLibraryName() const;
 		const FunctionSignature * CheckFunctionCall() const;
 
-		// Parse access keyword
+		// Parsing functions advance the current symbol, looking for a pattern of symbols
+		// and injecting the compiled results into the bytecode buffer.
 		VisibilityType ParseScope();
-
-		// Parse current condition operator
 		Opcode ParseLogicalOperator();
-
-		// Parse current binary operator
 		Opcode ParseBinaryOperator();
-
-		// Parse current value
 		Variant ParseValue();
-
-		// Parse current type
 		ValueType ParseValueType();
-
-		// Identifier parsing routines
 		String ParseName();
-
-		// Multi-identifier parsing routines
 		String ParseMultiName(std::initializer_list<SymbolType> symbols);
-
-		// Parse a variable
 		String ParseVariable();
-
-		// Parse subscript following variable or property name
 		bool ParseSubscript();
-
-		// Parse a new property declaration
 		void ParsePropertyDeclaration(VisibilityType scope, bool readOnly);
-
-		// Parse property name
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
-
-		// Identifier parsing routines
 		String ParseFunctionNamePart();
-
-		// Parse function signature
 		FunctionSignature ParseFunctionSignature(VisibilityType access);
-
-		// Parse function block
 		void ParseFunctionDefinition(VisibilityType scope);
-
-		// Parse a function call with the given signature
 		void ParseFunctionCall(const FunctionSignature * signature);
-
-		// Parse a subexpression operand
-		void ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall = false);
-
-		// Parse a subexpression operation
-		void ParseSubexpressionOperation(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall = false);
-
-		// Parse expression components
+		void ParseCast();
+		void ParseSubexpressionOperand(bool suppressFunctionCall = false);
+		void ParseSubexpressionOperation(bool suppressFunctionCall = false);
 		void ParseSubexpression(bool suppressFunctionCall = false);
-
-		// Parse a complete expression, which generally follows an assignment or conditional statement
 		void ParseExpression(bool suppressFunctionCall = false);
-
-		// Parse erase statement
 		void ParseErase();
-
-		// Parse increment or decrement statement
 		void ParseIncDec();
-
-		// Parse if/else block
 		void ParseIfElse();
-
-		// Parse loop block
 		void ParseLoop();
-
-		// Parse a single statement
 		void ParseStatement();
-
-		// Parse scoped block of code until "end" terminator is reached
 		void ParseBlock();
-
-		// Parse initial library import statements
 		void ParseLibraryImports();
-
-		// Parse library declaration
 		void ParseLibraryDeclaration();
-
-		// Parse a complete script
 		void ParseScript();
 
 	private:

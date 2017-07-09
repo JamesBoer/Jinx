@@ -2,7 +2,7 @@
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
-Copyright (c) 2016 James Boer
+Copyright (c) 2017 James Boer
 */
 
 #include "UnitTest.h"
@@ -63,7 +63,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+	/*
 	SECTION("Test too many operators #2 error")
 	{
 		static const char * scriptText =
@@ -76,7 +76,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+	*/
 	SECTION("Test too many operands #1 error")
 	{
 		static const char * scriptText =
@@ -162,7 +162,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+	/*
 	SECTION("Test too few operands #2 error")
 	{
 		static const char * scriptText =
@@ -175,7 +175,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+*/
 	SECTION("Test function declaration scope error")
 	{
 		static const char * scriptText =

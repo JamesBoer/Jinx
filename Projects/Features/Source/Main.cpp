@@ -67,27 +67,18 @@ int main(int argc, char ** argv)
 		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 		globalParams.freeFn = [](void * p) { free(p); };
 		Jinx::Initialize(globalParams);
-	
-		auto runtime = Jinx::CreateRuntime();
-
-        static const char * scriptText =
-            u8R"(
-    
-			function convert test {integer x}
-			end
-
-			convert test "string"
-
-			--set x to 3
-			--set y to "3"
-			--set z to x < y -- as integer
-
+		
+		const char * scriptText =
+			u8R"(
+		
+			set a to 3 / 2 as integer   -- 1
+		
 			)";
 
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(!script);
-
-    }
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 1);
+	}
 
 	Jinx::ShutDown();
 
