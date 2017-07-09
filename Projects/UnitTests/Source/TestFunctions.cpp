@@ -47,6 +47,28 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a") == nullptr);
 	}
 
+	SECTION("Test function with multiple return values and index operator")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function some values
+				return "wolf", "goat", "cabbage"
+			end
+
+			set wolf to some values [1]
+			set goat to some values [2]
+			set cabbage to some values [3]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("wolf") == "wolf");
+		REQUIRE(script->GetVariable("goat") == "goat");
+		REQUIRE(script->GetVariable("cabbage") == "cabbage");
+	}
+
 	SECTION("Test alternate names function")
 	{
 		static const char * scriptText =

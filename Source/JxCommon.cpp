@@ -62,6 +62,7 @@ static const char * s_opcodeName[] =
 	"pushvar",
 	"pushvarkey",
 	"pushval",
+	"pushvalkey",
 	"return",
 	"scopebegin",
 	"scopeend",

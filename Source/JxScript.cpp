@@ -620,6 +620,29 @@ bool Script::Execute()
 				Push(val);
 			}
 			break;
+			case Opcode::PushValKey:
+			{
+				auto key = Pop();
+				auto var = Pop();
+				if (!var.IsCollection())
+				{
+					Error("Expected collection when accessing by key");
+				}
+				else
+				{
+					auto coll = var.GetCollection();
+					auto itr = coll->find(key);
+					if (itr == coll->end())
+					{
+						Error("Specified key does not exist in collection");
+					}
+					else
+					{
+						Push(itr->second);
+					}
+				}
+			}
+			break;
 			case Opcode::Return:
 			{
 				auto val = Pop();

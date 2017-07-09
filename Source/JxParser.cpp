@@ -1388,6 +1388,10 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	// When finished validating the function and pushing parameters, call the function
 	EmitOpcode(Opcode::CallFunc);
 	EmitId(signature->GetId());
+
+	// Check for post-function index operator
+	if (ParseSubscript())
+		EmitOpcode(Opcode::PushValKey);
 }
 
 void Parser::ParseCast()
