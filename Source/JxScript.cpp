@@ -597,6 +597,7 @@ bool Script::Execute()
 				if (!var.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
+					return false;
 				}
 				else
 				{
@@ -605,6 +606,7 @@ bool Script::Execute()
 					if (itr == coll->end())
 					{
 						Error("Specified key does not exist in collection");
+						return false;
 					}
 					else
 					{
@@ -627,6 +629,7 @@ bool Script::Execute()
 				if (!var.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
+					return false;
 				}
 				else
 				{
@@ -635,6 +638,7 @@ bool Script::Execute()
 					if (itr == coll->end())
 					{
 						Error("Specified key does not exist in collection");
+						return false;
 					}
 					else
 					{
@@ -708,12 +712,12 @@ bool Script::Execute()
 				if (!key.IsKeyType())
 				{
 					Error("Invalid key type");
-					break;
+					return false;
 				}
 				if (!m_runtime->SetPropertyKeyValue(id, key, val))
 				{
 					Error("Expected collection when accessing by key");
-					break;
+					return false;
 				}
 			}
 			break;
@@ -734,13 +738,13 @@ bool Script::Execute()
 				if (!key.IsKeyType())
 				{
 					Error("Invalid key type");
-					break;
+					return false;
 				}
 				Variant prop = GetVariable(name);
 				if (!prop.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
-					break;
+					return false;
 				}
 				auto collection = prop.GetCollection();
 				(*collection)[key] = val;

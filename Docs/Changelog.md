@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 ## [0.8.0] - 2017-07-09
 
+### Added
+- Index operators can now be used directly following function calls for returned collections
+
 ### Changed
 - Math operations now use C-style precedence rules
 - Function return values are now always optional

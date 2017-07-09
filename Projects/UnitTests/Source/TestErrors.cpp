@@ -270,6 +270,23 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test function declaration keyword match error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function yadda
+				return 1
+			end
+
+			set a to yadda [1]
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test library property scope error #1")
 	{
 		static const char * scriptText1 =
