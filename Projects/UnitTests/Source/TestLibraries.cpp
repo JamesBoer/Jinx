@@ -19,15 +19,15 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 	
 			library test
 
-			public function return {a} plus {b}
+			public function {a} plus {b}
 				return a + b
 			end
 
-			private function return {a} minus {b}  
+			private function {a} minus {b}  
 				return a - b
 			end
 
-			function return {a} times {b}
+			function {a} times {b}
 				return a * b
 			end
 
@@ -193,7 +193,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 	
 			library test
 
-			public function return {a} plus {b}
+			public function {a} plus {b}
 				return a + b
 			end
 			

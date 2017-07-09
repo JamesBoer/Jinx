@@ -19,18 +19,15 @@ namespace Jinx
 		FunctionDefinition(const FunctionSignature & signature, BufferPtr bytecode, size_t offset) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
-			m_returnParameter(signature.HasReturnParameter()),
 			m_bytecode(bytecode),
 			m_offset(offset)
 		{}
 		FunctionDefinition(const FunctionSignature & signature, FunctionCallback callback) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
-			m_returnParameter(signature.HasReturnParameter()),
 			m_callback(callback)
 		{}
 		size_t GetParameterCount() const { return m_parameterCount; }
-		bool HasReturnParameter() const { return m_returnParameter; }
 		RuntimeID GetId() const { return m_id; }
 		const BufferPtr & GetBytecode() const { return m_bytecode; }
 		size_t GetOffset() const { return m_offset; }
@@ -40,7 +37,6 @@ namespace Jinx
 	private:
 		RuntimeID m_id;
 		size_t m_parameterCount;
-		bool m_returnParameter;
 		BufferPtr m_bytecode;
 		size_t m_offset;
 		FunctionCallback m_callback;

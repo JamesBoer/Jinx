@@ -217,7 +217,7 @@ multiline comment
 	
 			set private counter to 0
 			
-			function return counter to finished
+			function counter to finished
 				increment counter
 				return counter >= 10
 			end
@@ -241,7 +241,7 @@ multiline comment
 	
 			set private counter to 0
 			
-			function return counter to finished
+			function counter to finished
 				increment counter
 				return counter >= 10
 			end
@@ -263,7 +263,7 @@ multiline comment
 	
 			set private counter to 0
 			
-			function return counter to finished
+			function counter to finished
 				increment counter
 				return counter >= 10
 			end

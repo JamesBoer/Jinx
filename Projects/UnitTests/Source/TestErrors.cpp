@@ -121,7 +121,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 			
-			function return f
+			function f
 				return 23
 			end
 	
@@ -138,7 +138,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 			
-			function return f
+			function f
 				return 23
 			end
 	
@@ -230,7 +230,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText1 =
 			u8R"(
 	
-			private function return collisiontest
+			private function collisiontest
 				return 123
 			end
 
@@ -241,7 +241,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText2 =
 			u8R"(
 	
-			private function return collisiontest
+			private function collisiontest
 				return 456
 			end
 
@@ -508,141 +508,6 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 	
 			-- Missing comma
 			set a to [1, "red"], [2, "green"] [3, "blue"]
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test missing return valid in function error #1")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-	
-	SECTION("Test missing return valid in function error #2")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if true
-				else
-					return "some string"
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-	
-	SECTION("Test missing return valid in function error #3")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if false
-					return "some string"
-				else
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test missing return valid in function error #4")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if false
-					return "some string"
-				else
-					return
-				end
-				return "some string"
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test missing return valid in function error #5")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if false
-					return "some string"
-				else if false
-					return "some string"
-				else if false
-				else 
-					return "some string"
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test no return validation")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function somefunc
-				return "some string"
-			end
-
-			somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test no return function assignment")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function somefunc
-			end
-
-			set a to somefunc
 
 			)";
 

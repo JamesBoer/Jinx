@@ -140,7 +140,7 @@ namespace Jinx
 		void ParseIncDec();
 		void ParseIfElse();
 		void ParseLoop();
-		void ParseStatement();
+		bool ParseStatement();
 		void ParseBlock();
 		void ParseLibraryImports();
 		void ParseLibraryDeclaration();
@@ -182,12 +182,6 @@ namespace Jinx
 
 		// Keep track of variables currently in scope
 		VariableStackFrame m_variableStackFrame;
-
-		// We're parsing a function that requires a return value
-		bool m_requireReturnValue;
-
-		// Validate that we've returned a value
-		bool m_returnedValue;
 	};
 
 };

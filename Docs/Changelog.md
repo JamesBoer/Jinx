@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - Math operations now use C-style precedence rules
+- Function return values are now always optional
 
 ## [0.7.0] - 2017-07-07
 

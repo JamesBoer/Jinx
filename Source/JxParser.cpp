@@ -17,9 +17,7 @@ Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String 
 	m_error(false),
 	m_breakAddress(false),
 	m_bytecode(CreateBuffer()),
-	m_writer(m_bytecode),
-	m_requireReturnValue(false),
-	m_returnedValue(false)
+	m_writer(m_bytecode)
 {
 	m_currentSymbol = symbolList.begin();
 	m_importList = libraries;
@@ -1101,7 +1099,6 @@ String Parser::ParseFunctionNamePart()
 
 FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 {
-	bool returnParameter = Accept(SymbolType::Return);
 	if (Check(SymbolType::NewLine))
 	{
 		Error("Empty function signature");
@@ -1211,7 +1208,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 	EmitOpcode(Opcode::Function);
 
 	// Create the function signature
-	FunctionSignature signature(scope, returnParameter, m_library->GetName(), signatureParts);
+	FunctionSignature signature(scope, m_library->GetName(), signatureParts);
 	signature.Write(m_writer);
 	return signature;
 }
@@ -1285,21 +1282,23 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 		--stackIndex;
 	}
 
-	// Mark whether we require a return value
-	m_requireReturnValue = signature.HasReturnParameter();
-
 	// Parse the function body
+	bool returnedValue = false;
 	while (!Check(SymbolType::End) && !m_error)
-		ParseStatement();
+	{
+		if (ParseStatement())
+			returnedValue = true;
+	}
 	Expect(SymbolType::End);
 	Expect(SymbolType::NewLine);
 
-	// Check to make sure we've returned a value as expected
-	if (m_requireReturnValue && !m_returnedValue)
-		Error("Required return value not found");
-
-	// Return from the function.  
-	EmitOpcode(Opcode::Return);
+	// Check to make sure we've returned a value as expected.
+	if (!returnedValue)
+	{
+		EmitOpcode(Opcode::PushVal);
+		EmitValue(nullptr);
+		EmitOpcode(Opcode::Return);
+	}
 
 	// Backfill jump destination 
 	EmitAddressBackfill(jumpBackfillAddress);
@@ -1409,11 +1408,6 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	suppressFunctionCall = false;
 	if (signature)
 	{
-		if (signature->HasReturnParameter() == false)
-		{
-			Error("Function in expression requires a return parameter");
-			return;
-		}
 		ParseFunctionCall(signature);
 	}
 	else if (CheckProperty())
@@ -1733,12 +1727,6 @@ void Parser::ParseIfElse()
 	// Parse new block of code after if line
 	ParseBlock();
 
-	// If we've returned a value in the if block, store it here
-	bool returnedValueInIfBlock = m_returnedValue;
-
-	// Clear any return flag after this block, since it's after a conditional branch
-	m_returnedValue = false;
-
 	// Check to see if we continue with 'else' or 'end' the if block
 	if (Accept(SymbolType::Else))
 	{
@@ -1759,16 +1747,6 @@ void Parser::ParseIfElse()
 			// Check that the block ends properly
 			Expect(SymbolType::End);
 			Expect(SymbolType::NewLine);
-
-			// Check to see if we're required to return a value
-			if (m_requireReturnValue)
-			{
-				// If we've haven't returned a value in the 'if' block, then we can't
-				// leave the returned value flag marked true, since not all paths
-				// have returned a value.
-				if (!returnedValueInIfBlock)
-					m_returnedValue = false;
-			}
 		}
 		else if (Accept(SymbolType::If))
 		{
@@ -1794,9 +1772,6 @@ void Parser::ParseIfElse()
 	{
 		Error("Missing block termination after if");
 	}
-
-	if (!returnedValueInIfBlock)
-		m_returnedValue = false;
 }
 
 void Parser::ParseLoop()
@@ -1975,11 +1950,13 @@ void Parser::ParseLoop()
 	}
 }
 
-void Parser::ParseStatement()
+bool Parser::ParseStatement()
 {
 	// No need to continue if an error has been flagged
 	if (m_error)
-		return;
+		return false;
+
+	bool returnedValue = false;
 
 	// Functions signatures have precedence over everything, so check for a 
 	// potential signature match before anything else.
@@ -1989,15 +1966,13 @@ void Parser::ParseStatement()
 		// We found a valid function signature that matches the current token(s)
 		ParseFunctionCall(signature);
 
-		// If we're calling a function that has a return value as a statement,
-		// we must discard the return value on the stack.
-		if (signature->HasReturnParameter())
-			EmitOpcode(Opcode::Pop);
+		// Since all functions return a value, we need to discard the return
+		// value not on the stack, since we're not assigning it to a variable.
+		EmitOpcode(Opcode::Pop);
 		Expect(SymbolType::NewLine);
 	}
 	else
 	{
-
 		bool set = Accept(SymbolType::Set);
 		
 		// Parse scope level
@@ -2010,7 +1985,7 @@ void Parser::ParseStatement()
 			if (scope == VisibilityType::Local)
 			{
 				Error("The 'readonly' keyword must follow a private or public keyword");
-				return;
+				return false;
 			}
 		}
 		
@@ -2025,7 +2000,7 @@ void Parser::ParseStatement()
 			if (m_currentSymbol->text == m_library->GetName())
 			{
 				Error("Illegal use of library name in identifier");
-				return;
+				return false;
 			}
 
 			// We're declaring a new property if we see a non-local scope declaration
@@ -2046,7 +2021,7 @@ void Parser::ParseStatement()
 					if (propertyName.IsReadOnly())
 					{
 						Error("Can't change readonly property");
-						return;
+						return false;
 					}
 
 					// Check for subscript operator
@@ -2123,21 +2098,16 @@ void Parser::ParseStatement()
 				// We've hit a return value
 				if (!Check(SymbolType::NewLine))
 				{
-					// Check to make sure we're allowed to return a value
-					if (!m_requireReturnValue)
-						Error("Unexpected return value");
-					else
-						m_returnedValue = true;
 					ParseExpression();
-					EmitOpcode(Opcode::ReturnValue);
 				}
 				else
 				{
-					if (m_requireReturnValue)
-						Error("Required return value not found");
-					EmitOpcode(Opcode::Return);
+					EmitOpcode(Opcode::PushVal);
+					EmitValue(nullptr);
 				}
+				EmitOpcode(Opcode::Return);
 				Accept(SymbolType::NewLine);
+				returnedValue = true;
 			}
 			else if (Accept(SymbolType::Break))
 			{
@@ -2164,7 +2134,7 @@ void Parser::ParseStatement()
 					// Parse the expression to check for wait
 					ParseExpression();
 					if (!Expect(SymbolType::NewLine))
-						return;
+						return false;
 
 					// Add jump if false/true over wait statement depending on keyword
 					EmitOpcode(jumpTrue ? Opcode::JumpTrue : Opcode::JumpFalse);
@@ -2217,6 +2187,9 @@ void Parser::ParseStatement()
 			Error("Invalid symbol after scope specifier '%s'", scope == VisibilityType::Public ? "public" : "private");
 		}
 	}
+
+	// This is not an error value, but signals whether we've returned a value from this statement
+	return returnedValue;
 }
 
 void Parser::ParseBlock()

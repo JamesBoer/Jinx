@@ -112,11 +112,6 @@ namespace Jinx
 		ReadOnly,
 	};
 
-	enum class ReturnValue
-	{
-		None,
-		Required,
-	};
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -139,7 +134,7 @@ namespace Jinx
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(Visibility visibility, ReturnValue returnValue, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**

@@ -17,7 +17,7 @@ Library::Library(RuntimeWPtr runtime, const String & name) :
 {
 }
 
-FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool returnValue, std::initializer_list<String> name) const
+FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const
 {
 	// Build function signature parts from parameters
 	FunctionSignatureParts parts;
@@ -128,7 +128,7 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, bool return
 	}
 
 	// Create functions signature
-	FunctionSignature functionSignature(publicScope ? VisibilityType::Public : VisibilityType::Private, returnValue, GetName(), parts);
+	FunctionSignature functionSignature(publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), parts);
 	return functionSignature;
 }
 
@@ -159,7 +159,7 @@ bool Library::PropertyNameExists(const String & name) const
 	return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
 }
 
-bool Library::RegisterFunction(Visibility visibility, ReturnValue returnValue, std::initializer_list<String> name, FunctionCallback function)
+bool Library::RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
 {
 	if (name.size() < 1)
 	{
@@ -173,7 +173,7 @@ bool Library::RegisterFunction(Visibility visibility, ReturnValue returnValue, s
 	}
 
 	// Calculate the function signature
-	FunctionSignature functionSignature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, returnValue == ReturnValue::Required ? true : false, name);
+	FunctionSignature functionSignature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
 	if (!functionSignature.IsValid())
 		return false;
 

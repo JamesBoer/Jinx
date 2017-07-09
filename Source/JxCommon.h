@@ -62,7 +62,6 @@ namespace Jinx
 		PushVarKey,
 		PushVal,
 		Return,
-		ReturnValue,
 		ScopeBegin,
 		ScopeEnd,
 		SetIndex,

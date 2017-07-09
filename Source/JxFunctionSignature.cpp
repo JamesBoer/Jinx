@@ -12,14 +12,12 @@ using namespace Jinx;
 
 FunctionSignature::FunctionSignature() :
 	m_id(0),
-	m_returnParameter(false),
 	m_classParameter(false)
 {
 }
 
-FunctionSignature::FunctionSignature(VisibilityType visibility, bool returnParameter, const String & libraryName, const FunctionSignatureParts & parts) :
+FunctionSignature::FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts) :
 	m_visibility(visibility),
-	m_returnParameter(returnParameter),
 	m_parts(parts)
 {
 	if (m_visibility == VisibilityType::Local)
@@ -141,7 +139,6 @@ void FunctionSignature::Read(BinaryReader & reader)
 	// Read this object from a memory buffer
 	reader.Read(&m_id);
 	reader.Read<VisibilityType, uint8_t>(&m_visibility);
-	reader.Read(&m_returnParameter);
 	uint8_t partSize;
 	reader.Read(&partSize);
 	for (uint8_t i = 0; i < partSize; ++i)
@@ -167,7 +164,6 @@ void FunctionSignature::Write(BinaryWriter & writer) const
 	// Write this object to a memory buffer
 	writer.Write(m_id);
 	writer.Write<VisibilityType, uint8_t>(m_visibility);
-	writer.Write(m_returnParameter);
 	writer.Write(static_cast<uint8_t>(m_parts.size()));
 	for (const auto & part : m_parts)
 	{

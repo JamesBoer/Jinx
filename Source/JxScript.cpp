@@ -157,8 +157,7 @@ bool Script::Execute()
 					for (size_t i = 0; i < numParams; ++i)
 						m_stack.pop_back();			
 					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
-					if (functionDef->HasReturnParameter())
-						Push(retVal);
+					Push(retVal);
 				}
 				else
 				{
@@ -622,16 +621,6 @@ bool Script::Execute()
 			}
 			break;
 			case Opcode::Return:
-			{
-				assert(!m_execution.empty());
-				size_t targetSize = m_execution.back().stackTop;
-				m_execution.pop_back();
-				assert(!m_execution.empty());
-				while (m_stack.size() > targetSize)
-					m_stack.pop_back();
-			}
-			break;
-			case Opcode::ReturnValue:
 			{
 				auto val = Pop();
 				assert(!m_execution.empty());
