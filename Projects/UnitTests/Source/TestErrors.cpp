@@ -63,7 +63,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-	/*
+	
 	SECTION("Test too many operators #2 error")
 	{
 		static const char * scriptText =
@@ -76,7 +76,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-	*/
+	
 	SECTION("Test too many operands #1 error")
 	{
 		static const char * scriptText =
@@ -162,7 +162,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-	/*
+	
 	SECTION("Test too few operands #2 error")
 	{
 		static const char * scriptText =
@@ -175,7 +175,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-*/
+
 	SECTION("Test function declaration scope error")
 	{
 		static const char * scriptText =

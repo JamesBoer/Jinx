@@ -1398,7 +1398,7 @@ void Parser::ParseCast()
 	EmitValueType(valueType);
 }
 
-void Parser::ParseSubexpressionOperand(bool suppressFunctionCall)
+void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
@@ -1441,6 +1441,8 @@ void Parser::ParseSubexpressionOperand(bool suppressFunctionCall)
 	}
 	else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
 	{
+		if (required)
+			Error("Expected operand");
 		return;
 	}
 	else if (Accept(SymbolType::ParenOpen))
@@ -1474,11 +1476,14 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 	// Opcode stack for operators 
 	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
 
+	bool requiredOperand = false;
+
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
 		// Parse operand
-		ParseSubexpressionOperand(suppressFunctionCall);
-	
+		ParseSubexpressionOperand(requiredOperand, suppressFunctionCall);
+		requiredOperand = false;
+
 		// Check for casts
 		if (Accept(SymbolType::As))
 			ParseCast();
@@ -1486,6 +1491,7 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 		// Parse binary operator
 		if (CheckBinaryOperator())
 		{
+			requiredOperand = true;
 			auto opcode = ParseBinaryOperator();
 
 			// Check precedence if we've already parsed a binary math expression

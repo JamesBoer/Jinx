@@ -132,7 +132,7 @@ namespace Jinx
 		void ParseFunctionDefinition(VisibilityType scope);
 		void ParseFunctionCall(const FunctionSignature * signature);
 		void ParseCast();
-		void ParseSubexpressionOperand(bool suppressFunctionCall = false);
+		void ParseSubexpressionOperand(bool required, bool suppressFunctionCall = false);
 		void ParseSubexpressionOperation(bool suppressFunctionCall = false);
 		void ParseSubexpression(bool suppressFunctionCall = false);
 		void ParseExpression(bool suppressFunctionCall = false);
