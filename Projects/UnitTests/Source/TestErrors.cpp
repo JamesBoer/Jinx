@@ -176,6 +176,23 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test variable access scope error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			begin
+				set a to 123
+			end
+	
+			set b to a
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test function declaration scope error")
 	{
 		static const char * scriptText =
