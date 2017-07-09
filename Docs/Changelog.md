@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2017-07-09
+
+### Changed
+- Math operations now use C-style precedence rules
+
 ## [0.7.0] - 2017-07-07
 
 ### Changed
