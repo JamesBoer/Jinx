@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Index operators can now be used directly following function calls for returned collections
+- New performance metric for completed scripts
+- New performance test
 
 ### Changed
 - Math operations now use C-style precedence rules

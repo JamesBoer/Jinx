@@ -238,6 +238,7 @@ namespace Jinx
 			executionTimeNs(0),
 			scriptCompilationCount(0),
 			scriptExecutionCount(0),
+			scriptCompletionCount(0),
 			instructionCount(0)
 		{}
 		/// Total compilation time of all scripts in nanoseconds
@@ -245,9 +246,11 @@ namespace Jinx
 		/// Total execution time of all scripts in nanoseconds
 		uint64_t executionTimeNs;
 		/// Number of scripts compiled
-		uint32_t scriptCompilationCount;
+		uint64_t scriptCompilationCount;
 		/// Number of scripts executed
-		uint32_t scriptExecutionCount;
+		uint64_t scriptExecutionCount;
+		/// Number of scripts completed
+		uint64_t scriptCompletionCount;
 		/// Number of instructions executed
 		uint64_t instructionCount;
 	};

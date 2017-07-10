@@ -430,7 +430,7 @@ static const char * s_testScripts[] =
 
 		import core
 
-		function return {integer x} is divisible by {integer y}
+		function {integer x} is divisible by {integer y}
 			return x % y = 0
 		end
 
