@@ -164,9 +164,13 @@ namespace Jinx
 
 	private:
 		Mutex m_mutex;
-		MemoryBlock * m_head;
-		MemoryBlock * m_tail;
+		MemoryBlock * m_allocHead;
+		MemoryBlock * m_allocTail;
+		MemoryBlock * m_spareHead;
+		MemoryBlock * m_spareTail;
 		size_t m_allocBlockSize;
+		size_t m_allocSpareBlocks;
+		size_t m_maxAllocSpareBlocks;
 		AllocFn m_allocFn = [](size_t size) { return malloc(size); };
 		ReallocFn m_reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 		FreeFn m_freeFn = [](void * p) { return free(p); };
@@ -236,9 +240,13 @@ using namespace Jinx;
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
 BlockHeap::BlockHeap() :
-	m_head(nullptr),
-	m_tail(nullptr),
-	m_allocBlockSize((1024 * 8) - sizeof(MemoryBlock))
+	m_allocHead(nullptr),
+	m_allocTail(nullptr),
+	m_spareHead(nullptr),
+	m_spareTail(nullptr),
+	m_allocBlockSize((1024 * 8) - sizeof(MemoryBlock)),
+	m_allocSpareBlocks(0),
+	m_maxAllocSpareBlocks(0)
 {
 	m_allocFn = [](size_t size) { return malloc(size); };
 	m_freeFn = [](void * p) { return free(p); };
@@ -247,7 +255,8 @@ BlockHeap::BlockHeap() :
 BlockHeap::~BlockHeap()
 {
 	ShutDown();
-	assert(m_head == nullptr && m_tail == nullptr);
+	assert(m_allocHead == nullptr && m_allocTail == nullptr);
+	assert(m_spareHead == nullptr && m_spareTail == nullptr);
 }
 
 void * BlockHeap::Alloc(size_t bytes)
@@ -265,31 +274,31 @@ void * BlockHeap::Alloc(size_t bytes)
 	requestedBytes = NextHighestMultiple(requestedBytes, std::alignment_of<max_align_t>::value);
 
 	// Make sure we have a valid memory block for the requested size
-	if (!m_head)
+	if (!m_allocHead)
 	{
-		m_head = AllocBlock(requestedBytes);
-		m_tail = m_head;
+		m_allocHead = AllocBlock(requestedBytes);
+		m_allocTail = m_allocHead;
 	}
 	else
 	{
-		if (requestedBytes > (m_tail->capacity - m_tail->allocatedBytes))
+		if (requestedBytes > (m_allocTail->capacity - m_allocTail->allocatedBytes))
 		{
 			MemoryBlock * newBlock = AllocBlock(requestedBytes);
-			m_tail->next = newBlock;
-			newBlock->prev = m_tail;
-			m_tail = newBlock;
+			m_allocTail->next = newBlock;
+			newBlock->prev = m_allocTail;
+			m_allocTail = newBlock;
 		}
 	}
 
 	// Return a memory pointer
-	void * ptr = m_tail->data + m_tail->allocatedBytes;
-	m_tail->allocatedBytes += requestedBytes;
-	m_tail->usedBytes += requestedBytes;
-	m_tail->count++;
+	void * ptr = m_allocTail->data + m_allocTail->allocatedBytes;
+	m_allocTail->allocatedBytes += requestedBytes;
+	m_allocTail->usedBytes += requestedBytes;
+	m_allocTail->count++;
 
 	// Fill out memory header with required information
 	MemoryHeader * header = static_cast<MemoryHeader *>(ptr);
-	header->memBlock = m_tail;
+	header->memBlock = m_allocTail;
 	header->bytes = requestedBytes;
 
 #ifdef JINX_DEBUG_ALLOCATION
@@ -336,9 +345,40 @@ MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 	size_t blockSize = m_allocBlockSize;
 	if (bytes > blockSize)
 		blockSize = NextHighestMultiple(bytes, std::alignment_of<max_align_t>::value);
-	MemoryBlock * newBlock = static_cast<MemoryBlock *>(m_allocFn(blockSize + sizeof(MemoryBlock)));
-	newBlock->capacity = blockSize;
-	newBlock->data = reinterpret_cast<uint8_t *>(newBlock) + sizeof(MemoryBlock);
+
+	MemoryBlock * newBlock = nullptr;
+
+	// Check the sparelist first
+	MemoryBlock * curr = m_spareHead;
+	while (curr)
+	{
+		if (curr->capacity >= bytes)
+		{
+			if (curr == m_spareHead)
+				m_spareHead = curr->next;
+			else
+				curr->prev->next = curr->next;
+			if (curr == m_spareTail)
+				m_spareTail = curr->prev;
+			else
+				curr->next->prev = curr->prev;
+			m_allocSpareBlocks--;
+			newBlock = curr;
+			break;
+		}
+		curr = curr->next;
+	}
+
+	// If none is available, allocate a block
+	if (!newBlock)
+	{
+		newBlock = static_cast<MemoryBlock *>(m_allocFn(blockSize + sizeof(MemoryBlock)));
+		newBlock->capacity = blockSize;
+		newBlock->data = reinterpret_cast<uint8_t *>(newBlock) + sizeof(MemoryBlock);
+		m_stats.currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
+		m_stats.externalAllocCount++;
+		m_stats.currentBlockCount++;
+	}
 	newBlock->allocatedBytes = 0;
 	newBlock->usedBytes = 0;
 	newBlock->count = 0;
@@ -352,9 +392,6 @@ MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 	memset(newBlock->memGuardHead, MEMORY_GUARD_PATTERN, MEMORY_GUARD_SIZE);
 	memset(newBlock->memGuardTail, MEMORY_GUARD_PATTERN, MEMORY_GUARD_SIZE);
 #endif 
-	m_stats.currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
-	m_stats.externalAllocCount++;
-	m_stats.currentBlockCount++;
 	return newBlock;
 }
 
@@ -438,24 +475,40 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 	assert(memcmp(block->memGuardTail, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
 #endif 
 
-	// If this is the tail block but not the head, don't free it, but instead just 
-	// reset the size parameter, which effectively resets the allocations
-	// from this block.
-	if (block == m_tail && block != m_head)
+	// Remove the block from the double linked-list.
+	if (block == m_allocHead)
+		m_allocHead = block->next;
+	else
+		block->prev->next = block->next;
+	if (block == m_allocTail)
+		m_allocTail = block->prev;
+	else
+		block->next->prev = block->prev;
+
+	// Check first to see if we can put this on the spare list
+	if (m_allocSpareBlocks < m_maxAllocSpareBlocks)
 	{
 		block->allocatedBytes = 0;
 		block->usedBytes = 0;
+		block->count = 0;
+		if (!m_spareTail)
+		{
+			m_spareHead = block;
+			m_spareTail = block;
+			block->next = nullptr;
+			block->prev = nullptr;
+		}
+		else
+		{
+			block->next = nullptr;
+			block->prev = m_spareTail;
+			m_spareTail->next = block;
+			m_spareTail = block;
+		}
+		m_allocSpareBlocks++;
 	}
 	else
 	{
-		// Remove the block from the double linked-list.
-		if (block == m_head)
-			m_head = block->next;
-		if (block->prev)
-			block->prev->next = block->next;
-		if (block->next)
-			block->next->prev = block->prev;
-
 		// Track allocation stats
 		m_stats.externalFreeCount++;
 		m_stats.currentAllocatedMemory -= (block->capacity + sizeof(MemoryBlock));
@@ -483,10 +536,11 @@ void BlockHeap::Initialize(const GlobalParams & params)
 		m_allocFn = params.allocFn;
 		m_reallocFn = params.reallocFn;
 		m_freeFn = params.freeFn;
-		// Alloc block size must be at least 4K (otherwise, what's the point of a block allocator?)
-		assert(params.allocBlockSize >= (1024 * 4));
-		m_allocBlockSize = params.allocBlockSize - sizeof(MemoryBlock);
 	}
+	// Alloc block size must be at least 4K (otherwise, what's the point of a block allocator?)
+	assert(params.allocBlockSize >= (1024 * 4));
+	m_allocBlockSize = params.allocBlockSize - sizeof(MemoryBlock);
+	m_maxAllocSpareBlocks = params.allocSpareBlocks;
 }
 
 void BlockHeap::LogAllocations()
@@ -494,7 +548,7 @@ void BlockHeap::LogAllocations()
 	LogWriteLine("=== Memory Log Begin ===");
 
 	// Log all memory blocks
-	auto memBlock = m_head;
+	auto memBlock = m_allocHead;
 	while (memBlock)
 	{
 		LogWriteLine("");
@@ -577,7 +631,8 @@ void * BlockHeap::Realloc(void * ptr, size_t bytes)
 
 void BlockHeap::ShutDown()
 {
-	MemoryBlock * curr = m_head;
+	// Free memory from allocation list
+	MemoryBlock * curr = m_allocHead;
 	MemoryBlock * next;
 	while (curr)
 	{
@@ -594,8 +649,28 @@ void BlockHeap::ShutDown()
 		}
 		curr = next;
 	}
-	m_head = nullptr;
-	m_tail = nullptr;
+	m_allocHead = nullptr;
+	m_allocTail = nullptr;
+
+	// Free memory from spare list
+	curr = m_spareHead;
+	while (curr)
+	{
+		next = curr->next;
+		if (curr->usedBytes == 0)
+		{
+			m_stats.externalFreeCount++;
+			m_stats.currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+			m_freeFn(curr);
+		}
+		else
+		{
+			LogWriteLine("Could not free block at shutdown.  Memory still in use.");
+		}
+		curr = next;
+	}
+	m_spareHead = nullptr;
+	m_spareTail = nullptr;
 }
 
 #endif // JINX_DISABLE_POOL_ALLOCATOR

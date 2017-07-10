@@ -368,6 +368,7 @@ namespace Jinx
 			logSymbols(false),
 			logBytecode(false),
 			allocBlockSize(8192),
+			allocSpareBlocks(4),
 			maxInstructions(2000),
 			errorOnMaxInstrunctions(true)
 		{}
@@ -387,6 +388,8 @@ namespace Jinx
 		FreeFn freeFn;
 		/// Size of each individual block allocation in bytes
 		size_t allocBlockSize;
+		/// Number of spare allocation blocks to retain
+		size_t allocSpareBlocks;
 		/// Maximum number of instructions per tick
 		uint32_t maxInstructions;
 		/// Maximum total script instrunctions

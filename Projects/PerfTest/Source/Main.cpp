@@ -218,13 +218,13 @@ int main(int argc, char * argv[])
 
 	auto memoryStats = Jinx::GetMemoryStats();
 	printf("\n--- Memory ---\n");
-	printf("externalAllocCount: %llu\n", memoryStats.externalAllocCount);
-	printf("externalFreeCount: %llu\n", memoryStats.externalFreeCount);
-	printf("internalAllocCount: %llu\n", memoryStats.internalAllocCount);
-	printf("internalFreeCount: %llu\n", memoryStats.internalFreeCount);
-	printf("currentBlockCount: %llu\n", memoryStats.currentBlockCount);
-	printf("currentAllocatedMemory: %llu bytes\n", memoryStats.currentAllocatedMemory);
-	printf("currentUsedMemory: %llu bytes\n", memoryStats.currentUsedMemory);
+	printf("External alloc count: %llu\n", memoryStats.externalAllocCount);
+	printf("External free count: %llu\n", memoryStats.externalFreeCount);
+	printf("Internal alloc count: %llu\n", memoryStats.internalAllocCount);
+	printf("Internal free count: %llu\n", memoryStats.internalFreeCount);
+	printf("Current block count: %llu\n", memoryStats.currentBlockCount);
+	printf("Current allocated memory: %llu bytes\n", memoryStats.currentAllocatedMemory);
+	printf("Current used memory: %llu bytes\n", memoryStats.currentUsedMemory);
 	printf("\n");
 
 #ifdef JINX_WINDOWS
