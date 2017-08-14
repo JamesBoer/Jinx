@@ -17,6 +17,7 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode) :
 {
 	m_execution.reserve(6);
 	m_execution.push_back(ExecutionFrame(bytecode));
+	m_stack.reserve(32);
 
 	// Assume default unnamed library unless explicitly overridden
 	m_library = m_runtime->GetLibraryInternal("");

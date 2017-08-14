@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - Index operators can now be used directly following function calls for returned collections
 - New performance metric for completed scripts
 - New performance test
+- New initialization parameter for caching memory blocks
 
 ### Changed
 - Math operations now use C-style precedence rules

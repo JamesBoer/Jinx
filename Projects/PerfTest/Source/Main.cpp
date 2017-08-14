@@ -184,13 +184,13 @@ int main(int argc, char * argv[])
 		assert(script->Execute());
 	}
 
-	// Run fuzz permutations on bytecode
+	// Run performance tests on bytecode
 #ifdef PARALLEL_EXECUTION
 	#pragma omp parallel for
 #endif
 	for (int c = 0; c < NumPermutations; ++c)
 	{
-		for (size_t i = 0; i < bytecodeArray.size(); ++i)
+		for (int i = 0; i < bytecodeArray.size(); ++i)
 		{
 			// Create a runtime script with the given bytecode if it exists
 			auto script = runtime->CreateScript(bytecodeArray[i]);
@@ -206,12 +206,12 @@ int main(int argc, char * argv[])
 	// Report performance and memory stats
 
 	auto perfStats = runtime->GetScriptPerformanceStats();
-	double totalTime = (double)perfStats.executionTimeNs / 1000000000;
+	double executionTime = (double)perfStats.executionTimeNs / 1000000000;
 	printf("--- Performance ---\n");
-	printf("Total execution time: %f seconds\n", totalTime);
-	printf("Number of scripts executed: %llu (%llu per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / totalTime));
-	printf("Number of scripts completed: %llu (%llu per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / totalTime));
-	printf("Number of instructions executed: %llu (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / totalTime / 1000000.0));
+	printf("Total execution time: %f seconds\n", executionTime);
+	printf("Number of scripts executed: %llu (%llu per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / executionTime));
+	printf("Number of scripts completed: %llu (%llu per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / executionTime));
+	printf("Number of instructions executed: %llu (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / executionTime / 1000000.0));
 
 	bytecodeArray.fill(nullptr);
 	runtime = nullptr;
