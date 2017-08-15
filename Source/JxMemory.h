@@ -238,11 +238,11 @@ namespace Jinx
 			currentAllocatedMemory(0),
 			currentUsedMemory(0)
 		{}
-		uint32_t externalAllocCount;
-		uint32_t externalFreeCount;
-		uint32_t internalAllocCount;
-		uint32_t internalFreeCount;
-		uint32_t currentBlockCount;
+		uint64_t externalAllocCount;
+		uint64_t externalFreeCount;
+		uint64_t internalAllocCount;
+		uint64_t internalFreeCount;
+		uint64_t currentBlockCount;
 		uint64_t currentAllocatedMemory;
 		uint64_t currentUsedMemory;
 	};

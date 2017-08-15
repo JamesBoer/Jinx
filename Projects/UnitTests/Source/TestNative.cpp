@@ -2,7 +2,7 @@
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
-Copyright (c) 2016 James Boer
+Copyright (c) 2017 James Boer
 */
 
 #include "UnitTest.h"
@@ -55,10 +55,10 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto runtime = TestCreateRuntime();
 		auto library = runtime->GetLibrary("test");
-		library->RegisterFunction(Visibility::Public, ReturnValue::None, {"this", "function"}, ThisFunction);
-		library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "that", "function" }, ThatFunction);
-		library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "another", "function" }, AnotherFunction);
-		library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
+		library->RegisterFunction(Visibility::Public, {"this", "function"}, ThisFunction);
+		library->RegisterFunction(Visibility::Public, { "that", "function" }, ThatFunction);
+		library->RegisterFunction(Visibility::Public, { "another", "function" }, AnotherFunction);
+		library->RegisterFunction(Visibility::Public, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
 		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
 		REQUIRE(s_functionCalled == true);
@@ -72,7 +72,7 @@ TEST_CASE("Test Native", "[Native]")
 		static const char * scriptText =
 			u8R"(
 	
-			public function return getvalue
+			public function getvalue
 				return 123
 			end			
 			

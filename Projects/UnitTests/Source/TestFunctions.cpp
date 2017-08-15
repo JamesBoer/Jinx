@@ -2,7 +2,7 @@
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
-Copyright (c) 2016 James Boer
+Copyright (c) 2017 James Boer
 */
 
 #include "UnitTest.h"
@@ -27,6 +27,46 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
+	}
+
+	SECTION("Test no return assignment function")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function do nothing
+				-- do nothing
+			end
+
+			set a to do nothing
+		
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == nullptr);
+	}
+
+	SECTION("Test function with multiple return values and index operator")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function some values
+				return "wolf", "goat", "cabbage"
+			end
+
+			set wolf to some values [1]
+			set goat to some values [2]
+			set cabbage to some values [3]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("wolf") == "wolf");
+		REQUIRE(script->GetVariable("goat") == "goat");
+		REQUIRE(script->GetVariable("cabbage") == "cabbage");
 	}
 
 	SECTION("Test alternate names function")
@@ -99,11 +139,11 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			function return some constant integer
+			function some constant integer
 				return 42
 			end
 
-			function return some string val
+			function some string val
 				return "some string"
 			end
 
@@ -118,101 +158,12 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("b") == "some string");
 	}
 
-	SECTION("Test return value validation #1")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if true
-					return "some string"
-				else
-					return "some string"
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == "some string");
-	}
-
-
-	SECTION("Test return value validation #2")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if true
-					return "some string"
-				else
-				end
-				return "some string"
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == "some string");
-	}
-
-	SECTION("Test return value validation #3")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if (true)
-				else
-					return "some string"
-				end
-				return "some string"
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == "some string");
-	}
-
-	SECTION("Test return value validation #4")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if (true)
-				else if (false)
-					return "some string"
-				end
-				return "some string"
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == "some string");
-	}
-
 	SECTION("Test simple parameters")
 	{
 		static const char * scriptText =
 			u8R"(
 	
-			function return {a} plus {b}  
+			function {a} plus {b}  
 				return a + b
 			end
 
@@ -231,7 +182,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			function return {var a} plus {var b}  
+			function {var a} plus {var b}  
 				return var a + var b
 			end
 
@@ -252,7 +203,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	
 			set public readonly x to 1
 
-			function return {a} plus {b}  
+			function {a} plus {b}  
 				return a + b
 			end
 
@@ -272,7 +223,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	
 			set public readonly x x to 1
 
-			function return {a} plus {b}  
+			function {a} plus {b}  
 				return a + b
 			end
 
@@ -290,7 +241,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			function return {a} minus {b}  
+			function {a} minus {b}  
 				return a - b
 			end
 	 
@@ -312,7 +263,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			function return factorial { x }
+			function factorial { x }
 				if x <= 1
 					return 1
 				end
@@ -334,11 +285,11 @@ TEST_CASE("Test Functions", "[Functions]")
 			u8R"(
 	
 			-- Functions can be made up of keywords
-			function return loop function while
+			function loop function while
 				return 42
 			end
 
-			function return begin to while
+			function begin to while
 				return 99
 			end
 	 
@@ -358,11 +309,11 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			function return convert {string x}
+			function convert {string x}
 				return x
 			end
 
-			function return convertback {integer x}
+			function convertback {integer x}
 				return x
 			end
 
@@ -391,11 +342,11 @@ TEST_CASE("Test Functions", "[Functions]")
 			u8R"(
 	
 			-- Thto local function should be called from both scripts
-			function return localfunc
+			function localfunc
 				return 123
 			end
 
-			private function return privatefunc
+			private function privatefunc
 				return localfunc
 			end
 			
@@ -408,7 +359,7 @@ TEST_CASE("Test Functions", "[Functions]")
 	
 			-- This function should not be called, even though it
 			-- has the same name.
-			function return localfunc
+			function localfunc
 				return 456
 			end
 			

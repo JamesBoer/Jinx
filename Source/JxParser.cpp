@@ -17,9 +17,7 @@ Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String 
 	m_error(false),
 	m_breakAddress(false),
 	m_bytecode(CreateBuffer()),
-	m_writer(m_bytecode),
-	m_requireReturnValue(false),
-	m_returnedValue(false)
+	m_writer(m_bytecode)
 {
 	m_currentSymbol = symbolList.begin();
 	m_importList = libraries;
@@ -76,6 +74,29 @@ void Parser::ScopeEnd()
 	if (!m_variableStackFrame.ScopeEnd())
 		Error("%s", m_variableStackFrame.GetErrorMessage());
 	EmitOpcode(Opcode::ScopeEnd);
+}
+
+uint32_t Parser::GetOperatorPrecedence(Opcode opcode) const
+{
+	switch (opcode)
+	{
+	case Opcode::Multiply: return 1;
+	case Opcode::Divide: return 1;
+	case Opcode::Mod: return 1;
+	case Opcode::Add: return 2;
+	case Opcode::Subtract: return 2;
+	case Opcode::Less: return 3;
+	case Opcode::LessEq: return 3;
+	case Opcode::Greater: return 3;
+	case Opcode::GreaterEq: return 3;
+	case Opcode::Equals: return 3;
+	case Opcode::NotEquals: return 3;
+	case Opcode::And: return 4;
+	case Opcode::Or: return 4;
+	default:
+		assert(!"Unknown opcode used in binary expression");
+		return 0;
+	};
 }
 
 bool Parser::IsSymbolValid(SymbolListCItr symbol) const
@@ -216,23 +237,13 @@ bool Parser::Check(SymbolType symbol) const
 	return (symbol == m_currentSymbol->type);
 }
 
-bool Parser::CheckLogicalOperator() const
-{
-	if (m_error || m_currentSymbol == m_symbolList.end())
-		return false;
-	auto type = m_currentSymbol->type;
-	return 
-		type == SymbolType::And ||
-		type == SymbolType::Or ||
-		type == SymbolType::Not;
-}
-
 bool Parser::CheckBinaryOperator() const
 {
 	if (m_error || m_currentSymbol == m_symbolList.end())
 		return false;
 	auto type = m_currentSymbol->type;
 	return 
+		type == SymbolType::And ||
 		type == SymbolType::Asterisk ||
 		type == SymbolType::Equals ||
 		type == SymbolType::NotEquals ||
@@ -242,6 +253,7 @@ bool Parser::CheckBinaryOperator() const
 		type == SymbolType::LessThan ||
 		type == SymbolType::LessThanEquals ||
 		type == SymbolType::Minus ||
+		type == SymbolType::Or ||
 		type == SymbolType::Percent ||
 		type == SymbolType::Plus;
 }
@@ -682,6 +694,9 @@ Opcode Parser::ParseBinaryOperator()
 	Opcode opcode = Opcode::NumOpcodes;
 	switch (m_currentSymbol->type)
 	{
+	case SymbolType::And:
+		opcode = Opcode::And;
+		break;
 	case SymbolType::Asterisk:
 		opcode = Opcode::Multiply;
 		break;
@@ -708,6 +723,9 @@ Opcode Parser::ParseBinaryOperator()
 		break;
 	case SymbolType::Minus:
 		opcode = Opcode::Subtract;
+		break;
+	case SymbolType::Or:
+		opcode = Opcode::Or;
 		break;
 	case SymbolType::Percent:
 		opcode = Opcode::Mod;
@@ -1081,7 +1099,6 @@ String Parser::ParseFunctionNamePart()
 
 FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 {
-	bool returnParameter = Accept(SymbolType::Return);
 	if (Check(SymbolType::NewLine))
 	{
 		Error("Empty function signature");
@@ -1191,7 +1208,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 	EmitOpcode(Opcode::Function);
 
 	// Create the function signature
-	FunctionSignature signature(scope, returnParameter, m_library->GetName(), signatureParts);
+	FunctionSignature signature(scope, m_library->GetName(), signatureParts);
 	signature.Write(m_writer);
 	return signature;
 }
@@ -1265,21 +1282,23 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 		--stackIndex;
 	}
 
-	// Mark whether we require a return value
-	m_requireReturnValue = signature.HasReturnParameter();
-
 	// Parse the function body
+	bool returnedValue = false;
 	while (!Check(SymbolType::End) && !m_error)
-		ParseStatement();
+	{
+		if (ParseStatement())
+			returnedValue = true;
+	}
 	Expect(SymbolType::End);
 	Expect(SymbolType::NewLine);
 
-	// Check to make sure we've returned a value as expected
-	if (m_requireReturnValue && !m_returnedValue)
-		Error("Required return value not found");
-
-	// Return from the function.  
-	EmitOpcode(Opcode::Return);
+	// Check to make sure we've returned a value as expected.
+	if (!returnedValue)
+	{
+		EmitOpcode(Opcode::PushVal);
+		EmitValue(nullptr);
+		EmitOpcode(Opcode::Return);
+	}
 
 	// Backfill jump destination 
 	EmitAddressBackfill(jumpBackfillAddress);
@@ -1369,9 +1388,20 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	// When finished validating the function and pushing parameters, call the function
 	EmitOpcode(Opcode::CallFunc);
 	EmitId(signature->GetId());
+
+	// Check for post-function index operator
+	if (ParseSubscript())
+		EmitOpcode(Opcode::PushValKey);
 }
 
-void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
+void Parser::ParseCast()
+{
+	EmitOpcode(Opcode::Cast);
+	auto valueType = ParseValueType();
+	EmitValueType(valueType);
+}
+
+void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
@@ -1382,11 +1412,6 @@ void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & 
 	suppressFunctionCall = false;
 	if (signature)
 	{
-		if (signature->HasReturnParameter() == false)
-		{
-			Error("Function in expression requires a return parameter");
-			return;
-		}
 		ParseFunctionCall(signature);
 	}
 	else if (CheckProperty())
@@ -1414,6 +1439,8 @@ void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & 
 	}
 	else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
 	{
+		if (required)
+			Error("Expected operand");
 		return;
 	}
 	else if (Accept(SymbolType::ParenOpen))
@@ -1437,49 +1464,58 @@ void Parser::ParseSubexpressionOperand(std::vector<Opcode, Allocator<Opcode>> & 
 	{
 		Error("Expected operand");
 	}
-
-	if (!opcodeStack.empty())
-	{
-		EmitOpcode(opcodeStack.back());
-		opcodeStack.pop_back();
-	}
 }
 
-void Parser::ParseSubexpressionOperation(std::vector<Opcode, Allocator<Opcode>> & opcodeStack, bool suppressFunctionCall)
+void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
 
+	// Opcode stack for operators 
+	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
+
+	bool requiredOperand = false;
+
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
 		// Parse operand
-		ParseSubexpressionOperand(opcodeStack, suppressFunctionCall);
-		
+		ParseSubexpressionOperand(requiredOperand, suppressFunctionCall);
+		requiredOperand = false;
+
 		// Check for casts
 		if (Accept(SymbolType::As))
-		{
-			EmitOpcode(Opcode::Cast);
-			auto valueType = ParseValueType();
-			if (m_error)
-				return;
-			EmitValueType(valueType);
-		}
-		
+			ParseCast();
+
 		// Parse binary operator
 		if (CheckBinaryOperator())
 		{
+			requiredOperand = true;
 			auto opcode = ParseBinaryOperator();
+
+			// Check precedence if we've already parsed a binary math expression
+			while (!opcodeStack.empty() && GetOperatorPrecedence(opcode) >= GetOperatorPrecedence(opcodeStack.back()))
+			{
+				EmitOpcode(opcodeStack.back());
+				opcodeStack.pop_back();
+			}
 			opcodeStack.push_back(opcode);
 		}
-		else if (Check(SymbolType::And) || Check(SymbolType::Or))
+		else if (!opcodeStack.empty())
 		{
-			auto t = m_currentSymbol->type;
-			NextSymbol();
-			ParseExpression();
-			EmitOpcode(t == SymbolType::And ? Opcode::And : Opcode::Or);
+			while (!opcodeStack.empty())
+			{
+				EmitOpcode(opcodeStack.back());
+				opcodeStack.pop_back();
+			}
 		}
 		else
 			break;
+	}
+
+	// Check for leftover operators
+	if (!opcodeStack.empty())
+	{
+		Error("Syntax error when parsing expression");
 	}
 }
 
@@ -1495,9 +1531,6 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 		return;
 	}
 
-	// Opcode stack for operators 
-	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
-
 	// Check for a logical not at the beginning of the expression
 	if (Accept(SymbolType::Not))
 	{
@@ -1506,14 +1539,9 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	}
 	else
 	{
-		ParseSubexpressionOperation(opcodeStack, suppressFunctionCall);
+		ParseSubexpressionOperation(suppressFunctionCall);
 	}
 
-	// Check for leftover operators
-	if (!opcodeStack.empty())
-	{
-		Error("Syntax error when parsing expression");
-	}
 }
 
 void Parser::ParseExpression(bool suppressFunctionCall)
@@ -1703,12 +1731,6 @@ void Parser::ParseIfElse()
 	// Parse new block of code after if line
 	ParseBlock();
 
-	// If we've returned a value in the if block, store it here
-	bool returnedValueInIfBlock = m_returnedValue;
-
-	// Clear any return flag after this block, since it's after a conditional branch
-	m_returnedValue = false;
-
 	// Check to see if we continue with 'else' or 'end' the if block
 	if (Accept(SymbolType::Else))
 	{
@@ -1729,16 +1751,6 @@ void Parser::ParseIfElse()
 			// Check that the block ends properly
 			Expect(SymbolType::End);
 			Expect(SymbolType::NewLine);
-
-			// Check to see if we're required to return a value
-			if (m_requireReturnValue)
-			{
-				// If we've haven't returned a value in the 'if' block, then we can't
-				// leave the returned value flag marked true, since not all paths
-				// have returned a value.
-				if (!returnedValueInIfBlock)
-					m_returnedValue = false;
-			}
 		}
 		else if (Accept(SymbolType::If))
 		{
@@ -1764,9 +1776,6 @@ void Parser::ParseIfElse()
 	{
 		Error("Missing block termination after if");
 	}
-
-	if (!returnedValueInIfBlock)
-		m_returnedValue = false;
 }
 
 void Parser::ParseLoop()
@@ -1945,11 +1954,13 @@ void Parser::ParseLoop()
 	}
 }
 
-void Parser::ParseStatement()
+bool Parser::ParseStatement()
 {
 	// No need to continue if an error has been flagged
 	if (m_error)
-		return;
+		return false;
+
+	bool returnedValue = false;
 
 	// Functions signatures have precedence over everything, so check for a 
 	// potential signature match before anything else.
@@ -1959,15 +1970,13 @@ void Parser::ParseStatement()
 		// We found a valid function signature that matches the current token(s)
 		ParseFunctionCall(signature);
 
-		// If we're calling a function that has a return value as a statement,
-		// we must discard the return value on the stack.
-		if (signature->HasReturnParameter())
-			EmitOpcode(Opcode::Pop);
+		// Since all functions return a value, we need to discard the return
+		// value not on the stack, since we're not assigning it to a variable.
+		EmitOpcode(Opcode::Pop);
 		Expect(SymbolType::NewLine);
 	}
 	else
 	{
-
 		bool set = Accept(SymbolType::Set);
 		
 		// Parse scope level
@@ -1980,7 +1989,7 @@ void Parser::ParseStatement()
 			if (scope == VisibilityType::Local)
 			{
 				Error("The 'readonly' keyword must follow a private or public keyword");
-				return;
+				return false;
 			}
 		}
 		
@@ -1995,7 +2004,7 @@ void Parser::ParseStatement()
 			if (m_currentSymbol->text == m_library->GetName())
 			{
 				Error("Illegal use of library name in identifier");
-				return;
+				return false;
 			}
 
 			// We're declaring a new property if we see a non-local scope declaration
@@ -2016,7 +2025,7 @@ void Parser::ParseStatement()
 					if (propertyName.IsReadOnly())
 					{
 						Error("Can't change readonly property");
-						return;
+						return false;
 					}
 
 					// Check for subscript operator
@@ -2093,21 +2102,16 @@ void Parser::ParseStatement()
 				// We've hit a return value
 				if (!Check(SymbolType::NewLine))
 				{
-					// Check to make sure we're allowed to return a value
-					if (!m_requireReturnValue)
-						Error("Unexpected return value");
-					else
-						m_returnedValue = true;
 					ParseExpression();
-					EmitOpcode(Opcode::ReturnValue);
 				}
 				else
 				{
-					if (m_requireReturnValue)
-						Error("Required return value not found");
-					EmitOpcode(Opcode::Return);
+					EmitOpcode(Opcode::PushVal);
+					EmitValue(nullptr);
 				}
+				EmitOpcode(Opcode::Return);
 				Accept(SymbolType::NewLine);
+				returnedValue = true;
 			}
 			else if (Accept(SymbolType::Break))
 			{
@@ -2134,7 +2138,7 @@ void Parser::ParseStatement()
 					// Parse the expression to check for wait
 					ParseExpression();
 					if (!Expect(SymbolType::NewLine))
-						return;
+						return false;
 
 					// Add jump if false/true over wait statement depending on keyword
 					EmitOpcode(jumpTrue ? Opcode::JumpTrue : Opcode::JumpFalse);
@@ -2187,6 +2191,9 @@ void Parser::ParseStatement()
 			Error("Invalid symbol after scope specifier '%s'", scope == VisibilityType::Public ? "public" : "private");
 		}
 	}
+
+	// This is not an error value, but signals whether we've returned a value from this statement
+	return returnedValue;
 }
 
 void Parser::ParseBlock()

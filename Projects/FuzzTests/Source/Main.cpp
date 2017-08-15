@@ -164,7 +164,7 @@ static const char * s_testScripts[] =
 		set c to "false" as boolean
 		set d to "456" as integer
 		set e to "-123.456" as number
-		set f to 4 + 5 + 6 as string
+		set f to (4 + 5 + 6) as string
 
 	)",
 
@@ -430,7 +430,7 @@ static const char * s_testScripts[] =
 
 		import core
 
-		function return {integer x} is divisible by {integer y}
+		function {integer x} is divisible by {integer y}
 			return x % y = 0
 		end
 

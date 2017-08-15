@@ -105,12 +105,12 @@ void Jinx::RegisterLibCore(RuntimePtr runtime)
 	auto library = runtime->GetLibrary("core");
 
 	// Register core functions
-	library->RegisterFunction(Visibility::Public, ReturnValue::None, { "write", "{}" }, Write);
-	library->RegisterFunction(Visibility::Public, ReturnValue::None, { "write", "line", "{}" }, WriteLine);
-	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(get)", "size" }, GetSize);
-	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(is)", "empty" }, IsEmpty);
-	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(get)", "key" }, GetKey);
-	library->RegisterFunction(Visibility::Public, ReturnValue::Required, { "{}", "(get)", "value" }, GetValue);
+	library->RegisterFunction(Visibility::Public, { "write", "{}" }, Write);
+	library->RegisterFunction(Visibility::Public, { "write", "line", "{}" }, WriteLine);
+	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "size" }, GetSize);
+	library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
+	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
+	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
 
 	// Register core properties
 	library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");

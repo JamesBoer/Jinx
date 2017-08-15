@@ -25,12 +25,14 @@ Runtime::~Runtime()
 	}
 }
 
-void Runtime::AddPerformanceParams(uint64_t timeNs, uint64_t instCount)
+void Runtime::AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount)
 {
 	std::lock_guard<Mutex> lock(m_perfMutex);
 	m_perfStats.executionTimeNs += timeNs;
 	m_perfStats.instructionCount += instCount;
 	m_perfStats.scriptExecutionCount++;
+	if (finished)
+		m_perfStats.scriptCompletionCount++;
 }
 
 BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName, std::initializer_list<String> libraries)

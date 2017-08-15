@@ -39,7 +39,7 @@ namespace Jinx
 	{
 	public:
 		FunctionSignature();
-		FunctionSignature(VisibilityType visibility, bool returnParameter, const String & libraryName, const FunctionSignatureParts & parts);
+		FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
 
 		// Get unique function id
 		RuntimeID GetId() const { return m_id; }
@@ -52,9 +52,6 @@ namespace Jinx
 
 		// Get signature parts
 		const FunctionSignatureParts & GetParts() const { return m_parts; }
-
-		// Does this function return a parameter?
-		bool HasReturnParameter() const { return m_returnParameter; }
 
 		// Does this have a class parameter
 		bool HasClassParameter() const { return m_classParameter; }
@@ -87,9 +84,6 @@ namespace Jinx
 
 		// Visibility level
 		VisibilityType m_visibility;
-
-		// Indicates whether the function returns an anonymous parameter
-		bool m_returnParameter;
 
 		// Indicates this has a class parameter
 		bool m_classParameter;

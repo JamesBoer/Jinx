@@ -80,13 +80,13 @@ namespace Jinx
 	static const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	static const uint32_t MinorVersion = 7;
+	static const uint32_t MinorVersion = 8;
 
 	/// Patch number
 	static const uint32_t PatchNumber = 0;
 
 	/// Version string
-	static const char * VersionString = "0.7.0";
+	static const char * VersionString = "0.8.0";
 
 	// Forward declaration
 	class IScript;
@@ -112,11 +112,6 @@ namespace Jinx
 		ReadOnly,
 	};
 
-	enum class ReturnValue
-	{
-		None,
-		Required,
-	};
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -139,7 +134,7 @@ namespace Jinx
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(Visibility visibility, ReturnValue returnValue, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**
@@ -243,6 +238,7 @@ namespace Jinx
 			executionTimeNs(0),
 			scriptCompilationCount(0),
 			scriptExecutionCount(0),
+			scriptCompletionCount(0),
 			instructionCount(0)
 		{}
 		/// Total compilation time of all scripts in nanoseconds
@@ -250,9 +246,11 @@ namespace Jinx
 		/// Total execution time of all scripts in nanoseconds
 		uint64_t executionTimeNs;
 		/// Number of scripts compiled
-		uint32_t scriptCompilationCount;
+		uint64_t scriptCompilationCount;
 		/// Number of scripts executed
-		uint32_t scriptExecutionCount;
+		uint64_t scriptExecutionCount;
+		/// Number of scripts completed
+		uint64_t scriptCompletionCount;
 		/// Number of instructions executed
 		uint64_t instructionCount;
 	};
@@ -370,6 +368,7 @@ namespace Jinx
 			logSymbols(false),
 			logBytecode(false),
 			allocBlockSize(8192),
+			allocSpareBlocks(4),
 			maxInstructions(2000),
 			errorOnMaxInstrunctions(true)
 		{}
@@ -389,6 +388,8 @@ namespace Jinx
 		FreeFn freeFn;
 		/// Size of each individual block allocation in bytes
 		size_t allocBlockSize;
+		/// Number of spare allocation blocks to retain
+		size_t allocSpareBlocks;
 		/// Maximum number of instructions per tick
 		uint32_t maxInstructions;
 		/// Maximum total script instrunctions

@@ -151,6 +151,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Main.cpp" />
+    <ClCompile Include="..\..\..\Source\TestExpressions.cpp" />
     <ClCompile Include="..\..\..\Source\TestNative.cpp" />
     <ClCompile Include="..\..\..\Source\TestCasts.cpp" />
     <ClCompile Include="..\..\..\Source\TestCollections.cpp" />

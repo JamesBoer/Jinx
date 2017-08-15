@@ -2,7 +2,7 @@
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
-Copyright (c) 2016 James Boer
+Copyright (c) 2017 James Boer
 */
 
 #include "UnitTest.h"
@@ -63,7 +63,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+	
 	SECTION("Test too many operators #2 error")
 	{
 		static const char * scriptText =
@@ -76,7 +76,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+	
 	SECTION("Test too many operands #1 error")
 	{
 		static const char * scriptText =
@@ -121,7 +121,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 			
-			function return f
+			function f
 				return 23
 			end
 	
@@ -138,7 +138,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 			
-			function return f
+			function f
 				return 23
 			end
 	
@@ -162,7 +162,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-
+	
 	SECTION("Test too few operands #2 error")
 	{
 		static const char * scriptText =
@@ -170,6 +170,23 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 	
 			set a to 3 * (4 / )
 
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test variable access scope error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			begin
+				set a to 123
+			end
+	
+			set b to a
+			
 			)";
 
 		auto script = TestCreateScript(scriptText);
@@ -230,7 +247,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText1 =
 			u8R"(
 	
-			private function return collisiontest
+			private function collisiontest
 				return 123
 			end
 
@@ -241,7 +258,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText2 =
 			u8R"(
 	
-			private function return collisiontest
+			private function collisiontest
 				return 456
 			end
 
@@ -267,6 +284,23 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 			)";
 
 		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function declaration keyword match error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function yadda
+				return 1
+			end
+
+			set a to yadda [1]
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
 		REQUIRE(!script);
 	}
 
@@ -508,141 +542,6 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 	
 			-- Missing comma
 			set a to [1, "red"], [2, "green"] [3, "blue"]
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test missing return valid in function error #1")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-	
-	SECTION("Test missing return valid in function error #2")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if true
-				else
-					return "some string"
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-	
-	SECTION("Test missing return valid in function error #3")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if false
-					return "some string"
-				else
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test missing return valid in function error #4")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if false
-					return "some string"
-				else
-					return
-				end
-				return "some string"
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test missing return valid in function error #5")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function return somefunc
-				if false
-					return "some string"
-				else if false
-					return "some string"
-				else if false
-				else 
-					return "some string"
-				end
-			end
-
-			set a to somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test no return validation")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function somefunc
-				return "some string"
-			end
-
-			somefunc
-
-			)";
-
-		auto script = TestCreateScript(scriptText);
-		REQUIRE(!script);
-	}
-
-	SECTION("Test no return function assignment")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function somefunc
-			end
-
-			set a to somefunc
 
 			)";
 

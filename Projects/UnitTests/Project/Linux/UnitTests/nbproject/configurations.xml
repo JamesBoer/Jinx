@@ -12,6 +12,7 @@
       <itemPath>../../../Source/TestCasts.cpp</itemPath>
       <itemPath>../../../Source/TestCollections.cpp</itemPath>
       <itemPath>../../../Source/TestErrors.cpp</itemPath>
+      <itemPath>../../../Source/TestExpressions.cpp</itemPath>
       <itemPath>../../../Source/TestFunctions.cpp</itemPath>
       <itemPath>../../../Source/TestIfElse.cpp</itemPath>
       <itemPath>../../../Source/TestLibCore.cpp</itemPath>
@@ -75,6 +76,11 @@
             flavor2="0">
       </item>
       <item path="../../../Source/TestErrors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../Source/TestExpressions.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
       <item path="../../../Source/TestFunctions.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -146,6 +152,11 @@
             flavor2="0">
       </item>
       <item path="../../../Source/TestErrors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../../Source/TestExpressions.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
       <item path="../../../Source/TestFunctions.cpp" ex="false" tool="1" flavor2="0">
       </item>

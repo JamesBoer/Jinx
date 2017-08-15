@@ -17,6 +17,7 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode) :
 {
 	m_execution.reserve(6);
 	m_execution.push_back(ExecutionFrame(bytecode));
+	m_stack.reserve(32);
 
 	// Assume default unnamed library unless explicitly overridden
 	m_library = m_runtime->GetLibraryInternal("");
@@ -157,8 +158,7 @@ bool Script::Execute()
 					for (size_t i = 0; i < numParams; ++i)
 						m_stack.pop_back();			
 					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
-					if (functionDef->HasReturnParameter())
-						Push(retVal);
+					Push(retVal);
 				}
 				else
 				{
@@ -598,6 +598,7 @@ bool Script::Execute()
 				if (!var.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
+					return false;
 				}
 				else
 				{
@@ -606,6 +607,7 @@ bool Script::Execute()
 					if (itr == coll->end())
 					{
 						Error("Specified key does not exist in collection");
+						return false;
 					}
 					else
 					{
@@ -621,17 +623,32 @@ bool Script::Execute()
 				Push(val);
 			}
 			break;
-			case Opcode::Return:
+			case Opcode::PushValKey:
 			{
-				assert(!m_execution.empty());
-				size_t targetSize = m_execution.back().stackTop;
-				m_execution.pop_back();
-				assert(!m_execution.empty());
-				while (m_stack.size() > targetSize)
-					m_stack.pop_back();
+				auto key = Pop();
+				auto var = Pop();
+				if (!var.IsCollection())
+				{
+					Error("Expected collection when accessing by key");
+					return false;
+				}
+				else
+				{
+					auto coll = var.GetCollection();
+					auto itr = coll->find(key);
+					if (itr == coll->end())
+					{
+						Error("Specified key does not exist in collection");
+						return false;
+					}
+					else
+					{
+						Push(itr->second);
+					}
+				}
 			}
 			break;
-			case Opcode::ReturnValue:
+			case Opcode::Return:
 			{
 				auto val = Pop();
 				assert(!m_execution.empty());
@@ -696,12 +713,12 @@ bool Script::Execute()
 				if (!key.IsKeyType())
 				{
 					Error("Invalid key type");
-					break;
+					return false;
 				}
 				if (!m_runtime->SetPropertyKeyValue(id, key, val))
 				{
 					Error("Expected collection when accessing by key");
-					break;
+					return false;
 				}
 			}
 			break;
@@ -722,13 +739,13 @@ bool Script::Execute()
 				if (!key.IsKeyType())
 				{
 					Error("Invalid key type");
-					break;
+					return false;
 				}
 				Variant prop = GetVariable(name);
 				if (!prop.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
-					break;
+					return false;
 				}
 				auto collection = prop.GetCollection();
 				(*collection)[key] = val;
@@ -771,7 +788,7 @@ bool Script::Execute()
 	// Track accumulated script execution time
 	auto end = std::chrono::high_resolution_clock::now();
 	uint64_t executionTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
-	m_runtime->AddPerformanceParams(executionTimeNs, tickInstCount);
+	m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
 
 	return true;
 }

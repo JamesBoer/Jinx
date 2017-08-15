@@ -1,6 +1,18 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2017-07-09
+
+### Added
+- Index operators can now be used directly following function calls for returned collections
+- New performance metric for completed scripts
+- New performance test
+- New initialization parameter for caching memory blocks
+
+### Changed
+- Math operations now use C-style precedence rules
+- Function return values are now always optional
+
 ## [0.7.0] - 2017-07-07
 
 ### Changed

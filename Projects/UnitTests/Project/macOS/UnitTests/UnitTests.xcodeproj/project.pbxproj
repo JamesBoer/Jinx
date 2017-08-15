@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA486BB01F124B170021687E /* TestExpressions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA486BAF1F124B170021687E /* TestExpressions.cpp */; };
 		AA62D3E01D96F94100F263BB /* libJinx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AA62D3DF1D96F89600F263BB /* libJinx.a */; };
 		AA8B44B21D30503900CEBD9B /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A51D30503900CEBD9B /* Main.cpp */; };
 		AA8B44B41D30503900CEBD9B /* TestCasts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA8B44A71D30503900CEBD9B /* TestCasts.cpp */; };
@@ -47,6 +48,7 @@
 
 /* Begin PBXFileReference section */
 		AA32F9451CE2CF1F00941746 /* UnitTests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = UnitTests; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA486BAF1F124B170021687E /* TestExpressions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestExpressions.cpp; sourceTree = "<group>"; };
 		AA62D3DA1D96F89600F263BB /* Jinx.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Jinx.xcodeproj; path = ../../../../Jinx/macOS/Jinx/Jinx.xcodeproj; sourceTree = "<group>"; };
 		AA8B44A41D30503900CEBD9B /* catch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = catch.hpp; sourceTree = "<group>"; };
 		AA8B44A51D30503900CEBD9B /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
@@ -97,19 +99,20 @@
 		AA32F9471CE2CF1F00941746 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				AAF0495E1D322C9900090BA3 /* TestNative.cpp */,
-				AAF0495F1D322C9900090BA3 /* TestUnicode.cpp */,
 				AA8B44A41D30503900CEBD9B /* catch.hpp */,
 				AA8B44A51D30503900CEBD9B /* Main.cpp */,
 				AA8B44A71D30503900CEBD9B /* TestCasts.cpp */,
 				AA8B44A81D30503900CEBD9B /* TestCollections.cpp */,
 				AA8B44A91D30503900CEBD9B /* TestErrors.cpp */,
+				AA486BAF1F124B170021687E /* TestExpressions.cpp */,
 				AA8B44AA1D30503900CEBD9B /* TestFunctions.cpp */,
 				AA8B44AB1D30503900CEBD9B /* TestIfElse.cpp */,
 				AA8B44AC1D30503900CEBD9B /* TestLibCore.cpp */,
 				AA8B44AD1D30503900CEBD9B /* TestLibraries.cpp */,
 				AA8B44AE1D30503900CEBD9B /* TestLoops.cpp */,
+				AAF0495E1D322C9900090BA3 /* TestNative.cpp */,
 				AA8B44AF1D30503900CEBD9B /* TestStatements.cpp */,
+				AAF0495F1D322C9900090BA3 /* TestUnicode.cpp */,
 				AA8B44B01D30503900CEBD9B /* UnitTest.cpp */,
 				AA8B44B11D30503900CEBD9B /* UnitTest.h */,
 			);
@@ -208,6 +211,7 @@
 				AA8B44BA1D30503900CEBD9B /* TestLibraries.cpp in Sources */,
 				AA8B44B51D30503900CEBD9B /* TestCollections.cpp in Sources */,
 				AA8B44BC1D30503900CEBD9B /* TestStatements.cpp in Sources */,
+				AA486BB01F124B170021687E /* TestExpressions.cpp in Sources */,
 				AA8B44B71D30503900CEBD9B /* TestFunctions.cpp in Sources */,
 				AA8B44BB1D30503900CEBD9B /* TestLoops.cpp in Sources */,
 			);
