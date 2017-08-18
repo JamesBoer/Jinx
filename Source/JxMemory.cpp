@@ -78,6 +78,11 @@ void operator delete[](void * p) throw()
 namespace Jinx
 {
 
+	// External allocation functions
+	AllocFn s_allocFn = [](size_t size) { return malloc(size); };
+	ReallocFn s_reallocFn = [](void * p, size_t size) { return realloc(p, size); };
+	FreeFn s_freeFn = [](void * p) { return free(p); };
+
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
 #ifdef JINX_USE_MEMORY_GUARDS
@@ -125,6 +130,7 @@ namespace Jinx
 		BlockHeap * heap;
 		MemoryBlock * memBlock;
 		size_t bytes;
+		size_t padding;
 #ifdef JINX_DEBUG_ALLOCATION
 		// Allows us to walk through all allocations in a block.
 		MemoryHeader * prev;
@@ -148,8 +154,6 @@ namespace Jinx
 		BlockHeap();
 		~BlockHeap();
 
-		void Initialize(const GlobalParams & params);
-
 		void * Alloc(size_t bytes);
 		void * Realloc(void * ptr, size_t bytes);
 		void Free(void * ptr);
@@ -168,12 +172,7 @@ namespace Jinx
 		MemoryBlock * m_allocTail;
 		MemoryBlock * m_spareHead;
 		MemoryBlock * m_spareTail;
-		size_t m_allocBlockSize;
 		size_t m_allocSpareBlocks;
-		size_t m_maxAllocSpareBlocks;
-		AllocFn m_allocFn = [](size_t size) { return malloc(size); };
-		ReallocFn m_reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-		FreeFn m_freeFn = [](void * p) { return free(p); };
 	};
 
 #else // JINX_DISABLE_POOL_ALLOCATOR
@@ -181,20 +180,9 @@ namespace Jinx
 	class DefaultHeap
 	{
 	public:
-		void Initialize(const GlobalParams & params)
-		{
-			if (params.allocFn || params.reallocFn || params.freeFn)
-			{
-				// If you're using a custom memory function, you must use them ALL
-				assert(params.allocFn && params.reallocFn && params.freeFn);
-				m_allocFn = params.allocFn;
-				m_reallocFn = params.reallocFn;
-				m_freeFn = params.freeFn;
-			}
-		}
-		void * Alloc(size_t bytes) { return m_allocFn(bytes); }
-		void * Realloc(void * ptr, size_t bytes) { return m_reallocFn(ptr, bytes); }
-		void Free(void * ptr) { m_freeFn(ptr); }
+		void * Alloc(size_t bytes) { return s_allocFn(bytes); }
+		void * Realloc(void * ptr, size_t bytes) { return s_reallocFn(ptr, bytes); }
+		void Free(void * ptr) { s_freeFn(ptr); }
 		const MemoryStats & GetMemoryStats() const { return m_stats; }
 		void LogAllocations() {}
 		void ShutDown() {}
@@ -207,7 +195,6 @@ namespace Jinx
 	};
 
 #endif // #ifndef JINX_DISABLE_POOL_ALLOCATOR
-
 
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
@@ -228,6 +215,10 @@ namespace Jinx
 	// are allowed to occur from different threads (preventing this would be unweildy), 
 	// so locks are still needed to ensure thread-safety inside the heap itself.
 	static thread_local BlockHeap	s_heap;
+
+	// Allocation parameters
+	static size_t s_allocBlockSize = (1024 * 32) - sizeof(MemoryBlock);
+	static size_t s_maxAllocSpareBlocks = 2;
 
 	// Track global memory statistics
 	static std::atomic<uint64_t> s_externalAllocCount;
@@ -257,12 +248,8 @@ BlockHeap::BlockHeap() :
 	m_allocTail(nullptr),
 	m_spareHead(nullptr),
 	m_spareTail(nullptr),
-	m_allocBlockSize((1024 * 8) - sizeof(MemoryBlock)),
-	m_allocSpareBlocks(0),
-	m_maxAllocSpareBlocks(0)
+	m_allocSpareBlocks(0)
 {
-	m_allocFn = [](size_t size) { return malloc(size); };
-	m_freeFn = [](void * p) { return free(p); };
 }
 
 BlockHeap::~BlockHeap()
@@ -356,7 +343,7 @@ void * BlockHeap::Alloc(size_t bytes)
 
 MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 {
-	size_t blockSize = m_allocBlockSize;
+	size_t blockSize = s_allocBlockSize;
 	if (bytes > blockSize)
 		blockSize = NextHighestMultiple(bytes, std::alignment_of<max_align_t>::value);
 
@@ -386,7 +373,7 @@ MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 	// If none is available, allocate a block
 	if (!newBlock)
 	{
-		newBlock = static_cast<MemoryBlock *>(m_allocFn(blockSize + sizeof(MemoryBlock)));
+		newBlock = static_cast<MemoryBlock *>(s_allocFn(blockSize + sizeof(MemoryBlock)));
 		newBlock->capacity = blockSize;
 		newBlock->data = reinterpret_cast<uint8_t *>(newBlock) + sizeof(MemoryBlock);
 		s_currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
@@ -500,7 +487,7 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 		block->next->prev = block->prev;
 
 	// Check first to see if we can put this on the spare list
-	if (m_allocSpareBlocks < m_maxAllocSpareBlocks)
+	if (m_allocSpareBlocks < s_maxAllocSpareBlocks)
 	{
 		block->allocatedBytes = 0;
 		block->usedBytes = 0;
@@ -529,24 +516,8 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 		s_currentBlockCount--;
 
 		// Free the block of memory
-		m_freeFn(block);
+		s_freeFn(block);
 	}
-}
-
-void BlockHeap::Initialize(const GlobalParams & params)
-{
-	if (params.allocFn || params.reallocFn || params.freeFn)
-	{
-		// If you're using one custom memory function, you must use them ALL
-		assert(params.allocFn && params.reallocFn && params.freeFn);
-		m_allocFn = params.allocFn;
-		m_reallocFn = params.reallocFn;
-		m_freeFn = params.freeFn;
-	}
-	// Alloc block size must be at least 4K (otherwise, what's the point of a block allocator?)
-	assert(params.allocBlockSize >= (1024 * 4));
-	m_allocBlockSize = params.allocBlockSize - sizeof(MemoryBlock);
-	m_maxAllocSpareBlocks = params.allocSpareBlocks;
 }
 
 void BlockHeap::LogAllocations()
@@ -647,7 +618,7 @@ void BlockHeap::ShutDown()
 		{
 			s_externalFreeCount++;
 			s_currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
-			m_freeFn(curr);
+			s_freeFn(curr);
 		}
 		else
 		{
@@ -667,7 +638,7 @@ void BlockHeap::ShutDown()
 		{
 			s_externalFreeCount++;
 			s_currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
-			m_freeFn(curr);
+			s_freeFn(curr);
 		}
 		else
 		{
@@ -767,6 +738,8 @@ void * Jinx::MemPoolReallocate(void * ptr, size_t bytes)
 	void * p;
 #ifdef JINX_DEBUG_USE_STD_ALLOC
 	p = realloc(ptr, bytes);
+#elif defined(JINX_DISABLE_POOL_ALLOCATOR)
+	p = s_heap.Realloc(ptr, bytes);
 #else
 	if (ptr)
 	{
@@ -799,17 +772,34 @@ void Jinx::MemPoolFree(void * ptr)
 
 void Jinx::InitializeMemory(const GlobalParams & params)
 {
-	s_heap.Initialize(params);
+	if (params.allocFn || params.reallocFn || params.freeFn)
+	{
+		// If you're using one custom memory function, you must use them ALL
+		assert(params.allocFn && params.reallocFn && params.freeFn);
+		s_allocFn = params.allocFn;
+		s_reallocFn = params.reallocFn;
+		s_freeFn = params.freeFn;
+	}
+
+#ifndef JINX_DISABLE_POOL_ALLOCATOR
+	// Alloc block size must be at least 4K (otherwise, what's the point of a block allocator?)
+	assert(params.allocBlockSize >= (1024 * 4));
+	s_allocBlockSize = params.allocBlockSize - sizeof(MemoryBlock);
+	s_maxAllocSpareBlocks = params.allocSpareBlocks;
+#endif
+
 }
 
 void Jinx::ShutDownMemory()
 {
-	s_heap.ShutDown();
+	// TODO: need a way to shut down all allocators
+	//s_heap.ShutDown();
 }
 
 MemoryStats Jinx::GetMemoryStats()
 {
 	MemoryStats stats;
+#ifndef JINX_DISABLE_POOL_ALLOCATOR
 	stats.externalAllocCount = s_externalAllocCount;
 	stats.externalFreeCount = s_externalFreeCount;
 	stats.internalAllocCount = s_internalAllocCount;
@@ -817,13 +807,15 @@ MemoryStats Jinx::GetMemoryStats()
 	stats.currentBlockCount = s_currentBlockCount;
 	stats.currentAllocatedMemory = s_currentAllocatedMemory;
 	stats.currentUsedMemory = s_currentUsedMemory;
+#endif
 	return stats;
 }
 
 void Jinx::LogAllocations()
 {
+	// TODO: need a way to log all allocators
 #ifndef JINX_DEBUG_USE_STD_ALLOC
-	s_heap.LogAllocations();
+	//s_heap.LogAllocations();
 #endif
 }
 
