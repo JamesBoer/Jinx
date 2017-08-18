@@ -85,8 +85,8 @@ namespace Jinx
 	static const size_t MEMORY_GUARD_SIZE = 16;
 #endif
 
+	class BlockHeap;
 	struct MemoryHeader;
-
 
 
 	// This structure is placed at the beginning of each large system allocated block
@@ -122,6 +122,7 @@ namespace Jinx
 #ifdef JINX_USE_MEMORY_GUARDS
 		uint8_t memGuardHead[MEMORY_GUARD_SIZE];
 #endif
+		BlockHeap * heap;
 		MemoryBlock * memBlock;
 		size_t bytes;
 #ifdef JINX_DEBUG_ALLOCATION
@@ -153,7 +154,6 @@ namespace Jinx
 		void * Realloc(void * ptr, size_t bytes);
 		void Free(void * ptr);
 		void Free(MemoryHeader * header);
-		MemoryStats GetMemoryStats();
 		void LogAllocations();
 		void ShutDown();
 
@@ -174,7 +174,6 @@ namespace Jinx
 		AllocFn m_allocFn = [](size_t size) { return malloc(size); };
 		ReallocFn m_reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 		FreeFn m_freeFn = [](void * p) { return free(p); };
-		MemoryStats m_stats;
 	};
 
 #else // JINX_DISABLE_POOL_ALLOCATOR
@@ -224,7 +223,21 @@ namespace Jinx
 
 #endif // JINX_USE_MEMORY_GUARDS
 
-	static BlockHeap	s_heap;
+	// Each thread has its own local heap.  This helps to avoid thread contention
+	// when scripts are executed on parallel threads.  Note that reallocs and frees
+	// are allowed to occur from different threads (preventing this would be unweildy), 
+	// so locks are still needed to ensure thread-safety inside the heap itself.
+	static thread_local BlockHeap	s_heap;
+
+	// Track global memory statistics
+	static std::atomic<uint64_t> s_externalAllocCount;
+	static std::atomic<uint64_t> s_externalFreeCount;
+	static std::atomic<uint64_t> s_internalAllocCount;
+	static std::atomic<uint64_t> s_internalFreeCount;
+	static std::atomic<uint64_t> s_currentBlockCount;
+	static std::atomic<uint64_t> s_currentAllocatedMemory;
+	static std::atomic<uint64_t> s_currentUsedMemory;
+
 
 #else // JINX_DISABLE_POOL_ALLOCATOR
 
@@ -298,6 +311,7 @@ void * BlockHeap::Alloc(size_t bytes)
 
 	// Fill out memory header with required information
 	MemoryHeader * header = static_cast<MemoryHeader *>(ptr);
+	header->heap = this;
 	header->memBlock = m_allocTail;
 	header->bytes = requestedBytes;
 
@@ -332,8 +346,8 @@ void * BlockHeap::Alloc(size_t bytes)
 #endif 
 
 	// Update memory stats
-	m_stats.currentUsedMemory += requestedBytes;
-	m_stats.internalAllocCount++;
+	s_currentUsedMemory += requestedBytes;
+	s_internalAllocCount++;
 
 	// Return the allocated pointer advanced by the size of the memory header.  We'll
 	// reverse the process when freeing the memory.
@@ -375,9 +389,9 @@ MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 		newBlock = static_cast<MemoryBlock *>(m_allocFn(blockSize + sizeof(MemoryBlock)));
 		newBlock->capacity = blockSize;
 		newBlock->data = reinterpret_cast<uint8_t *>(newBlock) + sizeof(MemoryBlock);
-		m_stats.currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
-		m_stats.externalAllocCount++;
-		m_stats.currentBlockCount++;
+		s_currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
+		s_externalAllocCount++;
+		s_currentBlockCount++;
 	}
 	newBlock->allocatedBytes = 0;
 	newBlock->usedBytes = 0;
@@ -437,8 +451,8 @@ void BlockHeap::FreeInternal(MemoryHeader * header)
 	memBlock->count--;
 
 	// Update memory stats
-	m_stats.currentUsedMemory -= header->bytes;
-	m_stats.internalFreeCount++;
+	s_currentUsedMemory -= header->bytes;
+	s_internalFreeCount++;
 
 #ifdef JINX_DEBUG_ALLOCATION
 
@@ -510,21 +524,13 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 	else
 	{
 		// Track allocation stats
-		m_stats.externalFreeCount++;
-		m_stats.currentAllocatedMemory -= (block->capacity + sizeof(MemoryBlock));
-		m_stats.currentBlockCount--;
+		s_externalFreeCount++;
+		s_currentAllocatedMemory -= (block->capacity + sizeof(MemoryBlock));
+		s_currentBlockCount--;
 
 		// Free the block of memory
 		m_freeFn(block);
 	}
-}
-
-MemoryStats BlockHeap::GetMemoryStats()
-{
-	// Ensure thread-safe access to the allocated blocks
-	std::lock_guard<Mutex> lock(m_mutex);
-
-	return m_stats;
 }
 
 void BlockHeap::Initialize(const GlobalParams & params)
@@ -639,8 +645,8 @@ void BlockHeap::ShutDown()
 		next = curr->next;
 		if (curr->usedBytes == 0)
 		{
-			m_stats.externalFreeCount++;
-			m_stats.currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+			s_externalFreeCount++;
+			s_currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
 			m_freeFn(curr);
 		}
 		else
@@ -659,8 +665,8 @@ void BlockHeap::ShutDown()
 		next = curr->next;
 		if (curr->usedBytes == 0)
 		{
-			m_stats.externalFreeCount++;
-			m_stats.currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+			s_externalFreeCount++;
+			s_currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
 			m_freeFn(curr);
 		}
 		else
@@ -723,7 +729,15 @@ void * Jinx::MemPoolReallocate(const char * file, const char * function, uint32_
 	Jinx::ref(line);
 	p = s_heap.Realloc(ptr, bytes);
 #else
-	p = s_heap.Realloc(ptr, bytes);
+	if (ptr)
+	{
+		MemoryHeader * header = reinterpret_cast<MemoryHeader*>(static_cast<char *>(ptr) - sizeof(MemoryHeader));
+		p = header->heap->Realloc(ptr, bytes);
+	}
+	else
+	{
+		p = s_heap.Realloc(ptr, bytes);
+	}
 	if (p)
 	{
 		MemoryHeader * header = reinterpret_cast<MemoryHeader*>(static_cast<char *>(p) - sizeof(MemoryHeader));
@@ -754,7 +768,15 @@ void * Jinx::MemPoolReallocate(void * ptr, size_t bytes)
 #ifdef JINX_DEBUG_USE_STD_ALLOC
 	p = realloc(ptr, bytes);
 #else
-	p = s_heap.Realloc(ptr, bytes);
+	if (ptr)
+	{
+		MemoryHeader * header = reinterpret_cast<MemoryHeader*>(static_cast<char *>(ptr) - sizeof(MemoryHeader));
+		p = header->heap->Realloc(ptr, bytes);
+	}
+	else
+	{
+		p = s_heap.Realloc(ptr, bytes);
+	}
 #endif
 	return p;
 }
@@ -767,8 +789,11 @@ void Jinx::MemPoolFree(void * ptr)
 		return;
 #ifdef JINX_DEBUG_USE_STD_ALLOC
 	free(ptr);
-#else
+#elif defined(JINX_DISABLE_POOL_ALLOCATOR)
 	s_heap.Free(ptr);
+#else
+	MemoryHeader * header = reinterpret_cast<MemoryHeader*>(static_cast<char *>(ptr) - sizeof(MemoryHeader));
+	header->heap->Free(ptr);
 #endif
 }
 
@@ -784,7 +809,15 @@ void Jinx::ShutDownMemory()
 
 MemoryStats Jinx::GetMemoryStats()
 {
-	return s_heap.GetMemoryStats();
+	MemoryStats stats;
+	stats.externalAllocCount = s_externalAllocCount;
+	stats.externalFreeCount = s_externalFreeCount;
+	stats.internalAllocCount = s_internalAllocCount;
+	stats.internalFreeCount = s_internalFreeCount;
+	stats.currentBlockCount = s_currentBlockCount;
+	stats.currentAllocatedMemory = s_currentAllocatedMemory;
+	stats.currentUsedMemory = s_currentUsedMemory;
+	return stats;
 }
 
 void Jinx::LogAllocations()

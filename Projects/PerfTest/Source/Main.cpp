@@ -7,6 +7,8 @@ Copyright (c) 2016 James Boer
 
 #include <assert.h>
 #include <array>
+#include <thread>
+#include <list>
 
 #include "../../../Source/Jinx.h"
 
@@ -16,7 +18,6 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
-const size_t NumPermutations = 1000;
 
 static const char * s_testScripts[] =
 {
@@ -150,15 +151,13 @@ static const char * s_testScripts[] =
 		
 };
 		
+const size_t NumPermutations = 2000;
 
 template<typename T, size_t s>
 constexpr size_t countof(T(&)[s])
 {
 	return s;
 }
-
-// Comment out to test sequentially
-//#define PARALLEL_EXECUTION
 
 int main(int argc, char * argv[])
 {
@@ -184,34 +183,46 @@ int main(int argc, char * argv[])
 		assert(script->Execute());
 	}
 
-	// Run performance tests on bytecode
-#ifdef PARALLEL_EXECUTION
-	#pragma omp parallel for
-#endif
-	for (int c = 0; c < NumPermutations; ++c)
+	std::list<std::thread> threadList;
+	auto numCores = std::thread::hardware_concurrency();
+	//numCores = 1;
+	for (unsigned int n = 0; n < numCores; ++n)
 	{
-		for (int i = 0; i < bytecodeArray.size(); ++i)
+		threadList.push_back(std::thread([bytecodeArray, runtime, n, numCores]()
 		{
-			// Create a runtime script with the given bytecode if it exists
-			auto script = runtime->CreateScript(bytecodeArray[i]);
-			assert(script);
-			do
+			// Run performance tests on bytecode
+			auto begin = NumPermutations / numCores * n;
+			auto end = NumPermutations / numCores * (n + 1);
+			for (auto j = begin; j < end; ++j)
 			{
-				script->Execute();
-			} 
-			while (!script->IsFinished());
-		}
+				for (int i = 0; i < bytecodeArray.size(); ++i)
+				{
+					// Create a runtime script with the given bytecode if it exists
+					auto script = runtime->CreateScript(bytecodeArray[i]);
+					assert(script);
+					do
+					{
+						script->Execute();
+					}
+					while (!script->IsFinished());
+				}
+			}
+		}));
 	}
 
-	// Report performance and memory stats
+	// Wait for all threads to finish
+	for (auto & t : threadList)
+		t.join();
 
 	auto perfStats = runtime->GetScriptPerformanceStats();
 	double executionTime = (double)perfStats.executionTimeNs / 1000000000;
+	double perfRunTime = (double)perfStats.perfTimeNs / 1000000000;
 	printf("--- Performance ---\n");
 	printf("Total execution time: %f seconds\n", executionTime);
-	printf("Number of scripts executed: %llu (%llu per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / executionTime));
-	printf("Number of scripts completed: %llu (%llu per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / executionTime));
-	printf("Number of instructions executed: %llu (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / executionTime / 1000000.0));
+	printf("Total run time: %f seconds\n", perfRunTime);
+	printf("Number of scripts executed: %llu (%llu per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / perfRunTime));
+	printf("Number of scripts completed: %llu (%llu per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / perfRunTime));
+	printf("Number of instructions executed: %llu (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / perfRunTime / 1000000.0));
 
 	bytecodeArray.fill(nullptr);
 	runtime = nullptr;
