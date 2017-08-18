@@ -64,6 +64,24 @@ multiline comment
 		REQUIRE(script->GetVariable("e") == nullptr);
 	}
 
+	SECTION("Test variables case insensitivity")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set a b c to "Hello world!"
+			set x y z to A B C
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a b c") == "Hello world!");
+		REQUIRE(script->GetVariable("x y z") == "Hello world!");
+		REQUIRE(script->GetVariable("A B C") == "Hello world!");
+		REQUIRE(script->GetVariable("X Y Z") == "Hello world!");
+	}
+
 	SECTION("Test multiple word variables and basic statements")
 	{
 		const char * scriptText =
