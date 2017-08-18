@@ -9,6 +9,11 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+Runtime::Runtime()
+{
+	m_perfStartTime = std::chrono::high_resolution_clock::now();
+}
+
 Runtime::~Runtime()
 {
 	// Clear potential circular references by explicitly destroying collection values
@@ -127,9 +132,14 @@ FunctionDefinitionPtr Runtime::FindFunction(RuntimeID id) const
 PerformanceStats Runtime::GetScriptPerformanceStats(bool resetStats)
 {
 	std::lock_guard<Mutex> lock(m_perfMutex);
+	auto end = std::chrono::high_resolution_clock::now();
+	m_perfStats.perfTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_perfStartTime).count();
 	PerformanceStats s = m_perfStats;
 	if (resetStats)
+	{
 		m_perfStats = PerformanceStats();
+		m_perfStartTime = end;
+	}
 	return s;
 }
 

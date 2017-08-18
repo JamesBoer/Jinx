@@ -16,6 +16,7 @@ namespace Jinx
 	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
 	public:
+		Runtime();
 		virtual ~Runtime();
 
 		// IRuntime interface
@@ -58,6 +59,7 @@ namespace Jinx
 		PropertyMap m_propertyMap;
 		Mutex m_perfMutex;
 		PerformanceStats m_perfStats;
+		std::chrono::time_point<std::chrono::steady_clock> m_perfStartTime;
 	};
 
 
