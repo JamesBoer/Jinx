@@ -537,7 +537,6 @@ int main(int argc, char * argv[])
 
 	std::list<std::thread> threadList;
 	int numCores = std::thread::hardware_concurrency();
-	//numCores = 1;
 	for (int n = 0; n < numCores; ++n)
 	{
 		threadList.push_back(std::thread([n, numCores]()
@@ -554,11 +553,6 @@ int main(int argc, char * argv[])
 					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j), "Test Script");
 					if (!bytecode)
 						continue;
-
-					// Create a runtime script with the given bytecode if it exists
-					//auto script = runtime->CreateScript(bytecode);
-					//if (script)
-					//	script->Execute();
 				}
 				auto stats = Jinx::GetMemoryStats();
 				printf("Source permutation %i (Allocated Memory = %lli)\n", j, stats.currentAllocatedMemory);

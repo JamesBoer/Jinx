@@ -151,7 +151,7 @@ static const char * s_testScripts[] =
 		
 };
 		
-const size_t NumPermutations = 2000;
+const size_t NumPermutations = 5000;
 
 template<typename T, size_t s>
 constexpr size_t countof(T(&)[s])
@@ -188,12 +188,11 @@ int main(int argc, char * argv[])
 	//numCores = 1;
 	for (unsigned int n = 0; n < numCores; ++n)
 	{
-		threadList.push_back(std::thread([bytecodeArray, runtime, n, numCores]()
+		threadList.push_back(std::thread([bytecodeArray, runtime, numCores]()
 		{
 			// Run performance tests on bytecode
-			auto begin = NumPermutations / numCores * n;
-			auto end = NumPermutations / numCores * (n + 1);
-			for (auto j = begin; j < end; ++j)
+			auto numTests = NumPermutations / numCores;
+			for (auto j = 0; j < numTests; ++j)
 			{
 				for (int i = 0; i < bytecodeArray.size(); ++i)
 				{
