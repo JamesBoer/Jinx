@@ -52,13 +52,13 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../../../Jinx/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
+LDLIBSOPTIONS=../../../../Jinx/Linux/Jinx/dist/Debug/GNU-Linux/libjinx.a -lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fuzztests
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fuzztests: ../../../../Jinx/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fuzztests: ../../../../Jinx/Linux/Jinx/dist/Debug/GNU-Linux/libjinx.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/fuzztests: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -71,7 +71,7 @@ ${OBJECTDIR}/_ext/1ad155ca/Main.o: ../../../Source/Main.cpp
 
 # Subprojects
 .build-subprojects:
-	cd ../../../../Jinx/Linux/Jinx && ${MAKE}  -f Makefile CONF=Release
+	cd ../../../../Jinx/Linux/Jinx && ${MAKE}  -f Makefile CONF=Debug
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
@@ -80,7 +80,7 @@ ${OBJECTDIR}/_ext/1ad155ca/Main.o: ../../../Source/Main.cpp
 
 # Subprojects
 .clean-subprojects:
-	cd ../../../../Jinx/Linux/Jinx && ${MAKE}  -f Makefile CONF=Release clean
+	cd ../../../../Jinx/Linux/Jinx && ${MAKE}  -f Makefile CONF=Debug clean
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

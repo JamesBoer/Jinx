@@ -9,6 +9,7 @@ Copyright (c) 2016 James Boer
 #include <random>
 #include <thread>
 #include <list>
+#include <inttypes.h>
 
 #include "../../../Source/Jinx.h"
 
@@ -555,7 +556,7 @@ int main(int argc, char * argv[])
 						continue;
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Source permutation %i (Allocated Memory = %lli)\n", j, stats.currentAllocatedMemory);
+				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.currentAllocatedMemory);
 			}
 		}));
 	}
@@ -588,7 +589,7 @@ int main(int argc, char * argv[])
 					script->Execute();
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Bytecode permutation %i (Allocated Memory = %lli)\n", j, stats.currentAllocatedMemory);
+				printf("Bytecode permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.currentAllocatedMemory);
 			}
 		}));
 	}

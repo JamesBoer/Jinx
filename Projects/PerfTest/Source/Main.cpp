@@ -9,6 +9,7 @@ Copyright (c) 2016 James Boer
 #include <array>
 #include <thread>
 #include <list>
+#include <inttypes.h>
 
 #include "../../../Source/Jinx.h"
 
@@ -219,22 +220,22 @@ int main(int argc, char * argv[])
 	printf("--- Performance ---\n");
 	printf("Total execution time: %f seconds\n", executionTime);
 	printf("Total run time: %f seconds\n", perfRunTime);
-	printf("Number of scripts executed: %llu (%llu per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / perfRunTime));
-	printf("Number of scripts completed: %llu (%llu per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / perfRunTime));
-	printf("Number of instructions executed: %llu (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / perfRunTime / 1000000.0));
+	printf("Number of scripts executed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / perfRunTime));
+	printf("Number of scripts completed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / perfRunTime));
+	printf("Number of instructions executed: %" PRIu64 " (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / perfRunTime / 1000000.0));
 
 	bytecodeArray.fill(nullptr);
 	runtime = nullptr;
 
 	auto memoryStats = Jinx::GetMemoryStats();
 	printf("\n--- Memory ---\n");
-	printf("External alloc count: %llu\n", memoryStats.externalAllocCount);
-	printf("External free count: %llu\n", memoryStats.externalFreeCount);
-	printf("Internal alloc count: %llu\n", memoryStats.internalAllocCount);
-	printf("Internal free count: %llu\n", memoryStats.internalFreeCount);
-	printf("Current block count: %llu\n", memoryStats.currentBlockCount);
-	printf("Current allocated memory: %llu bytes\n", memoryStats.currentAllocatedMemory);
-	printf("Current used memory: %llu bytes\n", memoryStats.currentUsedMemory);
+	printf("External alloc count: %" PRIu64 "\n", memoryStats.externalAllocCount);
+	printf("External free count: %" PRIu64 "\n", memoryStats.externalFreeCount);
+	printf("Internal alloc count: %" PRIu64 "\n", memoryStats.internalAllocCount);
+	printf("Internal free count: %" PRIu64 "\n", memoryStats.internalFreeCount);
+	printf("Current block count: %" PRIu64 "\n", memoryStats.currentBlockCount);
+	printf("Current allocated memory: %" PRIu64 " bytes\n", memoryStats.currentAllocatedMemory);
+	printf("Current used memory: %" PRIu64 " bytes\n", memoryStats.currentUsedMemory);
 	printf("\n");
 
 #ifdef JINX_WINDOWS
