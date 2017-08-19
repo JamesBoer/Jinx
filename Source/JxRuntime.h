@@ -59,7 +59,7 @@ namespace Jinx
 		PropertyMap m_propertyMap;
 		Mutex m_perfMutex;
 		PerformanceStats m_perfStats;
-		std::chrono::time_point<std::chrono::steady_clock> m_perfStartTime;
+		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
 	};
 
 
