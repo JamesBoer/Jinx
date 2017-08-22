@@ -100,9 +100,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a1f9d85a1be41a6ebc482b698f038f76e"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_library.html#a1f9d85a1be41a6ebc482b698f038f76e">RegisterFunction</a> (Visibility visibility, ReturnValue returnValue, std::initializer_list&lt; String &gt; name, FunctionCallback function)=0</td></tr>
-<tr class="memdesc:a1f9d85a1be41a6ebc482b698f038f76e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a native function for use by scripts.  <a href="#a1f9d85a1be41a6ebc482b698f038f76e">More...</a><br /></td></tr>
-<tr class="separator:a1f9d85a1be41a6ebc482b698f038f76e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ac85a58721ff35f87247730e47e77b1"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_library.html#a5ac85a58721ff35f87247730e47e77b1">RegisterFunction</a> (Visibility visibility, std::initializer_list&lt; String &gt; name, FunctionCallback function)=0</td></tr>
+<tr class="memdesc:a5ac85a58721ff35f87247730e47e77b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a native function for use by scripts.  <a href="#a5ac85a58721ff35f87247730e47e77b1">More...</a><br /></td></tr>
+<tr class="separator:a5ac85a58721ff35f87247730e47e77b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf209831e54668f48fc9f241cb545825"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825">RegisterProperty</a> (Visibility visibility, Access access, const String &amp;name, const <a class="el" href="class_jinx_1_1_variant.html">Variant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:adf209831e54668f48fc9f241cb545825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a property for use by scripts.  <a href="#adf209831e54668f48fc9f241cb545825">More...</a><br /></td></tr>
 <tr class="separator:adf209831e54668f48fc9f241cb545825"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -115,7 +115,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> represents a single module of script code. </p>
-<p>Multiple scripts can be compiled as part of a single library. This interface allows the creation of native functions that script code can execute via <a class="el" href="class_jinx_1_1_i_library.html#a1f9d85a1be41a6ebc482b698f038f76e" title="Register a native function for use by scripts. ">RegisterFunction()</a> and properties through the use of the <a class="el" href="class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825" title="Register a property for use by scripts. ">RegisterProperty()</a> function. You can also get or set property values using the <a class="el" href="class_jinx_1_1_i_library.html#a101aadd20c08c15a8534dfd44cb315d1" title="Get property value. ">GetProperty()</a> and <a class="el" href="class_jinx_1_1_i_library.html#a32346265f79792d69d6ffe5e4945d9d9" title="Set property value. ">SetProperty()</a> functions. </p>
+<p>Multiple scripts can be compiled as part of a single library. This interface allows the creation of native functions that script code can execute via <a class="el" href="class_jinx_1_1_i_library.html#a5ac85a58721ff35f87247730e47e77b1" title="Register a native function for use by scripts. ">RegisterFunction()</a> and properties through the use of the <a class="el" href="class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825" title="Register a property for use by scripts. ">RegisterProperty()</a> function. You can also get or set property values using the <a class="el" href="class_jinx_1_1_i_library.html#a101aadd20c08c15a8534dfd44cb315d1" title="Get property value. ">GetProperty()</a> and <a class="el" href="class_jinx_1_1_i_library.html#a32346265f79792d69d6ffe5e4945d9d9" title="Set property value. ">SetProperty()</a> functions. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a101aadd20c08c15a8534dfd44cb315d1"></a>
 <div class="memitem">
@@ -150,7 +150,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1f9d85a1be41a6ebc482b698f038f76e"></a>
+<a class="anchor" id="a5ac85a58721ff35f87247730e47e77b1"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -162,12 +162,6 @@ Public Member Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">Visibility&#160;</td>
           <td class="paramname"><em>visibility</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">ReturnValue&#160;</td>
-          <td class="paramname"><em>returnValue</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -198,7 +192,6 @@ Public Member Functions</h2></td></tr>
 <p>This method registers a native function for use by script code. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">visibility</td><td>Indicates whether property is public or private. </td></tr>
-    <tr><td class="paramname">returnValue</td><td>Indicates whether this function requires a return value or not. </td></tr>
     <tr><td class="paramname">name</td><td>A list of names and parameters. Parameters are indicated with a "{}" string, while names are expected to conform to standard Jinx identifier naming rules. </td></tr>
     <tr><td class="paramname">function</td><td>The callback function executed by the script. </td></tr>
   </table>

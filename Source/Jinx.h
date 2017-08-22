@@ -128,7 +128,6 @@ namespace Jinx
 		/**
 		This method registers a native function for use by script code.
 		\param visibility Indicates whether property is public or private.
-		\param returnValue Indicates whether this function requires a return value or not.
 		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
 		standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
