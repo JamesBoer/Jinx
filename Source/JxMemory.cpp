@@ -159,6 +159,7 @@ namespace Jinx
 		void Free(void * ptr);
 		void Free(MemoryHeader * header);
 		void LogAllocations();
+		inline BlockHeap * Next() const { return m_next; }
 		void ShutDown();
 
 	private:
@@ -168,6 +169,8 @@ namespace Jinx
 
 	private:
 		Mutex m_mutex;
+		BlockHeap * m_prev;
+		BlockHeap * m_next;
 		MemoryBlock * m_allocHead;
 		MemoryBlock * m_allocTail;
 		MemoryBlock * m_spareHead;
@@ -216,6 +219,11 @@ namespace Jinx
 	// so locks are still needed to ensure thread-safety inside the heap itself.
 	static thread_local BlockHeap	s_heap;
 
+	// List of all thread-local heaps
+	static Mutex s_mutex;
+	static BlockHeap * s_head;
+	static BlockHeap * s_tail;
+
 	// Allocation parameters
 	static size_t s_allocBlockSize = (1024 * 32) - sizeof(MemoryBlock);
 	static size_t s_maxAllocSpareBlocks = 2;
@@ -250,6 +258,24 @@ BlockHeap::BlockHeap() :
 	m_spareTail(nullptr),
 	m_allocSpareBlocks(0)
 {
+	// Ensure thread-safe access to the global heap list
+	std::lock_guard<Mutex> lock(s_mutex);
+
+	// Add block heap to the global list
+	if (s_head == nullptr)
+	{
+		assert(s_tail == nullptr);
+		s_head = this;
+		m_prev = nullptr;
+	}
+	else
+	{
+		assert(s_tail);
+		m_prev = s_tail;
+		s_tail->m_next = this;
+	}
+	s_tail = this;
+	m_next = nullptr;
 }
 
 BlockHeap::~BlockHeap()
@@ -313,7 +339,6 @@ void * BlockHeap::Alloc(size_t bytes)
 	{
 		assert(header->memBlock->tail == nullptr);
 		header->memBlock->head = header;
-		header->memBlock->tail = header;
 		header->prev = nullptr;
 	}
 	else
@@ -321,8 +346,8 @@ void * BlockHeap::Alloc(size_t bytes)
 		assert(header->memBlock->tail);
 		header->prev = header->memBlock->tail;
 		header->memBlock->tail->next = header;
-		header->memBlock->tail = header;
 	}
+	header->memBlock->tail = header;
 	header->next = nullptr;
 
 #endif
@@ -495,7 +520,6 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 		if (!m_spareTail)
 		{
 			m_spareHead = block;
-			m_spareTail = block;
 			block->next = nullptr;
 			block->prev = nullptr;
 		}
@@ -504,8 +528,8 @@ void BlockHeap::FreeBlock(MemoryBlock * block)
 			block->next = nullptr;
 			block->prev = m_spareTail;
 			m_spareTail->next = block;
-			m_spareTail = block;
 		}
+		m_spareTail = block;
 		m_allocSpareBlocks++;
 	}
 	else
@@ -648,6 +672,23 @@ void BlockHeap::ShutDown()
 	}
 	m_spareHead = nullptr;
 	m_spareTail = nullptr;
+
+	// Block heap has already been removed from the global list
+	if (m_prev == nullptr && m_next == nullptr)
+		return;
+
+	// Ensure thread-safe access to the global heap list
+	std::lock_guard<Mutex> lock(s_mutex);
+
+	// Remove block heap from global heap list
+	if (this == s_head)
+		s_head = m_next;
+	else
+		m_prev->m_next = m_next;
+	if (this == s_tail)
+		s_tail = m_prev;
+	else
+		m_next->m_prev = m_prev;
 }
 
 #endif // JINX_DISABLE_POOL_ALLOCATOR
@@ -792,8 +833,15 @@ void Jinx::InitializeMemory(const GlobalParams & params)
 
 void Jinx::ShutDownMemory()
 {
-	// TODO: need a way to shut down all allocators
-	//s_heap.ShutDown();
+#ifndef JINX_DEBUG_USE_STD_ALLOC
+	std::lock_guard<Mutex> lock(s_mutex);
+	BlockHeap * heap = s_head;
+	while (heap)
+	{
+		heap->ShutDown();
+		heap = heap->Next();
+	}
+#endif
 }
 
 MemoryStats Jinx::GetMemoryStats()
@@ -813,9 +861,14 @@ MemoryStats Jinx::GetMemoryStats()
 
 void Jinx::LogAllocations()
 {
-	// TODO: need a way to log all allocators
 #ifndef JINX_DEBUG_USE_STD_ALLOC
-	//s_heap.LogAllocations();
+	std::lock_guard<Mutex> lock(s_mutex);
+	BlockHeap * heap = s_head;
+	while (heap)
+	{
+		heap->LogAllocations();
+		heap = heap->Next();
+	}
 #endif
 }
 
