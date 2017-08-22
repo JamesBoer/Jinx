@@ -132,7 +132,7 @@ static const char * s_testScripts[] =
 		u8R"(
 		import core
 
-		loop from 1 to 100
+		loop from 1 to 10
 			set a to [1, "red"], [2, "green"], [3, "blue"], [4, "yellow"], [5, "magenta"], [6, "cyan"]
 			set b to a[1]
 			set c to a[2]
@@ -152,7 +152,7 @@ static const char * s_testScripts[] =
 		
 };
 		
-const size_t NumPermutations = 5000;
+const size_t NumPermutations = 10000;
 
 template<typename T, size_t s>
 constexpr size_t countof(T(&)[s])
@@ -184,45 +184,56 @@ int main(int argc, char * argv[])
 		assert(script->Execute());
 	}
 
-	std::list<std::thread> threadList;
+	// Reset stats
+	runtime->GetScriptPerformanceStats(true);
+
 	auto numCores = std::thread::hardware_concurrency();
-	//numCores = 1;
-	for (unsigned int n = 0; n < numCores; ++n)
+	for (unsigned int c = 1; c <= numCores; ++c)
 	{
-		threadList.push_back(std::thread([bytecodeArray, runtime, numCores]()
+		std::list<std::thread> threadList;
+		for (unsigned int n = 0; n < c; ++n)
 		{
-			// Run performance tests on bytecode
-			auto numTests = NumPermutations / numCores;
-			for (auto j = 0; j < numTests; ++j)
+			threadList.push_back(std::thread([bytecodeArray, runtime, c, n]()
 			{
-				for (int i = 0; i < bytecodeArray.size(); ++i)
+				// Run performance tests on bytecode
+				auto numTests = NumPermutations / c;
+				if (n == c - 1)
 				{
-					// Create a runtime script with the given bytecode if it exists
-					auto script = runtime->CreateScript(bytecodeArray[i]);
-					assert(script);
-					do
-					{
-						script->Execute();
-					}
-					while (!script->IsFinished());
+					// Adjust for non-evenly-divisible permutations / threads
+					auto checkVal = numTests * c;
+					numTests += (NumPermutations - checkVal);
 				}
-			}
-		}));
+				for (auto j = 0; j < numTests; ++j)
+				{
+					for (int i = 0; i < bytecodeArray.size(); ++i)
+					{
+						// Create a runtime script with the given bytecode if it exists
+						auto script = runtime->CreateScript(bytecodeArray[i]);
+						assert(script);
+						do
+						{
+							script->Execute();
+						}
+						while (!script->IsFinished());
+					}
+				}
+			}));
+		}
+
+		// Wait for all threads to finish
+		for (auto & t : threadList)
+			t.join();
+
+		auto perfStats = runtime->GetScriptPerformanceStats();
+		double executionTime = (double)perfStats.executionTimeNs / 1000000000;
+		double perfRunTime = (double)perfStats.perfTimeNs / 1000000000;
+		printf("\n--- Performance (%i %s) ---\n", c, c == 1 ? "thread" : "threads");
+		printf("Total run time: %f seconds\n", perfRunTime);
+		printf("Total script execution time: %f seconds\n", executionTime);
+		printf("Number of scripts executed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / perfRunTime));
+		printf("Number of scripts completed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / perfRunTime));
+		printf("Number of instructions executed: %" PRIu64 " (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / perfRunTime / 1000000.0));
 	}
-
-	// Wait for all threads to finish
-	for (auto & t : threadList)
-		t.join();
-
-	auto perfStats = runtime->GetScriptPerformanceStats();
-	double executionTime = (double)perfStats.executionTimeNs / 1000000000;
-	double perfRunTime = (double)perfStats.perfTimeNs / 1000000000;
-	printf("--- Performance ---\n");
-	printf("Total execution time: %f seconds\n", executionTime);
-	printf("Total run time: %f seconds\n", perfRunTime);
-	printf("Number of scripts executed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / perfRunTime));
-	printf("Number of scripts completed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / perfRunTime));
-	printf("Number of instructions executed: %" PRIu64 " (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / perfRunTime / 1000000.0));
 
 	bytecodeArray.fill(nullptr);
 	runtime = nullptr;
