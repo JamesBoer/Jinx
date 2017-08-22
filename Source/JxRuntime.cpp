@@ -122,7 +122,7 @@ ScriptPtr Runtime::ExecuteScript(const char * scriptcode, String uniqueName, std
 
 FunctionDefinitionPtr Runtime::FindFunction(RuntimeID id) const
 {
-	std::lock_guard<Mutex> lock(m_functionMutex);
+	std::lock_guard<Mutex> lock(m_functionMutex[id % NumMutexes]);
 	auto itr = m_functionMap.find(id);
 	if (itr == m_functionMap.end())
 		return nullptr;
@@ -145,7 +145,7 @@ PerformanceStats Runtime::GetScriptPerformanceStats(bool resetStats)
 
 Variant Runtime::GetProperty(RuntimeID id) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
 	auto itr = m_propertyMap.find(id);
 	if (itr == m_propertyMap.end())
 		return Variant();
@@ -154,7 +154,7 @@ Variant Runtime::GetProperty(RuntimeID id) const
 
 Variant Runtime::GetPropertyKeyValue(RuntimeID id, const Variant & key)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
 	auto itr = m_propertyMap.find(id);
 	if (itr == m_propertyMap.end())
 		return Variant();
@@ -194,6 +194,7 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 	BinaryReader reader(buffer);
 	BytecodeHeader header;
 	reader.Read(&header, sizeof(header));
+	int instructionCount = 0;
 	while (reader.Tell() < buffer->Size())
 	{
 		// Read opcode instruction
@@ -206,6 +207,8 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 		}
 		Opcode opcode = static_cast<Opcode>(opByte);
 
+		++instructionCount;
+
 		const char * opcodeName = GetOpcodeText(opcode);
 		size_t opcodeNameLength = strlen(opcodeName);
 		LogWrite(opcodeName);
@@ -214,7 +217,7 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 		assert(opcodeNameLength < columnWidth);
 		for (size_t i = 0; i < (columnWidth - opcodeNameLength); ++i)
 			LogWrite(" ");
-
+		
 		// Read and log opcode arguments
 		switch (opcode)
 		{
@@ -300,7 +303,7 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 		}
 		LogWrite("\n");
 	}
-	LogWrite("\n");
+	LogWrite("\nInstruction Count: %i\n\n", instructionCount);
 }
 
 void Runtime::LogSymbols(const SymbolList & symbolList) const
@@ -312,7 +315,9 @@ void Runtime::LogSymbols(const SymbolList & symbolList) const
 	auto offset = 0;
 	if (!symbolList.empty())
 		offset = symbolList.begin()->columnNumber;
-	
+
+	int lineCount = 0;
+
 	// Iterate through the symbol list and write everything to the log
 	for (auto symbol = symbolList.begin(); symbol != symbolList.end(); ++symbol)
 	{
@@ -336,6 +341,7 @@ void Runtime::LogSymbols(const SymbolList & symbolList) const
 		case SymbolType::NewLine:
 			LogWrite("\n");
 			newLine = true;
+			++lineCount;
 			break;
 		case SymbolType::NameValue:
 			// Display names with spaces as surrounded by single quotes to help delineate them
@@ -362,38 +368,38 @@ void Runtime::LogSymbols(const SymbolList & symbolList) const
 			break;
 		};
 	}
-	LogWrite("\n");
+	LogWrite("\nLine Count: %i\n\n", lineCount);
 }
 
 bool Runtime::PropertyExists(RuntimeID id) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
 	return m_propertyMap.find(id) != m_propertyMap.end();
 }
 
 void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
 {
-	std::lock_guard<Mutex> lock(m_functionMutex);
+	std::lock_guard<Mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
 	auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, bytecode, offset);
 	m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 }
 
 void Runtime::RegisterFunction(const FunctionSignature & signature, FunctionCallback function)
 {
-	std::lock_guard<Mutex> lock(m_functionMutex);
+	std::lock_guard<Mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
 	auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
 	m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 }
 
 void Runtime::SetProperty(RuntimeID id, const Variant & value)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
 	m_propertyMap[id] = value;
 }
 
 bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
 	auto itr = m_propertyMap.find(id);
 	if (itr == m_propertyMap.end())
 		return false;

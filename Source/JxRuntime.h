@@ -51,11 +51,12 @@ namespace Jinx
 
 	private:
 
+		static const size_t NumMutexes = 8;
 		mutable Mutex m_libraryMutex;
 		LibraryMap m_libraryMap;
-		mutable Mutex m_functionMutex;
+		mutable Mutex m_functionMutex[NumMutexes];
 		FunctionMap m_functionMap;
-		mutable Mutex m_propertyMutex;
+		mutable Mutex m_propertyMutex[NumMutexes];
 		PropertyMap m_propertyMap;
 		Mutex m_perfMutex;
 		PerformanceStats m_perfStats;
