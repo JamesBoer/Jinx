@@ -152,7 +152,7 @@ static const char * s_testScripts[] =
 		
 };
 		
-const size_t NumPermutations = 10000;
+const int NumPermutations = 10000;
 
 template<typename T, size_t s>
 constexpr size_t countof(T(&)[s])
@@ -187,25 +187,25 @@ int main(int argc, char * argv[])
 	// Reset stats
 	runtime->GetScriptPerformanceStats(true);
 
-	auto numCores = std::thread::hardware_concurrency();
-	for (unsigned int c = 1; c <= numCores; ++c)
+	int numCores = (int)std::thread::hardware_concurrency();
+	for (int c = 1; c <= numCores; ++c)
 	{
 		std::list<std::thread> threadList;
-		for (unsigned int n = 0; n < c; ++n)
+		for (int n = 0; n < c; ++n)
 		{
 			threadList.push_back(std::thread([bytecodeArray, runtime, c, n]()
 			{
 				// Run performance tests on bytecode
-				auto numTests = NumPermutations / c;
+				int numTests = NumPermutations / c;
 				if (n == c - 1)
 				{
 					// Adjust for non-evenly-divisible permutations / threads
 					auto checkVal = numTests * c;
 					numTests += (NumPermutations - checkVal);
 				}
-				for (auto j = 0; j < numTests; ++j)
+				for (int j = 0; j < numTests; ++j)
 				{
-					for (int i = 0; i < bytecodeArray.size(); ++i)
+					for (int i = 0; i < (int)bytecodeArray.size(); ++i)
 					{
 						// Create a runtime script with the given bytecode if it exists
 						auto script = runtime->CreateScript(bytecodeArray[i]);
