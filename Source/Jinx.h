@@ -80,13 +80,13 @@ namespace Jinx
 	static const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	static const uint32_t MinorVersion = 8;
+	static const uint32_t MinorVersion = 9;
 
 	/// Patch number
 	static const uint32_t PatchNumber = 0;
 
 	/// Version string
-	static const char * VersionString = "0.8.0";
+	static const char * VersionString = "0.9.0";
 
 	// Forward declaration
 	class IScript;
@@ -128,7 +128,6 @@ namespace Jinx
 		/**
 		This method registers a native function for use by script code.
 		\param visibility Indicates whether property is public or private.
-		\param returnValue Indicates whether this function requires a return value or not.
 		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
 		standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
@@ -236,6 +235,7 @@ namespace Jinx
 		PerformanceStats() :
 			compilationTimeNs(0),
 			executionTimeNs(0),
+			perfTimeNs(0),
 			scriptCompilationCount(0),
 			scriptExecutionCount(0),
 			scriptCompletionCount(0),
@@ -245,6 +245,8 @@ namespace Jinx
 		uint64_t compilationTimeNs;
 		/// Total execution time of all scripts in nanoseconds
 		uint64_t executionTimeNs;
+		/// Performance sample time in nanoseconds
+		uint64_t perfTimeNs;
 		/// Number of scripts compiled
 		uint64_t scriptCompilationCount;
 		/// Number of scripts executed

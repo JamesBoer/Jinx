@@ -1,6 +1,17 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.9.0] - 2017-08-17
+
+### Added
+- Test case for case-folding variable rules
+- Total performance time interval to performance data
+
+### Changed
+- Optimized allocator for better multi-threaded performance
+- Optimized script runtime to avoid unneeded case folding on internal function calls
+- PerfTest and FuzzTest now use standard C++ threads for test code
+
 ## [0.8.0] - 2017-07-09
 
 ### Added

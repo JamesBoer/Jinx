@@ -219,7 +219,7 @@ bool Script::Execute()
 			{
 				String name;
 				m_execution.back().reader.Read(&name);
-				auto var = GetVariable(name);
+				auto var = GetVariableInternal(name);
 				if (var.IsCollectionItr())
 				{
 					auto itr = var.GetCollectionItr().first;
@@ -234,7 +234,7 @@ bool Script::Execute()
 			{
 				String name;
 				m_execution.back().reader.Read(&name);
-				auto var = GetVariable(name);
+				auto var = GetVariableInternal(name);
 				auto key = Pop();
 				if (var.IsCollection())
 				{
@@ -585,7 +585,7 @@ bool Script::Execute()
 			{
 				String name;
 				m_execution.back().reader.Read(&name);
-				auto var = GetVariable(name);
+				auto var = GetVariableInternal(name);
 				Push(var);
 			}
 			break;
@@ -593,7 +593,7 @@ bool Script::Execute()
 			{
 				String name;
 				m_execution.back().reader.Read(&name);
-				auto var = GetVariable(name);
+				auto var = GetVariableInternal(name);
 				auto key = Pop();
 				if (!var.IsCollection())
 				{
@@ -741,7 +741,7 @@ bool Script::Execute()
 					Error("Invalid key type");
 					return false;
 				}
-				Variant prop = GetVariable(name);
+				Variant prop = GetVariableInternal(name);
 				if (!prop.IsCollection())
 				{
 					Error("Expected collection when accessing by key");

@@ -52,7 +52,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=../../../../Jinx/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a
+LDLIBSOPTIONS=../../../../Jinx/Linux/Jinx/dist/Release/GNU-Linux/libjinx.a -lpthread
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

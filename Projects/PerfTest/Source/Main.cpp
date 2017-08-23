@@ -7,6 +7,9 @@ Copyright (c) 2016 James Boer
 
 #include <assert.h>
 #include <array>
+#include <thread>
+#include <list>
+#include <inttypes.h>
 
 #include "../../../Source/Jinx.h"
 
@@ -16,7 +19,6 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
-const size_t NumPermutations = 1000;
 
 static const char * s_testScripts[] =
 {
@@ -130,7 +132,7 @@ static const char * s_testScripts[] =
 		u8R"(
 		import core
 
-		loop from 1 to 100
+		loop from 1 to 10
 			set a to [1, "red"], [2, "green"], [3, "blue"], [4, "yellow"], [5, "magenta"], [6, "cyan"]
 			set b to a[1]
 			set c to a[2]
@@ -150,15 +152,13 @@ static const char * s_testScripts[] =
 		
 };
 		
+const int NumPermutations = 10000;
 
 template<typename T, size_t s>
 constexpr size_t countof(T(&)[s])
 {
 	return s;
 }
-
-// Comment out to test sequentially
-//#define PARALLEL_EXECUTION
 
 int main(int argc, char * argv[])
 {
@@ -184,47 +184,69 @@ int main(int argc, char * argv[])
 		assert(script->Execute());
 	}
 
-	// Run performance tests on bytecode
-#ifdef PARALLEL_EXECUTION
-	#pragma omp parallel for
-#endif
-	for (int c = 0; c < NumPermutations; ++c)
+	// Reset stats
+	runtime->GetScriptPerformanceStats(true);
+
+	int numCores = (int)std::thread::hardware_concurrency();
+	for (int c = 1; c <= numCores; ++c)
 	{
-		for (int i = 0; i < bytecodeArray.size(); ++i)
+		std::list<std::thread> threadList;
+		for (int n = 0; n < c; ++n)
 		{
-			// Create a runtime script with the given bytecode if it exists
-			auto script = runtime->CreateScript(bytecodeArray[i]);
-			assert(script);
-			do
+			threadList.push_back(std::thread([bytecodeArray, runtime, c, n]()
 			{
-				script->Execute();
-			} 
-			while (!script->IsFinished());
+				// Run performance tests on bytecode
+				int numTests = NumPermutations / c;
+				if (n == c - 1)
+				{
+					// Adjust for non-evenly-divisible permutations / threads
+					auto checkVal = numTests * c;
+					numTests += (NumPermutations - checkVal);
+				}
+				for (int j = 0; j < numTests; ++j)
+				{
+					for (int i = 0; i < (int)bytecodeArray.size(); ++i)
+					{
+						// Create a runtime script with the given bytecode if it exists
+						auto script = runtime->CreateScript(bytecodeArray[i]);
+						assert(script);
+						do
+						{
+							script->Execute();
+						}
+						while (!script->IsFinished());
+					}
+				}
+			}));
 		}
+
+		// Wait for all threads to finish
+		for (auto & t : threadList)
+			t.join();
+
+		auto perfStats = runtime->GetScriptPerformanceStats();
+		double executionTime = (double)perfStats.executionTimeNs / 1000000000;
+		double perfRunTime = (double)perfStats.perfTimeNs / 1000000000;
+		printf("\n--- Performance (%i %s) ---\n", c, c == 1 ? "thread" : "threads");
+		printf("Total run time: %f seconds\n", perfRunTime);
+		printf("Total script execution time: %f seconds\n", executionTime);
+		printf("Number of scripts executed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / perfRunTime));
+		printf("Number of scripts completed: %" PRIu64 " (%" PRIu64 " per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / perfRunTime));
+		printf("Number of instructions executed: %" PRIu64 " (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / perfRunTime / 1000000.0));
 	}
-
-	// Report performance and memory stats
-
-	auto perfStats = runtime->GetScriptPerformanceStats();
-	double executionTime = (double)perfStats.executionTimeNs / 1000000000;
-	printf("--- Performance ---\n");
-	printf("Total execution time: %f seconds\n", executionTime);
-	printf("Number of scripts executed: %llu (%llu per second)\n", perfStats.scriptExecutionCount, (uint64_t)((double)perfStats.scriptExecutionCount / executionTime));
-	printf("Number of scripts completed: %llu (%llu per second)\n", perfStats.scriptCompletionCount, (uint64_t)((double)perfStats.scriptCompletionCount / executionTime));
-	printf("Number of instructions executed: %llu (%.2fM per second)\n", perfStats.instructionCount, ((double)perfStats.instructionCount / executionTime / 1000000.0));
 
 	bytecodeArray.fill(nullptr);
 	runtime = nullptr;
 
 	auto memoryStats = Jinx::GetMemoryStats();
 	printf("\n--- Memory ---\n");
-	printf("External alloc count: %llu\n", memoryStats.externalAllocCount);
-	printf("External free count: %llu\n", memoryStats.externalFreeCount);
-	printf("Internal alloc count: %llu\n", memoryStats.internalAllocCount);
-	printf("Internal free count: %llu\n", memoryStats.internalFreeCount);
-	printf("Current block count: %llu\n", memoryStats.currentBlockCount);
-	printf("Current allocated memory: %llu bytes\n", memoryStats.currentAllocatedMemory);
-	printf("Current used memory: %llu bytes\n", memoryStats.currentUsedMemory);
+	printf("External alloc count: %" PRIu64 "\n", memoryStats.externalAllocCount);
+	printf("External free count: %" PRIu64 "\n", memoryStats.externalFreeCount);
+	printf("Internal alloc count: %" PRIu64 "\n", memoryStats.internalAllocCount);
+	printf("Internal free count: %" PRIu64 "\n", memoryStats.internalFreeCount);
+	printf("Current block count: %" PRIu64 "\n", memoryStats.currentBlockCount);
+	printf("Current allocated memory: %" PRIu64 " bytes\n", memoryStats.currentAllocatedMemory);
+	printf("Current used memory: %" PRIu64 " bytes\n", memoryStats.currentUsedMemory);
 	printf("\n");
 
 #ifdef JINX_WINDOWS

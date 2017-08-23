@@ -7,6 +7,9 @@ Copyright (c) 2016 James Boer
 
 #include <assert.h>
 #include <random>
+#include <thread>
+#include <list>
+#include <inttypes.h>
 
 #include "../../../Source/Jinx.h"
 
@@ -533,53 +536,68 @@ int main(int argc, char * argv[])
 		assert(script->Execute());
 	}
 
-	// Run fuzz permutations on source
-#ifdef PARALLEL_EXECUTION
-	#pragma omp parallel for
-#endif
-	for (int c = StartingPermutation; c < NumPermutations; ++c)
+	std::list<std::thread> threadList;
+	int numCores = std::thread::hardware_concurrency();
+	for (int n = 0; n < numCores; ++n)
 	{
-		Fuzzer sourceFuzzer;
-		auto runtime = CreateRuntime();
-		for (int i = StartingScript; i < static_cast<int>(countof(s_testScripts)); ++i)
+		threadList.push_back(std::thread([n, numCores]()
 		{
-			// Compile the text to bytecode
-			auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], c), "Test Script");
-			if (!bytecode)
-				continue;
-
-			// Create a runtime script with the given bytecode if it exists
-			auto script = runtime->CreateScript(bytecode);
-			if (script)
-				script->Execute();
-		}
-		auto stats = Jinx::GetMemoryStats();
-		printf("Source permutation %i (Allocated Memory = %lli)\n", c, stats.currentAllocatedMemory);
+			auto begin = (int)NumPermutations / numCores * n;
+			auto end = (int)NumPermutations / numCores * (n + 1);
+			for (int j = begin; j < end; ++j)
+			{
+				Fuzzer sourceFuzzer;
+				auto runtime = CreateRuntime();
+				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
+				{
+					// Compile the text to bytecode
+					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j), "Test Script");
+					if (!bytecode)
+						continue;
+				}
+				auto stats = Jinx::GetMemoryStats();
+				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.currentAllocatedMemory);
+			}
+		}));
 	}
 
-	// Run fuzz permutations on bytecode
-#ifdef PARALLEL_EXECUTION
-	#pragma omp parallel for
-#endif
-	for (int c = StartingPermutation; c < NumPermutations; ++c)
-	{
-		Fuzzer bytecodeFuzzer;
-		auto runtime = CreateRuntime();
-		for (int i = StartingScript; i < static_cast<int>(countof(s_testScripts)); ++i)
-		{
-			// Compile the text to bytecode
-			auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
-			if (!bytecode)
-				continue;
+	// Wait for all threads to finish
+	for (auto & t : threadList)
+		t.join();
+	threadList.clear();
 
-			// Create a runtime script with the given bytecode if it exists
-			auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode, c));
-			assert(script);
-			script->Execute();
-		}
-		auto stats = Jinx::GetMemoryStats();
-		printf("Bytecode permutation %i (Allocated Memory = %lli)\n", c, stats.currentAllocatedMemory);
+	for (int n = 0; n < numCores; ++n)
+	{
+		threadList.push_back(std::thread([n, numCores]()
+		{
+			auto begin = (int)NumPermutations / numCores * n;
+			auto end = (int)NumPermutations / numCores * (n + 1);
+			for (int j = begin; j < end; ++j)
+			{
+				Fuzzer bytecodeFuzzer;
+				auto runtime = CreateRuntime();
+				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
+				{
+					// Compile the text to bytecode
+					auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
+					if (!bytecode)
+						continue;
+
+					// Create a runtime script with the given bytecode if it exists
+					auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode, j));
+					assert(script);
+					script->Execute();
+				}
+				auto stats = Jinx::GetMemoryStats();
+				printf("Bytecode permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.currentAllocatedMemory);
+			}
+		}));
 	}
+
+	// Wait for all threads to finish
+	for (auto & t : threadList)
+		t.join();
+	threadList.clear();
 
 	return 0;
 }
