@@ -707,4 +707,50 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script->Execute());
 	}
 
+	SECTION("Test name collision in counting loop variable")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set i to 100
+			loop i from 1 to 10
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test name collision in nexted counting loop variable")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			loop i from 1 to 10
+				loop i from 1 to 10
+				end
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test name collision in collection iteration variable")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set list to "apple", "orange", "banana"
+			set i to null
+			loop i over list
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
 }

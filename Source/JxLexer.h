@@ -90,10 +90,12 @@ namespace Jinx
 		void AdvanceCurrent();
 		void ParseEndOfLine();
 		void ParseComment();
+		void ParseEllipse();
 		void ParseName();
 		void ParseNumber();
 		void ParseString();
 		void ParseWhitespace();
+		void ParseWhitespaceAndNewlines();
 
 	private:
 		BufferPtr m_buffer;

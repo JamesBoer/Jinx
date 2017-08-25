@@ -219,10 +219,15 @@ bool Lexer::Execute()
 			break;
 		default:
 			{
-				if (IsNumberStart(c))
-					ParseNumber();
+				if (c == '.' && IsNextCharacter('.'))
+					ParseEllipse();
 				else
-					ParseName();
+				{
+					if (IsNumberStart(c))
+						ParseNumber();
+					else
+						ParseName();
+				}
 				continue;
 			}
 		};
@@ -250,7 +255,7 @@ bool Lexer::IsName(const char * ptr) const
 		return false;
 	if (static_cast<unsigned char>(c) <= 32)
 		return false;
-	if (c == ',' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '/')
+	if (c == ',' || c == '.' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '/')
 		return false;
 	return true;
 }
@@ -344,6 +349,29 @@ void Lexer::ParseComment()
 			AdvanceCurrent();
 		}
 	}
+}
+
+void Lexer::ParseEllipse()
+{
+	int count = 0;
+	while (!IsEndOfText() && count < 3)
+	{
+		char c = *m_current;
+		if (c != '.')
+		{
+			Error("Expected ellipse");
+			return;
+		}
+		++count;
+		AdvanceCurrent();
+	}
+	ParseWhitespaceAndNewlines();
+	if (*m_current == '\r')
+		AdvanceCurrent();
+	if (IsEndOfText())
+		return;
+	if (*m_current == '\n')
+		AdvanceCurrent();
 }
 
 void Lexer::ParseEndOfLine()
@@ -484,4 +512,15 @@ void Lexer::ParseWhitespace()
 	m_columnMarker = m_columnNumber;
 }
 
+
+void Lexer::ParseWhitespaceAndNewlines()
+{
+	while (!IsEndOfText())
+	{
+		if (!IsWhitespace(*m_current) && !IsNewline(*m_current))
+			break;
+		AdvanceCurrent();
+	}
+	m_columnMarker = m_columnNumber;
+}
 
