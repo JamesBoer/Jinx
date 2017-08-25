@@ -103,6 +103,7 @@ namespace Jinx
 		CurlyClose,
 		SquareOpen,
 		SquareClose,
+		Ellipse,
 		SingleQuote,
 		LessThan,
 		LessThanEquals,

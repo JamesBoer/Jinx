@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.10.0] - 2017-08-24
+
+### Added
+- New ellipse operator allows explicit continuation of statements on a new line
+- Initialization lists can handle new lines between items in the list
+
+## Fixed
+- Check for name collision of variables assigned in loop statements
+
 ## [0.9.0] - 2017-08-17
 
 ### Added

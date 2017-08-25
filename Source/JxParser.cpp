@@ -1569,6 +1569,7 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 				uint32_t count = 1;
 				while (Accept(SymbolType::Comma))
 				{
+					Accept(SymbolType::NewLine);
 					Expect(SymbolType::SquareOpen);
 					ParseSubexpression();
 					Expect(SymbolType::Comma);
@@ -1596,16 +1597,11 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 		// If we finish the first subexpression with a common, then we're parsing an indexed list
 		if (Accept(SymbolType::Comma))
 		{
-			if (Check(SymbolType::NewLine))
-			{
-				Error("Unexpected end of line in list");
-				return;
-			}
-
 			// Parse all subexpressions in comma-delimited list
 			uint32_t count = 1;
 			do
 			{
+				Accept(SymbolType::NewLine);
 				ParseSubexpression();
 				++count;
 			} 
@@ -1786,6 +1782,13 @@ void Parser::ParseLoop()
 	{
 		// Parse initial name part
 		name = ParseMultiName({ SymbolType::From, SymbolType::Over, SymbolType::Until, SymbolType::While });
+
+		// Make sure the variable name doesn't already exist
+		if (VariableExists(name))
+		{
+			Error("Variable name '%s' already exists in this scope", name.c_str());
+			return;
+		}
 	}
 
 	// We're looping using a counter

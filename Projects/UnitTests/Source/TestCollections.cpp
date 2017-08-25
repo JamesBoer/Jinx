@@ -51,6 +51,60 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(3)->second == 1);
 	}
 
+	SECTION("Test collection initialization list on new lines")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			-- Create collection using an initialization list
+			set a to... 
+				3, 
+				2, 
+				1
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 3);
+		REQUIRE(collection->find(1) != collection->end());
+		REQUIRE(collection->find(1)->second == 3);
+		REQUIRE(collection->find(2) != collection->end());
+		REQUIRE(collection->find(2)->second == 2);
+		REQUIRE(collection->find(3) != collection->end());
+		REQUIRE(collection->find(3)->second == 1);
+	}
+
+	SECTION("Test collection initialization list on new lines with spacing")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			-- Create collection using an initialization list
+			set a to... 
+
+				3, 
+
+				2, 
+
+				1
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 3);
+		REQUIRE(collection->find(1) != collection->end());
+		REQUIRE(collection->find(1)->second == 3);
+		REQUIRE(collection->find(2) != collection->end());
+		REQUIRE(collection->find(2)->second == 2);
+		REQUIRE(collection->find(3) != collection->end());
+		REQUIRE(collection->find(3)->second == 1);
+	}
 
 	SECTION("Test collection addition of elements using assignment")
 	{
@@ -86,6 +140,63 @@ TEST_CASE("Test Collections", "[Collections]")
 	
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 3);
+		REQUIRE(collection->find(1) != collection->end());
+		REQUIRE(collection->find(1)->second == "red");
+		REQUIRE(collection->find(2) != collection->end());
+		REQUIRE(collection->find(2)->second == "green");
+		REQUIRE(collection->find(3) != collection->end());
+		REQUIRE(collection->find(3)->second == "blue");
+	}
+
+	SECTION("Test collection initialization list of key-value pairs on new lines")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			-- Create collection using an initialization list of key-value pairs		
+			set a to...
+				[1, "red"], 
+				[2, "green"], 
+				[3, "blue"]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 3);
+		REQUIRE(collection->find(1) != collection->end());
+		REQUIRE(collection->find(1)->second == "red");
+		REQUIRE(collection->find(2) != collection->end());
+		REQUIRE(collection->find(2)->second == "green");
+		REQUIRE(collection->find(3) != collection->end());
+		REQUIRE(collection->find(3)->second == "blue");
+	}
+
+	SECTION("Test collection initialization list of key-value pairs on new lines with spacing")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			-- Create collection using an initialization list of key-value pairs		
+			set a to...
+
+				[1, "red"], 
+
+				[2, "green"], 
+
+				[3, "blue"]
 
 			)";
 

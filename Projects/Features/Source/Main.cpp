@@ -70,22 +70,18 @@ int main(int argc, char ** argv)
 		
 		static const char * scriptText =
 			u8R"(
-
-			function some values
-				return "wolf", "goat", "cabbage"
+			
+			function test
+				return
 			end
 
-			set wolf to some values [1]
-			set goat to some values [2]
-			set cabbage to some values [3]
+			test
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("wolf") == "wolf");
-		REQUIRE(script->GetVariable("goat") == "goat");
-		REQUIRE(script->GetVariable("cabbage") == "cabbage");
+		//REQUIRE(script->GetVariable("x") == 100);
 	}
 
 	Jinx::ShutDown();
