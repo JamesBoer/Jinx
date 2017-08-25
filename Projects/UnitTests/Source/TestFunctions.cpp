@@ -47,6 +47,24 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a") == nullptr);
 	}
 
+	SECTION("Test no return assignment function")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function return nothing
+				return
+			end
+
+			set a to return nothing
+		
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == nullptr);
+	}
+
 	SECTION("Test function with multiple return values and index operator")
 	{
 		static const char * scriptText =

@@ -71,18 +71,17 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 			
-			set x to 1
-			loop i from 1 to 10
-				loop i from 1 to 10
-					increment x
-				end
+			function test
+				return
 			end
+
+			test
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("x") == 100);
+		//REQUIRE(script->GetVariable("x") == 100);
 	}
 
 	Jinx::ShutDown();
