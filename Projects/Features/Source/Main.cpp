@@ -71,17 +71,18 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 			
-			function test
-				return
-			end
-
-			test
+			set x to (1, 2), (3, 4), (5, 6)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		//REQUIRE(script->GetVariable("x") == 100);
+		REQUIRE(script->GetVariable("x").GetCollection()->at(1).GetCollection()->at(1) == 1);
+		REQUIRE(script->GetVariable("x").GetCollection()->at(1).GetCollection()->at(2) == 2);
+		REQUIRE(script->GetVariable("x").GetCollection()->at(2).GetCollection()->at(1) == 3);
+		REQUIRE(script->GetVariable("x").GetCollection()->at(2).GetCollection()->at(2) == 4);
+		REQUIRE(script->GetVariable("x").GetCollection()->at(3).GetCollection()->at(1) == 5);
+		REQUIRE(script->GetVariable("x").GetCollection()->at(3).GetCollection()->at(2) == 6);
 	}
 
 	Jinx::ShutDown();
