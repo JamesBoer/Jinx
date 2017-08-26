@@ -379,11 +379,11 @@ bool Variant::ConvertTo(ValueType type)
 
 void Variant::Destroy()
 {
-	
 	// Optimize for common case
 	if (m_type == ValueType::Null)
 		return;
 
+	// Explicitly call destructors for object types
 	switch (m_type)
 	{
 	case ValueType::String:
@@ -406,32 +406,6 @@ void Variant::Destroy()
 	};
 
 	m_type = ValueType::Null;
-
-	/*
-
-	if (m_type == ValueType::String)
-	{
-		m_string.~String();
-	}
-	else if (m_type == ValueType::Buffer)
-	{
-		m_buffer.~BufferPtr();
-	}
-	else if (m_type == ValueType::Collection)
-	{
-		m_collection.~CollectionPtr();
-	}
-	else if (m_type == ValueType::CollectionItr)
-	{
-		m_collectionItrPair.~CollectionItrPair();
-	}
-	else if (m_type == ValueType::UserObject)
-	{
-		m_userObject.~UserObjectPtr();
-	}
-	m_type = ValueType::Null;
-
-	*/
 }
 
 bool Variant::GetBoolean() const
