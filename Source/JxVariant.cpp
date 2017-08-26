@@ -379,6 +379,36 @@ bool Variant::ConvertTo(ValueType type)
 
 void Variant::Destroy()
 {
+	
+	// Optimize for common case
+	if (m_type == ValueType::Null)
+		return;
+
+	switch (m_type)
+	{
+	case ValueType::String:
+		m_string.~String();
+		break;
+	case ValueType::Collection:
+		m_collection.~CollectionPtr();
+		break;
+	case ValueType::CollectionItr:
+		m_collectionItrPair.~CollectionItrPair();
+		break;
+	case ValueType::UserObject:
+		m_userObject.~UserObjectPtr();
+		break;
+	case ValueType::Buffer:
+		m_buffer.~BufferPtr();
+		break;
+	default:
+		break;
+	};
+
+	m_type = ValueType::Null;
+
+	/*
+
 	if (m_type == ValueType::String)
 	{
 		m_string.~String();
@@ -400,6 +430,8 @@ void Variant::Destroy()
 		m_userObject.~UserObjectPtr();
 	}
 	m_type = ValueType::Null;
+
+	*/
 }
 
 bool Variant::GetBoolean() const
