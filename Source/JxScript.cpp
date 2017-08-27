@@ -217,24 +217,24 @@ bool Script::Execute()
 			break;
 			case Opcode::EraseVar:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
-				auto var = GetVariableInternal(name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
+				auto var = GetVariable(id);
 				if (var.IsCollectionItr())
 				{
 					auto itr = var.GetCollectionItr().first;
 					auto coll = var.GetCollectionItr().second;
 					if (itr != coll->end())
 						itr = coll->erase(itr);
-					SetVariableInternal(name, std::make_pair(itr, coll));
+					SetVariable(id, std::make_pair(itr, coll));
 				}
 			}
 			break;
 			case Opcode::EraseVarElem:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
-				auto var = GetVariableInternal(name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
+				auto var = GetVariable(id);
 				auto key = Pop();
 				if (var.IsCollection())
 				{
@@ -583,17 +583,17 @@ bool Script::Execute()
 			break;
 			case Opcode::PushVar:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
-				auto var = GetVariableInternal(name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
+				auto var = GetVariable(id);
 				Push(var);
 			}
 			break;
 			case Opcode::PushVarKey:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
-				auto var = GetVariableInternal(name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
+				auto var = GetVariable(id);
 				auto key = Pop();
 				if (!var.IsCollection())
 				{
@@ -664,13 +664,13 @@ bool Script::Execute()
 			{
 				ScopeFrame frame;
 				frame.stackTop = m_stack.size();
-				m_execution.back().names.push_back(frame);
+				m_execution.back().ids.push_back(frame);
 			}
 			break;
 			case Opcode::ScopeEnd:
 			{
-				auto stackTop = m_execution.back().names.back().stackTop;
-				m_execution.back().names.pop_back();
+				auto stackTop = m_execution.back().ids.back().stackTop;
+				m_execution.back().ids.pop_back();
 				while (m_stack.size() > stackTop)
 					m_stack.pop_back();
 			}
@@ -678,8 +678,8 @@ bool Script::Execute()
 			case Opcode::SetIndex:
 			{
 				assert(!m_stack.empty());
-				String name;
-				m_execution.back().reader.Read(&name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
 				int32_t stackIndex;
 				m_execution.back().reader.Read(&stackIndex);
 				ValueType type;
@@ -693,7 +693,7 @@ bool Script::Execute()
 						return false;
 					}
 				}
-				SetVariableAtIndex(name, index);
+				SetVariableAtIndex(id, index);
 			}
 			break;
 			case Opcode::SetProp:
@@ -724,16 +724,16 @@ bool Script::Execute()
 			break;
 			case Opcode::SetVar:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				SetVariableInternal(name, val);
+				SetVariable(id, val);
 			}
 			break;
 			case Opcode::SetVarKey:
 			{
-				String name;
-				m_execution.back().reader.Read(&name);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
 				Variant key = Pop();
 				if (!key.IsKeyType())
@@ -741,7 +741,7 @@ bool Script::Execute()
 					Error("Invalid key type");
 					return false;
 				}
-				Variant prop = GetVariableInternal(name);
+				Variant prop = GetVariable(id);
 				if (!prop.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
@@ -795,16 +795,18 @@ bool Script::Execute()
 
 Variant Script::GetVariable(const String & name) const
 {
-	return GetVariableInternal(FoldCase(name));
+	const auto & foldedName = FoldCase(name);
+	RuntimeID id = GetHash(foldedName.c_str(), foldedName.size());
+	return GetVariable(id);
 }
 
-Variant Script::GetVariableInternal(const String & name) const
+Variant Script::GetVariable(RuntimeID id) const
 {
-	auto & names = m_execution.back().names;
+	auto & names = m_execution.back().ids;
 	for (auto ritr = names.rbegin(); ritr != names.rend(); ++ritr)
 	{
-		auto itr = ritr->nameMap.find(name);
-		if (itr != ritr->nameMap.end())
+		auto itr = ritr->idMap.find(id);
+		if (itr != ritr->idMap.end())
 		{
 			auto index = itr->second;
 			if (index >= m_stack.size())
@@ -842,17 +844,19 @@ void Script::Push(const Variant & value)
 
 void Script::SetVariable(const String & name, const Variant & value)
 {
-	SetVariableInternal(FoldCase(name), value);
+	const auto & foldedName = FoldCase(name);
+	RuntimeID id = GetHash(foldedName.c_str(), foldedName.size());
+	SetVariable(id, value);
 }
 
-void Script::SetVariableInternal(const String & name, const Variant & value)
+void Script::SetVariable(RuntimeID id, const Variant & value)
 {
 	// Search down the variable stack for the variable
-	auto & names = m_execution.back().names;
+	auto & names = m_execution.back().ids;
 	for (auto ritr = names.rbegin(); ritr != names.rend(); ++ritr)
 	{
-		auto itr = ritr->nameMap.find(name);
-		if (itr != ritr->nameMap.end())
+		auto itr = ritr->idMap.find(id);
+		if (itr != ritr->idMap.end())
 		{
 			auto index = itr->second;
 			if (index >= m_stack.size())
@@ -866,13 +870,13 @@ void Script::SetVariableInternal(const String & name, const Variant & value)
 	}
 
 	// If we don't find the name, create a new variable on the top of the stack
-	names.back().nameMap.insert(std::make_pair(name, m_stack.size()));
+	names.back().idMap.insert(std::make_pair(id, m_stack.size()));
 	m_stack.push_back(value);
 }
 
-void Script::SetVariableAtIndex(const String & name, size_t index)
+void Script::SetVariableAtIndex(RuntimeID id, size_t index)
 {
 	assert(index < m_stack.size());
-	m_execution.back().names.back().nameMap.insert(std::make_pair(name, index));
+	m_execution.back().ids.back().idMap.insert(std::make_pair(id, index));
 }
 

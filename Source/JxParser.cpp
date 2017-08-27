@@ -1276,7 +1276,7 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	{
 		VariableAssign(itr->names.front());
 		EmitOpcode(Opcode::SetIndex);
-		EmitName(itr->names.front());
+		EmitId(GetHash(itr->names.front().c_str(), itr->names.front().size()));
 		EmitIndex(stackIndex);
 		EmitValueType(itr->valueType);
 		--stackIndex;
@@ -1433,7 +1433,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 		String name = ParseVariable();
 		bool subscript = ParseSubscript();
 		EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-		EmitName(name);
+		EmitId(GetHash(name.c_str(), name.size()));
 		if (Accept(SymbolType::Type))
 			EmitOpcode(Opcode::Type);
 	}
@@ -1653,7 +1653,7 @@ void Parser::ParseErase()
 			Expect(SymbolType::NewLine);
 			EmitOpcode(Opcode::EraseVar);
 		}
-		EmitName(varName);
+		EmitId(GetHash(varName.c_str(), varName.size()));
 	}
 	else
 	{
@@ -1684,7 +1684,7 @@ void Parser::ParseIncDec()
 	{
 		varName = ParseVariable();
 		EmitOpcode(Opcode::PushVar);
-		EmitName(varName);
+		EmitId(GetHash(varName.c_str(), varName.size()));
 	}
 	else
 	{
@@ -1709,7 +1709,7 @@ void Parser::ParseIncDec()
 	else
 	{
 		EmitOpcode(Opcode::SetVar);
-		EmitName(varName);
+		EmitId(GetHash(varName.c_str(), varName.size()));
 	}
 	Expect(SymbolType::NewLine);
 }
@@ -1805,7 +1805,7 @@ void Parser::ParseLoop()
 		{
 			VariableAssign(name);
 			EmitOpcode(Opcode::SetVar);
-			EmitName(name);
+			EmitId(GetHash(name.c_str(), name.size()));
 		}
 
 		// Parse to value
@@ -1866,7 +1866,7 @@ void Parser::ParseLoop()
 		{
 			VariableAssign(name);
 			EmitOpcode(Opcode::SetVar);
-			EmitName(name);
+			EmitId(GetHash(name.c_str(), name.size()));
 		}
 
 		// Store where the loop logic begins
@@ -2063,7 +2063,7 @@ bool Parser::ParseStatement()
 
 					// Assign a variable.  
 					EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
-					EmitName(name);
+					EmitId(GetHash(name.c_str(), name.size()));
 
 					// Add to variable table
 					VariableAssign(name);

@@ -225,7 +225,7 @@ RuntimeID Jinx::GetRandomId()
 	hd.h2 = s_uniqueId++;
 
 	// Return a new random Id from unique hash source
-	return GetHash(reinterpret_cast<const uint8_t *>(&hd), sizeof(hd));
+	return GetHash(&hd, sizeof(hd));
 }
 
 uint32_t Jinx::MaxInstructions()

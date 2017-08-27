@@ -224,10 +224,16 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 			case Opcode::CallFunc:
 			case Opcode::EraseProp:
 			case Opcode::ErasePropElem:
+			case Opcode::EraseVar:
+			case Opcode::EraseVarElem:
 			case Opcode::PushProp:
 			case Opcode::PushPropKeyVal:
+			case Opcode::PushVar:
+			case Opcode::PushVarKey:
 			case Opcode::SetProp:
 			case Opcode::SetPropKeyVal:
+			case Opcode::SetVar:
+			case Opcode::SetVarKey:
 			{
 				RuntimeID id;
 				reader.Read(&id);
@@ -241,13 +247,7 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 				LogWrite("%s", GetValueTypeName(type));
 			}
 			break;
-			case Opcode::EraseVar:
-			case Opcode::EraseVarElem:
 			case Opcode::Library:
-			case Opcode::PushVar:
-			case Opcode::PushVarKey:
-			case Opcode::SetVar:
-			case Opcode::SetVarKey:
 			{
 				String name;
 				reader.Read(&name);

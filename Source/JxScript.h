@@ -30,14 +30,14 @@ namespace Jinx
 	private:
 		void Error(const char * message);
 
-		Variant GetVariableInternal(const String & name) const;
+		Variant GetVariable(RuntimeID id) const;
 		Variant Pop();
 		void Push(const Variant & value);
-		void SetVariableAtIndex(const String & name, size_t index);
-		void SetVariableInternal(const String & name, const Variant & value);
+		void SetVariableAtIndex(RuntimeID id, size_t index);
+		void SetVariable(RuntimeID id, const Variant & value);
 
 	private:
-		typedef std::map<String, size_t, std::less<String>, Allocator<std::pair<String, size_t>>> NameIndexMap;
+		typedef std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<RuntimeID, size_t>>> IdIndexMap;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
@@ -45,7 +45,7 @@ namespace Jinx
 		// Name table frame for local names
 		struct ScopeFrame
 		{
-			NameIndexMap nameMap;
+			IdIndexMap idMap;
 			size_t stackTop;
 		};
 
@@ -56,8 +56,8 @@ namespace Jinx
 			{
 				ScopeFrame frame;
 				frame.stackTop = 0;
-				names.reserve(8);
-				names.push_back(frame);
+				ids.reserve(8);
+				ids.push_back(frame);
 			}
 
 			// Buffer containing script bytecode
@@ -67,8 +67,8 @@ namespace Jinx
 			// current internal position acts as the current frame's instruction pointer.
 			BinaryReader reader;
 
-			// Name lookup map
-			std::vector<ScopeFrame, Allocator<ScopeFrame>> names;
+			// Variable id lookup map
+			std::vector<ScopeFrame, Allocator<ScopeFrame>> ids;
 
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop;

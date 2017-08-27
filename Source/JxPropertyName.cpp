@@ -24,7 +24,7 @@ PropertyName::PropertyName(VisibilityType visibility, bool readOnly, const Strin
 	m_defaultValue(defaultValue)
 {
 	String combinedName = moduleName + " " + propertyName;
-	m_id = GetHash(reinterpret_cast<const uint8_t *>(combinedName.c_str()), static_cast<uint32_t>(combinedName.size()));
+	m_id = GetHash(combinedName.c_str(), combinedName.size());
 	m_partCount = GetNamePartCount(propertyName);
 }
 
