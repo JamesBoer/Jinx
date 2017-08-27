@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## Fixed
 - Improved local script variable lookup speed
+- Fixed potential crash on shutdown in allocator
 
 ## [0.10.0] - 2017-08-24
 
