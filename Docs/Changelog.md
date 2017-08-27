@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2017-08-26
+
+## Fixed
+- Improved local script variable lookup speed
+
 ## [0.10.0] - 2017-08-24
 
 ### Added
