@@ -689,6 +689,8 @@ void BlockHeap::ShutDown()
 		s_tail = m_prev;
 	else
 		m_next->m_prev = m_prev;
+	m_prev = nullptr;
+	m_next = nullptr;
 }
 
 #endif // JINX_DISABLE_POOL_ALLOCATOR
