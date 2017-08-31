@@ -13,7 +13,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	uint64_t GetHash(const uint8_t * data, uint32_t len);
+	uint64_t GetHash(const void * data, size_t len);
 
 };
 

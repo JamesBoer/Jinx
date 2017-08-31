@@ -54,10 +54,10 @@ uint32_t MurmurHashNeutral2(const void * key, int len, uint32_t seed)
 }
 
 // Use two endian-neutral 32-bit hashes combined to a 64-bit hash to reduce odds of random collisions
-uint64_t Jinx::GetHash(const uint8_t * data, uint32_t len)
+uint64_t Jinx::GetHash(const void * data, size_t len)
 {
-	uint32_t hash1 = MurmurHashNeutral2(data, len, 0xF835E195);
-	uint32_t hash2 = MurmurHashNeutral2(data, len, 0x5C285D21);
+	uint32_t hash1 = MurmurHashNeutral2(data, static_cast<int>(len), 0xF835E195);
+	uint32_t hash2 = MurmurHashNeutral2(data, static_cast<int>(len), 0x5C285D21);
 	uint64_t hash = (static_cast<uint64_t>(hash2) << 32) | static_cast<uint64_t>(hash1);
 	assert(hash != InvalidID);
 	return hash;

@@ -106,6 +106,25 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(3)->second == 1);
 	}
 
+	SECTION("Test initialization list of pairs")
+	{
+		static const char * scriptText =
+			u8R"(
+			
+			set a to (1, 2), (3, 4), (5, 6)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1).GetCollection()->at(1) == 1);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1).GetCollection()->at(2) == 2);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).GetCollection()->at(1) == 3);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).GetCollection()->at(2) == 4);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetCollection()->at(1) == 5);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetCollection()->at(2) == 6);
+	}
+
 	SECTION("Test collection addition of elements using assignment")
 	{
 		static const char * scriptText =

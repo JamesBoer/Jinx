@@ -54,7 +54,7 @@ FunctionSignature::FunctionSignature(VisibilityType visibility, const String & l
 			}
 			hashString += " ";
 		}
-		m_id = GetHash(reinterpret_cast<const uint8_t *>(hashString.c_str()), static_cast<uint32_t>(hashString.length()));
+		m_id = GetHash(hashString.c_str(), hashString.length());
 	}
 }
 

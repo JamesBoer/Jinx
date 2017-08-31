@@ -379,26 +379,32 @@ bool Variant::ConvertTo(ValueType type)
 
 void Variant::Destroy()
 {
-	if (m_type == ValueType::String)
+	// Optimize for common case
+	if (m_type == ValueType::Null)
+		return;
+
+	// Explicitly call destructors for object types
+	switch (m_type)
 	{
+	case ValueType::String:
 		m_string.~String();
-	}
-	else if (m_type == ValueType::Buffer)
-	{
-		m_buffer.~BufferPtr();
-	}
-	else if (m_type == ValueType::Collection)
-	{
+		break;
+	case ValueType::Collection:
 		m_collection.~CollectionPtr();
-	}
-	else if (m_type == ValueType::CollectionItr)
-	{
+		break;
+	case ValueType::CollectionItr:
 		m_collectionItrPair.~CollectionItrPair();
-	}
-	else if (m_type == ValueType::UserObject)
-	{
+		break;
+	case ValueType::UserObject:
 		m_userObject.~UserObjectPtr();
-	}
+		break;
+	case ValueType::Buffer:
+		m_buffer.~BufferPtr();
+		break;
+	default:
+		break;
+	};
+
 	m_type = ValueType::Null;
 }
 
