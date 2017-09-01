@@ -80,13 +80,13 @@ namespace Jinx
 	static const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	static const uint32_t MinorVersion = 11;
+	static const uint32_t MinorVersion = 10;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 0;
+	static const uint32_t PatchNumber = 1;
 
 	/// Version string
-	static const char * VersionString = "0.11.0";
+	static const char * VersionString = "0.10.1";
 
 	// Forward declaration
 	class IScript;
@@ -359,8 +359,8 @@ namespace Jinx
 
 	/// Initializes global Jinx parameters
 	/**
-	\param params A GlobalParams struct containing a number of parameters that affect any
-	created runtime objects.
+	A struct containing a number of global parameters affecting memory, logging, and
+	general runtime behavior.
 	\sa Initialize()
 	*/
 	struct GlobalParams
@@ -392,7 +392,7 @@ namespace Jinx
 		size_t allocBlockSize;
 		/// Number of spare allocation blocks to retain
 		size_t allocSpareBlocks;
-		/// Maximum number of instructions per tick
+		/// Maximum number of instructions per script per Execute() function
 		uint32_t maxInstructions;
 		/// Maximum total script instrunctions
 		bool errorOnMaxInstrunctions;
