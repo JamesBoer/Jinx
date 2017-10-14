@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.10.2] - 2017-10-13
+
+## Fixed
+- Minor change for Xcode 9 compatibility
+
 ## [0.10.1] - 2017-08-26
 
 ## Fixed
