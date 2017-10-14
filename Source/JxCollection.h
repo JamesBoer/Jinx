@@ -15,7 +15,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 	class Variant;
-	typedef std::map<Variant, Variant, std::less<Variant>, Allocator<std::pair<Variant, Variant>>> Collection;
+	typedef std::map<Variant, Variant, std::less<Variant>, Allocator<std::pair<const Variant, Variant>>> Collection;
 	typedef std::shared_ptr<Collection> CollectionPtr;
 	typedef Collection::iterator CollectionItr;
 	typedef std::pair<CollectionItr, CollectionPtr> CollectionItrPair;

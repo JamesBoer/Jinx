@@ -39,7 +39,7 @@ namespace Jinx
 		FunctionSignature CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const;
 		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
-		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<String, PropertyName>>> PropertyNameTable;
+		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>> PropertyNameTable;
 
 		// Library name
 		String m_name;

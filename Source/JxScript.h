@@ -37,7 +37,7 @@ namespace Jinx
 		void SetVariable(RuntimeID id, const Variant & value);
 
 	private:
-		typedef std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<RuntimeID, size_t>>> IdIndexMap;
+		typedef std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>> IdIndexMap;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
