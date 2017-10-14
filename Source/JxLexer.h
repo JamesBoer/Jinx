@@ -38,7 +38,7 @@ namespace Jinx
 
 	typedef std::list<Symbol, Allocator<Symbol>> SymbolList;
 	typedef SymbolList::const_iterator SymbolListCItr;
-	typedef std::map<String, SymbolType, std::less<String>, Allocator<std::pair<String, SymbolType>>> SymbolTypeMap;
+	typedef std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>> SymbolTypeMap;
 
 	class Lexer
 	{
