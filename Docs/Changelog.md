@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.10.3] - 2017-10-25
+
+## Fixed
+- Fix potential error in allocator with static initialization ordering
+
 ## [0.10.2] - 2017-10-13
 
 ## Fixed
