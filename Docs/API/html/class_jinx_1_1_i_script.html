@@ -112,6 +112,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a00c9be2222beda416088575b5b8d9918"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a00c9be2222beda416088575b5b8d9918">SetVariable</a> (const String &amp;name, const <a class="el" href="class_jinx_1_1_variant.html">Variant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:a00c9be2222beda416088575b5b8d9918"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a variable by name.  <a href="#a00c9be2222beda416088575b5b8d9918">More...</a><br /></td></tr>
 <tr class="separator:a00c9be2222beda416088575b5b8d9918"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0774d4b9c9bb71fc7a51e15ef280f8ea"><td class="memItemLeft" align="right" valign="top">virtual void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a0774d4b9c9bb71fc7a51e15ef280f8ea">GetUserContext</a> () const  =0</td></tr>
+<tr class="memdesc:a0774d4b9c9bb71fc7a51e15ef280f8ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a user context pointer.  <a href="#a0774d4b9c9bb71fc7a51e15ef280f8ea">More...</a><br /></td></tr>
+<tr class="separator:a0774d4b9c9bb71fc7a51e15ef280f8ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f9acb7d64b1a3c6147695270b269385"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_jinx_8h.html#aec5ab3b563503ea605b4197e3da148de">LibraryPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a7f9acb7d64b1a3c6147695270b269385">GetLibrary</a> () const  =0</td></tr>
 <tr class="memdesc:a7f9acb7d64b1a3c6147695270b269385"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the library to which this script belongs.  <a href="#a7f9acb7d64b1a3c6147695270b269385">More...</a><br /></td></tr>
 <tr class="separator:a7f9acb7d64b1a3c6147695270b269385"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,6 +172,32 @@ Public Member Functions</h2></td></tr>
 
 <p>Return the library to which this script belongs. </p>
 <dl class="section return"><dt>Returns</dt><dd>This function returns a shared pointer to the library which this script belongs to. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a0774d4b9c9bb71fc7a51e15ef280f8ea"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void* Jinx::IScript::GetUserContext </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a user context pointer. </p>
+<dl class="section return"><dt>Returns</dt><dd>void pointer optionally passed at script creation. This is intended to be used by native library functions to retrieve user-specific data or objects. </dd></dl>
 
 </div>
 </div>

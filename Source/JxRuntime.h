@@ -21,9 +21,9 @@ namespace Jinx
 
 		// IRuntime interface
 		BufferPtr Compile(const char * scriptText, String uniqueName, std::initializer_list<String> libraries) override;
-		ScriptPtr CreateScript(BufferPtr bytecode) override;
-		ScriptPtr CreateScript(const char * scriptText, String uniqueName, std::initializer_list<String> libraries) override;
-		ScriptPtr ExecuteScript(const char * scriptcode, String uniqueName, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
+		ScriptPtr CreateScript(const char * scriptText, void * userContext, String uniqueName, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptcode, void * userContext, String uniqueName, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
 
 		// Internal interface

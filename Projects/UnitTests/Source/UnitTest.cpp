@@ -29,7 +29,7 @@ Jinx::RuntimePtr TestCreateRuntime()
 	return Jinx::CreateRuntime();
 }
 
-ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime)
+ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, void * userContext)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();
@@ -40,10 +40,10 @@ ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime)
 		return nullptr;
 
 	// Create a script with the compiled bytecode
-	return runtime->CreateScript(bytecode);
+	return runtime->CreateScript(bytecode, userContext);
 }
 
-Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime)
+Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime, void * userContext)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();
@@ -54,7 +54,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 		return nullptr;
 
 	// Create a script with the compiled bytecode
-	auto script = runtime->CreateScript(bytecode);
+	auto script = runtime->CreateScript(bytecode, userContext);
 
 	// Execute script until finished
 	do

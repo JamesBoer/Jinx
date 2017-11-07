@@ -16,7 +16,7 @@ namespace Jinx
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
-		Script(RuntimeIPtr runtime, BufferPtr bytecode);
+		Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext);
 		virtual ~Script();
 
 		bool Execute() override;
@@ -24,6 +24,8 @@ namespace Jinx
 
 		Variant GetVariable(const String & name) const override;
 		void SetVariable(const String & name, const Variant & value) override;
+
+		void * GetUserContext() const override { return m_userContext; }
 
 		LibraryPtr GetLibrary() const override { return m_library; }
 
@@ -82,6 +84,9 @@ namespace Jinx
 
 		// Current library
 		LibraryIPtr m_library;
+
+		// User context pointer
+		void * m_userContext;
 
 		// Is finished executing
 		bool m_finished;

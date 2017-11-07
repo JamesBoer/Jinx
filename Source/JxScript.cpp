@@ -10,8 +10,9 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-Script::Script(RuntimeIPtr runtime, BufferPtr bytecode) :
+Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
 	m_runtime(runtime),
+	m_userContext(userContext),
 	m_finished(false),
 	m_error(false)
 {

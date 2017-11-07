@@ -12,6 +12,19 @@ using namespace Jinx;
 
 static bool s_functionCalled;
 
+class TestClass
+{
+public:
+	TestClass(int testValue) : m_testValue(testValue) { }
+
+	int GetTestValue() const { return m_testValue; }
+
+private:
+	int m_testValue;
+};
+
+static TestClass s_testClass(99);
+
 
 static Variant ThisFunction(ScriptPtr script, Parameters params)
 {
@@ -36,6 +49,12 @@ static Variant YetAnotherFunction(ScriptPtr script, Parameters params)
 	return params[0] + Variant(" ") + params[1] + Variant(" ") + params[2];
 }
 
+static Variant MemberFunction(ScriptPtr script, Parameters params)
+{
+	TestClass * testClass = static_cast<TestClass *>(script->GetUserContext());
+	return testClass->GetTestValue();
+}
+
 
 TEST_CASE("Test Native", "[Native]")
 {
@@ -50,6 +69,7 @@ TEST_CASE("Test Native", "[Native]")
 			set a to that function
 			set b to another function
 			set c to yet "one" another "two" function "three"
+			set d to member function
 
 			)";
 
@@ -59,12 +79,14 @@ TEST_CASE("Test Native", "[Native]")
 		library->RegisterFunction(Visibility::Public, { "that", "function" }, ThatFunction);
 		library->RegisterFunction(Visibility::Public, { "another", "function" }, AnotherFunction);
 		library->RegisterFunction(Visibility::Public, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
-		auto script = TestExecuteScript(scriptText, runtime);
+		library->RegisterFunction(Visibility::Public, { "member", "function" }, MemberFunction);
+		auto script = TestExecuteScript(scriptText, runtime, &s_testClass);
 		REQUIRE(script);
 		REQUIRE(s_functionCalled == true);
 		REQUIRE(script->GetVariable("a") == 42);
 		REQUIRE(script->GetVariable("b") == "forty two");
 		REQUIRE(script->GetVariable("c") == "one two three");
+		REQUIRE(script->GetVariable("d") == 99);
 	}
 
 	SECTION("Test native function execution")

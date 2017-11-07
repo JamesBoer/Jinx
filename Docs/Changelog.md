@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.11.0] - 2017-11-07
+
+## Added
+- Added per-script user context pointer for native library functions.
+
 ## [0.10.3] - 2017-10-25
 
 ## Fixed
