@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ## Added
 - Added per-script user context pointer for native library functions.
 
+## Fixed
+- Made changes to reduced probability of name collisions.
+
 ## [0.10.3] - 2017-10-25
 
 ## Fixed
