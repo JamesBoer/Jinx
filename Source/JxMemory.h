@@ -209,8 +209,8 @@ namespace Jinx
 		void construct(pointer ptr, const T& val) { new (static_cast<T*> (ptr)) T(val); }
 
 		template<typename U>
-		void destroy(U* ptr) { ref(ptr); ptr->~U(); }
-		void destroy(pointer ptr) { ref(ptr); ptr->~T(); }
+		void destroy(U* ptr) { Jinx::ref(ptr); ptr->~U(); }
+		void destroy(pointer ptr) { Jinx::ref(ptr); ptr->~T(); }
 
 		size_type max_size() const { return std::numeric_limits<std::size_t>::max() / sizeof(T); }
 	};

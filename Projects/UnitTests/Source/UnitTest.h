@@ -31,8 +31,8 @@ THE SOFTWARE.
 #include "catch.hpp"
 
 Jinx::RuntimePtr TestCreateRuntime();
-Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr);
-Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr);
+Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr, void * userContext = nullptr);
+Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr, void * userContext = nullptr);
 
 
 #endif // UNIT_TESTS_H____

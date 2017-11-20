@@ -256,10 +256,9 @@ BlockHeap::BlockHeap() :
 	m_allocTail(nullptr),
 	m_spareHead(nullptr),
 	m_spareTail(nullptr),
+	m_next(nullptr),
 	m_allocSpareBlocks(0)
 {
-	// Ensure thread-safe access to the global heap list
-	std::lock_guard<Mutex> lock(s_mutex);
 
 	// Add block heap to the global list
 	if (s_head == nullptr)
@@ -267,15 +266,17 @@ BlockHeap::BlockHeap() :
 		assert(s_tail == nullptr);
 		s_head = this;
 		m_prev = nullptr;
+		s_tail = this;
 	}
 	else
 	{
+		// Ensure thread-safe access to the global heap list
+		std::lock_guard<Mutex> lock(s_mutex);
 		assert(s_tail);
 		m_prev = s_tail;
 		s_tail->m_next = this;
+		s_tail = this;
 	}
-	s_tail = this;
-	m_next = nullptr;
 }
 
 BlockHeap::~BlockHeap()

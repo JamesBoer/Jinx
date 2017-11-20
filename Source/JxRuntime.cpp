@@ -85,12 +85,12 @@ BufferPtr Runtime::Compile(const char * scriptText, String uniqueName, std::init
 	return Compile(scriptBuffer, uniqueName, libraries);
 }
 
-ScriptPtr Runtime::CreateScript(BufferPtr bytecode)
+ScriptPtr Runtime::CreateScript(BufferPtr bytecode, void * userContext)
 {
-	return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode));
+	return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode), userContext);
 }
 
-ScriptPtr Runtime::CreateScript(const char * scriptText, String uniqueName, std::initializer_list<String> libraries)
+ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, String uniqueName, std::initializer_list<String> libraries)
 {
 	// Compile script text to bytecode
 	auto bytecode = Compile(scriptText, uniqueName, libraries);
@@ -98,10 +98,10 @@ ScriptPtr Runtime::CreateScript(const char * scriptText, String uniqueName, std:
 		return nullptr;
 
 	// Create and return the script
-	return CreateScript(bytecode);
+	return CreateScript(bytecode, userContext);
 }
 
-ScriptPtr Runtime::ExecuteScript(const char * scriptcode, String uniqueName, std::initializer_list<String> libraries)
+ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, String uniqueName, std::initializer_list<String> libraries)
 {
 	// Compile the text to bytecode
 	auto bytecode = Compile(scriptcode, uniqueName, libraries);
@@ -109,7 +109,7 @@ ScriptPtr Runtime::ExecuteScript(const char * scriptcode, String uniqueName, std
 		return nullptr;
 
 	// Create a runtime script with the given bytecode
-	auto script = CreateScript(bytecode);
+	auto script = CreateScript(bytecode, userContext);
 	if (!script)
 		return nullptr;
 

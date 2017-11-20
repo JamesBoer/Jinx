@@ -10,8 +10,9 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-Script::Script(RuntimeIPtr runtime, BufferPtr bytecode) :
+Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
 	m_runtime(runtime),
+	m_userContext(userContext),
 	m_finished(false),
 	m_error(false)
 {
@@ -181,8 +182,44 @@ bool Script::Execute()
 			{
 				auto op1 = Pop();
 				auto op2 = Pop();
+				if (!op1.IsNumericType())
+				{
+					Error("Can't increment non-numeric type");
+					return false;
+				}
+				if (!op2.IsNumericType())
+				{
+					Error("Can't increment value by a non-numeric type");
+					return false;
+				}
 				op2 -= op1;
 				Push(op2);
+			}
+			break;
+			case Opcode::Divide:
+			{
+				auto op2 = Pop();
+				auto op1 = Pop();
+				if (op2.GetNumber() == 0.0)
+				{
+					Error("Divide by zero");
+					return false;
+				}
+				auto result = op1 / op2;
+				if (result.IsNull())
+				{
+					Error("Invalid variable for division");
+					return false;
+				}
+				Push(result);
+			}
+			break;
+			case Opcode::Equals:
+			{
+				auto op2 = Pop();
+				auto op1 = Pop();
+				auto result = op1 == op2;
+				Push(result);
 			}
 			break;
 			case Opcode::EraseProp:
@@ -240,7 +277,7 @@ bool Script::Execute()
 				{
 					if (!key.IsKeyType())
 					{
-						LogWriteLine("Invalid key");
+						Error("Invalid key");
 						return false;
 					}
 					auto coll = var.GetCollection();
@@ -248,32 +285,6 @@ bool Script::Execute()
 					if (itr != coll->end())
 						coll->erase(itr);
 				}
-			}
-			break;
-			case Opcode::Divide:
-			{
-				auto op2 = Pop();
-				auto op1 = Pop();
-				if (op2.GetNumber() == 0.0)
-				{
-					Error("Divide by zero");
-					return false;
-				}
-				auto result = op1 / op2;
-				if (result.IsNull())
-				{
-					Error("Invalid variable for division");
-					return false;
-				}
-				Push(result);
-			}
-			break;
-			case Opcode::Equals:
-			{
-				auto op2 = Pop();
-				auto op1 = Pop();
-				auto result = op1 == op2;
-				Push(result);
 			}
 			break;
 			case Opcode::Exit:
@@ -295,6 +306,11 @@ bool Script::Execute()
 			{
 				auto op2 = Pop();
 				auto op1 = Pop();
+				if (!ValidateValueComparison(op1, op2))
+				{
+					Error("Incompatible types in operator >");
+					return false;
+				}
 				auto result = op1 > op2;
 				Push(result);
 			}
@@ -303,6 +319,11 @@ bool Script::Execute()
 			{
 				auto op2 = Pop();
 				auto op1 = Pop();
+				if (!ValidateValueComparison(op1, op2))
+				{
+					Error("Incompatible types in operator >=");
+					return false;
+				}
 				auto result = op1 >= op2;
 				Push(result);
 			}
@@ -311,6 +332,16 @@ bool Script::Execute()
 			{
 				auto op1 = Pop();
 				auto op2 = Pop();
+				if (!op1.IsNumericType())
+				{
+					Error("Can't increment non-numeric type");
+					return false;
+				}
+				if (!op2.IsNumericType())
+				{
+					Error("Can't increment value by a non-numeric type");
+					return false;
+				}
 				op2 += op1;
 				Push(op2);
 			}
@@ -348,6 +379,11 @@ bool Script::Execute()
 			{
 				auto op2 = Pop();
 				auto op1 = Pop();
+				if (!ValidateValueComparison(op1, op2))
+				{
+					Error("Incompatible types in operator <");
+					return false;
+				}
 				auto result = op1 < op2;
 				Push(result);
 			}
@@ -356,6 +392,11 @@ bool Script::Execute()
 			{
 				auto op2 = Pop();
 				auto op1 = Pop();
+				if (!ValidateValueComparison(op1, op2))
+				{
+					Error("Incompatible types in operator <=");
+					return false;
+				}
 				auto result = op1 <= op2;
 				Push(result);
 			}

@@ -1,6 +1,28 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.12.0] - 2017-11-19
+
+## Changed
+- Most operators no longer perform automatic type coersion, and errors are more explicitly handled.
+- Documented type coersion behavior in tutorial.
+
+## Fixed
+- Fixed comparison between integer and numeric types
+
+## [0.11.0] - 2017-11-07
+
+## Added
+- Added per-script user context pointer for native library functions.
+
+## Fixed
+- Made changes to reduced probability of name collisions.
+
+## [0.10.3] - 2017-10-25
+
+## Fixed
+- Fix potential error in allocator with static initialization ordering
+
 ## [0.10.2] - 2017-10-13
 
 ## Fixed

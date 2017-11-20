@@ -176,6 +176,162 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test divide by zero error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to 1 / 0
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test mod by zero error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to 1 % 0
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid comparison operands #1 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to 1 < "cow"
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid comparison operands #2 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to null >= null
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid comparison operands #3 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to "lemur" > false
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid increment #1 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to "grasshopper"
+			increment a
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid increment #2 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to 12
+			increment a by "weasel"
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid increment #3 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			increment 3
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid decrement #1 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to "grasshopper"
+			decrement a
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid decrement #2 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to 12
+			decrement a by "weasel"
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test invalid decrement #3 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			decrement 3
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test variable access scope error")
 	{
 		static const char * scriptText =
