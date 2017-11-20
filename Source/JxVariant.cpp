@@ -9,6 +9,27 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+static bool s_allowValueCompare[] =
+{
+	false,	// Null
+	true,	// Number
+	true,	// Integer
+	false,	// Boolean
+	true,	// String
+	false,	// Collection
+	false,	// CollectionItr
+	false,	// UserObject
+	false,	// Buffer
+	true,	// Guid
+	false,	// ValType
+};
+
+static_assert(countof(s_allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
+
+bool CheckValueTypeForCompare(ValueType type)
+{
+	return s_allowValueCompare[static_cast<size_t>(type)];
+}
 
 Variant::Variant(const Variant & copy)
 {
@@ -286,6 +307,7 @@ bool Variant::ConvertTo(ValueType type)
 			if (!StringToNumber(m_string, &number))
 			{
 				LogWriteLine("Error converting string %s to number", m_string.c_str());
+				SetNull();
 				return false;
 			}
 			SetNumber(number);
@@ -297,6 +319,7 @@ bool Variant::ConvertTo(ValueType type)
 			if (!StringToInteger(m_string, &integer))
 			{
 				LogWriteLine("Error converting string %s to integer", m_string.c_str());
+				SetNull();
 				return false;
 			}
 			SetInteger(integer);
@@ -308,6 +331,7 @@ bool Variant::ConvertTo(ValueType type)
 			if (!StringToBoolean(m_string, &boolean))
 			{
 				LogWriteLine("Error converting string %s to boolean", m_string.c_str());
+				SetNull();
 				return false;
 			}
 			SetBoolean(boolean);
@@ -319,6 +343,7 @@ bool Variant::ConvertTo(ValueType type)
 			if (!StringToGuid(m_string, &guid))
 			{
 				LogWriteLine("Error converting string %s to Guid", m_string.c_str());
+				SetNull();
 				return false;
 			}
 			SetGuid(guid);
@@ -330,6 +355,7 @@ bool Variant::ConvertTo(ValueType type)
 			if (!StringToValueType(m_string, &valType))
 			{
 				LogWriteLine("Error converting string %s to value type", m_string.c_str());
+				SetNull();
 				return false;
 			}
 			SetValType(valType);
@@ -374,6 +400,7 @@ bool Variant::ConvertTo(ValueType type)
 		break;
 	};
 	LogWriteLine("Error converting %s to %s", GetValueTypeName(m_type), GetValueTypeName(type));
+	SetNull();
 	return false;
 }
 
@@ -531,6 +558,13 @@ bool Variant::IsKeyType() const
 	default:
 		break;
 	};
+	return false;
+}
+
+bool Variant::IsNumericType() const
+{
+	if (m_type == ValueType::Integer || m_type == ValueType::Number)
+		return true;
 	return false;
 }
 
@@ -764,12 +798,12 @@ Variant Jinx::operator + (const Variant & left, const Variant & right)
 
 Variant Jinx::operator - (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != ValueType::Number && left.GetType() != ValueType::Integer)
+	if (!left.IsNumericType())
 	{
 		LogWriteLine("Invalid left operand for subtraction");
 		return Variant();
 	}
-	if (right.GetType() != ValueType::Number && right.GetType() != ValueType::Integer)
+	if (!right.IsNumericType())
 	{
 		LogWriteLine("Invalid right operand for subtraction");
 		return Variant();
@@ -790,12 +824,12 @@ Variant Jinx::operator - (const Variant & left, const Variant & right)
 
 Variant Jinx::operator * (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != ValueType::Number && left.GetType() != ValueType::Integer)
+	if (!left.IsNumericType())
 	{
 		LogWriteLine("Invalid left operand for multiplication");
 		return Variant();
 	}
-	if (right.GetType() != ValueType::Number && right.GetType() != ValueType::Integer)
+	if (!right.IsNumericType())
 	{
 		LogWriteLine("Invalid right operand for multiplication");
 		return Variant();
@@ -816,12 +850,12 @@ Variant Jinx::operator * (const Variant & left, const Variant & right)
 
 Variant Jinx::operator / (const Variant & left, const Variant & right)
 {
-	if (left.GetType() != ValueType::Number && left.GetType() != ValueType::Integer)
+	if (!left.IsNumericType())
 	{
 		LogWriteLine("Invalid left operand for division");
 		return Variant();
 	}
-	if (right.GetType() != ValueType::Number && right.GetType() != ValueType::Integer)
+	if (!right.IsNumericType())
 	{
 		LogWriteLine("Invalid right operand for division");
 		return Variant();
@@ -871,30 +905,75 @@ bool Jinx::operator == (const Variant & left, const Variant & right)
 {
 	switch (left.GetType())
 	{
-	case ValueType::Null:
-		return right.IsNull();
-	case ValueType::Number:
-		return left.GetNumber() == right.GetNumber();
-	case ValueType::Integer:
-		return left.GetInteger() == right.GetInteger();
-	case ValueType::Boolean:
-		return left.GetBoolean() == right.GetBoolean();
-	case ValueType::String:
-		return left.GetString() == right.GetString();
-	case ValueType::Collection:
-		return left.GetCollection() == right.GetCollection();
-	case ValueType::CollectionItr:
-		return left.GetCollectionItr() == right.GetCollectionItr();
-	case ValueType::UserObject:
-		return left.GetUserObject() == right.GetUserObject();
-	case ValueType::Buffer:
-		return left.GetBuffer() == right.GetBuffer();
-	case ValueType::Guid:
-		return left.GetGuid() == right.GetGuid();
-	case ValueType::ValType:
-		return left.GetValType() == right.GetValType();
-	default:
-		assert(!"Unknown variant type!");
+		case ValueType::Null:
+		{
+			return right.IsNull();
+		}
+		case ValueType::Number:
+		{
+			return left.GetNumber() == right.GetNumber();
+		}
+		case ValueType::Integer:
+		{
+			if (!right.IsNumericType())
+				return false;
+			if (right.IsNumber())
+				return left.GetNumber() == right.GetNumber();
+			else
+				return left.GetInteger() == right.GetInteger();
+		}
+		case ValueType::Boolean:
+		{
+			if (!right.IsBoolean())
+				return false;
+			return left.GetBoolean() == right.GetBoolean();
+		}
+		case ValueType::String:
+		{
+			if (!right.IsString())
+				return false;
+			return left.GetString() == right.GetString();
+		}
+		case ValueType::Collection:
+		{
+			if (!right.IsCollection())
+				return false;
+			return left.GetCollection() == right.GetCollection();
+		}
+		case ValueType::CollectionItr:
+		{
+			if (!right.IsCollectionItr())
+				return false;
+			return left.GetCollectionItr() == right.GetCollectionItr();
+		}
+		case ValueType::UserObject:
+		{
+			if (!right.IsUserObject())
+				return false;
+			return left.GetUserObject() == right.GetUserObject();
+		}
+		case ValueType::Buffer:
+		{
+			if (!right.IsBuffer())
+				return false;
+			return left.GetBuffer() == right.GetBuffer();
+		}
+		case ValueType::Guid:
+		{
+			if (!right.IsGuid())
+				return false;
+			return left.GetGuid() == right.GetGuid();
+		}
+		case ValueType::ValType:
+		{
+			if (!right.IsValType())
+				return false;
+			return left.GetValType() == right.GetValType();
+		}
+		default:
+		{
+			assert(!"Unknown variant type!");
+		}
 	};
 
 	return false;
@@ -904,33 +983,78 @@ bool Jinx::operator < (const Variant & left, const Variant & right)
 {
 	switch (left.GetType())
 	{
-	case ValueType::Null:
-		return false;
-	case ValueType::Number:
-		return left.GetNumber() < right.GetNumber();
-	case ValueType::Integer:
-		return left.GetInteger() < right.GetInteger();
-	case ValueType::Boolean:
-		return left.GetBoolean() < right.GetBoolean();
-	case ValueType::String:
-		return left.GetString() < right.GetString();
-	case ValueType::Collection:
-		return left.GetCollection() < right.GetCollection();
-	case ValueType::CollectionItr:
-		LogWriteLine("Error comparing collectionitr type with < operator");
-		return false;
-	case ValueType::UserObject:
-		return left.GetUserObject() < right.GetUserObject();
-	case ValueType::Buffer:
-		return left.GetBuffer() < right.GetBuffer();
-	case ValueType::Guid:
-		return left.GetGuid() < right.GetGuid();
-	case ValueType::ValType:
-		return left.GetValType() < right.GetValType();
-	default:
-		assert(!"Unknown variant type!");
+		case ValueType::Null:
+		{
+			LogWriteLine("Error comparing null type with < operator");
+			return false;
+		}
+		case ValueType::Number:
+		{
+			if (!right.IsNumericType())
+				break;
+			return left.GetNumber() < right.GetNumber();
+		}
+		case ValueType::Integer:
+		{
+			if (!right.IsNumericType())
+				break;
+			if (right.IsNumber())
+				return left.GetNumber() < right.GetNumber();
+			else
+				return left.GetInteger() < right.GetInteger();
+		}
+		case ValueType::Boolean:
+		{
+			if (!right.IsBoolean())
+				break;
+			return left.GetBoolean() < right.GetBoolean();
+		}
+		case ValueType::String:
+		{
+			if (!right.IsNumericType())
+				break;
+			return left.GetString() < right.GetString();
+		}
+		case ValueType::Collection:
+		{
+			LogWriteLine("Error comparing collection type with < operator");
+			return false;
+		}
+		case ValueType::CollectionItr:
+		{
+			LogWriteLine("Error comparing collectionitr type with < operator");
+			return false;
+		}
+		case ValueType::UserObject:
+		{
+			if (!right.IsUserObject())
+				break;
+			return left.GetUserObject() < right.GetUserObject();
+		}
+		case ValueType::Buffer:
+		{
+			LogWriteLine("Error comparing buffer type with < operator");
+			return false;
+		}
+		case ValueType::Guid:
+		{
+			if (!right.IsGuid())
+				break;
+			return left.GetGuid() < right.GetGuid();
+		}
+		case ValueType::ValType:
+		{
+			if (!right.IsValType())
+				break;
+			return left.GetValType() < right.GetValType();
+		}
+		default:
+		{
+			assert(!"Unknown variant type!");
+		}
 	};
-
+	
+	LogWriteLine("Type error in right operand when using < operator");
 	return false;
 }
 
@@ -939,31 +1063,91 @@ bool Jinx::operator <= (const Variant & left, const Variant & right)
 	switch (left.GetType())
 	{
 	case ValueType::Null:
+	{
+		LogWriteLine("Error comparing null type with < operator");
 		return false;
+	}
 	case ValueType::Number:
+	{
+		if (!right.IsNumericType())
+			break;
 		return left.GetNumber() <= right.GetNumber();
+	}
 	case ValueType::Integer:
-		return left.GetInteger() <= right.GetInteger();
+	{
+		if (!right.IsNumericType())
+			break;
+		if (right.IsNumber())
+			return left.GetNumber() <= right.GetNumber();
+		else
+			return left.GetInteger() <= right.GetInteger();
+	}
 	case ValueType::Boolean:
+	{
+		if (!right.IsBoolean())
+			break;
 		return left.GetBoolean() <= right.GetBoolean();
+	}
 	case ValueType::String:
+	{
+		if (!right.IsNumericType())
+			break;
 		return left.GetString() <= right.GetString();
+	}
 	case ValueType::Collection:
-		return left.GetCollection() <= right.GetCollection();
-	case ValueType::CollectionItr:
-		LogWriteLine("Error comparing collectionitr type with <= operator");
+	{
+		LogWriteLine("Error comparing collection type with < operator");
 		return false;
+	}
+	case ValueType::CollectionItr:
+	{
+		LogWriteLine("Error comparing collectionitr type with < operator");
+		return false;
+	}
 	case ValueType::UserObject:
+	{
+		if (!right.IsUserObject())
+			break;
 		return left.GetUserObject() <= right.GetUserObject();
+	}
 	case ValueType::Buffer:
-		return left.GetBuffer() <= right.GetBuffer();
+	{
+		LogWriteLine("Error comparing buffer type with < operator");
+		return false;
+	}
 	case ValueType::Guid:
+	{
+		if (!right.IsGuid())
+			break;
 		return left.GetGuid() <= right.GetGuid();
+	}
 	case ValueType::ValType:
-		return left.GetValType() < right.GetValType();
+	{
+		if (!right.IsValType())
+			break;
+		return left.GetValType() <= right.GetValType();
+	}
 	default:
+	{
 		assert(!"Unknown variant type!");
+	}
 	};
 
+	LogWriteLine("Type error in right operand when using < operator");
 	return false;
 }
+
+bool Jinx::ValidateValueComparison(const Variant & left, const Variant & right)
+{
+	if (!CheckValueTypeForCompare(left.GetType()))
+		return false;
+	if (!CheckValueTypeForCompare(right.GetType()))
+		return false;
+	if (left.GetType() != right.GetType())
+	{
+		if (!left.IsNumericType() || !right.IsNumericType())
+			return false;
+	}
+	return true;
+}
+

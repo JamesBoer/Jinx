@@ -103,7 +103,7 @@ bool Jinx::StringToNumber(const String & value, double * outValue)
 		++p;
 	}
 	*outValue = std::atof(s);
-	return true;
+	return count > 0;
 }
 
 bool Jinx::StringToInteger(const String & value, int64_t * outValue)
@@ -129,7 +129,7 @@ bool Jinx::StringToInteger(const String & value, int64_t * outValue)
 		++p;
 	}
 	*outValue = std::strtoull(s, nullptr, 10);
-	return true;
+	return count > 0;
 }
 
 bool Jinx::StringToValueType(const String & value, ValueType * outValue)

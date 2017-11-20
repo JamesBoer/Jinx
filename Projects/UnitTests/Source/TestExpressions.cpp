@@ -66,6 +66,10 @@ TEST_CASE("Test Expressions", "[Expressions]")
 			
 			set a to true = true		-- true
 			set b to true != true		-- false
+			set c to "apple" = 123.45   -- false
+			set d to null != 5			-- true
+			set e to null = null		-- true
+			set f to "str" = "str"		-- true
 
 			)";
 
@@ -73,6 +77,10 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == true);
 		REQUIRE(script->GetVariable("b") == false);
+		REQUIRE(script->GetVariable("c") == false);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == true);
+		REQUIRE(script->GetVariable("f") == true);
 	}
 
 	SECTION("Test logical operators")
@@ -139,7 +147,58 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("j") == true);
 	}
 
-	SECTION("Test automatic string conversion")
+	SECTION("Test less than or greater than operators on mixed numeric types")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to 1 < 1.5				
+			set b to 2 < 1.99999	
+			
+			set c to 1.99999 > 2				
+			set d to 2 > 1	
+			
+			set e to 1 <= 2.01
+			set f to 1 <= 1
+			set g to 2 <= 1
+
+			set h to 1.5 >= 2
+			set i to 1.1 >= 1
+			set j to 2.0 >= 1
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == false);
+		REQUIRE(script->GetVariable("c") == false);
+		REQUIRE(script->GetVariable("d") == true);
+		REQUIRE(script->GetVariable("e") == true);
+		REQUIRE(script->GetVariable("f") == true);
+		REQUIRE(script->GetVariable("g") == false);
+		REQUIRE(script->GetVariable("h") == false);
+		REQUIRE(script->GetVariable("i") == true);
+		REQUIRE(script->GetVariable("j") == true);
+	}
+
+	SECTION("Test string concatenation")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "together " + "forever"
+			set b to "another" + " " + "try"
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == "together forever");
+		REQUIRE(script->GetVariable("b") == "another try");
+	}
+
+	SECTION("Test automatic string conversion and concatenation")
 	{
 		const char * scriptText =
 			u8R"(

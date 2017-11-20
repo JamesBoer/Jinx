@@ -68,6 +68,7 @@ TEST_CASE("Test Casts", "[Casts]")
 		REQUIRE(script->GetVariable("e") == "true");
 		REQUIRE(script->GetVariable("f") == true);
 		REQUIRE(script->GetVariable("g") == true);
+		REQUIRE(script->GetVariable("h") == 1);
 	}
 
 }

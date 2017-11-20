@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.12.0] - 2017-11-19
+
+## Changed
+- Most operators no longer perform automatic type coersion, and errors are more explicitly handled.
+- Documented type coersion behavior in tutorial.
+
+## Fixed
+- Fixed comparison between integer and numeric types
+
 ## [0.11.0] - 2017-11-07
 
 ## Added

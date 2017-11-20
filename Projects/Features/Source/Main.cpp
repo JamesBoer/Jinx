@@ -70,19 +70,30 @@ int main(int argc, char ** argv)
 		
 		static const char * scriptText =
 			u8R"(
-			
-			set x to (1, 2), (3, 4), (5, 6)
+	
+			set a to 3
+			if a
+				set a to 4
+			end
+
+			set b to []
+			if not b
+				set b to "check"
+			end
+
+			set c to null
+			if c
+				set c to 123
+			end
+
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("x").GetCollection()->at(1).GetCollection()->at(1) == 1);
-		REQUIRE(script->GetVariable("x").GetCollection()->at(1).GetCollection()->at(2) == 2);
-		REQUIRE(script->GetVariable("x").GetCollection()->at(2).GetCollection()->at(1) == 3);
-		REQUIRE(script->GetVariable("x").GetCollection()->at(2).GetCollection()->at(2) == 4);
-		REQUIRE(script->GetVariable("x").GetCollection()->at(3).GetCollection()->at(1) == 5);
-		REQUIRE(script->GetVariable("x").GetCollection()->at(3).GetCollection()->at(2) == 6);
+		REQUIRE(script->GetVariable("a") == 4);
+		REQUIRE(script->GetVariable("b") == "check");
+		REQUIRE(script->GetVariable("c") == nullptr);
 	}
 
 	Jinx::ShutDown();

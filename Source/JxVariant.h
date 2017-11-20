@@ -122,6 +122,9 @@ namespace Jinx
 		// Is this a valid collection key?
 		bool IsKeyType() const;
 
+		// Is this an integer or number type?
+		bool IsNumericType() const;
+
 		// Type checks
 		bool IsType(ValueType type) { return m_type == type ? true : false; }
 		bool IsNull() const { return m_type == ValueType::Null ? true : false; }
@@ -165,10 +168,6 @@ namespace Jinx
 
 		void Destroy();
 
-		friend bool operator == (const Variant & left, const Variant & right);
-		friend bool operator < (const Variant & left, const Variant & right);
-		friend bool operator <= (const Variant & left, const Variant & right);
-
 		ValueType m_type;
 		union
 		{
@@ -199,6 +198,9 @@ namespace Jinx
 	inline bool operator != (const Variant & left, const Variant & right) { return (left == right) ? false : true; }
 	inline bool operator > (const Variant & left, const Variant & right) { return (left <= right) ? false : true; }
 	inline bool operator >= (const Variant & left, const Variant & right) { return (left < right) ? false : true; }
+
+	// Variant operator <, <=, >, >= type validation
+	bool ValidateValueComparison(const Variant & left, const Variant & right);
 
 	/// Helper function convertion to utf-8 string from other types using a Variant object
 	inline String Str(const char16_t * str) { return Variant(str).GetString(); }

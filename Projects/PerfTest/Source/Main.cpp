@@ -163,6 +163,7 @@ constexpr size_t countof(T(&)[s])
 int main(int argc, char * argv[])
 {
 	Jinx::GlobalParams globalParams;
+	globalParams.enableLogging = true;
 	Jinx::Initialize(globalParams);
 
 	std::array<Jinx::BufferPtr, countof(s_testScripts)> bytecodeArray;
