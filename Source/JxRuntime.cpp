@@ -268,7 +268,9 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 			break;
 			case Opcode::Jump:
 			case Opcode::JumpFalse:
+			case Opcode::JumpFalseCheck:
 			case Opcode::JumpTrue:
+			case Opcode::JumpTrueCheck:
 			case Opcode::PopCount:
 			case Opcode::PushColl:
 			case Opcode::PushList:

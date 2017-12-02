@@ -1475,6 +1475,7 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
 
 	bool requiredOperand = false;
+	std::vector<size_t, Allocator<size_t>> jumpAddrStack;
 
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
@@ -1498,6 +1499,14 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 				EmitOpcode(opcodeStack.back());
 				opcodeStack.pop_back();
 			}
+
+			// Emit short-circuit evaluation jump check with placeholder address
+			if (opcode == Opcode::And || opcode == Opcode::Or)
+			{
+				EmitOpcode(opcode == Opcode::And ? Opcode::JumpFalseCheck : Opcode::JumpTrueCheck);
+				jumpAddrStack.push_back(EmitAddressPlaceholder());
+			}
+
 			opcodeStack.push_back(opcode);
 		}
 		else if (!opcodeStack.empty())
@@ -1510,6 +1519,13 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 		}
 		else
 			break;
+	}
+
+	// Backfill any short-circuit test jump address now that we're finished with local expression
+	while (!jumpAddrStack.empty())
+	{
+		EmitAddressBackfill(jumpAddrStack.back());
+		jumpAddrStack.pop_back();
 	}
 
 	// Check for leftover operators

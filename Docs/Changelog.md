@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.13.0] - 2017-12-01
+
+## Changed
+- Logical operators now perform short-circuit evaluation
+- Updated Catch unit test library
+
 ## [0.12.0] - 2017-11-19
 
 ## Changed

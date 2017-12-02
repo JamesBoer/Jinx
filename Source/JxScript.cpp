@@ -364,11 +364,43 @@ bool Script::Execute()
 				}
 			}
 			break;
+			case Opcode::JumpFalseCheck:
+			{
+				uint32_t jumpIndex;
+				m_execution.back().reader.Read(&jumpIndex);
+				if (m_stack.empty())
+				{
+					Error("Stack underflow");
+					return false;
+				}
+				const auto & op1 = m_stack.back();
+				if (op1.GetBoolean() == false)
+				{
+					m_execution.back().reader.Seek(jumpIndex);
+				}
+			}
+			break;
 			case Opcode::JumpTrue:
 			{
 				uint32_t jumpIndex;
 				m_execution.back().reader.Read(&jumpIndex);
 				auto op1 = Pop();
+				if (op1.GetBoolean() == true)
+				{
+					m_execution.back().reader.Seek(jumpIndex);
+				}
+			}
+			break;
+			case Opcode::JumpTrueCheck:
+			{
+				uint32_t jumpIndex;
+				m_execution.back().reader.Read(&jumpIndex);
+				if (m_stack.empty())
+				{
+					Error("Stack underflow");
+					return false;
+				}
+				const auto & op1 = m_stack.back();
 				if (op1.GetBoolean() == true)
 				{
 					m_execution.back().reader.Seek(jumpIndex);
