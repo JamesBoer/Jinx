@@ -300,4 +300,220 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("d") == true);
 		REQUIRE(script->GetVariable("e") == true);
 	}
+
+	SECTION("Test short circuit evaluation #1")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+
+			function f
+				set x to true
+			end
+
+			set a to 1 = 1 or f
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == false);
+	}
+
+	SECTION("Test short circuit evaluation #2")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+
+			function f
+				set x to true
+			end
+
+			set a to 1 = 2 and f
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == false);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == false);
+	}
+
+	SECTION("Test short circuit evaluation #3")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+			set private y to false
+
+			function f1
+				set x to true
+				return true
+			end
+
+			function f2
+				set y to true
+				return true
+			end
+
+			set a to (1 = 1 and 2 = 2) and (f1 or f2)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("y") == false);
+	}
+
+	SECTION("Test short circuit evaluation #4")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+			set private y to false
+
+			function f1
+				set x to true
+				return true
+			end
+
+			function f2
+				set y to true
+				return true
+			end
+
+			set a to (1 = 1 and 2 = 2) or (f1 or f2)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == false);
+		REQUIRE(script->GetLibrary()->GetProperty("y") == false);
+	}
+
+	SECTION("Test short circuit evaluation #5")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+			set private y to false
+
+			function f1
+				set x to true
+				return true
+			end
+
+			function f2
+				set y to true
+				return true
+			end
+
+			set a to (1 = 1 and 2 = 3) and (f1 or f2)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == false);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == false);
+		REQUIRE(script->GetLibrary()->GetProperty("y") == false);
+	}
+
+	SECTION("Test short circuit evaluation #6")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+			set private y to false
+
+			function f1
+				set x to true
+				return false
+			end
+
+			function f2
+				set y to true
+				return true
+			end
+
+			set a to (1 = 1 and 2 = 2) and (f1 and f2)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == false);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("y") == false);
+	}
+
+	SECTION("Test short circuit evaluation #7")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+			set private y to false
+
+			function f1
+				set x to true
+				return false
+			end
+
+			function f2
+				set y to true
+				return true
+			end
+
+			set a to (1 = 1 or 2 = 2) or (f1 or f2)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == false);
+		REQUIRE(script->GetLibrary()->GetProperty("y") == false);
+	}
+
+	SECTION("Test short circuit evaluation #8")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set private x to false
+			set private y to false
+
+			function f1
+				set x to true
+				return true
+			end
+
+			function f2
+				set y to true
+				return true
+			end
+
+			set a to (1 = 2 or 2 = 3 or 3 = 4 or 4 = 5) or (f1 or f2)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("x") == true);
+		REQUIRE(script->GetLibrary()->GetProperty("y") == false);
+	}
 }
