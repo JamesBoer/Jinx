@@ -44,6 +44,9 @@ namespace Jinx
 		// Get unique function id
 		RuntimeID GetId() const { return m_id; }
 
+		// Get human-readable name for debug purposes
+		String GetName() const;
+
 		// Get signature length
 		size_t GetLength() const { return m_parts.size(); }
 
@@ -53,7 +56,7 @@ namespace Jinx
 		// Get signature parts
 		const FunctionSignatureParts & GetParts() const { return m_parts; }
 
-		// Does this have a class parameter
+		// Does this have a class parameter (not currently used)
 		bool HasClassParameter() const { return m_classParameter; }
 
 		// Is this a valid signature?

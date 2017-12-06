@@ -70,14 +70,18 @@ int main(int argc, char ** argv)
 	
 		static const char * scriptText =
 			u8R"(
+
+			function {x} minus {y}
+				return x - y
+			end
 	
-			set a to true or false and true
+			set a to 4 minus 3 minus 1 
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("a") == 2);
 
 	}
 

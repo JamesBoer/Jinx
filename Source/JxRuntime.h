@@ -46,7 +46,7 @@ namespace Jinx
 		typedef std::map<String, LibraryIPtr, std::less<String>, Allocator<std::pair<const String, LibraryIPtr>>> LibraryMap;
 		typedef std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>> FunctionMap;
 		typedef std::map<RuntimeID, Variant, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, Variant>>> PropertyMap;
-		void LogBytecode(const BufferPtr & buffer) const;
+		void LogBytecode(const Parser & parser) const;
 		void LogSymbols(const SymbolList & symbolList) const;
 
 	private:

@@ -23,6 +23,10 @@ namespace Jinx
 
 		BufferPtr GetBytecode() const { return m_bytecode; }
 
+		// Retrieve a debug-friendly name from an ID.  This is a relatively
+		// slow function not intended for runtime code.
+		String GetNameFromID(RuntimeID id) const;
+
 	private:
 
 		enum class FunctionParse
@@ -50,6 +54,9 @@ namespace Jinx
 				LogWrite("Error in '%s' at line %i, column %i: ", m_uniqueName.c_str(), m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			LogWriteLine(format, std::forward<Args>(args)...);
 		}
+
+		// Hash and register variable or property name and ID mapping
+		RuntimeID NameToRuntimeID(const String & name);
 
 		// Assign a variable or check that it exists
 		void VariableAssign(const String & name);
@@ -147,6 +154,8 @@ namespace Jinx
 		void ParseScript();
 
 	private:
+		typedef std::map <RuntimeID, String, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, String>>> IDNameMap;
+
 		// Runtime object
 		RuntimeIPtr m_runtime;
 
@@ -182,6 +191,9 @@ namespace Jinx
 
 		// Keep track of variables currently in scope
 		VariableStackFrame m_variableStackFrame;
+
+		// ID to name mapping for debug output
+		IDNameMap m_idNameMap;
 	};
 
 };

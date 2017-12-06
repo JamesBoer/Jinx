@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.13.1] - 2017-12-06
+
+## Changed
+- Opcode debug output now shows symbol and function names
+
 ## [0.13.0] - 2017-12-01
 
 ## Changed
