@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ## Changed
 - Opcode debug output now shows symbol and function names
 
+## Fixed
+- Parser now rejects function parameter names that collide with properties
+
 ## [0.13.0] - 2017-12-01
 
 ## Changed

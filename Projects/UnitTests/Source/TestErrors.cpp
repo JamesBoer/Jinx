@@ -546,6 +546,36 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test property duplicates")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set private a to 123
+			set private a to 234
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test property name collision with function parameter name")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set private a to 123
+
+			function test {a}
+			return
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test property readonly syntax order")
 	{
 		static const char * scriptText =

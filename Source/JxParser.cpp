@@ -954,7 +954,7 @@ void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
 	// Search for multi-part property names
 	String name = ParseMultiName({ SymbolType::To });
 
-	if (m_library->PropertyNameExists(name))
+	if (propertyLibrary->PropertyNameExists(name))
 	{
 		Error("Property is already defined");
 		return;
@@ -1143,6 +1143,11 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			if (CheckName())
 			{
 				String paramName = ParseMultiName({ SymbolType::CurlyClose });
+				if (m_library->PropertyNameExists(paramName))
+				{
+					Error("Function parameter name '%s' already exists as a property name", paramName.c_str());
+					return FunctionSignature();
+				}
 				part.names.push_back(paramName);
 			}
 			else
@@ -1290,6 +1295,7 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	// they were pushed on the stack in order.
 	for (FunctionSignatureParts::reverse_iterator itr = params.rbegin(); itr != params.rend(); ++itr)
 	{
+		
 		VariableAssign(itr->names.front());
 		EmitOpcode(Opcode::SetIndex);
 		EmitId(NameToRuntimeID(itr->names.front()));
