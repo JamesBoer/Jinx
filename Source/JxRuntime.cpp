@@ -65,7 +65,7 @@ BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName, std::initi
 
 	// Log bytecode for development and debug purposes
 	if (IsLogBytecodeEnabled())
-		LogBytecode(parser.GetBytecode());
+		LogBytecode(parser);
 
 	// Track accumulated script compilation time and count
 	auto end = std::chrono::high_resolution_clock::now();
@@ -187,10 +187,11 @@ bool Runtime::LibraryExists(const String & name) const
 	return m_libraryMap.find(name) != m_libraryMap.end();
 }
 
-void Runtime::LogBytecode(const BufferPtr & buffer) const
+void Runtime::LogBytecode(const Parser & parser) const
 {
 	LogWriteLine("\nBytecode:\n====================");
 	const size_t columnWidth = 16;
+	auto buffer = parser.GetBytecode();
 	BinaryReader reader(buffer);
 	BytecodeHeader header;
 	reader.Read(&header, sizeof(header));
@@ -237,6 +238,7 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 			{
 				RuntimeID id;
 				reader.Read(&id);
+				LogWrite("%s", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::Cast:
@@ -258,6 +260,7 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 			{
 				FunctionSignature signature;
 				signature.Read(reader);
+				LogWrite("%s", parser.GetNameFromID(signature.GetId()).c_str());
 			}
 			break;
 			case Opcode::Property:
@@ -289,13 +292,13 @@ void Runtime::LogBytecode(const BufferPtr & buffer) const
 			break;
 			case Opcode::SetIndex:
 			{
-				String name;
-				reader.Read(&name);
+				RuntimeID id;
+				reader.Read(&id);
 				int32_t stackIndex;
 				reader.Read(&stackIndex);
 				ValueType type;
 				reader.Read<ValueType, uint8_t>(&type);
-				LogWrite("%s %i %s", name.c_str(), stackIndex, GetValueTypeName(type));
+				LogWrite("%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
 			}
 			break;
 			default:

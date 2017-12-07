@@ -40,6 +40,21 @@ bool Parser::Execute()
 	return !m_error;
 }
 
+String Parser::GetNameFromID(RuntimeID id) const
+{
+	auto itr = m_idNameMap.find(id);
+	if (itr == m_idNameMap.end())
+		return String();
+	return itr->second;
+}
+
+RuntimeID Parser::NameToRuntimeID(const String & name)
+{
+	auto id = GetHash(name.c_str(), name.size());
+	m_idNameMap[id] = name;
+	return id;
+}
+
 void Parser::VariableAssign(const String & name)
 {
 	if (!m_variableStackFrame.VariableAssign(name))
@@ -939,7 +954,7 @@ void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
 	// Search for multi-part property names
 	String name = ParseMultiName({ SymbolType::To });
 
-	if (m_library->PropertyNameExists(name))
+	if (propertyLibrary->PropertyNameExists(name))
 	{
 		Error("Property is already defined");
 		return;
@@ -964,6 +979,7 @@ void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
 		ParseExpression();
 		EmitOpcode(Opcode::SetProp);
 		EmitId(propertyName.GetId());
+		m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 	}
 	else if (readOnly)
 	{
@@ -1127,6 +1143,11 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			if (CheckName())
 			{
 				String paramName = ParseMultiName({ SymbolType::CurlyClose });
+				if (m_library->PropertyNameExists(paramName))
+				{
+					Error("Function parameter name '%s' already exists as a property name", paramName.c_str());
+					return FunctionSignature();
+				}
 				part.names.push_back(paramName);
 			}
 			else
@@ -1274,9 +1295,10 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	// they were pushed on the stack in order.
 	for (FunctionSignatureParts::reverse_iterator itr = params.rbegin(); itr != params.rend(); ++itr)
 	{
+		
 		VariableAssign(itr->names.front());
 		EmitOpcode(Opcode::SetIndex);
-		EmitId(GetHash(itr->names.front().c_str(), itr->names.front().size()));
+		EmitId(NameToRuntimeID(itr->names.front()));
 		EmitIndex(stackIndex);
 		EmitValueType(itr->valueType);
 		--stackIndex;
@@ -1388,6 +1410,7 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	// When finished validating the function and pushing parameters, call the function
 	EmitOpcode(Opcode::CallFunc);
 	EmitId(signature->GetId());
+	m_idNameMap[signature->GetId()] = signature->GetName();
 
 	// Check for post-function index operator
 	if (ParseSubscript())
@@ -1425,6 +1448,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 		bool subscript = ParseSubscript();
 		EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
 		EmitId(propertyName.GetId());
+		m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 		if (Accept(SymbolType::Type))
 			EmitOpcode(Opcode::Type);
 	}
@@ -1433,7 +1457,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 		String name = ParseVariable();
 		bool subscript = ParseSubscript();
 		EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-		EmitId(GetHash(name.c_str(), name.size()));
+		EmitId(NameToRuntimeID(name));
 		if (Accept(SymbolType::Type))
 			EmitOpcode(Opcode::Type);
 	}
@@ -1466,10 +1490,17 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	}
 }
 
-void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
+void Parser::ParseSubexpression(bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
+
+	// Make sure we have a valid expression
+	if (Check(SymbolType::NewLine))
+	{
+		Error("Expected valid expression");
+		return;
+	}
 
 	// Opcode stack for operators 
 	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
@@ -1477,8 +1508,13 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 	bool requiredOperand = false;
 	std::vector<size_t, Allocator<size_t>> jumpAddrStack;
 
+	bool not = false;
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
+		// Check for a unary negation operator
+		while (Accept(SymbolType::Not))
+			not = !not;
+
 		// Parse operand
 		ParseSubexpressionOperand(requiredOperand, suppressFunctionCall);
 		requiredOperand = false;
@@ -1503,6 +1539,13 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 			// Emit short-circuit evaluation jump check with placeholder address
 			if (opcode == Opcode::And || opcode == Opcode::Or)
 			{
+				// Emit not opcode if required
+				if (not)
+				{
+					EmitOpcode(Opcode::Not);
+					not = false;
+				}
+
 				EmitOpcode(opcode == Opcode::And ? Opcode::JumpFalseCheck : Opcode::JumpTrueCheck);
 				jumpAddrStack.push_back(EmitAddressPlaceholder());
 			}
@@ -1518,8 +1561,14 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 			}
 		}
 		else
+		{
 			break;
+		}
 	}
+
+	// Emit negation opcode if required
+	if (not)
+		EmitOpcode(Opcode::Not);
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression
 	while (!jumpAddrStack.empty())
@@ -1532,30 +1581,6 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 	if (!opcodeStack.empty())
 	{
 		Error("Syntax error when parsing expression");
-	}
-}
-
-void Parser::ParseSubexpression(bool suppressFunctionCall)
-{
-	if (m_error)
-		return;
-
-	// Make sure we have a valid expression
-	if (Check(SymbolType::NewLine))
-	{
-		Error("Expected valid expression");
-		return;
-	}
-
-	// Check for a logical not at the beginning of the expression
-	if (Accept(SymbolType::Not))
-	{
-		ParseExpression();
-		EmitOpcode(Opcode::Not);	
-	}
-	else
-	{
-		ParseSubexpressionOperation(suppressFunctionCall);
 	}
 
 }
@@ -1653,6 +1678,7 @@ void Parser::ParseErase()
 			EmitOpcode(Opcode::EraseProp);
 		}
 		EmitId(propName.GetId());
+		m_idNameMap[propName.GetId()] = propName.GetName();
 	}
 	else if (CheckVariable())
 	{
@@ -1669,7 +1695,7 @@ void Parser::ParseErase()
 			Expect(SymbolType::NewLine);
 			EmitOpcode(Opcode::EraseVar);
 		}
-		EmitId(GetHash(varName.c_str(), varName.size()));
+		EmitId(NameToRuntimeID(varName));
 	}
 	else
 	{
@@ -1695,12 +1721,13 @@ void Parser::ParseIncDec()
 		}
 		EmitOpcode(Opcode::PushProp);
 		EmitId(propName.GetId());
+		m_idNameMap[propName.GetId()] = propName.GetName();
 	}
 	else if (CheckVariable())
 	{
 		varName = ParseVariable();
 		EmitOpcode(Opcode::PushVar);
-		EmitId(GetHash(varName.c_str(), varName.size()));
+		EmitId(NameToRuntimeID(varName));
 	}
 	else
 	{
@@ -1721,11 +1748,12 @@ void Parser::ParseIncDec()
 	{
 		EmitOpcode(Opcode::SetProp);
 		EmitId(propName.GetId());
+		m_idNameMap[propName.GetId()] = propName.GetName();
 	}
 	else
 	{
 		EmitOpcode(Opcode::SetVar);
-		EmitId(GetHash(varName.c_str(), varName.size()));
+		EmitId(NameToRuntimeID(varName));
 	}
 	Expect(SymbolType::NewLine);
 }
@@ -1821,7 +1849,7 @@ void Parser::ParseLoop()
 		{
 			VariableAssign(name);
 			EmitOpcode(Opcode::SetVar);
-			EmitId(GetHash(name.c_str(), name.size()));
+			EmitId(NameToRuntimeID(name));
 		}
 
 		// Parse to value
@@ -1882,7 +1910,7 @@ void Parser::ParseLoop()
 		{
 			VariableAssign(name);
 			EmitOpcode(Opcode::SetVar);
-			EmitId(GetHash(name.c_str(), name.size()));
+			EmitId(NameToRuntimeID(name));
 		}
 
 		// Store where the loop logic begins
@@ -2060,6 +2088,7 @@ bool Parser::ParseStatement()
 					// Assign property
 					EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
 					EmitId(propertyName.GetId());
+					m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 				}
 				// Otherwise we're just dealing with an ordinary variable
 				else
@@ -2079,7 +2108,7 @@ bool Parser::ParseStatement()
 
 					// Assign a variable.  
 					EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
-					EmitId(GetHash(name.c_str(), name.size()));
+					EmitId(NameToRuntimeID(name));
 
 					// Add to variable table
 					VariableAssign(name);

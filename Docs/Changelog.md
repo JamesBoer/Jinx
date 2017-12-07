@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.14.0] - 2017-12-06
+
+## Changed
+- Opcode debug output now shows symbol and function names
+- Logical 'not' operation now has same precedence as 'or/and'
+
+## Fixed
+- Parser now rejects function parameter names that collide with properties
+
 ## [0.13.0] - 2017-12-01
 
 ## Changed

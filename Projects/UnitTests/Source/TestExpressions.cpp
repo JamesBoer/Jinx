@@ -94,10 +94,14 @@ TEST_CASE("Test Expressions", "[Expressions]")
 			set d to true or false			-- true		
 
 			set e to 1 < 2 or 4 != 5        -- true
-			set f to not 1 < 2 or 4 != 5    -- false
+			set f to not 1 < 2 or 4 != 5    -- true
 			set g to not (1 < 2 or 4 != 5)  -- false
 			set h to (not 1 < 2) or 4 != 5  -- true
-
+			set i to not false				-- true
+			set j to not 3 = 3				-- false
+			set k to not 1 + 2 + 3 > 100	-- true
+			set l to not 123				-- false
+			
 			)";
 
 		auto script = TestExecuteScript(scriptText);
@@ -107,9 +111,13 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("c") == false);
 		REQUIRE(script->GetVariable("d") == true);
 		REQUIRE(script->GetVariable("e") == true);
-		REQUIRE(script->GetVariable("f") == false);
+		REQUIRE(script->GetVariable("f") == true);
 		REQUIRE(script->GetVariable("g") == false);
 		REQUIRE(script->GetVariable("h") == true);
+		REQUIRE(script->GetVariable("i") == true);
+		REQUIRE(script->GetVariable("j") == false);
+		REQUIRE(script->GetVariable("k") == true);
+		REQUIRE(script->GetVariable("l") == false);
 	}
 
 	SECTION("Test less than or greater than operators")

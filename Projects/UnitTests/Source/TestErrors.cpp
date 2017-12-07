@@ -176,6 +176,85 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test logic operator #1 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to true and
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test logic operator #2 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to true or
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+
+	SECTION("Test logic operator #3 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to and true
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test logic operator #4 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to or true
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test logic operator #5 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to not and
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test logic operator #6 error")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set a to not or
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test divide by zero error")
 	{
 		static const char * scriptText =
@@ -539,6 +618,36 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 			set private a a to 123
 			set public a a to 345
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test property duplicates")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set private a to 123
+			set private a to 234
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test property name collision with function parameter name")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set private a to 123
+
+			function test {a}
+			return
 			
 			)";
 

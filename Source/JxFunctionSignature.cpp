@@ -80,6 +80,42 @@ FunctionSignatureParts FunctionSignature::GetParameters() const
 	return parameters;
 }
 
+String FunctionSignature::GetName() const
+{
+	String fnName;
+	fnName.reserve(32);
+	for (const auto & part : m_parts)
+	{
+		if (part.partType == FunctionSignaturePartType::Name)
+		{
+			if (part.optional)
+				fnName += "( ";
+			size_t count = 0;
+			for (const auto & name : part.names)
+			{
+				fnName += name;
+				fnName += " ";
+				if (part.names.size() > 1 && count < part.names.size() - 1)
+					fnName += "/ ";
+				count++;
+			}
+			if (part.optional)
+				fnName += ") ";
+		}
+		else
+		{
+			fnName += "{ ";
+			if (part.valueType != ValueType::Any)
+			{
+				fnName += GetValueTypeName(part.valueType);
+				fnName += " ";
+			}
+			fnName += "} ";
+		}
+	}
+	return fnName;
+}
+
 bool FunctionSignature::IsMatch(const FunctionSignatureParts & parts) const
 {
 	// Check a list of parts against this signature.  We return true if we reach the end
