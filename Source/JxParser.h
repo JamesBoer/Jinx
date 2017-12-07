@@ -140,7 +140,6 @@ namespace Jinx
 		void ParseFunctionCall(const FunctionSignature * signature);
 		void ParseCast();
 		void ParseSubexpressionOperand(bool required, bool suppressFunctionCall = false);
-		void ParseSubexpressionOperation(bool suppressFunctionCall = false);
 		void ParseSubexpression(bool suppressFunctionCall = false);
 		void ParseExpression(bool suppressFunctionCall = false);
 		void ParseErase();

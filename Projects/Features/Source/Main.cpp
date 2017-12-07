@@ -68,21 +68,16 @@ int main(int argc, char ** argv)
 		globalParams.freeFn = [](void * p) { free(p); };
 		Jinx::Initialize(globalParams);
 	
-		static const char * scriptText =
+		const char * scriptText =
 			u8R"(
-
-			function {x} minus {y}
-				return x - y
-			end
-	
-			set a to 4 minus 3 minus 1 
+			
+			set m to not "boo"				-- false
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 2);
-
+		REQUIRE(script->GetVariable("m") == false);
 	}
 
 	Jinx::ShutDown();

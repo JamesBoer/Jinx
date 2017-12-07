@@ -1490,10 +1490,17 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	}
 }
 
-void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
+void Parser::ParseSubexpression(bool suppressFunctionCall)
 {
 	if (m_error)
 		return;
+
+	// Make sure we have a valid expression
+	if (Check(SymbolType::NewLine))
+	{
+		Error("Expected valid expression");
+		return;
+	}
 
 	// Opcode stack for operators 
 	std::vector<Opcode, Allocator<Opcode>> opcodeStack;
@@ -1501,8 +1508,13 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 	bool requiredOperand = false;
 	std::vector<size_t, Allocator<size_t>> jumpAddrStack;
 
+	bool not = false;
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
+		// Check for a unary negation operator
+		while (Accept(SymbolType::Not))
+			not = !not;
+
 		// Parse operand
 		ParseSubexpressionOperand(requiredOperand, suppressFunctionCall);
 		requiredOperand = false;
@@ -1527,6 +1539,13 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 			// Emit short-circuit evaluation jump check with placeholder address
 			if (opcode == Opcode::And || opcode == Opcode::Or)
 			{
+				// Emit not opcode if required
+				if (not)
+				{
+					EmitOpcode(Opcode::Not);
+					not = false;
+				}
+
 				EmitOpcode(opcode == Opcode::And ? Opcode::JumpFalseCheck : Opcode::JumpTrueCheck);
 				jumpAddrStack.push_back(EmitAddressPlaceholder());
 			}
@@ -1542,8 +1561,14 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 			}
 		}
 		else
+		{
 			break;
+		}
 	}
+
+	// Emit negation opcode if required
+	if (not)
+		EmitOpcode(Opcode::Not);
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression
 	while (!jumpAddrStack.empty())
@@ -1556,30 +1581,6 @@ void Parser::ParseSubexpressionOperation(bool suppressFunctionCall)
 	if (!opcodeStack.empty())
 	{
 		Error("Syntax error when parsing expression");
-	}
-}
-
-void Parser::ParseSubexpression(bool suppressFunctionCall)
-{
-	if (m_error)
-		return;
-
-	// Make sure we have a valid expression
-	if (Check(SymbolType::NewLine))
-	{
-		Error("Expected valid expression");
-		return;
-	}
-
-	// Check for a logical not at the beginning of the expression
-	if (Accept(SymbolType::Not))
-	{
-		ParseExpression();
-		EmitOpcode(Opcode::Not);	
-	}
-	else
-	{
-		ParseSubexpressionOperation(suppressFunctionCall);
 	}
 
 }
