@@ -1508,12 +1508,12 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	bool requiredOperand = false;
 	std::vector<size_t, Allocator<size_t>> jumpAddrStack;
 
-	bool not = false;
+	bool notOp = false;
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
 	{
 		// Check for a unary negation operator
 		while (Accept(SymbolType::Not))
-			not = !not;
+			notOp = !notOp;
 
 		// Parse operand
 		ParseSubexpressionOperand(requiredOperand, suppressFunctionCall);
@@ -1540,10 +1540,10 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 			if (opcode == Opcode::And || opcode == Opcode::Or)
 			{
 				// Emit not opcode if required
-				if (not)
+				if (notOp)
 				{
 					EmitOpcode(Opcode::Not);
-					not = false;
+					notOp = false;
 				}
 
 				EmitOpcode(opcode == Opcode::And ? Opcode::JumpFalseCheck : Opcode::JumpTrueCheck);
@@ -1567,7 +1567,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	}
 
 	// Emit negation opcode if required
-	if (not)
+	if (notOp)
 		EmitOpcode(Opcode::Not);
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression
