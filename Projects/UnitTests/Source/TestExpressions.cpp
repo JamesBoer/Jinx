@@ -75,10 +75,10 @@ TEST_CASE("Test Expressions", "[Expressions]")
 			set h to -5.0 % -3.0
 
 			set i to 6 % 3
-			set j to 6 % 3
+			set j to -6 % 3
 
 			set k to 6.0 % 3.0
-			set l to 6.0 % 3.0
+			set l to -6.0 % 3.0
 
 			)";
 
