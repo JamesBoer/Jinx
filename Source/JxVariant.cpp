@@ -883,7 +883,11 @@ Variant Jinx::operator % (const Variant & left, const Variant & right)
 {
 	// Handle floating-point numbers with fmod function
 	if (left.GetType() == ValueType::Number || right.GetType() == ValueType::Number)
-		return fmod(left.GetNumber(), right.GetNumber());
+	{
+		auto l = left.GetNumber();
+		auto r = right.GetNumber();
+		return fmod(fmod(l, r) + r, r);
+	}
 
 	// Check for non-integer types, especially since co-erced right values will be zero
 	if (left.GetType() != ValueType::Integer)
@@ -898,7 +902,9 @@ Variant Jinx::operator % (const Variant & left, const Variant & right)
 	}
 
 	// Return result from integer mod operation
-	return Variant(left.GetInteger() % right.GetInteger());
+	auto l = left.GetInteger();
+	auto r = right.GetInteger();
+	return ((l % r) + r) % r;
 }
 
 bool Jinx::operator == (const Variant & left, const Variant & right)
