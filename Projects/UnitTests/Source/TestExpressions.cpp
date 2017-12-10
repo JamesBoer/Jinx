@@ -59,6 +59,45 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("n").GetNumber() == Approx(6.206));
 	}
 
+	SECTION("Test mod operators with signs")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			set a to 5 % 3
+			set b to -5 % 3
+			set c to 5 % -3
+			set d to -5 % -3
+
+			set e to 5.0 % 3.0
+			set f to -5.0 % 3.0
+			set g to 5.0 % -3.0
+			set h to -5.0 % -3.0
+
+			set i to 6 % 3
+			set j to 6 % 3
+
+			set k to 6.0 % 3.0
+			set l to 6.0 % 3.0
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 2);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == -1);
+		REQUIRE(script->GetVariable("d") == -2);
+		REQUIRE(script->GetVariable("e") == 2.0);
+		REQUIRE(script->GetVariable("f") == 1.0);
+		REQUIRE(script->GetVariable("g") == -1.0);
+		REQUIRE(script->GetVariable("h") == -2.0);
+		REQUIRE(script->GetVariable("i") == 0);
+		REQUIRE(script->GetVariable("j") == 0);
+		REQUIRE(script->GetVariable("k") == 0.0);
+		REQUIRE(script->GetVariable("l") == 0.0);
+	}
+
 	SECTION("Test equality and inequality operators")
 	{
 		const char * scriptText =

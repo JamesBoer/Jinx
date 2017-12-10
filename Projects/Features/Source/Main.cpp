@@ -71,13 +71,13 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 			
-			set m to not "boo"				-- false
+			set a to -5 % -3
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("m") == false);
+		REQUIRE(script->GetVariable("a") == 1);
 	}
 
 	Jinx::ShutDown();
