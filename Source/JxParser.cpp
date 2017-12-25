@@ -1296,7 +1296,7 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	{
 		// Register function signature in library
 		auto itr = std::find(m_library->Functions().begin(), m_library->Functions().end(), signature);
-		if (itr != m_localFunctions.end())
+		if (itr != m_library->Functions().end())
 		{
 			Error("Function already defined in library %s", m_library->GetName().c_str());
 			return;
