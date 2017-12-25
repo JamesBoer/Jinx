@@ -363,8 +363,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			if (name == currSym->text)
 			{
 				auto newMatch = match;
-				newMatch.partTypes.push_back(FunctionSignaturePartType::Name);
-				newMatch.partCounts.push_back(1);
+				newMatch.partData.push_back(std::make_pair(FunctionSignaturePartType::Name, 1));
 				auto newCurrSym = currSym;
 				++newCurrSym;
 				if (CheckFunctionCallPart(parts, partsIndex + 1, newCurrSym, newMatch))
@@ -405,13 +404,12 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		// If our match structure isn't up to date, push new match items.  Otherwise,
 		// advance our expression token count.  This will be important for determining
 		// how many symbols we need to parse for an expression.
-		if (partsIndex >= newMatch.partTypes.size())
+		if (partsIndex >= newMatch.partData.size())
 		{
-			newMatch.partTypes.push_back(FunctionSignaturePartType::Parameter);
-			newMatch.partCounts.push_back(1);
+			newMatch.partData.push_back(std::make_pair(FunctionSignaturePartType::Parameter, 1));
 		}
 		else
-			newMatch.partCounts[partsIndex] = newMatch.partCounts[partsIndex] + 1;
+			newMatch.partData[partsIndex].second = newMatch.partData[partsIndex].second + 1;
 
 		// Check symbols against the current part.
 		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
@@ -454,7 +452,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionLis
 		auto newMatch = CheckFunctionCall(functionSig, currentSymbol);
 		if (newMatch.signature)
 		{
-			if (!match.signature || match.partCounts.size() < newMatch.partCounts.size())
+			if (!match.signature || match.partData.size() < newMatch.partData.size())
 				match = newMatch;
 		}
 	}
@@ -1356,9 +1354,9 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	FrameEnd();
 }
 
-void Parser::ParseFunctionCall(const FunctionSignature * signature)
+void Parser::ParseFunctionCall(const FunctionMatch & match)
 {
-	assert(signature);
+	assert(match.signature);
 
 	auto libName = CheckLibraryName();
 	if (!libName.empty())
@@ -1370,7 +1368,7 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 	int optionalCount = 0;
 
 	// Match each token or token set to a part of the function signature
-	const auto & parts = signature->GetParts();
+	const auto & parts = match.signature->GetParts();
 	for (auto partsItr = parts.begin(); partsItr != parts.end();)
 	{
 		if (partsItr->optional)
@@ -1378,56 +1376,24 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 
 		if (partsItr->partType == FunctionSignaturePartType::Name)
 		{
-			// Validate each part of the function name
-			if (CheckFunctionNamePart())
-			{
-				auto name = ParseFunctionNamePart();
-				bool match = false;
-				while (!match)
-				{
-					for (const auto & n : partsItr->names)
-					{
-						if (name == n)
-						{
-							match = true;
-							break;
-						}
-					}
-					if (match)
-						break;
-					if (partsItr->optional)
-					{
-						++partsItr;
-						if (partsItr == parts.end())
-							break;
-						continue;
-					}
-					Error("Mismatch in function name");
-					return;
-				}
-			}
-			else
-			{
-				if (partsItr->optional)
-				{
-					++partsItr;
-					continue;
-				}
-				Error("Expecting function name");
-				return;
-			}
+			NextSymbol();
 		}
 		else
 		{
+
 			// Push parameter onto the stack
 			if (Accept(SymbolType::ParenOpen))
 			{
-				ParseExpression();
+				ParseExpression(false, m_symbolList.end());
 				Expect(SymbolType::ParenClose);
 			}
 			else
 			{
-				ParseExpression(count <= optionalCount);
+				auto expressionSize = match.partData[count].second;
+				auto endSymbol = m_currentSymbol;
+				for (size_t i = 0; i < expressionSize; ++i)
+					++endSymbol;
+				ParseExpression(count <= optionalCount, endSymbol);
 			}
 		}
 		count++;
@@ -1436,8 +1402,8 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 
 	// When finished validating the function and pushing parameters, call the function
 	EmitOpcode(Opcode::CallFunc);
-	EmitId(signature->GetId());
-	m_idNameMap[signature->GetId()] = signature->GetName();
+	EmitId(match.signature->GetId());
+	m_idNameMap[match.signature->GetId()] = match.signature->GetName();
 
 	// Check for post-function index operator
 	if (ParseSubscript())
@@ -1462,7 +1428,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	suppressFunctionCall = false;
 	if (functionMatch.signature)
 	{
-		ParseFunctionCall(functionMatch.signature);
+		ParseFunctionCall(functionMatch);
 	}
 	else if (CheckProperty())
 	{
@@ -1517,7 +1483,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	}
 }
 
-void Parser::ParseSubexpression(bool suppressFunctionCall)
+void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSymbol)
 {
 	if (m_error)
 		return;
@@ -1536,7 +1502,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	std::vector<size_t, Allocator<size_t>> jumpAddrStack;
 
 	bool notOp = false;
-	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
+	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine && m_currentSymbol != endSymbol)
 	{
 		// Check for a unary negation operator
 		while (Accept(SymbolType::Not))
@@ -1612,7 +1578,17 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 
 }
 
-void Parser::ParseExpression(bool suppressFunctionCall)
+void Parser::ParseSubexpression(bool suppressFunctionCall)
+{
+	ParseSubexpression(suppressFunctionCall, m_symbolList.end());
+}
+
+void Parser::ParseSubexpression()
+{
+	ParseSubexpression(false);
+}
+
+void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol)
 {
 	// Check first for an opening bracket, which indicates either an index operator or a key-value pair.
 	if (Accept(SymbolType::SquareOpen))
@@ -1630,7 +1606,7 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 			// If we see a comma after a square open bracket, we're parsing a key-value pair
 			if (Accept(SymbolType::Comma))
 			{
-				ParseExpression(suppressFunctionCall);
+				ParseExpression(suppressFunctionCall, endSymbol);
 				Expect(SymbolType::SquareClose);
 
 				// Parse all subsequent key-value pairs
@@ -1660,7 +1636,7 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 	{
 		// Parse the first subexpression, defined as any normal expression excluding index operators or lists, 
 		// which are handled in this function
-		ParseSubexpression(suppressFunctionCall);
+		ParseSubexpression(suppressFunctionCall, endSymbol);
 
 		// If we finish the first subexpression with a common, then we're parsing an indexed list
 		if (Accept(SymbolType::Comma))
@@ -1680,6 +1656,11 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 			EmitCount(count);
 		}
 	}
+}
+
+void Parser::ParseExpression()
+{
+	ParseExpression(false, m_symbolList.end());
 }
 
 void Parser::ParseErase()
@@ -2038,11 +2019,11 @@ bool Parser::ParseStatement()
 
 	// Functions signatures have precedence over everything, so check for a 
 	// potential signature match before anything else.
-	auto functionMatch = CheckFunctionCall();
+	const auto functionMatch = CheckFunctionCall();
 	if (functionMatch.signature)
 	{
 		// We found a valid function signature that matches the current token(s)
-		ParseFunctionCall(functionMatch.signature);
+		ParseFunctionCall(functionMatch);
 
 		// Since all functions return a value, we need to discard the return
 		// value not on the stack, since we're not assigning it to a variable.

@@ -29,16 +29,14 @@ namespace Jinx
 
 	private:
 
-		typedef std::vector<FunctionSignaturePartType, Allocator<FunctionSignaturePartType>> FunctionPartTypes;
-		typedef std::vector<size_t, Allocator<size_t>> FunctionPartCounts;
+		typedef std::vector<std::pair<FunctionSignaturePartType, size_t>, Allocator<std::pair<FunctionSignaturePartType, size_t>>> FunctionPartData;
 
 		// Structure returned from function finding algorithm
 		struct FunctionMatch
 		{
 			FunctionMatch() : signature(nullptr) {}
 			const FunctionSignature * signature;
-			FunctionPartTypes partTypes;
-			FunctionPartCounts partCounts;
+			FunctionPartData partData;
 		};
 
 		// Log an error
@@ -145,11 +143,14 @@ namespace Jinx
 		String ParseFunctionNamePart();
 		FunctionSignature ParseFunctionSignature(VisibilityType access);
 		void ParseFunctionDefinition(VisibilityType scope);
-		void ParseFunctionCall(const FunctionSignature * signature);
+		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
-		void ParseSubexpressionOperand(bool required, bool suppressFunctionCall = false);
-		void ParseSubexpression(bool suppressFunctionCall = false);
-		void ParseExpression(bool suppressFunctionCall = false);
+		void ParseSubexpressionOperand(bool required, bool suppressFunctionCall);
+		void ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSymbol);
+		void ParseSubexpression(bool suppressFunctionCall);
+		void ParseSubexpression();
+		void ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol);
+		void ParseExpression();
 		void ParseErase();
 		void ParseIncDec();
 		void ParseIfElse();
@@ -174,6 +175,9 @@ namespace Jinx
 
 		// Current symbol being parsed
 		SymbolListCItr m_currentSymbol;
+
+		// Symbol marking end of current expression
+		SymbolListCItr m_exprEndSymbol;
 
 		// Signal an error
 		bool m_error;
