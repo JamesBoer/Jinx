@@ -71,10 +71,19 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 			
-			function test
+			function (a) b/c/d (e)
+				-- do nothing
 			end
 
-			test
+			a b e
+			a c e
+			a d e
+			b e
+			c e
+			d e
+			b
+			c
+			d			
 
 			)";
 

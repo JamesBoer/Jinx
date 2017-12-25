@@ -346,12 +346,13 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 	if (partsIndex >= parts.size())
 		return true;
 
+	const auto & part = parts[partsIndex];
+
 	// Check for invalid symbol - always a failure condition
 	if (!IsSymbolValid(currSym))
-		return false;
+		return part.optional;
 
 	// Recursively iterate through all parts and match them against the signature.
-	const auto & part = parts[partsIndex];
 	if (part.partType == FunctionSignaturePartType::Name)
 	{
 		if (currSym->type != SymbolType::NameValue && !IsKeyword(currSym->type))
@@ -376,7 +377,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 
 		if (part.optional)
 		{
-			if (CheckFunctionCallPart(parts, partsIndex + 1, ++currSym, match))
+			if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, match))
 				return true;
 		}
 		else

@@ -106,6 +106,31 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 	}
 
+	SECTION("Test alternate names function")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function (a) b/c/d (e)
+				-- do nothing
+			end
+
+			a b e
+			a c e
+			a d e
+			b e
+			c e
+			d e
+			b
+			c
+			d			
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+	}
+
 	SECTION("Test optional names function")
 	{
 		static const char * scriptText =
