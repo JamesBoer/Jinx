@@ -43,7 +43,6 @@ Copyright (c) 2016 James Boer
 #include "JxHash.h"
 #include "JxFunctionSignature.h"
 #include "JxFunctionDefinition.h"
-#include "JxFunctionTable.h"
 #include "JxLibrary.h"
 #include "JxVariableStackFrame.h"
 #include "JxParser.h"

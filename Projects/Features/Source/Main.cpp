@@ -71,13 +71,16 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 			
-			set a to -5 % -3
+			function test
+			end
+
+			test
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 1);
+		//REQUIRE(script->GetVariable("a") == nullptr);
 	}
 
 	Jinx::ShutDown();

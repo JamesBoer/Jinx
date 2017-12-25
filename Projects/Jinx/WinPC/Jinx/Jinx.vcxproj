@@ -26,7 +26,6 @@
     <ClInclude Include="..\..\..\..\Source\JxConversion.h" />
     <ClInclude Include="..\..\..\..\Source\JxFunctionDefinition.h" />
     <ClInclude Include="..\..\..\..\Source\JxFunctionSignature.h" />
-    <ClInclude Include="..\..\..\..\Source\JxFunctionTable.h" />
     <ClInclude Include="..\..\..\..\Source\JxGuid.h" />
     <ClInclude Include="..\..\..\..\Source\JxHash.h" />
     <ClInclude Include="..\..\..\..\Source\JxInternal.h" />
@@ -52,7 +51,6 @@
     <ClCompile Include="..\..\..\..\Source\JxCommon.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxConversion.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxFunctionSignature.cpp" />
-    <ClCompile Include="..\..\..\..\Source\JxFunctionTable.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxHash.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxLexer.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxLibCore.cpp" />
