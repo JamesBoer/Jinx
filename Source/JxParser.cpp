@@ -348,14 +348,14 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 
 	const auto & part = parts[partsIndex];
 
-	// Check for invalid symbol - always a failure condition
+	// Check for invalid symbol
 	if (!IsSymbolValid(currSym))
-		return part.optional;
+		return part.optional && partsIndex == (parts.size() - 1);
 
 	// Recursively iterate through all parts and match them against the signature.
 	if (part.partType == FunctionSignaturePartType::Name)
 	{
-		if (currSym->type != SymbolType::NameValue && !IsKeyword(currSym->type))
+		if (!part.optional && currSym->type != SymbolType::NameValue && !IsKeyword(currSym->type))
 			return false;
 
 		for (const auto & name : part.names)
@@ -385,9 +385,49 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 	}
 	else
 	{
+		// Check for valid expressions
+		size_t symCount = 0;
+		if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount))
+		{
+			for (size_t i = 0; i < symCount; ++i)
+				++currSym;
+		}
+		else if (IsValue(currSym->type) || IsOperator(currSym->type))
+		{
+			++currSym;
+		}
+		else
+			return false;
+
+		// Store off current match structure
+		auto newMatch = match;
+
+		// If our match structure isn't up to date, push new match items.  Otherwise,
+		// advance our expression token count.  This will be important for determining
+		// how many symbols we need to parse for an expression.
+		if (partsIndex >= newMatch.partTypes.size())
+		{
+			newMatch.partTypes.push_back(FunctionSignaturePartType::Parameter);
+			newMatch.partCounts.push_back(1);
+		}
+		else
+			newMatch.partCounts[partsIndex] = newMatch.partCounts[partsIndex] + 1;
+
+		// Check symbols against the current part.
+		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
+		{
+			match = newMatch;
+			return true;
+		}
+
+		// Check to see if advancing a part leads to success
+		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, newMatch))
+		{
+			match = newMatch;
+			return true;
+		}
 
 	}
-
 
 	return false;
 }

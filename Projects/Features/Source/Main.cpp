@@ -71,25 +71,17 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 			
-			function (a) b/c/d (e)
-				-- do nothing
+			function {x} minus {y}
+				return x - y
 			end
 
-			a b e
-			a c e
-			a d e
-			b e
-			c e
-			d e
-			b
-			c
-			d			
+			set a to 5 + 2 minus 3 + 1
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		//REQUIRE(script->GetVariable("a") == nullptr);
+		REQUIRE(script->GetVariable("a") == 3);
 	}
 
 	Jinx::ShutDown();
