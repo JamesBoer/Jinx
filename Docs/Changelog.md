@@ -7,8 +7,6 @@ All notable changes to this project will be documented in this file.
 - Function precedence now works left to right
 - Compound expressions are no longer a problem for the parser
 
-## Fixed
-- Parser now rejects function parameter names that collide with properties
 ## [0.14.0] - 2017-12-06
 
 ## Changed

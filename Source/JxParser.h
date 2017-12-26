@@ -121,10 +121,11 @@ namespace Jinx
 		bool CheckProperty(size_t * symCount = nullptr) const;
 		bool CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const;
 		String CheckLibraryName() const;
-		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, FunctionMatch & match) const;
-		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, bool skipInitialParam) const;
-		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, bool skipInitialParam) const;
-		FunctionMatch CheckFunctionCall(bool skipInitialParam = false) const;
+		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const;
+		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
+		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
+		FunctionMatch CheckFunctionCall(bool skipInitialParam, SymbolListCItr endSym) const;
+		FunctionMatch CheckFunctionCall() const;
 
 		// Parsing functions advance the current symbol, looking for a pattern of symbols
 		// and injecting the compiled results into the bytecode buffer.
@@ -145,11 +146,10 @@ namespace Jinx
 		void ParseFunctionDefinition(VisibilityType scope);
 		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
-		void ParseSubexpressionOperand(bool required, bool suppressFunctionCall);
-		void ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSymbol);
-		void ParseSubexpression(bool suppressFunctionCall);
+		void ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol);
+		void ParseSubexpression(SymbolListCItr endSymbol);
 		void ParseSubexpression();
-		void ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol);
+		void ParseExpression(SymbolListCItr endSymbol);
 		void ParseExpression();
 		void ParseErase();
 		void ParseIncDec();
