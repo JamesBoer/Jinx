@@ -1362,42 +1362,19 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 	if (!libName.empty())
 		NextSymbol();
 	
-	// We only need to suppress potential recursive function calls if the first 
-	// token is a parameter.
-	int count = 0;
-	int optionalCount = 0;
-
-	// Match each token or token set to a part of the function signature
-	const auto & parts = match.signature->GetParts();
-	for (auto partsItr = parts.begin(); partsItr != parts.end();)
+	// Parse function components according to match data
+	for (size_t i = 0; i < match.partData.size(); ++i)
 	{
-		if (partsItr->optional)
-			optionalCount++;
-
-		if (partsItr->partType == FunctionSignaturePartType::Name)
-		{
+		if (match.partData[i].first == FunctionSignaturePartType::Name)
 			NextSymbol();
-		}
 		else
 		{
-
-			// Push parameter onto the stack
-			if (Accept(SymbolType::ParenOpen))
-			{
-				ParseExpression(false, m_symbolList.end());
-				Expect(SymbolType::ParenClose);
-			}
-			else
-			{
-				auto expressionSize = match.partData[count].second;
-				auto endSymbol = m_currentSymbol;
-				for (size_t i = 0; i < expressionSize; ++i)
-					++endSymbol;
-				ParseExpression(count <= optionalCount, endSymbol);
-			}
+			auto expressionSize = match.partData[i].second;
+			auto endSymbol = m_currentSymbol;
+			for (size_t j = 0; j < expressionSize; ++j)
+				++endSymbol;
+			ParseExpression(i == 0, endSymbol);
 		}
-		count++;
-		++partsItr;
 	}
 
 	// When finished validating the function and pushing parameters, call the function
@@ -1422,39 +1399,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	if (m_error)
 		return;
 
-	FunctionMatch functionMatch;
-	if (!suppressFunctionCall)
-		functionMatch = CheckFunctionCall();
-	suppressFunctionCall = false;
-	if (functionMatch.signature)
-	{
-		ParseFunctionCall(functionMatch);
-	}
-	else if (CheckProperty())
-	{
-		auto propertyName = ParsePropertyName();
-		if (!propertyName.IsValid())
-		{
-			Error("Unable to find property name in library");
-			return;
-		}
-		bool subscript = ParseSubscript();
-		EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
-		EmitId(propertyName.GetId());
-		m_idNameMap[propertyName.GetId()] = propertyName.GetName();
-		if (Accept(SymbolType::Type))
-			EmitOpcode(Opcode::Type);
-	}
-	else if (CheckVariable())
-	{
-		String name = ParseVariable();
-		bool subscript = ParseSubscript();
-		EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-		EmitId(NameToRuntimeID(name));
-		if (Accept(SymbolType::Type))
-			EmitOpcode(Opcode::Type);
-	}
-	else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
+	if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
 	{
 		if (required)
 			Error("Expected operand");
@@ -1465,22 +1410,59 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 		ParseExpression();
 		Expect(SymbolType::ParenClose);
 	}
-	else if (CheckValue())
-	{
-		auto val = ParseValue();
-		EmitOpcode(Opcode::PushVal);
-		EmitValue(val);
-	}
-	else if (CheckValueType())
-	{
-		auto val = ParseValueType();
-		EmitOpcode(Opcode::PushVal);
-		EmitValue(val);
-	}
 	else
 	{
-		Error("Expected operand");
+		FunctionMatch functionMatch;
+		if (!suppressFunctionCall)
+			functionMatch = CheckFunctionCall();
+		suppressFunctionCall = false;
+		if (functionMatch.signature)
+		{
+			ParseFunctionCall(functionMatch);
+		}
+		else if (CheckProperty())
+		{
+			auto propertyName = ParsePropertyName();
+			if (!propertyName.IsValid())
+			{
+				Error("Unable to find property name in library");
+				return;
+			}
+			bool subscript = ParseSubscript();
+			EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
+			EmitId(propertyName.GetId());
+			m_idNameMap[propertyName.GetId()] = propertyName.GetName();
+			if (Accept(SymbolType::Type))
+				EmitOpcode(Opcode::Type);
+		}
+		else if (CheckVariable())
+		{
+			String name = ParseVariable();
+			bool subscript = ParseSubscript();
+			EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
+			EmitId(NameToRuntimeID(name));
+			if (Accept(SymbolType::Type))
+				EmitOpcode(Opcode::Type);
+		}
+		else if (CheckValue())
+		{
+			auto val = ParseValue();
+			EmitOpcode(Opcode::PushVal);
+			EmitValue(val);
+		}
+		else if (CheckValueType())
+		{
+			auto val = ParseValueType();
+			EmitOpcode(Opcode::PushVal);
+			EmitValue(val);
+		}
+		else
+		{
+			Error("Expected operand");
+		}
+
 	}
+
 }
 
 void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSymbol)

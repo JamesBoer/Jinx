@@ -68,20 +68,26 @@ int main(int argc, char ** argv)
 		globalParams.freeFn = [](void * p) { free(p); };
 		Jinx::Initialize(globalParams);
 	
-		const char * scriptText =
+		static const char * scriptText =
 			u8R"(
-			
-			function {x} minus {y}
-				return x - y
-			end
+			import core
 
-			set a to 5 + 2 minus 3 + 1
+			-- Create collection using an initialization list of key-value pairs		
+			set a to [1, "red"], [2, "green"], [3, "blue"]
+			
+			-- Add single element to a
+			set a[(a size + 1)] to "purple"
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 3);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 4);
+		REQUIRE(collection->find(4) != collection->end());
+		REQUIRE(collection->find(4)->second == "purple");
 	}
 
 	Jinx::ShutDown();

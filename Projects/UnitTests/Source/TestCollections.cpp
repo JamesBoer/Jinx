@@ -319,8 +319,8 @@ TEST_CASE("Test Collections", "[Collections]")
 
 	SECTION("Test adding auto-indexed value to existing collection")
 	{
-	static const char * scriptText =
-		u8R"(
+		static const char * scriptText =
+			u8R"(
 			import core
 
 			-- Create collection using an initialization list of key-value pairs		
