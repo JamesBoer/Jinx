@@ -389,6 +389,30 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("d") == 4);
 	}
 
+	SECTION("Test compound middle function parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function check {x} expression  
+				return x
+			end
+
+			set a to check 2 + 3 expression	
+			set b to check (2 + 3) expression	
+			set c to check true or false expression	
+			set d to check (true or false) expression	
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 5);
+		REQUIRE(script->GetVariable("b") == 5);
+		REQUIRE(script->GetVariable("c") == true);
+		REQUIRE(script->GetVariable("d") == true);
+	}
+
 	SECTION("Test functional recursion")
 	{
 		static const char * scriptText =

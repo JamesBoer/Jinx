@@ -115,7 +115,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-/*
+
 	SECTION("Test too many operands #4 error")
 	{
 		static const char * scriptText =
@@ -132,7 +132,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
-*/
+
 	SECTION("Test too many operands #5 error")
 	{
 		static const char * scriptText =

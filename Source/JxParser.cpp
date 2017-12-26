@@ -1594,7 +1594,14 @@ void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSym
 	{
 		const auto match = CheckFunctionCall(true);
 		if (match.signature)
+		{
+			if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
+			{
+				Error("Missing operator before function '%s'", match.signature->GetName().c_str());
+				return;
+			}
 			ParseFunctionCall(match);
+		}
 	}
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression
