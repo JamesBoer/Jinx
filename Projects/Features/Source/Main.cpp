@@ -76,20 +76,17 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 	
-			function (opt/optional) (blah) {num} stuff
-				-- do nothing
+			function {a} minus {b}  
+				return a - b
 			end
-
-			--optional 123 stuff
-			opt 456 stuff
-			--789 stuff
-			--blah 000 stuff
-			--opt blah 111 stuff
+	 
+			set a to 5 minus 3 minus 1
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 1);
 	}
 
 	Jinx::ShutDown();
