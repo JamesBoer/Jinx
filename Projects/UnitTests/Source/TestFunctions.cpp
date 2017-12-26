@@ -278,6 +278,67 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 3);
 	}
+
+	SECTION("Test complex expressions as function parameters #1")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function {x} test
+				return x
+			end
+	 
+			set a to 1 + 2 * 3 - 1 test
+			set b to true and true test
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("b") == true);
+	}
+
+	SECTION("Test complex expressions as function parameters #2")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function test {x} test
+				return x
+			end
+	 
+			set a to test 1 + 2 * 3 - 1 test
+			set b to test true and true test
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("b") == true);
+	}
+
+	SECTION("Test complex expressions as function parameters #3")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function test {x}
+				return x
+			end
+	 
+			set a to test 1 + 2 * 3 - 1
+			set b to test true and true
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("b") == true);
+	}
+
 /*
 	SECTION("Test simple chained functions")
 	{
@@ -301,6 +362,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("c") == 5);
 	}
 */
+
 	SECTION("Test functional recursion")
 	{
 		static const char * scriptText =
