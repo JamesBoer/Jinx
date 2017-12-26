@@ -372,7 +372,7 @@ TEST_CASE("Test Collections", "[Collections]")
 
 			-- Create collection using an initialization list of key-value pairs		
 			set a to [1, "red"], [2, "green"], [3, "blue"]
-			
+
 			loop i over a
 				if i value = "blue"
 					erase i

@@ -413,6 +413,28 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("d") == true);
 	}
 
+	SECTION("Test function as function parameter")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function meaning of life
+				return 42
+			end
+
+			function get {x} answer
+				return x
+			end
+
+			set a to get meaning of life answer
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 42);
+	}
+
 	SECTION("Test functional recursion")
 	{
 		static const char * scriptText =

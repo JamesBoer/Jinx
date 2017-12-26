@@ -413,7 +413,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			return false;
 		}
 		else if (IsConstant(currSym->type) || IsOperator(currSym->type) || currSym->type == SymbolType::Not ||
-			currSym->type == SymbolType::And || currSym->type == SymbolType::Or)
+			currSym->type == SymbolType::And || currSym->type == SymbolType::Or || currSym->type == SymbolType::NameValue)
 		{
 			++currSym;
 			symCount = 1;
@@ -428,19 +428,19 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		// advance our expression token count.  This will be important for determining
 		// how many symbols we need to parse for an expression.
 		if (partsIndex >= newMatch.partData.size())
-			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, part.optional));
+			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, false));
 		else
 			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + symCount;
 
-		// Check symbols against the current part.
-		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
+		// Check to see if advancing part index leads to success
+		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, newMatch))
 		{
 			match = newMatch;
 			return true;
 		}
 
-		// Check to see if advancing a part leads to success
-		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, newMatch))
+		// Check symbols against the current part.
+		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
 		{
 			match = newMatch;
 			return true;
