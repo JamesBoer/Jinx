@@ -340,11 +340,15 @@ String Parser::CheckLibraryName() const
 	return libraryName;
 }
 
-bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, FunctionMatch & match) const
+bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
 {
 	// If we reach the end of the parts list, return success
 	if (partsIndex >= parts.size())
 		return true;
+
+	// If we've exceeded our range, return failure
+	if (currSym == endSym)
+		return false;
 
 	const auto & part = parts[partsIndex];
 
@@ -366,7 +370,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 				newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 1, part.optional));
 				auto newCurrSym = currSym;
 				++newCurrSym;
-				if (CheckFunctionCallPart(parts, partsIndex + 1, newCurrSym, newMatch))
+				if (CheckFunctionCallPart(parts, partsIndex + 1, newCurrSym, endSym, newMatch))
 				{
 					match = newMatch;
 					return true;
@@ -376,7 +380,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 
 		if (part.optional)
 		{
-			if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, match))
+			if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, endSym, match))
 				return true;
 		}
 		else
@@ -433,32 +437,31 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + symCount;
 
 		// Check to see if advancing part index leads to success
-		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, newMatch))
+		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, endSym, newMatch))
 		{
 			match = newMatch;
 			return true;
 		}
 
 		// Check symbols against the current part.
-		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
+		if (CheckFunctionCallPart(parts, partsIndex, currSym, endSym, newMatch))
 		{
 			match = newMatch;
 			return true;
 		}
-
 	}
 
 	return false;
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, bool skipInitialParam) const
+Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const
 {
 	FunctionMatch match;
 	const auto & parts = signature.GetParts();
 	size_t partsIndex = 0;
 	if (skipInitialParam && signature.GetParts()[0].partType == FunctionSignaturePartType::Parameter)
 		partsIndex++;
-	if (CheckFunctionCallPart(parts, partsIndex, currSym, match))
+	if (CheckFunctionCallPart(parts, partsIndex, currSym, endSym, match))
 	{
 		match.signature = &signature;
 		return match;
@@ -466,13 +469,13 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signat
 	return FunctionMatch();
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, bool skipInitialParam) const
+Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const
 {
 	FunctionMatch match;
 	for (const auto & functionSig : functionList)
 	{
 		auto currentSymbol = currSym;
-		auto newMatch = CheckFunctionCall(functionSig, currentSymbol, skipInitialParam);
+		auto newMatch = CheckFunctionCall(functionSig, currentSymbol, endSym, skipInitialParam);
 		if (newMatch.signature)
 		{
 			if (!match.signature || match.partData.size() < newMatch.partData.size())
@@ -482,7 +485,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionLis
 	return match;
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam) const
+Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolListCItr endSym) const
 {
 	FunctionMatch match;
 
@@ -512,25 +515,25 @@ Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam) const
 	if (!libraryName.empty())
 	{
 		auto library = m_runtime->GetLibraryInternal(libraryName);
-		match = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
+		match = CheckFunctionCall(library->Functions(), currentSymbol, endSym, skipInitialParam);
 	}
 	else
 	{
 		// Check locally function table for signature match
-		match = CheckFunctionCall(m_localFunctions, currentSymbol, skipInitialParam);
+		match = CheckFunctionCall(m_localFunctions, currentSymbol, endSym, skipInitialParam);
 
 		// If not found in local function table, search in libraries for a function match
 		if (!match.signature)
 		{
 			// Check the current library for a signature match
-			match = CheckFunctionCall(m_library->Functions(), currentSymbol, skipInitialParam);
+			match = CheckFunctionCall(m_library->Functions(), currentSymbol, endSym, skipInitialParam);
 
 			// If a library name isn't specified or a signature wasn't found, search first in current library, then in order of imports
 			if (!match.signature)
 			{
 				// Search default library first
 				auto library = m_runtime->GetLibraryInternal(libraryName);
-				match = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
+				match = CheckFunctionCall(library->Functions(), currentSymbol, endSym, skipInitialParam);
 
 				// If function wasn't found in default library, search through all import libraries
 				if (!match.signature)
@@ -547,7 +550,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam) const
 
 						// Search for function in this library
 						library = m_runtime->GetLibraryInternal(libName);
-						auto newMatch = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
+						auto newMatch = CheckFunctionCall(library->Functions(), currentSymbol, endSym, skipInitialParam);
 						if (newMatch.signature)
 						{
 							if (match.signature)
@@ -572,6 +575,11 @@ Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam) const
 	}
 
 	return match;
+}
+
+Parser::FunctionMatch Parser::CheckFunctionCall() const
+{
+	return CheckFunctionCall(false, m_symbolList.end());
 }
 
 bool Parser::CheckVariable(SymbolListCItr currSym, size_t * symCount) const
@@ -1386,20 +1394,12 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 	if (!libName.empty())
 		NextSymbol();
 	
-	// Supress recursive function calls until we've parsed at least
-	// one non-optional name part, otherwise, we'll just be parsing the same function.
-	bool supressFunctionCall = true;
-
 	// Parse function components according to match data
 	for (size_t i = 0; i < match.partData.size(); ++i)
 	{
 		if (std::get<0>(match.partData[i]) == FunctionSignaturePartType::Name)
 		{
 			NextSymbol();
-
-			// If we've matched a non-optional name part, turn off function suppression
-			if (!std::get<2>(match.partData[i]))
-				supressFunctionCall = false;
 		}
 		else
 		{
@@ -1414,9 +1414,7 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 				auto endSymbol = m_currentSymbol;
 				for (size_t j = 0; j < expressionSize; ++j)
 					++endSymbol;
-				if (i == match.partData.size() - 1)
-					supressFunctionCall = true;
-				ParseExpression(supressFunctionCall, endSymbol);
+				ParseExpression(endSymbol);
 			}
 		}
 	}
@@ -1438,7 +1436,7 @@ void Parser::ParseCast()
 	EmitValueType(valueType);
 }
 
-void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
+void Parser::ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol)
 {
 	if (m_error)
 		return;
@@ -1451,10 +1449,7 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	}
 	else
 	{
-		FunctionMatch functionMatch;
-		if (!suppressFunctionCall)
-			functionMatch = CheckFunctionCall();
-		suppressFunctionCall = false;
+		FunctionMatch functionMatch = CheckFunctionCall(false, endSymbol);
 		if (functionMatch.signature)
 		{
 			ParseFunctionCall(functionMatch);
@@ -1504,12 +1499,10 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 		{
 			Error("Expected operand");
 		}
-
 	}
-
 }
 
-void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSymbol)
+void Parser::ParseSubexpression(SymbolListCItr endSymbol)
 {
 	if (m_error)
 		return;
@@ -1535,7 +1528,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSym
 			notOp = !notOp;
 
 		// Parse operand
-		ParseSubexpressionOperand(requiredOperand, suppressFunctionCall);
+		ParseSubexpressionOperand(requiredOperand, endSymbol);
 		requiredOperand = false;
 
 		// Check for casts
@@ -1590,18 +1583,15 @@ void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSym
 		EmitOpcode(Opcode::Not);
 
 	// Check for chained function calls
-	if (!suppressFunctionCall)
+	const auto match = CheckFunctionCall(true, endSymbol);
+	if (match.signature)
 	{
-		const auto match = CheckFunctionCall(true);
-		if (match.signature)
+		if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
 		{
-			if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
-			{
-				Error("Missing operator before function '%s'", match.signature->GetName().c_str());
-				return;
-			}
-			ParseFunctionCall(match);
+			Error("Missing operator before function '%s'", match.signature->GetName().c_str());
+			return;
 		}
+		ParseFunctionCall(match);
 	}
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression
@@ -1619,17 +1609,12 @@ void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSym
 
 }
 
-void Parser::ParseSubexpression(bool suppressFunctionCall)
-{
-	ParseSubexpression(suppressFunctionCall, m_symbolList.end());
-}
-
 void Parser::ParseSubexpression()
 {
-	ParseSubexpression(false);
+	ParseSubexpression(m_symbolList.end());
 }
 
-void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol)
+void Parser::ParseExpression(SymbolListCItr endSymbol)
 {
 	// Check first for an opening bracket, which indicates either an index operator or a key-value pair.
 	if (Accept(SymbolType::SquareOpen))
@@ -1642,12 +1627,12 @@ void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol
 		}
 		else
 		{
-			ParseSubexpression(suppressFunctionCall);
+			ParseSubexpression(endSymbol);
 
 			// If we see a comma after a square open bracket, we're parsing a key-value pair
 			if (Accept(SymbolType::Comma))
 			{
-				ParseExpression(suppressFunctionCall, endSymbol);
+				ParseExpression(endSymbol);
 				Expect(SymbolType::SquareClose);
 
 				// Parse all subsequent key-value pairs
@@ -1656,9 +1641,9 @@ void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol
 				{
 					Accept(SymbolType::NewLine);
 					Expect(SymbolType::SquareOpen);
-					ParseSubexpression();
+					ParseSubexpression(endSymbol);
 					Expect(SymbolType::Comma);
-					ParseSubexpression();
+					ParseSubexpression(endSymbol);
 					Expect(SymbolType::SquareClose);
 					++count;
 				}
@@ -1677,7 +1662,7 @@ void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol
 	{
 		// Parse the first subexpression, defined as any normal expression excluding index operators or lists, 
 		// which are handled in this function
-		ParseSubexpression(suppressFunctionCall, endSymbol);
+		ParseSubexpression(endSymbol);
 
 		// If we finish the first subexpression with a common, then we're parsing an indexed list
 		if (Accept(SymbolType::Comma))
@@ -1687,7 +1672,7 @@ void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol
 			do
 			{
 				Accept(SymbolType::NewLine);
-				ParseSubexpression();
+				ParseSubexpression(endSymbol);
 				++count;
 			} 
 			while (Accept(SymbolType::Comma));
@@ -1701,7 +1686,7 @@ void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol
 
 void Parser::ParseExpression()
 {
-	ParseExpression(false, m_symbolList.end());
+	ParseExpression(m_symbolList.end());
 }
 
 void Parser::ParseErase()
