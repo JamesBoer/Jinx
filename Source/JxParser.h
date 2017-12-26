@@ -29,7 +29,7 @@ namespace Jinx
 
 	private:
 
-		typedef std::vector<std::pair<FunctionSignaturePartType, size_t>, Allocator<std::pair<FunctionSignaturePartType, size_t>>> FunctionPartData;
+		typedef std::vector<std::tuple<FunctionSignaturePartType, size_t, bool>, Allocator<std::tuple<FunctionSignaturePartType, size_t, bool>>> FunctionPartData;
 
 		// Structure returned from function finding algorithm
 		struct FunctionMatch

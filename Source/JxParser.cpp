@@ -363,7 +363,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			if (name == currSym->text)
 			{
 				auto newMatch = match;
-				newMatch.partData.push_back(std::make_pair(FunctionSignaturePartType::Name, 1));
+				newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 1, part.optional));
 				auto newCurrSym = currSym;
 				++newCurrSym;
 				if (CheckFunctionCallPart(parts, partsIndex + 1, newCurrSym, newMatch))
@@ -406,10 +406,10 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		// how many symbols we need to parse for an expression.
 		if (partsIndex >= newMatch.partData.size())
 		{
-			newMatch.partData.push_back(std::make_pair(FunctionSignaturePartType::Parameter, 1));
+			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, 1, part.optional));
 		}
 		else
-			newMatch.partData[partsIndex].second = newMatch.partData[partsIndex].second + 1;
+			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + 1;
 
 		// Check symbols against the current part.
 		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
@@ -1363,18 +1363,28 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 	if (!libName.empty())
 		NextSymbol();
 	
+	// Supress recursive function calls until we've parsed at least
+	// one non-optional name part, otherwise, we'll just be parsing the same function.
+	bool supressFunctionCall = true;
+
 	// Parse function components according to match data
 	for (size_t i = 0; i < match.partData.size(); ++i)
 	{
-		if (match.partData[i].first == FunctionSignaturePartType::Name)
+		if (std::get<0>(match.partData[i]) == FunctionSignaturePartType::Name)
+		{
 			NextSymbol();
+
+			// If we've matched a non-optional name part, turn off function suppression
+			if (!std::get<2>(match.partData[i]))
+				supressFunctionCall = false;
+		}
 		else
 		{
-			auto expressionSize = match.partData[i].second;
+			auto expressionSize = std::get<1>(match.partData[i]);
 			auto endSymbol = m_currentSymbol;
 			for (size_t j = 0; j < expressionSize; ++j)
 				++endSymbol;
-			ParseExpression(i == 0, endSymbol);
+			ParseExpression(supressFunctionCall, endSymbol);
 		}
 	}
 

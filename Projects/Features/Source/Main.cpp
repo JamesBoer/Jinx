@@ -20,6 +20,11 @@ using namespace Jinx;
 
 #define REQUIRE assert
 
+Jinx::RuntimePtr TestCreateRuntime()
+{
+	return Jinx::CreateRuntime();
+}
+
 Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
 {
 	if (!runtime)
@@ -70,24 +75,21 @@ int main(int argc, char ** argv)
 	
 		static const char * scriptText =
 			u8R"(
-			import core
+	
+			function (opt/optional) (blah) {num} stuff
+				-- do nothing
+			end
 
-			-- Create collection using an initialization list of key-value pairs		
-			set a to [1, "red"], [2, "green"], [3, "blue"]
-			
-			-- Add single element to a
-			set a[(a size + 1)] to "purple"
+			--optional 123 stuff
+			opt 456 stuff
+			--789 stuff
+			--blah 000 stuff
+			--opt blah 111 stuff
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection());
-		auto collection = script->GetVariable("a").GetCollection();
-		REQUIRE(collection);
-		REQUIRE(collection->size() == 4);
-		REQUIRE(collection->find(4) != collection->end());
-		REQUIRE(collection->find(4)->second == "purple");
 	}
 
 	Jinx::ShutDown();
