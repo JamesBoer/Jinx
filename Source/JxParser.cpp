@@ -1301,6 +1301,7 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 			Error("Function already defined in library %s", m_library->GetName().c_str());
 			return;
 		}
+		m_library->RegisterFunctionSignature(signature);
 	}
 
 	// During initial execution, jump over code body
