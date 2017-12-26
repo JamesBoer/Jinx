@@ -21,8 +21,6 @@
 		AA7D1C681D4D229000A5AAF3 /* JxFunctionDefinition.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C3C1D4D229000A5AAF3 /* JxFunctionDefinition.h */; };
 		AA7D1C691D4D229000A5AAF3 /* JxFunctionSignature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C3D1D4D229000A5AAF3 /* JxFunctionSignature.cpp */; };
 		AA7D1C6A1D4D229000A5AAF3 /* JxFunctionSignature.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C3E1D4D229000A5AAF3 /* JxFunctionSignature.h */; };
-		AA7D1C6B1D4D229000A5AAF3 /* JxFunctionTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C3F1D4D229000A5AAF3 /* JxFunctionTable.cpp */; };
-		AA7D1C6C1D4D229000A5AAF3 /* JxFunctionTable.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C401D4D229000A5AAF3 /* JxFunctionTable.h */; };
 		AA7D1C6D1D4D229000A5AAF3 /* JxGuid.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C411D4D229000A5AAF3 /* JxGuid.h */; };
 		AA7D1C6E1D4D229000A5AAF3 /* JxHash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C421D4D229000A5AAF3 /* JxHash.cpp */; };
 		AA7D1C6F1D4D229000A5AAF3 /* JxHash.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C431D4D229000A5AAF3 /* JxHash.h */; };
@@ -72,8 +70,6 @@
 		AA7D1C3C1D4D229000A5AAF3 /* JxFunctionDefinition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionDefinition.h; path = ../../../../Source/JxFunctionDefinition.h; sourceTree = "<group>"; };
 		AA7D1C3D1D4D229000A5AAF3 /* JxFunctionSignature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxFunctionSignature.cpp; path = ../../../../Source/JxFunctionSignature.cpp; sourceTree = "<group>"; };
 		AA7D1C3E1D4D229000A5AAF3 /* JxFunctionSignature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionSignature.h; path = ../../../../Source/JxFunctionSignature.h; sourceTree = "<group>"; };
-		AA7D1C3F1D4D229000A5AAF3 /* JxFunctionTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxFunctionTable.cpp; path = ../../../../Source/JxFunctionTable.cpp; sourceTree = "<group>"; };
-		AA7D1C401D4D229000A5AAF3 /* JxFunctionTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxFunctionTable.h; path = ../../../../Source/JxFunctionTable.h; sourceTree = "<group>"; };
 		AA7D1C411D4D229000A5AAF3 /* JxGuid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxGuid.h; path = ../../../../Source/JxGuid.h; sourceTree = "<group>"; };
 		AA7D1C421D4D229000A5AAF3 /* JxHash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxHash.cpp; path = ../../../../Source/JxHash.cpp; sourceTree = "<group>"; };
 		AA7D1C431D4D229000A5AAF3 /* JxHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxHash.h; path = ../../../../Source/JxHash.h; sourceTree = "<group>"; };
@@ -151,8 +147,6 @@
 				AA7D1C3C1D4D229000A5AAF3 /* JxFunctionDefinition.h */,
 				AA7D1C3D1D4D229000A5AAF3 /* JxFunctionSignature.cpp */,
 				AA7D1C3E1D4D229000A5AAF3 /* JxFunctionSignature.h */,
-				AA7D1C3F1D4D229000A5AAF3 /* JxFunctionTable.cpp */,
-				AA7D1C401D4D229000A5AAF3 /* JxFunctionTable.h */,
 				AA7D1C411D4D229000A5AAF3 /* JxGuid.h */,
 				AA7D1C421D4D229000A5AAF3 /* JxHash.cpp */,
 				AA7D1C431D4D229000A5AAF3 /* JxHash.h */,
@@ -220,7 +214,6 @@
 				AA7D1C671D4D229000A5AAF3 /* JxConversion.h in Headers */,
 				AA7D1C7A1D4D229000A5AAF3 /* JxMemory.h in Headers */,
 				AA7D1C6F1D4D229000A5AAF3 /* JxHash.h in Headers */,
-				AA7D1C6C1D4D229000A5AAF3 /* JxFunctionTable.h in Headers */,
 				AA7D1C741D4D229000A5AAF3 /* JxLibCore.h in Headers */,
 				AA7D1C781D4D229000A5AAF3 /* JxLogging.h in Headers */,
 				AA7D1C821D4D229000A5AAF3 /* JxRuntime.h in Headers */,
@@ -285,7 +278,6 @@
 			files = (
 				AA7D1C851D4D229000A5AAF3 /* JxSerialize.cpp in Sources */,
 				AA7D1C791D4D229000A5AAF3 /* JxMemory.cpp in Sources */,
-				AA7D1C6B1D4D229000A5AAF3 /* JxFunctionTable.cpp in Sources */,
 				AA7D1C751D4D229000A5AAF3 /* JxLibrary.cpp in Sources */,
 				AA7D1C691D4D229000A5AAF3 /* JxFunctionSignature.cpp in Sources */,
 				AA7D1C871D4D229000A5AAF3 /* JxUnicode.cpp in Sources */,
