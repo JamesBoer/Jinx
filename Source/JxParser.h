@@ -176,9 +176,6 @@ namespace Jinx
 		// Current symbol being parsed
 		SymbolListCItr m_currentSymbol;
 
-		// Symbol marking end of current expression
-		SymbolListCItr m_exprEndSymbol;
-
 		// Signal an error
 		bool m_error;
 

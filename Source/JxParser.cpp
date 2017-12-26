@@ -391,7 +391,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			for (size_t i = 0; i < symCount; ++i)
 				++currSym;
 		}
-		else if (IsValue(currSym->type) || IsOperator(currSym->type))
+		else if (IsConstant(currSym->type) || IsOperator(currSym->type))
 		{
 			++currSym;
 		}

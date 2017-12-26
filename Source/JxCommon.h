@@ -156,7 +156,7 @@ namespace Jinx
 	const char * GetSymbolTypeText(SymbolType symbol);
 
 	// Check to see if a symbol is a particular category
-	bool IsValue(SymbolType symbol);
+	bool IsConstant(SymbolType symbol);
 	bool IsOperator(SymbolType symbol);
 	bool IsKeyword(SymbolType symbol);
 

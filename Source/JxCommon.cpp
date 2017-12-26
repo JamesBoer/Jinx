@@ -164,10 +164,10 @@ const char * Jinx::GetSymbolTypeText(SymbolType symbol)
 	return s_symbolTypeName[static_cast<size_t>(symbol)];
 }
 
-bool Jinx::IsValue(SymbolType symbol)
+bool Jinx::IsConstant(SymbolType symbol)
 {
 	assert(static_cast<int>(symbol) < static_cast<int>(SymbolType::NumSymbols));
-	return (static_cast<int>(symbol) >= static_cast<int>(SymbolType::NameValue)) && (static_cast<int>(symbol) < static_cast<int>(SymbolType::ForwardSlash));
+	return (static_cast<int>(symbol) > static_cast<int>(SymbolType::NameValue)) && (static_cast<int>(symbol) < static_cast<int>(SymbolType::ForwardSlash));
 }
 
 bool Jinx::IsOperator(SymbolType symbol)
