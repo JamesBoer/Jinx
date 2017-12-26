@@ -340,18 +340,162 @@ String Parser::CheckLibraryName() const
 	return libraryName;
 }
 
-const FunctionSignature * Parser::CheckFunctionCall() const
+bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, FunctionMatch & match) const
 {
+	// If we reach the end of the parts list, return success
+	if (partsIndex >= parts.size())
+		return true;
+
+	const auto & part = parts[partsIndex];
+
+	// Check for invalid symbol
+	if (!IsSymbolValid(currSym))
+		return part.optional && partsIndex == (parts.size() - 1);
+
+	// Recursively iterate through all parts and match them against the signature.
+	if (part.partType == FunctionSignaturePartType::Name)
+	{
+		if (!part.optional && currSym->type != SymbolType::NameValue && !IsKeyword(currSym->type))
+			return false;
+
+		for (const auto & name : part.names)
+		{
+			if (name == currSym->text)
+			{
+				auto newMatch = match;
+				newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 1, part.optional));
+				auto newCurrSym = currSym;
+				++newCurrSym;
+				if (CheckFunctionCallPart(parts, partsIndex + 1, newCurrSym, newMatch))
+				{
+					match = newMatch;
+					return true;
+				}
+			}
+		}	
+
+		if (part.optional)
+		{
+			if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, match))
+				return true;
+		}
+		else
+			return false;
+	}
+	else
+	{
+		// Check for valid expressions
+		size_t symCount = 0;
+		if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount))
+		{
+			for (size_t i = 0; i < symCount; ++i)
+				++currSym;
+		}
+		else if (currSym->type == SymbolType::ParenOpen)
+		{
+			size_t parenCount = 1;
+			symCount = 1;
+			while (parenCount)
+			{
+				++currSym;
+				++symCount;
+				if (!IsSymbolValid(currSym))
+					return false;
+				if (currSym->type == SymbolType::ParenOpen)
+					++parenCount;
+				else if (currSym->type == SymbolType::ParenClose)
+					--parenCount;
+			}
+			++currSym;
+		}
+		else if (currSym->type == SymbolType::ParenClose)
+		{
+			return false;
+		}
+		else if (IsConstant(currSym->type) || IsOperator(currSym->type) || currSym->type == SymbolType::Not ||
+			currSym->type == SymbolType::And || currSym->type == SymbolType::Or || currSym->type == SymbolType::NameValue)
+		{
+			++currSym;
+			symCount = 1;
+		}
+		else
+			return false;
+
+		// Store off current match structure
+		auto newMatch = match;
+
+		// If our match structure isn't up to date, push new match items.  Otherwise,
+		// advance our expression token count.  This will be important for determining
+		// how many symbols we need to parse for an expression.
+		if (partsIndex >= newMatch.partData.size())
+			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, false));
+		else
+			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + symCount;
+
+		// Check to see if advancing part index leads to success
+		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, newMatch))
+		{
+			match = newMatch;
+			return true;
+		}
+
+		// Check symbols against the current part.
+		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
+		{
+			match = newMatch;
+			return true;
+		}
+
+	}
+
+	return false;
+}
+
+Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, bool skipInitialParam) const
+{
+	FunctionMatch match;
+	const auto & parts = signature.GetParts();
+	size_t partsIndex = 0;
+	if (skipInitialParam && signature.GetParts()[0].partType == FunctionSignaturePartType::Parameter)
+		partsIndex++;
+	if (CheckFunctionCallPart(parts, partsIndex, currSym, match))
+	{
+		match.signature = &signature;
+		return match;
+	}
+	return FunctionMatch();
+}
+
+Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, bool skipInitialParam) const
+{
+	FunctionMatch match;
+	for (const auto & functionSig : functionList)
+	{
+		auto currentSymbol = currSym;
+		auto newMatch = CheckFunctionCall(functionSig, currentSymbol, skipInitialParam);
+		if (newMatch.signature)
+		{
+			if (!match.signature || match.partData.size() < newMatch.partData.size())
+				match = newMatch;
+		}
+	}
+	return match;
+}
+
+Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam) const
+{
+	FunctionMatch match;
+
 	// Store current symbol
 	auto currentSymbol = m_currentSymbol;
 
 	// Check for error or invalid symbols
 	if (m_error || currentSymbol == m_symbolList.end())
-		return nullptr;
+		return match;
 
 	// Any operators other than open parentheses mean this can't be a function call
 	if (IsOperator(currentSymbol->type) && (currentSymbol->type != SymbolType::ParenOpen))
-		return nullptr;
+		return match;
 
 	// Check for explicit library name in the first symbol.  libraryName is empty if not found.
 	String libraryName = CheckLibraryName();
@@ -361,162 +505,63 @@ const FunctionSignature * Parser::CheckFunctionCall() const
 	{
 		++currentSymbol;
 		if (currentSymbol == m_symbolList.end())
-			return nullptr;
+			return match;
 	}
 
-	// Create a signature parts list to match existing signatures against
-	FunctionSignatureParts parts;
-
-	// Add symbols to list until we hit a terminating symbol
-	while (IsSymbolValid(currentSymbol))
+	// If we explicitly specify a library name, then only look in that library
+	if (!libraryName.empty())
 	{
-		int parenCount = 0;
-		if (currentSymbol->type == SymbolType::NameValue || IsKeyword(currentSymbol->type))
-		{
-			String name = currentSymbol->text;
-			FunctionSignaturePart part;
-			size_t partSize = 0;
-			if (CheckVariable(currentSymbol, &partSize))
-			{
-				// Advance if more than one symbol used for variable
-				for (size_t i = 1; i < partSize; ++i)
-				{
-					++currentSymbol;
-					name += " ";
-					name += currentSymbol->text;
-				}
-				part.partType = FunctionSignaturePartType::Parameter;
-			}
-			else if (CheckProperty(currentSymbol, &partSize))
-			{
-				if (IsLibraryName(name))
-				{
-					String libName = name;
-					++currentSymbol;
-					if (!IsSymbolValid(currentSymbol))
-						return nullptr;
-				}
-				// Advance if more than one symbol used for variable
-				for (size_t i = 1; i < partSize; ++i)
-				{
-					++currentSymbol;
-					name += " ";
-					name += currentSymbol->text;
-				}
-				part.partType = FunctionSignaturePartType::Parameter;
-
-			}
-			else
-				part.partType = FunctionSignaturePartType::Name;
-			part.names.push_back(name);
-			parts.push_back(part);
-		}
-		else if (IsValue(currentSymbol->type))
-		{
-			FunctionSignaturePart part;
-			part.partType = FunctionSignaturePartType::Parameter;
-			parts.push_back(part);
-		}
-		else if (currentSymbol->type == SymbolType::ParenOpen)
-		{
-			++parenCount;
-			while (parenCount)
-			{
-				++currentSymbol;
-				if ((currentSymbol->type == SymbolType::NewLine) || (currentSymbol == m_symbolList.end()))
-					return nullptr;
-				if (currentSymbol->type == SymbolType::ParenClose)
-					--parenCount;
-				else if (currentSymbol->type == SymbolType::ParenOpen)
-					++parenCount;
-			}
-			FunctionSignaturePart part;
-			part.partType = FunctionSignaturePartType::Parameter;
-			parts.push_back(part);
-		}
-		else if (currentSymbol->type == SymbolType::SquareOpen)
-		{
-			++parenCount;
-			while (parenCount)
-			{
-				++currentSymbol;
-				if ((currentSymbol->type == SymbolType::NewLine) || (currentSymbol == m_symbolList.end()))
-					return nullptr;
-				if (currentSymbol->type == SymbolType::SquareClose)
-					--parenCount;
-				else if (currentSymbol->type == SymbolType::SquareOpen)
-					++parenCount;
-			}
-			FunctionSignaturePart part;
-			part.partType = FunctionSignaturePartType::Parameter;
-			parts.push_back(part);
-		}
-		else if (IsOperator(currentSymbol->type))
-		{
-			break;
-		}
-		++currentSymbol;
+		auto library = m_runtime->GetLibraryInternal(libraryName);
+		match = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
 	}
-
-	// Check possibility of a match with signature parts
-	const FunctionSignature * functionSignature = nullptr;
-	if (!parts.empty())
+	else
 	{
-		// If we explicitly specify a library name, then only look in that library
-		if (!libraryName.empty())
-		{
-			auto library = m_runtime->GetLibraryInternal(libraryName);
-			functionSignature = library->Functions().Find(parts);
-		}
-		else
-		{
-			// Check locally function table for signature match
-			functionSignature = m_localFunctions.Find(parts);
+		// Check locally function table for signature match
+		match = CheckFunctionCall(m_localFunctions, currentSymbol, skipInitialParam);
 
-			// If not found in local function table, search in libraries for a function match
-			if (!functionSignature)
+		// If not found in local function table, search in libraries for a function match
+		if (!match.signature)
+		{
+			// Check the current library for a signature match
+			match = CheckFunctionCall(m_library->Functions(), currentSymbol, skipInitialParam);
+
+			// If a library name isn't specified or a signature wasn't found, search first in current library, then in order of imports
+			if (!match.signature)
 			{
-				// Check the current library for a signature match
-				functionSignature = m_library->Functions().Find(parts);
+				// Search default library first
+				auto library = m_runtime->GetLibraryInternal(libraryName);
+				match = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
 
-				// If a library name isn't specified or a signature wasn't found, search first in current library, then in order of imports
-				if (!functionSignature)
+				// If function wasn't found in default library, search through all import libraries
+				if (!match.signature)
 				{
-					// Search default library first
-					auto library = m_runtime->GetLibraryInternal(libraryName);
-					functionSignature = library->Functions().Find(parts);
-
-					// If function wasn't found in default library, search through all import libraries
-					if (!functionSignature)
+					// Loop through all imported library names
+					for (const auto & libName : m_importList)
 					{
-						// Loop through all imported library names
-						for (const auto & libName : m_importList)
+						// Make sure the library exists
+						if (!m_runtime->LibraryExists(libName))
 						{
-							// Make sure the library exists
-							if (!m_runtime->LibraryExists(libName))
-							{
-								LogWriteLine("Warning: Unable to find library '%s'", libName.c_str());
-								continue;
-							}
+							LogWriteLine("Warning: Unable to find library '%s'", libName.c_str());
+							continue;
+						}
 
-							// Search for function in this library
-							library = m_runtime->GetLibraryInternal(libName);
-							auto fnSig = library->Functions().Find(parts);
-							if (fnSig)
+						// Search for function in this library
+						library = m_runtime->GetLibraryInternal(libName);
+						auto newMatch = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
+						if (newMatch.signature)
+						{
+							if (match.signature)
 							{
-								if (functionSignature)
+								LogWriteLine("Warning: Ambiguous function name detected.  Use library name to disambiguate.");
+								return match;
+							}
+							else
+							{
+								match = newMatch;
+								if (match.signature->GetVisibility() == VisibilityType::Private && library != m_library)
 								{
-									LogWriteLine("Warning: Ambiguous function name detected.  Use library name to disambiguate.");
-									return nullptr;
-								}
-								else
-								{
-									functionSignature = fnSig;
-									if (functionSignature->GetVisibility() == VisibilityType::Private && library != m_library)
-									{
-										LogWriteLine("Warning: Scope does not allow calling of library function");
-										return nullptr;
-									}
+									LogWriteLine("Warning: Scope does not allow calling of library function");
+									return match;
 								}
 							}
 						}
@@ -526,7 +571,7 @@ const FunctionSignature * Parser::CheckFunctionCall() const
 		}
 	}
 
-	return functionSignature;
+	return match;
 }
 
 bool Parser::CheckVariable(SymbolListCItr currSym, size_t * symCount) const
@@ -1262,20 +1307,24 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	if (signature.GetVisibility() == VisibilityType::Local)
 	{
 		// Register function signature for local scope only
-		if (!m_localFunctions.Register(signature, true))
+		auto itr = std::find(m_localFunctions.begin(), m_localFunctions.end(), signature);
+		if (itr != m_localFunctions.end())
 		{
 			Error("Function already defined in script %s", m_library->GetName().c_str());
 			return;
 		}
+		m_localFunctions.push_back(signature);
 	}
 	else
 	{
 		// Register function signature in library
-		if (!m_library->Functions().Register(signature, true))
+		auto itr = std::find(m_library->Functions().begin(), m_library->Functions().end(), signature);
+		if (itr != m_library->Functions().end())
 		{
 			Error("Function already defined in library %s", m_library->GetName().c_str());
 			return;
 		}
+		m_library->RegisterFunctionSignature(signature);
 	}
 
 	// During initial execution, jump over code body
@@ -1329,70 +1378,31 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	FrameEnd();
 }
 
-void Parser::ParseFunctionCall(const FunctionSignature * signature)
+void Parser::ParseFunctionCall(const FunctionMatch & match)
 {
-	assert(signature);
+	assert(match.signature);
 
 	auto libName = CheckLibraryName();
 	if (!libName.empty())
 		NextSymbol();
 	
-	// We only need to suppress potential recursive function calls if the first 
-	// token is a parameter.
-	int count = 0;
-	int optionalCount = 0;
+	// Supress recursive function calls until we've parsed at least
+	// one non-optional name part, otherwise, we'll just be parsing the same function.
+	bool supressFunctionCall = true;
 
-	// Match each token or token set to a part of the function signature
-	const auto & parts = signature->GetParts();
-	for (auto partsItr = parts.begin(); partsItr != parts.end();)
+	// Parse function components according to match data
+	for (size_t i = 0; i < match.partData.size(); ++i)
 	{
-		if (partsItr->optional)
-			optionalCount++;
-
-		if (partsItr->partType == FunctionSignaturePartType::Name)
+		if (std::get<0>(match.partData[i]) == FunctionSignaturePartType::Name)
 		{
-			// Validate each part of the function name
-			if (CheckFunctionNamePart())
-			{
-				auto name = ParseFunctionNamePart();
-				bool match = false;
-				while (!match)
-				{
-					for (const auto & n : partsItr->names)
-					{
-						if (name == n)
-						{
-							match = true;
-							break;
-						}
-					}
-					if (match)
-						break;
-					if (partsItr->optional)
-					{
-						++partsItr;
-						if (partsItr == parts.end())
-							break;
-						continue;
-					}
-					Error("Mismatch in function name");
-					return;
-				}
-			}
-			else
-			{
-				if (partsItr->optional)
-				{
-					++partsItr;
-					continue;
-				}
-				Error("Expecting function name");
-				return;
-			}
+			NextSymbol();
+
+			// If we've matched a non-optional name part, turn off function suppression
+			if (!std::get<2>(match.partData[i]))
+				supressFunctionCall = false;
 		}
 		else
 		{
-			// Push parameter onto the stack
 			if (Accept(SymbolType::ParenOpen))
 			{
 				ParseExpression();
@@ -1400,17 +1410,21 @@ void Parser::ParseFunctionCall(const FunctionSignature * signature)
 			}
 			else
 			{
-				ParseExpression(count <= optionalCount);
+				auto expressionSize = std::get<1>(match.partData[i]);
+				auto endSymbol = m_currentSymbol;
+				for (size_t j = 0; j < expressionSize; ++j)
+					++endSymbol;
+				if (i == match.partData.size() - 1)
+					supressFunctionCall = true;
+				ParseExpression(supressFunctionCall, endSymbol);
 			}
 		}
-		count++;
-		++partsItr;
 	}
 
 	// When finished validating the function and pushing parameters, call the function
 	EmitOpcode(Opcode::CallFunc);
-	EmitId(signature->GetId());
-	m_idNameMap[signature->GetId()] = signature->GetName();
+	EmitId(match.signature->GetId());
+	m_idNameMap[match.signature->GetId()] = match.signature->GetName();
 
 	// Check for post-function index operator
 	if (ParseSubscript())
@@ -1429,68 +1443,73 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 	if (m_error)
 		return;
 
-	const FunctionSignature * signature = nullptr;
-	if (!suppressFunctionCall)
-		signature = CheckFunctionCall();
-	suppressFunctionCall = false;
-	if (signature)
-	{
-		ParseFunctionCall(signature);
-	}
-	else if (CheckProperty())
-	{
-		auto propertyName = ParsePropertyName();
-		if (!propertyName.IsValid())
-		{
-			Error("Unable to find property name in library");
-			return;
-		}
-		bool subscript = ParseSubscript();
-		EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
-		EmitId(propertyName.GetId());
-		m_idNameMap[propertyName.GetId()] = propertyName.GetName();
-		if (Accept(SymbolType::Type))
-			EmitOpcode(Opcode::Type);
-	}
-	else if (CheckVariable())
-	{
-		String name = ParseVariable();
-		bool subscript = ParseSubscript();
-		EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-		EmitId(NameToRuntimeID(name));
-		if (Accept(SymbolType::Type))
-			EmitOpcode(Opcode::Type);
-	}
-	else if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
+	if (Check(SymbolType::Comma) || Check(SymbolType::ParenClose) || Check(SymbolType::SquareClose) || Check(SymbolType::To) || Check(SymbolType::By))
 	{
 		if (required)
 			Error("Expected operand");
 		return;
 	}
-	else if (Accept(SymbolType::ParenOpen))
-	{
-		ParseExpression();
-		Expect(SymbolType::ParenClose);
-	}
-	else if (CheckValue())
-	{
-		auto val = ParseValue();
-		EmitOpcode(Opcode::PushVal);
-		EmitValue(val);
-	}
-	else if (CheckValueType())
-	{
-		auto val = ParseValueType();
-		EmitOpcode(Opcode::PushVal);
-		EmitValue(val);
-	}
 	else
 	{
-		Error("Expected operand");
+		FunctionMatch functionMatch;
+		if (!suppressFunctionCall)
+			functionMatch = CheckFunctionCall();
+		suppressFunctionCall = false;
+		if (functionMatch.signature)
+		{
+			ParseFunctionCall(functionMatch);
+		}
+		else if (Accept(SymbolType::ParenOpen))
+		{
+			ParseExpression();
+			Expect(SymbolType::ParenClose);
+		}
+		else if (CheckProperty())
+		{
+			auto propertyName = ParsePropertyName();
+			if (!propertyName.IsValid())
+			{
+				Error("Unable to find property name in library");
+				return;
+			}
+			bool subscript = ParseSubscript();
+			EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
+			EmitId(propertyName.GetId());
+			m_idNameMap[propertyName.GetId()] = propertyName.GetName();
+			if (Accept(SymbolType::Type))
+				EmitOpcode(Opcode::Type);
+		}
+		else if (CheckVariable())
+		{
+			String name = ParseVariable();
+			bool subscript = ParseSubscript();
+			EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
+			EmitId(NameToRuntimeID(name));
+			if (Accept(SymbolType::Type))
+				EmitOpcode(Opcode::Type);
+		}
+		else if (CheckValue())
+		{
+			auto val = ParseValue();
+			EmitOpcode(Opcode::PushVal);
+			EmitValue(val);
+		}
+		else if (CheckValueType())
+		{
+			auto val = ParseValueType();
+			EmitOpcode(Opcode::PushVal);
+			EmitValue(val);
+		}
+		else
+		{
+			Error("Expected operand");
+		}
+
 	}
+
 }
 
-void Parser::ParseSubexpression(bool suppressFunctionCall)
+void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSymbol)
 {
 	if (m_error)
 		return;
@@ -1509,7 +1528,7 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	std::vector<size_t, Allocator<size_t>> jumpAddrStack;
 
 	bool notOp = false;
-	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine)
+	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine && m_currentSymbol != endSymbol)
 	{
 		// Check for a unary negation operator
 		while (Accept(SymbolType::Not))
@@ -1570,6 +1589,21 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 	if (notOp)
 		EmitOpcode(Opcode::Not);
 
+	// Check for chained function calls
+	if (!suppressFunctionCall)
+	{
+		const auto match = CheckFunctionCall(true);
+		if (match.signature)
+		{
+			if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
+			{
+				Error("Missing operator before function '%s'", match.signature->GetName().c_str());
+				return;
+			}
+			ParseFunctionCall(match);
+		}
+	}
+
 	// Backfill any short-circuit test jump address now that we're finished with local expression
 	while (!jumpAddrStack.empty())
 	{
@@ -1585,7 +1619,17 @@ void Parser::ParseSubexpression(bool suppressFunctionCall)
 
 }
 
-void Parser::ParseExpression(bool suppressFunctionCall)
+void Parser::ParseSubexpression(bool suppressFunctionCall)
+{
+	ParseSubexpression(suppressFunctionCall, m_symbolList.end());
+}
+
+void Parser::ParseSubexpression()
+{
+	ParseSubexpression(false);
+}
+
+void Parser::ParseExpression(bool suppressFunctionCall, SymbolListCItr endSymbol)
 {
 	// Check first for an opening bracket, which indicates either an index operator or a key-value pair.
 	if (Accept(SymbolType::SquareOpen))
@@ -1603,7 +1647,7 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 			// If we see a comma after a square open bracket, we're parsing a key-value pair
 			if (Accept(SymbolType::Comma))
 			{
-				ParseExpression(suppressFunctionCall);
+				ParseExpression(suppressFunctionCall, endSymbol);
 				Expect(SymbolType::SquareClose);
 
 				// Parse all subsequent key-value pairs
@@ -1633,7 +1677,7 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 	{
 		// Parse the first subexpression, defined as any normal expression excluding index operators or lists, 
 		// which are handled in this function
-		ParseSubexpression(suppressFunctionCall);
+		ParseSubexpression(suppressFunctionCall, endSymbol);
 
 		// If we finish the first subexpression with a common, then we're parsing an indexed list
 		if (Accept(SymbolType::Comma))
@@ -1653,6 +1697,11 @@ void Parser::ParseExpression(bool suppressFunctionCall)
 			EmitCount(count);
 		}
 	}
+}
+
+void Parser::ParseExpression()
+{
+	ParseExpression(false, m_symbolList.end());
 }
 
 void Parser::ParseErase()
@@ -2011,11 +2060,11 @@ bool Parser::ParseStatement()
 
 	// Functions signatures have precedence over everything, so check for a 
 	// potential signature match before anything else.
-	auto signature = CheckFunctionCall();
-	if (signature)
+	const auto functionMatch = CheckFunctionCall();
+	if (functionMatch.signature)
 	{
 		// We found a valid function signature that matches the current token(s)
-		ParseFunctionCall(signature);
+		ParseFunctionCall(functionMatch);
 
 		// Since all functions return a value, we need to discard the return
 		// value not on the stack, since we're not assigning it to a variable.

@@ -106,6 +106,31 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 	}
 
+	SECTION("Test alternate names function")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function (a) b/c/d (e)
+				-- do nothing
+			end
+
+			a b e
+			a c e
+			a d e
+			b e
+			c e
+			d e
+			b
+			c
+			d			
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+	}
+
 	SECTION("Test optional names function")
 	{
 		static const char * scriptText =
@@ -254,6 +279,66 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a") == 3);
 	}
 
+	SECTION("Test complex expressions as function parameters #1")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function {x} test
+				return x
+			end
+	 
+			set a to 1 + 2 * 3 - 1 test
+			set b to true and true test
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("b") == true);
+	}
+
+	SECTION("Test complex expressions as function parameters #2")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function test {x} test
+				return x
+			end
+	 
+			set a to test 1 + 2 * 3 - 1 test
+			set b to test true and true test
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("b") == true);
+	}
+
+	SECTION("Test complex expressions as function parameters #3")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function test {x}
+				return x
+			end
+	 
+			set a to test 1 + 2 * 3 - 1
+			set b to test true and true
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("b") == true);
+	}
+
 	SECTION("Test simple chained functions")
 	{
 		static const char * scriptText =
@@ -263,17 +348,91 @@ TEST_CASE("Test Functions", "[Functions]")
 				return a - b
 			end
 	 
-			set a to (5 minus 3) minus 1	
-			set b to 5 minus 3 minus 1
-			set c to (4 + 3) minus (3 minus 1)
+			set a to 5 minus 3 minus 1	
+			set b to (5 minus 3) minus 1
+			set c to 5 minus (3 minus 1)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 1);
-		REQUIRE(script->GetVariable("b") == 3);
-		REQUIRE(script->GetVariable("c") == 5);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 3);
+	}
+
+	SECTION("Test compound function parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function {a} minus {b}  
+				return a - b
+			end
+	 
+			set x to 5
+			set y to 3
+			set z to 1
+
+			set a to 2 + 3 minus 3 + 1	
+			set b to (2 + 3) minus (3 + 1)	
+			set c to x + y minus y + z	
+			set d to (x + y) minus (y + z)	
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 4);
+		REQUIRE(script->GetVariable("d") == 4);
+	}
+
+	SECTION("Test compound middle function parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function check {x} expression  
+				return x
+			end
+
+			set a to check 2 + 3 expression	
+			set b to check (2 + 3) expression	
+			set c to check true or false expression	
+			set d to check (true or false) expression	
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 5);
+		REQUIRE(script->GetVariable("b") == 5);
+		REQUIRE(script->GetVariable("c") == true);
+		REQUIRE(script->GetVariable("d") == true);
+	}
+
+	SECTION("Test function as function parameter")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function meaning of life
+				return 42
+			end
+
+			function get {x} answer
+				return x
+			end
+
+			set a to get meaning of life answer
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 42);
 	}
 
 	SECTION("Test functional recursion")

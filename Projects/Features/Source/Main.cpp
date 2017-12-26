@@ -20,6 +20,11 @@ using namespace Jinx;
 
 #define REQUIRE assert
 
+Jinx::RuntimePtr TestCreateRuntime()
+{
+	return Jinx::CreateRuntime();
+}
+
 Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
 {
 	if (!runtime)
@@ -68,16 +73,25 @@ int main(int argc, char ** argv)
 		globalParams.freeFn = [](void * p) { free(p); };
 		Jinx::Initialize(globalParams);
 	
-		const char * scriptText =
+		static const char * scriptText =
 			u8R"(
-			
-			set a to -5 % -3
+	
+			function {a} minus {b}  
+				return a - b
+			end
+	 
+			set a to 5 minus 3 minus 1	
+			set b to (5 minus 3) minus 1
+			set c to 5 minus (3 minus 1)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 3);
+
 	}
 
 	Jinx::ShutDown();

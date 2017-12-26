@@ -132,6 +132,16 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initia
 	return functionSignature;
 }
 
+bool Library::FunctionSignatureExists(const FunctionSignature & signature) const
+{
+	for (const auto & function : m_functionList)
+	{
+		if (signature == function)
+			return true;
+	}
+	return false;
+}
+
 PropertyName Library::GetPropertyName(const String & name)
 {
 	std::lock_guard<Mutex> lock(m_propertyMutex);
@@ -177,9 +187,9 @@ bool Library::RegisterFunction(Visibility visibility, std::initializer_list<Stri
 	if (!functionSignature.IsValid())
 		return false;
 
-	// Register function in library table.  This allows scripts compiled
-	// to parse and use this function.
-	m_functionTable.Register(functionSignature, false);
+	// Register function in library table.  This allows the the parser to find
+	// and use this function.
+	m_functionList.push_back(functionSignature);
 
 	// Register the function definition with the runtime system for 
 	// runtime lookups.
@@ -190,6 +200,12 @@ bool Library::RegisterFunction(Visibility visibility, std::initializer_list<Stri
 
 	// Return success
 	return true;
+}
+
+void Library::RegisterFunctionSignature(const FunctionSignature & signature)
+{
+	// TODO: make thread-safe
+	m_functionList.push_back(signature);
 }
 
 bool Library::RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value)

@@ -12,7 +12,6 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx
 {
-
 	class Library : public ILibrary
 	{
 	public:
@@ -25,13 +24,16 @@ namespace Jinx
 		void SetProperty(const String & name, const Variant & value) override;
 
 		// Internal functions
-		FunctionTable & Functions() { return m_functionTable; }
+		FunctionList & Functions() { return m_functionList; }
 		const String & GetName() const { return m_name; }
 		
 		bool RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates);
 		bool PropertyNameExists(const String & name) const;
 		PropertyName GetPropertyName(const String & name);
 		size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
+
+		void RegisterFunctionSignature(const FunctionSignature & signature);
+		bool FunctionSignatureExists(const FunctionSignature & signature) const;
 
 	private:
 		
@@ -45,7 +47,7 @@ namespace Jinx
 		String m_name;
 
 		// Track function definitions
-		FunctionTable m_functionTable;
+		FunctionList m_functionList;
 
 		// Properties
 		mutable Mutex m_propertyMutex;

@@ -116,60 +116,6 @@ String FunctionSignature::GetName() const
 	return fnName;
 }
 
-bool FunctionSignature::IsMatch(const FunctionSignatureParts & parts) const
-{
-	// Check a list of parts against this signature.  We return true if we reach the end
-	// of the parameter parts list and we're still matching.  Note that the parts list can
-	// exceed the length of this signature and we'll still consider it a match.  We
-	// account for this when parsing.  Note that we can't use the == operators because
-	// that checks for *exact* matches, which wouldn't quite work for this operation.
-	if (parts.empty())
-		return false;
-	auto partCmpItr = parts.begin();
-	for (auto partItr = m_parts.begin(); partItr != m_parts.end();)
-	{
-		if (partCmpItr == parts.end())
-			return false;
-		auto & partCmp = *partCmpItr;
-		auto & part = *partItr;
-		if (part.partType == FunctionSignaturePartType::Name && part.optional && partCmp.partType != FunctionSignaturePartType::Name)
-		{
-			partItr++;
-			continue;
-		}
-		if (part.partType != FunctionSignaturePartType::Parameter || partCmp.partType != FunctionSignaturePartType::Parameter)
-		{
-			if (partCmp.partType == FunctionSignaturePartType::Parameter && partCmp.names.empty())
-				return false;
-			if (!(part.partType == FunctionSignaturePartType::Parameter && partCmp.partType == FunctionSignaturePartType::Name))
-			{
-				if (part.partType == FunctionSignaturePartType::Name)
-				{
-					bool foundMatch = false;
-					for (const auto & name : part.names)
-					{
-						if (name == partCmp.names.front())
-						{
-							foundMatch = true;
-							break;
-						}
-					}
-					if (!foundMatch)
-					{
-						if (!part.optional)
-							return false;
-						partItr++;
-						continue;
-					}
-				}
-			}
-		}
-		++partCmpItr;
-		++partItr;
-	}
-	return true;
-}
-
 void FunctionSignature::Read(BinaryReader & reader)
 {
 	// Read this object from a memory buffer

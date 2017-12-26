@@ -68,10 +68,6 @@ namespace Jinx
 		// Get number of parameters
 		size_t GetParameterCount() const;
 
-		// Check for a signature match against parts.  Note that the source parts list is allowed to exceed the
-		// signature being matched against, but not vice-versa.
-		bool IsMatch(const FunctionSignatureParts & parts) const;
-
 		// Serialization
 		void Read(BinaryReader & reader);
 		void Write(BinaryWriter & writer) const;
@@ -99,6 +95,8 @@ namespace Jinx
 
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
 	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
+
+	typedef std::vector<FunctionSignature, Allocator<FunctionSignature>> FunctionList;
 
 };
 
