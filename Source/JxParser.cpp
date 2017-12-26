@@ -391,10 +391,32 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			for (size_t i = 0; i < symCount; ++i)
 				++currSym;
 		}
+		else if (currSym->type == SymbolType::ParenOpen)
+		{
+			size_t parenCount = 1;
+			symCount = 1;
+			while (parenCount)
+			{
+				++currSym;
+				++symCount;
+				if (!IsSymbolValid(currSym))
+					return false;
+				if (currSym->type == SymbolType::ParenOpen)
+					++parenCount;
+				else if (currSym->type == SymbolType::ParenClose)
+					--parenCount;
+			}
+			++currSym;
+		}
+		else if (currSym->type == SymbolType::ParenClose)
+		{
+			return false;
+		}
 		else if (IsConstant(currSym->type) || IsOperator(currSym->type) || currSym->type == SymbolType::Not ||
 			currSym->type == SymbolType::And || currSym->type == SymbolType::Or)
 		{
 			++currSym;
+			symCount = 1;
 		}
 		else
 			return false;
@@ -406,11 +428,9 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		// advance our expression token count.  This will be important for determining
 		// how many symbols we need to parse for an expression.
 		if (partsIndex >= newMatch.partData.size())
-		{
-			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, 1, part.optional));
-		}
+			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, part.optional));
 		else
-			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + 1;
+			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + symCount;
 
 		// Check symbols against the current part.
 		if (CheckFunctionCallPart(parts, partsIndex, currSym, newMatch))
@@ -1383,13 +1403,21 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 		}
 		else
 		{
-			auto expressionSize = std::get<1>(match.partData[i]);
-			auto endSymbol = m_currentSymbol;
-			for (size_t j = 0; j < expressionSize; ++j)
-				++endSymbol;
-			if (i == match.partData.size() - 1)
-				supressFunctionCall = true;
-			ParseExpression(supressFunctionCall, endSymbol);
+			if (Accept(SymbolType::ParenOpen))
+			{
+				ParseExpression();
+				Expect(SymbolType::ParenClose);
+			}
+			else
+			{
+				auto expressionSize = std::get<1>(match.partData[i]);
+				auto endSymbol = m_currentSymbol;
+				for (size_t j = 0; j < expressionSize; ++j)
+					++endSymbol;
+				if (i == match.partData.size() - 1)
+					supressFunctionCall = true;
+				ParseExpression(supressFunctionCall, endSymbol);
+			}
 		}
 	}
 
@@ -1421,11 +1449,6 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 			Error("Expected operand");
 		return;
 	}
-	else if (Accept(SymbolType::ParenOpen))
-	{
-		ParseExpression();
-		Expect(SymbolType::ParenClose);
-	}
 	else
 	{
 		FunctionMatch functionMatch;
@@ -1435,6 +1458,11 @@ void Parser::ParseSubexpressionOperand(bool required, bool suppressFunctionCall)
 		if (functionMatch.signature)
 		{
 			ParseFunctionCall(functionMatch);
+		}
+		else if (Accept(SymbolType::ParenOpen))
+		{
+			ParseExpression();
+			Expect(SymbolType::ParenClose);
 		}
 		else if (CheckProperty())
 		{

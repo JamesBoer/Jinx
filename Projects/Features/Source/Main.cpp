@@ -81,12 +81,16 @@ int main(int argc, char ** argv)
 			end
 	 
 			set a to 5 minus 3 minus 1	
+			set b to (5 minus 3) minus 1
+			set c to 5 minus (3 minus 1)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 3);
 
 	}
 

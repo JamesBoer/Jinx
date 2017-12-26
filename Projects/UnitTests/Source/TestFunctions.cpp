@@ -348,17 +348,45 @@ TEST_CASE("Test Functions", "[Functions]")
 				return a - b
 			end
 	 
-			set a to (5 minus 3) minus 1	
-			set b to 5 minus 3 minus 1
-			set c to (4 + 3) minus (3 minus 1)
+			set a to 5 minus 3 minus 1	
+			set b to (5 minus 3) minus 1
+			set c to 5 minus (3 minus 1)
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 1);
-		REQUIRE(script->GetVariable("b") == 3);
-		REQUIRE(script->GetVariable("c") == 5);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 3);
+	}
+
+	SECTION("Test compound function parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function {a} minus {b}  
+				return a - b
+			end
+	 
+			set x to 5
+			set y to 3
+			set z to 1
+
+			set a to 2 + 3 minus 3 + 1	
+			set b to (2 + 3) minus (3 + 1)	
+			set c to x + y minus y + z	
+			set d to (x + y) minus (y + z)	
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 4);
+		REQUIRE(script->GetVariable("d") == 4);
 	}
 
 	SECTION("Test functional recursion")
