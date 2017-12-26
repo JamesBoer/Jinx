@@ -20,8 +20,6 @@
       <itemPath>../../../../Source/JxFunctionDefinition.h</itemPath>
       <itemPath>../../../../Source/JxFunctionSignature.cpp</itemPath>
       <itemPath>../../../../Source/JxFunctionSignature.h</itemPath>
-      <itemPath>../../../../Source/JxFunctionTable.cpp</itemPath>
-      <itemPath>../../../../Source/JxFunctionTable.h</itemPath>
       <itemPath>../../../../Source/JxGuid.h</itemPath>
       <itemPath>../../../../Source/JxHash.cpp</itemPath>
       <itemPath>../../../../Source/JxHash.h</itemPath>
@@ -119,16 +117,6 @@
             flavor2="0">
       </item>
       <item path="../../../../Source/JxFunctionSignature.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../../Source/JxFunctionTable.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../../../Source/JxFunctionTable.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -278,16 +266,6 @@
             flavor2="0">
       </item>
       <item path="../../../../Source/JxFunctionSignature.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../../../Source/JxFunctionTable.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../../../Source/JxFunctionTable.h"
             ex="false"
             tool="3"
             flavor2="0">

@@ -40,7 +40,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/5555977b/JxCommon.o \
 	${OBJECTDIR}/_ext/5555977b/JxConversion.o \
 	${OBJECTDIR}/_ext/5555977b/JxFunctionSignature.o \
-	${OBJECTDIR}/_ext/5555977b/JxFunctionTable.o \
 	${OBJECTDIR}/_ext/5555977b/JxHash.o \
 	${OBJECTDIR}/_ext/5555977b/JxLexer.o \
 	${OBJECTDIR}/_ext/5555977b/JxLibCore.o \
@@ -109,11 +108,6 @@ ${OBJECTDIR}/_ext/5555977b/JxFunctionSignature.o: ../../../../Source/JxFunctionS
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxFunctionSignature.o ../../../../Source/JxFunctionSignature.cpp
-
-${OBJECTDIR}/_ext/5555977b/JxFunctionTable.o: ../../../../Source/JxFunctionTable.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxFunctionTable.o ../../../../Source/JxFunctionTable.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxHash.o: ../../../../Source/JxHash.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
