@@ -431,11 +431,13 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 	return false;
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym) const
+Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, bool skipInitialParam) const
 {
 	FunctionMatch match;
 	const auto & parts = signature.GetParts();
 	size_t partsIndex = 0;
+	if (skipInitialParam && signature.GetParts()[0].partType == FunctionSignaturePartType::Parameter)
+		partsIndex++;
 	if (CheckFunctionCallPart(parts, partsIndex, currSym, match))
 	{
 		match.signature = &signature;
@@ -444,13 +446,13 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signat
 	return FunctionMatch();
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym) const
+Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, bool skipInitialParam) const
 {
 	FunctionMatch match;
 	for (const auto & functionSig : functionList)
 	{
 		auto currentSymbol = currSym;
-		auto newMatch = CheckFunctionCall(functionSig, currentSymbol);
+		auto newMatch = CheckFunctionCall(functionSig, currentSymbol, skipInitialParam);
 		if (newMatch.signature)
 		{
 			if (!match.signature || match.partData.size() < newMatch.partData.size())
@@ -460,7 +462,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionLis
 	return match;
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall() const
+Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam) const
 {
 	FunctionMatch match;
 
@@ -490,25 +492,25 @@ Parser::FunctionMatch Parser::CheckFunctionCall() const
 	if (!libraryName.empty())
 	{
 		auto library = m_runtime->GetLibraryInternal(libraryName);
-		match = CheckFunctionCall(library->Functions(), currentSymbol);
+		match = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
 	}
 	else
 	{
 		// Check locally function table for signature match
-		match = CheckFunctionCall(m_localFunctions, currentSymbol);
+		match = CheckFunctionCall(m_localFunctions, currentSymbol, skipInitialParam);
 
 		// If not found in local function table, search in libraries for a function match
 		if (!match.signature)
 		{
 			// Check the current library for a signature match
-			match = CheckFunctionCall(m_library->Functions(), currentSymbol);
+			match = CheckFunctionCall(m_library->Functions(), currentSymbol, skipInitialParam);
 
 			// If a library name isn't specified or a signature wasn't found, search first in current library, then in order of imports
 			if (!match.signature)
 			{
 				// Search default library first
 				auto library = m_runtime->GetLibraryInternal(libraryName);
-				match = CheckFunctionCall(library->Functions(), currentSymbol);
+				match = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
 
 				// If function wasn't found in default library, search through all import libraries
 				if (!match.signature)
@@ -525,7 +527,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall() const
 
 						// Search for function in this library
 						library = m_runtime->GetLibraryInternal(libName);
-						auto newMatch = CheckFunctionCall(library->Functions(), currentSymbol);
+						auto newMatch = CheckFunctionCall(library->Functions(), currentSymbol, skipInitialParam);
 						if (newMatch.signature)
 						{
 							if (match.signature)
@@ -1385,6 +1387,8 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 			auto endSymbol = m_currentSymbol;
 			for (size_t j = 0; j < expressionSize; ++j)
 				++endSymbol;
+			if (i == match.partData.size() - 1)
+				supressFunctionCall = true;
 			ParseExpression(supressFunctionCall, endSymbol);
 		}
 	}
@@ -1556,6 +1560,14 @@ void Parser::ParseSubexpression(bool suppressFunctionCall, SymbolListCItr endSym
 	// Emit negation opcode if required
 	if (notOp)
 		EmitOpcode(Opcode::Not);
+
+	// Check for chained function calls
+	if (!suppressFunctionCall)
+	{
+		const auto match = CheckFunctionCall(true);
+		if (match.signature)
+			ParseFunctionCall(match);
+	}
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression
 	while (!jumpAddrStack.empty())

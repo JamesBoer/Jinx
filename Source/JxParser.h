@@ -122,9 +122,9 @@ namespace Jinx
 		bool CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const;
 		String CheckLibraryName() const;
 		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, FunctionMatch & match) const;
-		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym) const;
-		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym) const;
-		FunctionMatch CheckFunctionCall() const;
+		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, bool skipInitialParam) const;
+		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, bool skipInitialParam) const;
+		FunctionMatch CheckFunctionCall(bool skipInitialParam = false) const;
 
 		// Parsing functions advance the current symbol, looking for a pattern of symbols
 		// and injecting the compiled results into the bytecode buffer.
