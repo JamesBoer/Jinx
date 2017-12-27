@@ -1594,15 +1594,20 @@ void Parser::ParseSubexpression(SymbolListCItr endSymbol)
 		EmitOpcode(Opcode::Not);
 
 	// Check for chained function calls
-	const auto match = CheckFunctionCall(true, endSymbol);
-	if (match.signature)
+	while (true)
 	{
-		if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
+		const auto match = CheckFunctionCall(true, endSymbol);
+		if (match.signature)
 		{
-			Error("Missing operator before function '%s'", match.signature->GetName().c_str());
-			return;
+			if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
+			{
+				Error("Missing operator before function '%s'", match.signature->GetName().c_str());
+				return;
+			}
+			ParseFunctionCall(match);
 		}
-		ParseFunctionCall(match);
+		else
+			break;
 	}
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression

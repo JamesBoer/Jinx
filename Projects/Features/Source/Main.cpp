@@ -76,29 +76,23 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 
-			function life
-				return 999
+			function {x} test {y}
+				return x + y
 			end
 
-			function answer
-				return 123
-			end
+			set test to 1
 
-			function meaning of life
-				return 42
-			end
-
-			function get {x} answer
-				return x
-			end
-
-			set a to get meaning of life answer
+			set a to test test test
+			set b to test test test test test
+			set c to test test test test test test test
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 42);
+		REQUIRE(script->GetVariable("a") == 2);
+		REQUIRE(script->GetVariable("b") == 3);
+		REQUIRE(script->GetVariable("c") == 4);
 
 	}
 
