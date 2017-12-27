@@ -136,15 +136,15 @@ TEST_CASE("Test Functions", "[Functions]")
 		static const char * scriptText =
 			u8R"(
 	
-			function (opt/optional) (blah) {num} stuff
+			function (opt/optional) (blah) do {num} stuff
 				-- do nothing
 			end
 
-			optional 123 stuff
-			opt 456 stuff
-			789 stuff
-			blah 000 stuff
-			opt blah 111 stuff
+			optional do 123 stuff
+			opt do 456 stuff
+			do 789 stuff
+			blah do 000 stuff
+			opt blah do 111 stuff
 
 			)";
 

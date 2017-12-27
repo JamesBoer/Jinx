@@ -522,7 +522,49 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
-	SECTION("Test function declaration keyword match error")
+	SECTION("Test function declaration optional name part error #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function (test) {x} test {y} (test)
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function declaration optional name part error #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x} (test) {y} (test)
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function declaration optional name part error #3")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x} (test) (test) {y} (test)
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function subscript operator error")
 	{
 		static const char * scriptText =
 			u8R"(

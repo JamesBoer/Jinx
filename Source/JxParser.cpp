@@ -1177,6 +1177,8 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 	bool parsedNonKeywordName = false;
 	int parsedNameCount = 0;
 	int optionalNameCount = 0;
+	int parsedNameCountSection = 0;
+	int optionalNameCountSection = 0;
 	FunctionSignatureParts signatureParts;
 	while (!Check(SymbolType::NewLine))
 	{
@@ -1186,6 +1188,11 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			if (parsedParameter)
 			{
 				Error("Functions cannot have multiple variables without a name separating them");
+				return FunctionSignature();
+			}
+			if (parsedNameCount && parsedNameCountSection <= optionalNameCountSection)
+			{
+				Error("Arguments can't be separated soley by optional parameters");
 				return FunctionSignature();
 			}
 			part.partType = FunctionSignaturePartType::Parameter;
@@ -1210,6 +1217,8 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			}
 			Expect(SymbolType::CurlyClose);
 			parsedParameter = true;
+			parsedNameCountSection = 0;
+			optionalNameCountSection = 0;
 		}
 		else
 		{
@@ -1220,6 +1229,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 				return FunctionSignature();
 			}
 			parsedNameCount++;
+			parsedNameCountSection++;
 			if (IsKeyword(m_currentSymbol->type) == false)
 				parsedNonKeywordName = true;
 			part.partType = FunctionSignaturePartType::Name;
@@ -1245,6 +1255,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			if (part.optional)
 			{
 				optionalNameCount++;
+				optionalNameCountSection++;
 				if (!Expect(SymbolType::ParenClose))
 				{
 					Error("Expected closing parentheses for optional function name part");
