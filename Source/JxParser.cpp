@@ -1535,8 +1535,15 @@ void Parser::ParseSubexpression(SymbolListCItr endSymbol)
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine && m_currentSymbol != endSymbol)
 	{
 		// Check for a unary negation operator
-		while (Accept(SymbolType::Not))
+		if (Accept(SymbolType::Not))
+		{
 			notOp = !notOp;
+			if (Check(SymbolType::Not))
+			{
+				Error("More than one consecutive not operator is not permitted");
+				return;
+			}
+		}
 
 		// Parse operand
 		ParseSubexpressionOperand(requiredOperand, endSymbol);
