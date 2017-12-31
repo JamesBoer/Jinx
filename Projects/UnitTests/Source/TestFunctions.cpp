@@ -363,6 +363,50 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("c") == 4);
 	}
 
+	SECTION("Test overloaded function names with different parameters #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+				return 1
+			end
+
+			function test {x}
+				return 2
+			end
+
+			set a to test < 3
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+	}
+
+	SECTION("Test overloaded function names with different parameters #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+				return 1
+			end
+
+			function {x} test
+				return x
+			end
+
+			set a to 2 test
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 2);
+	}
+
 	SECTION("Test simple chained functions")
 	{
 		static const char * scriptText =
