@@ -184,8 +184,9 @@ size_t Jinx::GetUtf8CharSize(const char * utf8Str)
 	return s;
 }
 
-// Workaround for VS 2015 bug
-#if _MSC_VER == 1900
+// Workaround for VS 2015/2017 bug.  It's safest to leave the fix open-ended, as the workaround is still compliant
+// even if fixed in the future.  Note: May want to revist this periodically in case MS ever fixes this.
+#if _MSC_VER >= 1900
 
 StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
 {

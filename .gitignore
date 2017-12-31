@@ -28,3 +28,6 @@ profile
 dist/
 private/
 
+*.ipch
+*.db-shm
+*.db-wal
