@@ -388,6 +388,9 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 	}
 	else
 	{
+		// Set a flag if this is the initial token in the expression.
+		bool isInitialToken = partsIndex >= match.partData.size();
+
 		// Check for valid expressions
 		size_t symCount = 0;
 		if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount))
@@ -416,8 +419,12 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		{
 			return false;
 		}
-		else if (IsConstant(currSym->type) || IsOperator(currSym->type) || currSym->type == SymbolType::Not ||
-			currSym->type == SymbolType::And || currSym->type == SymbolType::Or || currSym->type == SymbolType::NameValue)
+		else if (IsConstant(currSym->type) || currSym->type == SymbolType::Not || currSym->type == SymbolType::NameValue)
+		{
+			++currSym;
+			symCount = 1;
+		}
+		else if (!isInitialToken && (IsOperator(currSym->type) || currSym->type == SymbolType::And || currSym->type == SymbolType::Or))
 		{
 			++currSym;
 			symCount = 1;
@@ -431,7 +438,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		// If our match structure isn't up to date, push new match items.  Otherwise,
 		// advance our expression token count.  This will be important for determining
 		// how many symbols we need to parse for an expression.
-		if (partsIndex >= newMatch.partData.size())
+		if (isInitialToken)
 			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, false));
 		else
 			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + symCount;

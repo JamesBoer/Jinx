@@ -76,24 +76,21 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 
-			function {x} test {y}
-				return x + y
+			function test
+				return 123.45
 			end
 
-			set test to 1
+			function test {x}
+				return 123.45
+			end
 
-			set a to test test test
-			set b to test test test test test
-			set c to test test test test test test test
+			set a to test < 234.0
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 2);
-		REQUIRE(script->GetVariable("b") == 3);
-		REQUIRE(script->GetVariable("c") == 4);
-
+		REQUIRE(script->GetVariable("a") == true);
 	}
 
 	Jinx::ShutDown();
