@@ -1535,8 +1535,15 @@ void Parser::ParseSubexpression(SymbolListCItr endSymbol)
 	while (IsSymbolValid(m_currentSymbol) && m_currentSymbol->type != SymbolType::NewLine && m_currentSymbol != endSymbol)
 	{
 		// Check for a unary negation operator
-		while (Accept(SymbolType::Not))
+		if (Accept(SymbolType::Not))
+		{
 			notOp = !notOp;
+			if (Check(SymbolType::Not))
+			{
+				Error("More than one consecutive not operator is not permitted");
+				return;
+			}
+		}
 
 		// Parse operand
 		ParseSubexpressionOperand(requiredOperand, endSymbol);
@@ -1594,15 +1601,20 @@ void Parser::ParseSubexpression(SymbolListCItr endSymbol)
 		EmitOpcode(Opcode::Not);
 
 	// Check for chained function calls
-	const auto match = CheckFunctionCall(true, endSymbol);
-	if (match.signature)
+	while (true)
 	{
-		if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
+		const auto match = CheckFunctionCall(true, endSymbol);
+		if (match.signature)
 		{
-			Error("Missing operator before function '%s'", match.signature->GetName().c_str());
-			return;
+			if (match.signature->GetParts()[0].partType != FunctionSignaturePartType::Parameter)
+			{
+				Error("Missing operator before function '%s'", match.signature->GetName().c_str());
+				return;
+			}
+			ParseFunctionCall(match);
 		}
-		ParseFunctionCall(match);
+		else
+			break;
 	}
 
 	// Backfill any short-circuit test jump address now that we're finished with local expression

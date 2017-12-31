@@ -339,6 +339,30 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("b") == true);
 	}
 
+	SECTION("Test function variable partial name collision")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {x} test {y}
+				return x + y
+			end
+
+			set test to 1
+
+			set a to test test test
+			set b to test test test test test
+			set c to test test test test test test test
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 2);
+		REQUIRE(script->GetVariable("b") == 3);
+		REQUIRE(script->GetVariable("c") == 4);
+	}
+
 	SECTION("Test simple chained functions")
 	{
 		static const char * scriptText =
