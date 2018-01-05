@@ -23,17 +23,20 @@ namespace Jinx
 		Variant GetProperty(const String & name) const override;
 		void SetProperty(const String & name, const Variant & value) override;
 
-		// Internal functions
-		FunctionList & Functions() { return m_functionList; }
+		// Internal name getter
 		const String & GetName() const { return m_name; }
 		
+		// Internal property functions
 		bool RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates);
 		bool PropertyNameExists(const String & name) const;
 		PropertyName GetPropertyName(const String & name);
 		size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
 
+		// Internal function signature functions
 		void RegisterFunctionSignature(const FunctionSignature & signature);
 		bool FunctionSignatureExists(const FunctionSignature & signature) const;
+		Mutex & FunctionMutex() { return m_functionMutex; }
+		const FunctionList & Functions() const { return m_functionList; }
 
 	private:
 		
@@ -47,6 +50,7 @@ namespace Jinx
 		String m_name;
 
 		// Track function definitions
+		mutable Mutex m_functionMutex;
 		FunctionList m_functionList;
 
 		// Properties

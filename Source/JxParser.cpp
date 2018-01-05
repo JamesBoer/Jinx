@@ -492,6 +492,26 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionLis
 	return match;
 }
 
+Parser::FunctionMatch Parser::CheckFunctionCall(LibraryIPtr library, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const
+{
+	// Need to find a more elegant way of doing this, as this is a fragile interface
+	std::lock_guard<Mutex> lock(library->FunctionMutex());
+	const auto & functionList = library->Functions();
+
+	FunctionMatch match;
+	for (const auto & functionSig : functionList)
+	{
+		auto currentSymbol = currSym;
+		auto newMatch = CheckFunctionCall(functionSig, currentSymbol, endSym, skipInitialParam);
+		if (newMatch.signature)
+		{
+			if (!match.signature || match.partData.size() < newMatch.partData.size())
+				match = newMatch;
+		}
+	}
+	return match;
+}
+
 Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolListCItr endSym) const
 {
 	FunctionMatch match;
@@ -522,25 +542,25 @@ Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolLis
 	if (!libraryName.empty())
 	{
 		auto library = m_runtime->GetLibraryInternal(libraryName);
-		match = CheckFunctionCall(library->Functions(), currentSymbol, endSym, skipInitialParam);
+		match = CheckFunctionCall(library, currentSymbol, endSym, skipInitialParam);
 	}
 	else
 	{
-		// Check locally function table for signature match
+		// Check local function table for signature match
 		match = CheckFunctionCall(m_localFunctions, currentSymbol, endSym, skipInitialParam);
 
 		// If not found in local function table, search in libraries for a function match
 		if (!match.signature)
 		{
 			// Check the current library for a signature match
-			match = CheckFunctionCall(m_library->Functions(), currentSymbol, endSym, skipInitialParam);
+			match = CheckFunctionCall(m_library, currentSymbol, endSym, skipInitialParam);
 
 			// If a library name isn't specified or a signature wasn't found, search first in current library, then in order of imports
 			if (!match.signature)
 			{
 				// Search default library first
 				auto library = m_runtime->GetLibraryInternal(libraryName);
-				match = CheckFunctionCall(library->Functions(), currentSymbol, endSym, skipInitialParam);
+				match = CheckFunctionCall(library, currentSymbol, endSym, skipInitialParam);
 
 				// If function wasn't found in default library, search through all import libraries
 				if (!match.signature)
@@ -557,7 +577,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolLis
 
 						// Search for function in this library
 						library = m_runtime->GetLibraryInternal(libName);
-						auto newMatch = CheckFunctionCall(library->Functions(), currentSymbol, endSym, skipInitialParam);
+						auto newMatch = CheckFunctionCall(library, currentSymbol, endSym, skipInitialParam);
 						if (newMatch.signature)
 						{
 							if (match.signature)
@@ -1344,8 +1364,7 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 	else
 	{
 		// Register function signature in library
-		auto itr = std::find(m_library->Functions().begin(), m_library->Functions().end(), signature);
-		if (itr != m_library->Functions().end())
+		if (m_library->FunctionSignatureExists(signature))
 		{
 			Error("Function already defined in library %s", m_library->GetName().c_str());
 			return;
