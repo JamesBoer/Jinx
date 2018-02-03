@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.15.1] - 2018-02-03
+
+## Fixed
+- Fixed a bug when assigning collection elements within a collection
+
 ## [0.15.0] - 2017-12-26
 
 ## Changed
