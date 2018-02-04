@@ -398,6 +398,7 @@ TEST_CASE("Test Collections", "[Collections]")
 			set a to []
 			set a[1] to []
 			set a[1][1] to []
+			set b to a[1][1]
 
 			)";
 
@@ -405,6 +406,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").IsCollection());
 		REQUIRE(script->GetVariable("a").GetCollection()->at(1).IsCollection());
+		REQUIRE(script->GetVariable("b").IsCollection());
 	}
 
 }
