@@ -390,4 +390,21 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(3) == collection->end());
 	}
 
+	SECTION("Test collections in collections assignment")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			set a to []
+			set a[1] to []
+			set a[1][1] to []
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1).IsCollection());
+	}
+
 }

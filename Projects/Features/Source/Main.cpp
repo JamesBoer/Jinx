@@ -76,21 +76,16 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 
-			function test
-				return 123.45
-			end
-
-			function test {x}
-				return 123.45
-			end
-
-			set a to test < 234.0
+			set a to []
+			set a[1] to []
+			set a[1][1] to []
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1).IsCollection());
 	}
 
 	Jinx::ShutDown();

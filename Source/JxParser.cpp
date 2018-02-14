@@ -983,10 +983,14 @@ bool Parser::ParseSubscript()
 {
 	if (m_error || m_currentSymbol == m_symbolList.end())
 		return false;
-	if (!Accept(SymbolType::SquareOpen))
-		return false;
-	ParseExpression();
-	return Expect(SymbolType::SquareClose);
+	bool subscript = false;
+	while (Accept(SymbolType::SquareOpen))
+	{
+		ParseExpression();
+		Expect(SymbolType::SquareClose);
+		subscript = true;
+	}
+	return subscript;
 }
 
 void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
