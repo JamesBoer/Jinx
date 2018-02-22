@@ -1538,7 +1538,20 @@ void Parser::ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol)
 		}
 		else
 		{
-			Error("Expected operand");
+			// If we can't find a valid function call within this end symbol, try
+			// a match without those limits.  This gives priority to initial expressions,
+			// but still allows functions to parse correctly if no valid expressions
+			// otherwise exist.
+			endSymbol = m_symbolList.end();
+			functionMatch = CheckFunctionCall(false, endSymbol);
+			if (functionMatch.signature)
+			{
+				ParseFunctionCall(functionMatch);
+			}
+			else
+			{
+				Error("Expected operand");
+			}
 		}
 	}
 }

@@ -651,4 +651,48 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script2->GetVariable("a") == 123);
 	}
 
+	SECTION("Test chained functions")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function testa {integer n}
+				return n
+			end
+
+			function testb {integer n}
+				return n
+			end
+
+			set x to testa testb 42
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 42);
+	}
+
+	SECTION("Test chained multi-part functions")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test a {integer n}
+				return n
+			end
+
+			function test b {integer n}
+				return n
+			end
+
+			set x to test a test b 42
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 42);
+	}
+
 }

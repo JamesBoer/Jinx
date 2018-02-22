@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.15.2] - 2018-02-22
+
+## Fixed
+- Fixed a bug related to function chains
+
 ## [0.15.1] - 2018-02-03
 
 ## Fixed
