@@ -96,7 +96,8 @@ namespace Jinx
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
 	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	typedef std::vector<FunctionSignature, Allocator<FunctionSignature>> FunctionList;
+	typedef std::list<FunctionSignature, Allocator<FunctionSignature>> FunctionList;
+	typedef std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>> FunctionPtrList;
 
 };
 
