@@ -132,10 +132,14 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initia
 	return functionSignature;
 }
 
-const FunctionList Library::Functions() const
+const FunctionPtrList Library::Functions() const
 {
 	std::lock_guard<Mutex> lock(m_functionMutex);
-	return m_functionList;
+	FunctionPtrList fnList;
+	fnList.reserve(m_functionList.size());
+	for (const auto & fn : m_functionList)
+		fnList.push_back(&fn);
+	return fnList;
 }
 
 bool Library::FunctionSignatureExists(const FunctionSignature & signature) const

@@ -521,13 +521,13 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionLis
 
 Parser::FunctionMatch Parser::CheckFunctionCall(LibraryIPtr library, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const
 {
-	const auto functionList = library->Functions();
+	const auto functionPtrList = library->Functions();
 
 	FunctionMatch match;
-	for (const auto & functionSig : functionList)
+	for (const auto functionSig : functionPtrList)
 	{
 		auto currentSymbol = currSym;
-		auto newMatch = CheckFunctionCall(functionSig, currentSymbol, endSym, skipInitialParam);
+		auto newMatch = CheckFunctionCall(*functionSig, currentSymbol, endSym, skipInitialParam);
 		if (newMatch.signature)
 		{
 			if (!match.signature || match.partData.size() < newMatch.partData.size())
