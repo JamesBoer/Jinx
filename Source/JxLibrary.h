@@ -35,8 +35,7 @@ namespace Jinx
 		// Internal function signature functions
 		void RegisterFunctionSignature(const FunctionSignature & signature);
 		bool FunctionSignatureExists(const FunctionSignature & signature) const;
-		Mutex & FunctionMutex() { return m_functionMutex; }
-		const FunctionList & Functions() const { return m_functionList; }
+		const FunctionList Functions() const;
 
 	private:
 		

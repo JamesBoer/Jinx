@@ -521,9 +521,7 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionList & functionLis
 
 Parser::FunctionMatch Parser::CheckFunctionCall(LibraryIPtr library, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const
 {
-	// Need to find a more elegant way of doing this, as this is a fragile interface
-	std::lock_guard<Mutex> lock(library->FunctionMutex());
-	const auto & functionList = library->Functions();
+	const auto functionList = library->Functions();
 
 	FunctionMatch match;
 	for (const auto & functionSig : functionList)
