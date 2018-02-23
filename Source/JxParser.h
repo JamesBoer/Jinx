@@ -125,6 +125,7 @@ namespace Jinx
 		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(LibraryIPtr library, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
+		FunctionMatch CheckFunctionCall(bool skipInitialParam, SymbolListCItr currSym, SymbolListCItr endSym) const;
 		FunctionMatch CheckFunctionCall(bool skipInitialParam, SymbolListCItr endSym) const;
 		FunctionMatch CheckFunctionCall() const;
 

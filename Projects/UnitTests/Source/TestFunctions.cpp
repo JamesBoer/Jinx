@@ -457,6 +457,28 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("d") == 4);
 	}
 
+	SECTION("Test compound chained functions")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			function {a} minus {b}  
+				return a - b
+			end
+	 
+			set a to 5 minus 1 + 2 minus 1	
+			set b to (5 minus 1 + 2) minus 1
+			set c to 5 minus (1 + 2 minus 1)
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 1);
+		REQUIRE(script->GetVariable("c") == 3);
+	}
+
 	SECTION("Test compound middle function parameters")
 	{
 		static const char * scriptText =

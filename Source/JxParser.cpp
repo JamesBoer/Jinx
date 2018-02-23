@@ -344,7 +344,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 {
 	// If we reach the end of the parts list, return success
 	if (partsIndex >= parts.size())
-		return true;
+		return false;
 
 	// If we've exceeded our range, return failure
 	if (currSym == endSym)
@@ -366,10 +366,10 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		{
 			if (name == currSym->text)
 			{
-				auto newMatch = match;
-				newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 1, part.optional));
+				match.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 1, part.optional));
 				auto newCurrSym = currSym;
 				++newCurrSym;
+				auto newMatch = match;
 				if (CheckFunctionCallPart(parts, partsIndex + 1, newCurrSym, endSym, newMatch))
 				{
 					match = newMatch;
@@ -380,11 +380,14 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 
 		if (part.optional)
 		{
-			if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, endSym, match))
+			auto newMatch = match;
+			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 0, true));
+			if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, endSym, newMatch))
+			{
+				match = newMatch;
 				return true;
+			}
 		}
-		else
-			return false;
 	}
 	else
 	{
@@ -419,7 +422,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		{
 			return false;
 		}
-		else if (IsConstant(currSym->type) || currSym->type == SymbolType::Not || currSym->type == SymbolType::NameValue)
+		else if (IsConstant(currSym->type) || currSym->type == SymbolType::Not)
 		{
 			++currSym;
 			symCount = 1;
@@ -429,19 +432,40 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 			++currSym;
 			symCount = 1;
 		}
-		else
-			return false;
-
-		// Store off current match structure
-		auto newMatch = match;
+		else 
+		{
+			if (partsIndex != 0)
+			{
+				FunctionMatch exprMatch = CheckFunctionCall(false, currSym, endSym);
+				if (exprMatch.signature)
+				{
+					for (size_t i = 0; i < exprMatch.partData.size(); ++i)
+					{
+						++currSym;
+						++symCount;
+					}
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
 
 		// If our match structure isn't up to date, push new match items.  Otherwise,
 		// advance our expression token count.  This will be important for determining
 		// how many symbols we need to parse for an expression.
 		if (isInitialToken)
-			newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, false));
+			match.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, symCount, false));
 		else
-			std::get<1>(newMatch.partData[partsIndex]) = std::get<1>(newMatch.partData[partsIndex]) + symCount;
+			std::get<1>(match.partData[partsIndex]) = std::get<1>(match.partData[partsIndex]) + symCount;
+
+		// Store off current match structure
+		auto newMatch = match;
 
 		// Check to see if advancing part index leads to success
 		if (CheckFunctionCallPart(parts, partsIndex + 1, currSym, endSym, newMatch))
@@ -458,7 +482,7 @@ bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t 
 		}
 	}
 
-	return false;
+	return match.partData.size() == parts.size();
 }
 
 Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const
@@ -467,7 +491,10 @@ Parser::FunctionMatch Parser::CheckFunctionCall(const FunctionSignature & signat
 	const auto & parts = signature.GetParts();
 	size_t partsIndex = 0;
 	if (skipInitialParam && signature.GetParts()[0].partType == FunctionSignaturePartType::Parameter)
+	{
 		partsIndex++;
+		match.partData.push_back(std::make_tuple(FunctionSignaturePartType::Parameter, 0, false));
+	}
 	if (CheckFunctionCallPart(parts, partsIndex, currSym, endSym, match))
 	{
 		match.signature = &signature;
@@ -512,12 +539,12 @@ Parser::FunctionMatch Parser::CheckFunctionCall(LibraryIPtr library, SymbolListC
 	return match;
 }
 
-Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolListCItr endSym) const
+Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolListCItr currSym, SymbolListCItr endSym) const
 {
 	FunctionMatch match;
 
 	// Store current symbol
-	auto currentSymbol = m_currentSymbol;
+	auto currentSymbol = currSym;
 
 	// Check for error or invalid symbols
 	if (m_error || currentSymbol == m_symbolList.end())
@@ -602,6 +629,11 @@ Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolLis
 	}
 
 	return match;
+}
+
+Parser::FunctionMatch Parser::CheckFunctionCall(bool skipInitialParam, SymbolListCItr endSym) const
+{
+	return CheckFunctionCall(skipInitialParam, m_currentSymbol, endSym);
 }
 
 Parser::FunctionMatch Parser::CheckFunctionCall() const
@@ -1440,7 +1472,9 @@ void Parser::ParseFunctionCall(const FunctionMatch & match)
 	{
 		if (std::get<0>(match.partData[i]) == FunctionSignaturePartType::Name)
 		{
-			NextSymbol();
+			// Check to make sure this isn't a skipped optional name part
+			if (std::get<1>(match.partData[i]) != 0)
+				NextSymbol();
 		}
 		else
 		{
