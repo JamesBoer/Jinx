@@ -72,20 +72,40 @@ int main(int argc, char ** argv)
 		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 		globalParams.freeFn = [](void * p) { free(p); };
 		Jinx::Initialize(globalParams);
-	
+
 		static const char * scriptText =
 			u8R"(
 
-			set a to []
-			set a[1] to []
-			set a[1][1] to []
+			function {a} minus {b}  
+				return a - b
+			end
+	 
+			set a to 5 minus 1 + 2 minus 1	
+
+			function {a} (get) test
+				return a + 1
+			end
+	
+			set b to 1 test
+
+			function meaning of life
+				return 42
+			end
+
+			function get {x} answer
+				return x
+			end
+
+			set c to get meaning of life answer
+
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection());
-		REQUIRE(script->GetVariable("a").GetCollection()->at(1).IsCollection());
+		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("b") == 2);
+		REQUIRE(script->GetVariable("c") == 42);
 	}
 
 	Jinx::ShutDown();
