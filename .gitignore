@@ -6,6 +6,11 @@ release/
 *.sdf
 *.suo
 *.opendb
+*.ipch
+*.db-shm
+*.db-wal
+db.lock
+storage.ide
 
 # Xcode
 .DS_Store
@@ -28,6 +33,3 @@ profile
 dist/
 private/
 
-*.ipch
-*.db-shm
-*.db-wal
