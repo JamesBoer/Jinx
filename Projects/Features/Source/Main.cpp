@@ -76,13 +76,14 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 
-			set a to 1
+			loop from 1 to 2
+				set a to 1
+			end
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 1);
 	}
 
 	Jinx::ShutDown();

@@ -57,7 +57,7 @@ static const char * s_testScripts[] =
 		end
 
 	)",
-	
+
 	u8R"(
 	
 		-- Simple if/else tests
@@ -128,7 +128,7 @@ static const char * s_testScripts[] =
 		end
 
 		)",
-		
+	
 		u8R"(
 		import core
 
@@ -149,7 +149,7 @@ static const char * s_testScripts[] =
 		end
 
 		)",
-		
+	
 };
 		
 const int NumPermutations = 10000;

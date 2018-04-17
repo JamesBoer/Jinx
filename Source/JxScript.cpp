@@ -735,15 +735,13 @@ bool Script::Execute()
 			break;
 			case Opcode::ScopeBegin:
 			{
-				ScopeFrame frame;
-				frame.stackTop = m_stack.size();
-				m_execution.back().ids.push_back(frame);
+				m_execution.back().scopeStack.push_back(m_stack.size());
 			}
 			break;
 			case Opcode::ScopeEnd:
 			{
-				auto stackTop = m_execution.back().ids.back().stackTop;
-				m_execution.back().ids.pop_back();
+				auto stackTop = m_execution.back().scopeStack.back();
+				m_execution.back().scopeStack.pop_back();
 				while (m_stack.size() > stackTop)
 					m_stack.pop_back();
 			}
@@ -876,19 +874,16 @@ Variant Script::GetVariable(const String & name) const
 Variant Script::GetVariable(RuntimeID id) const
 {
 	auto & names = m_execution.back().ids;
-	for (auto ritr = names.rbegin(); ritr != names.rend(); ++ritr)
+	auto itr = names.find(id);
+	if (itr != names.end())
 	{
-		auto itr = ritr->idMap.find(id);
-		if (itr != ritr->idMap.end())
+		auto index = itr->second;
+		if (index >= m_stack.size())
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
-			{
-				LogWriteLine("Attempted to access stack at invalid index");
-				return Variant();
-			}
-			return m_stack[itr->second];
+			LogWriteLine("Attempted to access stack at invalid index");
+			return Variant();
 		}
+		return m_stack[itr->second];
 	}
 	return Variant();
 }
@@ -924,32 +919,33 @@ void Script::SetVariable(const String & name, const Variant & value)
 
 void Script::SetVariable(RuntimeID id, const Variant & value)
 {
-	// Search down the variable stack for the variable
+	// Search the current frame for the variable
 	auto & names = m_execution.back().ids;
-	for (auto ritr = names.rbegin(); ritr != names.rend(); ++ritr)
+	auto itr = names.find(id);
+	if (itr != names.end())
 	{
-		auto itr = ritr->idMap.find(id);
-		if (itr != ritr->idMap.end())
+		auto index = itr->second;
+		if (index >= m_stack.size())
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
-			{
-				LogWriteLine("Attempted to access stack at invalid index");
-				return;
-			}
+			itr->second = m_stack.size();
+			m_stack.push_back(value);
+			return;
+		}
+		else
+		{
 			m_stack[itr->second] = value;
 			return;
 		}
 	}
 
 	// If we don't find the name, create a new variable on the top of the stack
-	names.back().idMap.insert(std::make_pair(id, m_stack.size()));
+	names.insert(std::make_pair(id, m_stack.size()));
 	m_stack.push_back(value);
 }
 
 void Script::SetVariableAtIndex(RuntimeID id, size_t index)
 {
 	assert(index < m_stack.size());
-	m_execution.back().ids.back().idMap.insert(std::make_pair(id, index));
+	m_execution.back().ids.insert(std::make_pair(id, index));
 }
 
