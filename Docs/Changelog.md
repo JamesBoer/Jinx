@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.15.3] - 2018-04-17
+
+## Changed
+- Improved runtime performance of local variable lookups
+
 ## [0.15.2] - 2018-02-22
 
 ## Fixed
