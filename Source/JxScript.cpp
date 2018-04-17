@@ -869,7 +869,7 @@ bool Script::Execute()
 Variant Script::GetVariable(const String & name) const
 {
 	const auto & foldedName = FoldCase(name);
-	RuntimeID id = GetHash(foldedName.c_str(), foldedName.size());
+	RuntimeID id = GetVariableId(foldedName.c_str(), foldedName.size(), 1);
 	return GetVariable(id);
 }
 
@@ -918,7 +918,7 @@ void Script::Push(const Variant & value)
 void Script::SetVariable(const String & name, const Variant & value)
 {
 	const auto & foldedName = FoldCase(name);
-	RuntimeID id = GetHash(foldedName.c_str(), foldedName.size());
+	RuntimeID id = GetVariableId(foldedName.c_str(), foldedName.size(), 1);
 	SetVariable(id, value);
 }
 

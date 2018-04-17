@@ -59,7 +59,7 @@ namespace Jinx
 		}
 
 		// Hash and register variable or property name and ID mapping
-		RuntimeID NameToRuntimeID(const String & name);
+		RuntimeID VariableNameToRuntimeID(const String & name);
 
 		// Assign a variable or check that it exists
 		void VariableAssign(const String & name);

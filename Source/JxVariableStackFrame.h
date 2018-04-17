@@ -27,6 +27,9 @@ namespace Jinx
 		bool VariableAssign(const String & name);
 		bool VariableExists(const String & name) const;
 
+		// Get the stack depth given a variable name
+		size_t GetStackDepthFromName(const String & name) const;
+
 		// Begin or end a new execution frame, like with a function
 		void FrameBegin();
 		bool FrameEnd();
