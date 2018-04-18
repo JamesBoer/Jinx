@@ -48,9 +48,9 @@ String Parser::GetNameFromID(RuntimeID id) const
 	return itr->second;
 }
 
-RuntimeID Parser::NameToRuntimeID(const String & name)
+RuntimeID Parser::VariableNameToRuntimeID(const String & name)
 {
-	auto id = GetHash(name.c_str(), name.size());
+	auto id = GetVariableId(name.c_str(), name.size(), m_variableStackFrame.GetStackDepthFromName(name));
 	m_idNameMap[id] = name;
 	return id;
 }
@@ -1426,7 +1426,7 @@ void Parser::ParseFunctionDefinition(VisibilityType scope)
 		
 		VariableAssign(itr->names.front());
 		EmitOpcode(Opcode::SetIndex);
-		EmitId(NameToRuntimeID(itr->names.front()));
+		EmitId(VariableNameToRuntimeID(itr->names.front()));
 		EmitIndex(stackIndex);
 		EmitValueType(itr->valueType);
 		--stackIndex;
@@ -1552,7 +1552,7 @@ void Parser::ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol)
 			String name = ParseVariable();
 			bool subscript = ParseSubscript();
 			EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
-			EmitId(NameToRuntimeID(name));
+			EmitId(VariableNameToRuntimeID(name));
 			if (Accept(SymbolType::Type))
 				EmitOpcode(Opcode::Type);
 		}
@@ -1827,7 +1827,7 @@ void Parser::ParseErase()
 			Expect(SymbolType::NewLine);
 			EmitOpcode(Opcode::EraseVar);
 		}
-		EmitId(NameToRuntimeID(varName));
+		EmitId(VariableNameToRuntimeID(varName));
 	}
 	else
 	{
@@ -1859,7 +1859,7 @@ void Parser::ParseIncDec()
 	{
 		varName = ParseVariable();
 		EmitOpcode(Opcode::PushVar);
-		EmitId(NameToRuntimeID(varName));
+		EmitId(VariableNameToRuntimeID(varName));
 	}
 	else
 	{
@@ -1885,7 +1885,7 @@ void Parser::ParseIncDec()
 	else
 	{
 		EmitOpcode(Opcode::SetVar);
-		EmitId(NameToRuntimeID(varName));
+		EmitId(VariableNameToRuntimeID(varName));
 	}
 	Expect(SymbolType::NewLine);
 }
@@ -1981,7 +1981,7 @@ void Parser::ParseLoop()
 		{
 			VariableAssign(name);
 			EmitOpcode(Opcode::SetVar);
-			EmitId(NameToRuntimeID(name));
+			EmitId(VariableNameToRuntimeID(name));
 		}
 
 		// Parse to value
@@ -2042,7 +2042,7 @@ void Parser::ParseLoop()
 		{
 			VariableAssign(name);
 			EmitOpcode(Opcode::SetVar);
-			EmitId(NameToRuntimeID(name));
+			EmitId(VariableNameToRuntimeID(name));
 		}
 
 		// Store where the loop logic begins
@@ -2238,12 +2238,12 @@ bool Parser::ParseStatement()
 					ParseExpression();
 					Expect(SymbolType::NewLine);
 
-					// Assign a variable.  
-					EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
-					EmitId(NameToRuntimeID(name));
-
 					// Add to variable table
 					VariableAssign(name);
+
+					// Assign a variable.  
+					EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
+					EmitId(VariableNameToRuntimeID(name));
 				}
 			}
 		}

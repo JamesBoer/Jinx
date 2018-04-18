@@ -53,6 +53,25 @@ void VariableStackFrame::SetMaxVariableParts(size_t varParts)
 	frame.maxVariableParts = varParts;
 }
 
+size_t VariableStackFrame::GetStackDepthFromName(const String & name) const
+{
+	// Sanity check
+	if (m_frames.empty())
+		return 0;
+
+	// Find the variable in the current frame
+	const FrameData & frame = m_frames.back();
+	size_t stackDepth = frame.stack.size();
+	for (auto ritr = frame.stack.rbegin(); ritr != frame.stack.rend(); ++ritr)
+	{
+		auto itr = ritr->find(name);
+		if (itr != ritr->end())
+			return stackDepth;
+		--stackDepth;
+	}
+	return 0;
+}
+
 bool VariableStackFrame::VariableAssign(const String & name)
 {
 	// Sanity check

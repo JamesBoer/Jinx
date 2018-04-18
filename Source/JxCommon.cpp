@@ -217,6 +217,13 @@ size_t Jinx::GetNamePartCount(const String & name)
 	return parts;
 }
 
+RuntimeID Jinx::GetVariableId(const char * name, size_t nameLen, size_t stackDepth)
+{
+	RuntimeID id = GetHash(name, nameLen);
+	id += static_cast<RuntimeID>(stackDepth);
+	return id;
+}
+
 RuntimeID Jinx::GetRandomId()
 {
 	// Create hash source of current time, a unique id, and a string

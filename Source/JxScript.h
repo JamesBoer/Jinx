@@ -40,26 +40,17 @@ namespace Jinx
 
 	private:
 		typedef std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>> IdIndexMap;
+		typedef std::vector<size_t, Allocator<size_t>> ScopeStack;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
 
-		// Name table frame for local names
-		struct ScopeFrame
-		{
-			IdIndexMap idMap;
-			size_t stackTop;
-		};
-
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr bc) : bytecode(bc), reader(bc)
+			ExecutionFrame(BufferPtr bc) : bytecode(bc), reader(bc) 
 			{
-				ScopeFrame frame;
-				frame.stackTop = 0;
-				ids.reserve(8);
-				ids.push_back(frame);
+				scopeStack.reserve(32);
 			}
 
 			// Buffer containing script bytecode
@@ -70,7 +61,10 @@ namespace Jinx
 			BinaryReader reader;
 
 			// Variable id lookup map
-			std::vector<ScopeFrame, Allocator<ScopeFrame>> ids;
+			IdIndexMap ids;
+
+			// Track top of stack for each level of scope
+			ScopeStack scopeStack;
 
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop;
