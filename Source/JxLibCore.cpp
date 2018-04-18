@@ -9,14 +9,14 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
-static void DebugWriteInternal(const Variant & var)
+static void DebugWriteInternal(const Variant & var, bool writeNewLine)
 {
 	if (var.IsCollection())
 	{
 		const auto & coll = *var.GetCollection();
 		for (const auto & v : coll)
 		{
-			DebugWriteInternal(v.second);
+			DebugWriteInternal(v.second, writeNewLine);
 		}
 	}
 	else
@@ -25,6 +25,8 @@ static void DebugWriteInternal(const Variant & var)
 		auto cstr = str.c_str();
 		if (cstr)
 			LogWrite(cstr);
+		if (writeNewLine)
+			LogWrite("\n");
 	}
 }
 
@@ -32,7 +34,7 @@ static Variant Write(ScriptPtr, Parameters params)
 {
 	if (params.empty())
 		return nullptr;
-	DebugWriteInternal(params[0]);
+	DebugWriteInternal(params[0], false);
 	return nullptr;
 }
 
@@ -43,8 +45,7 @@ static Variant WriteLine(ScriptPtr, Parameters params)
 		LogWrite("\n");
 		return nullptr;
 	}
-	DebugWriteInternal(params[0]);
-	LogWrite("\n");
+	DebugWriteInternal(params[0], true);
 	return nullptr;
 }
 
@@ -100,6 +101,17 @@ static Variant GetValue(ScriptPtr, Parameters params)
 	return params[0].GetCollectionItr().first->second;
 }
 
+static Variant GetCallStack(ScriptPtr script, Parameters params)
+{
+	ScriptIPtr s = std::static_pointer_cast<Script>(script);
+	auto functions = s->GetCallStack();
+	auto var = CreateCollection();
+	int64_t index = 1;
+	for (const auto & fnName : functions)
+		var->insert(std::make_pair(index++, fnName));
+	return var;
+}
+
 void Jinx::RegisterLibCore(RuntimePtr runtime)
 {
 	auto library = runtime->GetLibrary("core");
@@ -111,6 +123,7 @@ void Jinx::RegisterLibCore(RuntimePtr runtime)
 	library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
 	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
 	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
+	library->RegisterFunction(Visibility::Public, { "(get)", "call", "stack" }, GetCallStack);
 
 	// Register core properties
 	library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");

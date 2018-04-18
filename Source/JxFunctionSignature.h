@@ -56,9 +56,6 @@ namespace Jinx
 		// Get signature parts
 		const FunctionSignatureParts & GetParts() const { return m_parts; }
 
-		// Does this have a class parameter (not currently used)
-		bool HasClassParameter() const { return m_classParameter; }
-
 		// Is this a valid signature?
 		inline bool IsValid() const { return !m_parts.empty(); }
 
@@ -84,8 +81,8 @@ namespace Jinx
 		// Visibility level
 		VisibilityType m_visibility;
 
-		// Indicates this has a class parameter
-		bool m_classParameter;
+		// Library name
+		String m_libraryName;
 
 		// Each signature is made up of any number of parts representing either part
 		// of the function name or a variable placeholder.

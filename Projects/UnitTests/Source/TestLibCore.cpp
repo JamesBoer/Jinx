@@ -73,5 +73,66 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("c") == true);
 		REQUIRE(script->GetVariable("d") == true);
 	}
-	
+
+	SECTION("Test get call stack function with local functions")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			import core
+
+			function func4 {integer a}
+				return call stack
+			end
+
+			function func3 {a}
+				return func4 a
+			end
+
+			function func2/func22 (opt1/opt2)
+				return func3 123
+			end
+
+			function func1/func11 (optional)
+				return func2
+			end
+
+			set a to func1
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == "root");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == "func1/func11 (optional)");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(3) == "func2/func22 (opt1/opt2)");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(4) == "func3 {}");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(5) == "func4 {integer}");
+	}
+
+	SECTION("Test get call stack function with local functions")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			import core
+
+			library test
+
+			function func one
+				return call stack
+			end
+
+			set a to func one
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == "root");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == "test func one");
+	}
+
 }

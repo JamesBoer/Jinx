@@ -29,6 +29,8 @@ namespace Jinx
 
 		LibraryPtr GetLibrary() const override { return m_library; }
 
+		std::vector<String, Allocator<String>> GetCallStack() const;
+
 	private:
 		void Error(const char * message);
 
@@ -48,10 +50,11 @@ namespace Jinx
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr bc) : bytecode(bc), reader(bc) 
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
 			{
 				scopeStack.reserve(32);
 			}
+			ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
 
 			// Buffer containing script bytecode
 			BufferPtr bytecode;
@@ -59,6 +62,12 @@ namespace Jinx
 			// Binary reader - sequentially extracts data from bytecode buffer.  The reader's
 			// current internal position acts as the current frame's instruction pointer.
 			BinaryReader reader;
+
+			// Function definition name.  Note that storing a raw string pointer is reasonably safe, 
+			// because shared pointers to other objects are referenced in this struct, and there is 
+			// no other way to modify the containing string.  I don't want to incur the expense of a 
+			// safer string copy, which would cause an allocation cost for each function call.
+			const char * name;
 
 			// Variable id lookup map
 			IdIndexMap ids;
@@ -88,6 +97,8 @@ namespace Jinx
 		// Runtime error
 		bool m_error;
 	};
+
+	typedef std::shared_ptr<Script> ScriptIPtr;
 };
 
 #endif // JX_SCRIPT_H__

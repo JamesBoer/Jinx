@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.15.3] - 2018-04-18
+
+## Added
+- Added 'get call stack' core library function
+
 ## [0.15.3] - 2018-04-17
 
 ## Changed
