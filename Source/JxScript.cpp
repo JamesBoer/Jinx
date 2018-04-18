@@ -17,7 +17,7 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
 	m_error(false)
 {
 	m_execution.reserve(6);
-	m_execution.push_back(ExecutionFrame(bytecode));
+	m_execution.push_back(ExecutionFrame(bytecode, "root"));
 	m_stack.reserve(32);
 
 	// Assume default unnamed library unless explicitly overridden
@@ -142,7 +142,7 @@ bool Script::Execute()
 				// Check to see if this is a bytecode function
 				if (functionDef->GetBytecode())
 				{
-					m_execution.push_back(ExecutionFrame(functionDef->GetBytecode()));
+					m_execution.push_back(ExecutionFrame(functionDef));
 					m_execution.back().reader.Seek(functionDef->GetOffset());
 				}
 				// Otherwise, call a native function callback
@@ -862,6 +862,14 @@ bool Script::Execute()
 	m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
 
 	return true;
+}
+
+std::vector<String, Allocator<String>> Script::GetCallStack() const
+{
+	std::vector<String, Allocator<String>> strings;
+	for (const auto frame : m_execution)
+		strings.push_back(frame.name);
+	return strings;
 }
 
 Variant Script::GetVariable(const String & name) const

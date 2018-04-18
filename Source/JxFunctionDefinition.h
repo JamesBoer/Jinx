@@ -19,12 +19,14 @@ namespace Jinx
 		FunctionDefinition(const FunctionSignature & signature, BufferPtr bytecode, size_t offset) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
+			m_name(signature.GetName()),
 			m_bytecode(bytecode),
 			m_offset(offset)
 		{}
 		FunctionDefinition(const FunctionSignature & signature, FunctionCallback callback) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
+			m_name(signature.GetName()),
 			m_callback(callback)
 		{}
 		size_t GetParameterCount() const { return m_parameterCount; }
@@ -32,6 +34,7 @@ namespace Jinx
 		const BufferPtr & GetBytecode() const { return m_bytecode; }
 		size_t GetOffset() const { return m_offset; }
 		FunctionCallback GetCallback() const { return m_callback; }
+		const char * GetName() const { return m_name.c_str(); }
 		friend class FunctionTable;
 
 	private:
@@ -39,6 +42,7 @@ namespace Jinx
 		size_t m_parameterCount;
 		BufferPtr m_bytecode;
 		size_t m_offset;
+		String m_name;
 		FunctionCallback m_callback;
 	};
 	

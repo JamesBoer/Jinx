@@ -11,13 +11,13 @@ using namespace Jinx;
 
 
 FunctionSignature::FunctionSignature() :
-	m_id(0),
-	m_classParameter(false)
+	m_id(0)
 {
 }
 
 FunctionSignature::FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts) :
 	m_visibility(visibility),
+	m_libraryName(libraryName),
 	m_parts(parts)
 {
 	if (m_visibility == VisibilityType::Local)
@@ -35,24 +35,26 @@ FunctionSignature::FunctionSignature(VisibilityType visibility, const String & l
 		// Create a unique id based on a hash of the library name, signature text, and parameters
 		String hashString = libraryName;
 		hashString.reserve(64);
-		for (const auto & part : m_parts)
+		for (auto itr = m_parts.begin(); itr != m_parts.end();)
 		{
-			if (part.partType == FunctionSignaturePartType::Name)
+			if (itr->partType == FunctionSignaturePartType::Name)
 			{
-				for (const auto & name : part.names)
+				for (const auto & name : itr->names)
 					hashString += name;
 			}
-			else if (part.partType == FunctionSignaturePartType::Parameter)
+			else if (itr->partType == FunctionSignaturePartType::Parameter)
 			{
 				hashString += "{}";
 			}
 			else
 			{
 				hashString += "{";
-				hashString += part.names.front();
+				hashString += itr->names.front();
 				hashString += "}";
 			}
-			hashString += " ";
+			++itr;
+			if (itr != m_parts.end())
+				hashString += " ";
 		}
 		m_id = GetHash(hashString.c_str(), hashString.length());
 	}
@@ -84,34 +86,38 @@ String FunctionSignature::GetName() const
 {
 	String fnName;
 	fnName.reserve(32);
-	for (const auto & part : m_parts)
+	if (!m_libraryName.empty())
 	{
-		if (part.partType == FunctionSignaturePartType::Name)
+		fnName += m_libraryName;
+		fnName += " ";
+	}
+	for (auto partItr = m_parts.begin(); partItr != m_parts.end();)
+	{
+		if (partItr->partType == FunctionSignaturePartType::Name)
 		{
-			if (part.optional)
-				fnName += "( ";
-			size_t count = 0;
-			for (const auto & name : part.names)
+			if (partItr->optional)
+				fnName += "(";
+			for (auto nameItr = partItr->names.begin(); nameItr != partItr->names.end();)
 			{
-				fnName += name;
-				fnName += " ";
-				if (part.names.size() > 1 && count < part.names.size() - 1)
-					fnName += "/ ";
-				count++;
+				fnName += *nameItr;
+				++nameItr;
+				if (nameItr != partItr->names.end() && partItr->names.size() > 1)
+					fnName += "/";
 			}
-			if (part.optional)
-				fnName += ") ";
+			if (partItr->optional)
+				fnName += ")";
 		}
 		else
 		{
-			fnName += "{ ";
-			if (part.valueType != ValueType::Any)
-			{
-				fnName += GetValueTypeName(part.valueType);
-				fnName += " ";
-			}
-			fnName += "} ";
+			fnName += "{";
+			if (partItr->valueType != ValueType::Any)
+				fnName += GetValueTypeName(partItr->valueType);
+			fnName += "}";
 		}
+
+		++partItr;
+		if (partItr != m_parts.end())
+			fnName += " ";
 	}
 	return fnName;
 }
@@ -121,6 +127,7 @@ void FunctionSignature::Read(BinaryReader & reader)
 	// Read this object from a memory buffer
 	reader.Read(&m_id);
 	reader.Read<VisibilityType, uint8_t>(&m_visibility);
+	reader.Read(&m_libraryName);
 	uint8_t partSize;
 	reader.Read(&partSize);
 	for (uint8_t i = 0; i < partSize; ++i)
@@ -146,6 +153,7 @@ void FunctionSignature::Write(BinaryWriter & writer) const
 	// Write this object to a memory buffer
 	writer.Write(m_id);
 	writer.Write<VisibilityType, uint8_t>(m_visibility);
+	writer.Write(m_libraryName);
 	writer.Write(static_cast<uint8_t>(m_parts.size()));
 	for (const auto & part : m_parts)
 	{

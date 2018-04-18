@@ -73,17 +73,41 @@ int main(int argc, char ** argv)
 		globalParams.freeFn = [](void * p) { free(p); };
 		Jinx::Initialize(globalParams);
 
-		static const char * scriptText =
+		const char * scriptText =
 			u8R"(
+			
+			import core
 
-			loop from 1 to 2
-				set a to 1
+			function func4 {integer a}
+				return call stack
 			end
 
+			function func3 {a}
+				return func4 a
+			end
+
+			function func2/func22 (opt1/opt2)
+				return func3 123
+			end
+
+			function func1/func11 (optional)
+				return func2
+			end
+
+			set a to func1
+
+			write line a
+			
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == "root");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == "func1/func11 (optional)");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(3) == "func2/func22 (opt1/opt2)");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(4) == "func3 {}");
+		REQUIRE(script->GetVariable("a").GetCollection()->at(5) == "func4 {integer}");
 	}
 
 	Jinx::ShutDown();
