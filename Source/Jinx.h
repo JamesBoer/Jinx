@@ -83,10 +83,7 @@ namespace Jinx
 	static const uint32_t MinorVersion = 15;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 4;
-
-	/// Version string
-	static const char * VersionString = "0.15.4";
+	static const uint32_t PatchNumber = 5;
 
 	// Forward declaration
 	class IScript;
@@ -407,6 +404,9 @@ namespace Jinx
 		/// Maximum total script instrunctions
 		bool errorOnMaxInstrunctions;
 	};
+
+	/// Get Jinx version in string form for easier display
+	String GetVersionString();
 
 	/// Initializes global Jinx parameters
 	/**
