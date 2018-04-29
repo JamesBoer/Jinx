@@ -1,7 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.15.5] - 2018-04-27
+## [0.15.5] - 2018-04-29
+
+## Added
+- Added debug info to identify line number in original source for runtime errors
 
 ## Changed
 - Version string is acquired via a function instead of being a constant

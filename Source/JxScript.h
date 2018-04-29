@@ -25,8 +25,8 @@ namespace Jinx
 		Variant GetVariable(const String & name) const override;
 		void SetVariable(const String & name, const Variant & value) override;
 
+		const String & GetName() const override { return m_name; }
 		void * GetUserContext() const override { return m_userContext; }
-
 		LibraryPtr GetLibrary() const override { return m_library; }
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
@@ -91,11 +91,17 @@ namespace Jinx
 		// User context pointer
 		void * m_userContext;
 
+		// Initial position of bytecode for this script
+		size_t m_bytecodeStart;
+
 		// Is finished executing
 		bool m_finished;
 
 		// Runtime error
 		bool m_error;
+
+		// Script name
+		String m_name;
 	};
 
 	typedef std::shared_ptr<Script> ScriptIPtr;

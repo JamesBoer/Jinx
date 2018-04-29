@@ -10,10 +10,11 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & uniqueName, std::initializer_list<String> libraries) :
+Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name, std::initializer_list<String> libraries) :
 	m_runtime(runtime),
-	m_uniqueName(uniqueName),
+	m_name(name),
 	m_symbolList(symbolList),
+	m_lastLine(1),
 	m_error(false),
 	m_breakAddress(false),
 	m_bytecode(CreateBuffer()),
@@ -21,17 +22,21 @@ Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String 
 {
 	m_currentSymbol = symbolList.begin();
 	m_importList = libraries;
+	if (EnableDebugInfo())
+		m_debugLines.reserve(1024);
 }
 
 bool Parser::Execute()
 {
-
 	// Reserve 1K space
 	m_bytecode->Reserve(1024);
 
 	// Write bytecode header
 	BytecodeHeader header;
 	m_writer.Write(&header, sizeof(header));
+
+	// Write script name
+	m_writer.Write(m_name);
 
 	// Parse script symbols into bytecode
 	ParseScript();
@@ -197,6 +202,16 @@ void Parser::EmitName(const String & name)
 
 void Parser::EmitOpcode(Opcode opcode)
 {
+	// Only bother with writing this information if we're generating debug info
+	if (EnableDebugInfo())
+	{
+		// Only write a new entry when we're at a new line, since that's all we're tracking
+		if (m_debugLines.empty() || m_debugLines.back().lineNumber != m_lastLine)
+		{
+			auto pos = static_cast<uint32_t>(m_writer.Tell());
+			m_debugLines.push_back({ pos, m_lastLine });
+		}
+	}
 	m_writer.Write<Opcode, uint8_t>(opcode);
 }
 
@@ -220,8 +235,36 @@ void Parser::EmitValueType(ValueType valueType)
 	m_writer.Write(ValueTypeToByte(valueType));
 }
 
+void Parser::WriteBytecodeHeader()
+{
+	// Get bytecode data size
+	size_t currentPos = m_writer.Tell();
+	size_t bytecodeSize = currentPos - sizeof(BytecodeHeader);
+	if (bytecodeSize > UINT_MAX)
+	{
+		Error("Bytecode data has exceeded maximum allowable size");
+		return;
+	}
+	BytecodeHeader header;
+	header.dataSize = static_cast<uint32_t>(bytecodeSize);
+	m_writer.Seek(0);
+	m_writer.Write(&header, sizeof(header));
+	m_writer.Seek(currentPos);
+}
+
+void Parser::WriteDebugInfo()
+{
+	DebugHeader opcodeHeader;
+	opcodeHeader.lineEntryCount = static_cast<uint32_t>(m_debugLines.size());
+	opcodeHeader.dataSize = static_cast<uint32_t>(m_debugLines.size() + sizeof(DebugLineEntry));
+	m_writer.Write(&opcodeHeader, sizeof(opcodeHeader));
+	for (const auto & lineEntry : m_debugLines)
+		m_writer.Write(&lineEntry, sizeof(lineEntry));
+}
+
 void Parser::NextSymbol()
 {
+	m_lastLine = m_currentSymbol->lineNumber;
 	++m_currentSymbol;
 }
 
@@ -2468,4 +2511,7 @@ void Parser::ParseScript()
 	if (m_breakAddress)
 		Error("Illegal break");
 	EmitOpcode(Opcode::Exit);
+	WriteBytecodeHeader();
+	if (EnableDebugInfo())
+		WriteDebugInfo();
 }

@@ -178,22 +178,43 @@ namespace Jinx
 	}
 
 	const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
-	const uint16_t BytecodeMajorVersion = 0;
-	const uint16_t BytecodeMinorVersion = 1;
+	const uint32_t BytecodeVersion = 0;
 
 	struct BytecodeHeader
 	{
 		BytecodeHeader() :
 			signature(BytecodeSignature),
-			majorVer(BytecodeMajorVersion),
-			minorVer(BytecodeMinorVersion)
+			version(BytecodeVersion),
+			dataSize(0)
 		{}
 		uint32_t signature;
-		uint16_t majorVer;
-		uint16_t minorVer;
+		uint32_t version;
+		uint32_t dataSize;
 	};
 
-	static_assert(sizeof(BytecodeHeader) == 8, "BytecodeHeader struct is not properly aligned on this platform");
+	static_assert(sizeof(BytecodeHeader) == 12, "BytecodeHeader struct is not properly aligned on this platform");
+
+	const uint32_t DebugSignature = MakeFourCC('J', 'D', 'B', 'G');
+
+	struct DebugHeader
+	{
+		DebugHeader() :
+			signature(DebugSignature),
+			lineEntryCount(0),
+			dataSize(0)
+		{}
+		uint32_t signature;
+		uint32_t lineEntryCount;
+		uint32_t dataSize;
+	};
+
+	static_assert(sizeof(DebugHeader) == 12, "DebugHeader struct is not properly aligned on this platform");
+
+	struct DebugLineEntry
+	{
+		uint32_t opcodePosition;
+		uint32_t lineNumber;
+	};
 
 	template <typename T>
 	inline T NextHighestMultiple(T val, T multiple)
@@ -227,6 +248,7 @@ namespace Jinx
 	RuntimeID GetRandomId();
 	uint32_t MaxInstructions();
 	bool ErrorOnMaxInstrunction();
+	bool EnableDebugInfo();
 
 	// Forward declarations
 	class Runtime;

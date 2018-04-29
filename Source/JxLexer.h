@@ -32,8 +32,8 @@ namespace Jinx
 			int64_t intVal;
 			bool boolVal;
 		};
-		int32_t lineNumber;
-		int32_t columnNumber;
+		uint32_t lineNumber;
+		uint32_t columnNumber;
 	};
 
 	typedef std::list<Symbol, Allocator<Symbol>> SymbolList;
@@ -44,7 +44,7 @@ namespace Jinx
 	{
 	public:
 		// Lex the script text
-		Lexer(BufferPtr buffer, const String & uniqueName);
+		Lexer(BufferPtr buffer, const String & name);
 
 		// Do lexing pass to create token list
 		bool Execute();
@@ -60,10 +60,10 @@ namespace Jinx
 		{
 			if (m_error)
 				return;
-			if (m_uniqueName.empty())
+			if (m_name.empty())
 				LogWrite("Error at line %i, column %i:", m_lineNumber, m_columnNumber);
 			else
-				LogWrite("Error in '%s' at line %i, column %i: ", m_uniqueName.c_str(), m_lineNumber, m_columnNumber);
+				LogWrite("Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
 			LogWriteLine(format, std::forward<Args>(args)...);
 			m_error = true;
 		}
@@ -99,14 +99,14 @@ namespace Jinx
 
 	private:
 		BufferPtr m_buffer;
-		String m_uniqueName;
+		String m_name;
 		SymbolList m_symbolList;
 		const char * m_start;
 		const char * m_end;
 		const char * m_current;
-		int32_t m_columnNumber;
-		int32_t m_columnMarker;
-		int32_t m_lineNumber;
+		uint32_t m_columnNumber;
+		uint32_t m_columnMarker;
+		uint32_t m_lineNumber;
 		bool m_error;
 		SymbolTypeMap m_symbolTypeMap;
 	};

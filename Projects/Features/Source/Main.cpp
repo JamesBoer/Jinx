@@ -66,6 +66,7 @@ int main(int argc, char ** argv)
 		GlobalParams globalParams;
 		globalParams.logSymbols = true;
 		globalParams.logBytecode = true;
+		globalParams.enableDebugInfo = true;
         globalParams.maxInstructions = 5000;
 		globalParams.allocBlockSize = 1024 * 256;
 		globalParams.allocFn = [](size_t size) { return malloc(size); };
@@ -76,6 +77,10 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 			
+			-- Test of diagnostic output
+			set x to 0
+			set y to 1
+			set z to "this is a test string"
 			set a to 1 / 0
 			
 			)";
