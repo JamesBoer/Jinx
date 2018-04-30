@@ -28,6 +28,7 @@ Copyright (c) 2016 James Boer
 #include <atomic>
 #include <locale>
 #include <codecvt>
+#include <climits>
 
 #include "Jinx.h"
 #include "JxLogging.h"

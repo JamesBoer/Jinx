@@ -40,13 +40,13 @@ void Runtime::AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t inst
 		m_perfStats.scriptCompletionCount++;
 }
 
-BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName, std::initializer_list<String> libraries)
+BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String name, std::initializer_list<String> libraries)
 {
 	// Mark script execution start time
 	auto begin = std::chrono::high_resolution_clock::now();
 
 	// Lex script text into tokens
-	Lexer lexer(scriptBuffer, uniqueName);
+	Lexer lexer(scriptBuffer, name);
 
 	// Exit if errors when lexing
 	if (!lexer.Execute())
@@ -57,7 +57,7 @@ BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName, std::initi
 		LogSymbols(lexer.GetSymbolList());
 
 	// Create parser with symbol list
-	Parser parser(shared_from_this(), lexer.GetSymbolList(), uniqueName, libraries);
+	Parser parser(shared_from_this(), lexer.GetSymbolList(), name, libraries);
 
 	// Generate bytecode from symbol list
 	if (!parser.Execute())
@@ -78,11 +78,11 @@ BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String uniqueName, std::initi
 	return parser.GetBytecode();
 }
 
-BufferPtr Runtime::Compile(const char * scriptText, String uniqueName, std::initializer_list<String> libraries)
+BufferPtr Runtime::Compile(const char * scriptText, String name, std::initializer_list<String> libraries)
 {
 	auto scriptBuffer = CreateBuffer();
 	scriptBuffer->Write(scriptText, strlen(scriptText) + 1);
-	return Compile(scriptBuffer, uniqueName, libraries);
+	return Compile(scriptBuffer, name, libraries);
 }
 
 ScriptPtr Runtime::CreateScript(BufferPtr bytecode, void * userContext)
@@ -90,10 +90,10 @@ ScriptPtr Runtime::CreateScript(BufferPtr bytecode, void * userContext)
 	return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode), userContext);
 }
 
-ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, String uniqueName, std::initializer_list<String> libraries)
+ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries)
 {
 	// Compile script text to bytecode
-	auto bytecode = Compile(scriptText, uniqueName, libraries);
+	auto bytecode = Compile(scriptText, name, libraries);
 	if (!bytecode)
 		return nullptr;
 
@@ -101,10 +101,10 @@ ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, Str
 	return CreateScript(bytecode, userContext);
 }
 
-ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, String uniqueName, std::initializer_list<String> libraries)
+ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, String name, std::initializer_list<String> libraries)
 {
 	// Compile the text to bytecode
-	auto bytecode = Compile(scriptcode, uniqueName, libraries);
+	auto bytecode = Compile(scriptcode, name, libraries);
 	if (!bytecode)
 		return nullptr;
 
@@ -195,15 +195,17 @@ void Runtime::LogBytecode(const Parser & parser) const
 	BinaryReader reader(buffer);
 	BytecodeHeader header;
 	reader.Read(&header, sizeof(header));
+	String scriptName;
+	reader.Read(&scriptName);
 	int instructionCount = 0;
-	while (reader.Tell() < buffer->Size())
+	while (reader.Tell() < header.dataSize + sizeof(header))
 	{
 		// Read opcode instruction
 		uint8_t opByte;
 		reader.Read(&opByte);
 		if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
 		{
-			LogWriteLine("Invalid operation in bytecode");
+			LogWriteLine("LogBytecode(): Invalid operation in bytecode");
 			return;
 		}
 		Opcode opcode = static_cast<Opcode>(opByte);
@@ -329,7 +331,7 @@ void Runtime::LogSymbols(const SymbolList & symbolList) const
 		// Write indentation at each new line
 		if (newLine)
 		{
-			for (int32_t i = 1; i < symbol->columnNumber - offset; ++i)
+			for (uint32_t i = 1; i < symbol->columnNumber - offset; ++i)
 				LogWrite(" ");
 			newLine = false;
 		}
@@ -414,6 +416,36 @@ bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Varia
 	auto collPtr = variant.GetCollection();
 	(*collPtr)[key] = value;
 	return true;
+}
+
+BufferPtr Runtime::StripDebugInfo(BufferPtr bytecode) const
+{
+	// Validate input
+	assert(bytecode);
+	if (!bytecode)
+		return nullptr;
+	if (bytecode->Size() < sizeof(BytecodeHeader))
+		return nullptr;
+
+	// Read the bytecode header
+	BytecodeHeader header;
+	BinaryReader reader(bytecode);
+	reader.Read(&header, sizeof(header));
+
+	// Validate bytecode header
+	if (header.signature != BytecodeSignature || header.version != BytecodeVersion || header.dataSize == 0)
+		return nullptr;
+
+	// If the total size matches size indicated by bytecode header, there is no
+	// debug info.  Just return the original buffer.
+	if (header.dataSize + sizeof(header) <= bytecode->Size())
+		return bytecode;
+
+	// Copy just the bytecode without debug info to a new buffer and return it
+	auto newBytecode = CreateBuffer();
+	newBytecode->Reserve(bytecode->Size());
+	newBytecode->Write(bytecode->Ptr(), bytecode->Size());
+	return bytecode;
 }
 
 RuntimePtr Jinx::CreateRuntime()

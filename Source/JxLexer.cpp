@@ -10,9 +10,9 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 
 
-Lexer::Lexer(BufferPtr buffer, const String & uniqueName) :
+Lexer::Lexer(BufferPtr buffer, const String & name) :
 	m_buffer(buffer),
-	m_uniqueName(uniqueName),
+	m_name(name),
 	m_start(nullptr),
 	m_end(nullptr),
 	m_current(nullptr),

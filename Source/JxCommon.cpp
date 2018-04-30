@@ -247,6 +247,18 @@ bool Jinx::ErrorOnMaxInstrunction()
 	return s_globalParams.errorOnMaxInstrunctions;
 }
 
+bool Jinx::EnableDebugInfo()
+{
+	return s_globalParams.enableDebugInfo;
+}
+
+String Jinx::GetVersionString()
+{
+	char buffer[32];
+	snprintf(buffer, countof(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
+	return buffer;
+}
+
 void Jinx::Initialize(const GlobalParams & params)
 {
 	s_globalParams = params;

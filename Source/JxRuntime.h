@@ -20,14 +20,16 @@ namespace Jinx
 		virtual ~Runtime();
 
 		// IRuntime interface
-		BufferPtr Compile(const char * scriptText, String uniqueName, std::initializer_list<String> libraries) override;
+		BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
 		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
-		ScriptPtr CreateScript(const char * scriptText, void * userContext, String uniqueName, std::initializer_list<String> libraries) override;
-		ScriptPtr ExecuteScript(const char * scriptcode, void * userContext, String uniqueName, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
+		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
+		BufferPtr StripDebugInfo(BufferPtr bytecode) const override;
 
 		// Internal interface
-		BufferPtr Compile(BufferPtr scriptBuffer, String uniqueName, std::initializer_list<String> libraries);
+		BufferPtr Compile(BufferPtr scriptBuffer, String name, std::initializer_list<String> libraries);
 		inline LibraryIPtr GetLibraryInternal(const String & name) { return std::static_pointer_cast<Library>(GetLibrary(name)); }
 		FunctionDefinitionPtr FindFunction(RuntimeID id) const;
 		bool LibraryExists(const String & name) const;
@@ -38,7 +40,6 @@ namespace Jinx
 		bool PropertyExists(RuntimeID id) const;
 		void SetProperty(RuntimeID id, const Variant & value);
 		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
-		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 
 	private:

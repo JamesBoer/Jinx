@@ -83,10 +83,7 @@ namespace Jinx
 	static const uint32_t MinorVersion = 15;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 4;
-
-	/// Version string
-	static const char * VersionString = "0.15.4";
+	static const uint32_t PatchNumber = 5;
 
 	// Forward declaration
 	class IScript;
@@ -213,6 +210,13 @@ namespace Jinx
 		*/
 		virtual void SetVariable(const String & name, const Variant & value) = 0;
 
+		/// Get the script name
+		/**
+		\return This returns the name of the script designated by the user when compiling from source.
+		\sa IRuntime::CompileScript(), IRuntime::ExecuteScript()
+		*/
+		virtual const String & GetName() const = 0;
+
 		/// Get a user context pointer
 		/**
 		\return void pointer optionally passed at script creation.  This is intended to be
@@ -278,13 +282,13 @@ namespace Jinx
 		bytecode buffer is then passed to the CreateScript() function to create a
 		script ready for execution.
 		\param scriptText A C string containing text to compile to bytecode
-		\param uniqueName The name of the script, typically the filename, used for debugging
+		\param name The name of the script, typically the filename, used for debugging
 		and diagnostic purposes.
 		\param libraries A list of libraries to import by default.
 		\return A BufferPtr containing compiled bytecode on success or a nullptr on failure.
 		\sa CreateScript()
 		*/
-		virtual BufferPtr Compile(const char * scriptText, String uniqueName = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual BufferPtr Compile(const char * scriptText, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Create a script from bytecode
 		/**
@@ -302,12 +306,12 @@ namespace Jinx
 		Compiles script text to bytecode, then creates and returns a script if successful.
 		\param scriptText A C string containing text to compile to bytecode
 		\param userContext A void pointer containing per-script user-defined data or object.
-		\param uniqueName The name of the script, typically the filename, used for debugging
+		\param name The name of the script, typically the filename, used for debugging
 		and diagnostic purposes.
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, void * userContext = nullptr, String uniqueName = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -315,12 +319,12 @@ namespace Jinx
 		script if successful.
 		\param scriptText A C string containing text to compile to bytecode
 		\param userContext A void pointer containing per-script user-defined data or object.
-		\param uniqueName The name of the script, typically the filename, used for debugging
+		\param name The name of the script, typically the filename, used for debugging
 		and diagnostic purposes.
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, void * userContext = nullptr, String uniqueName = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**
@@ -338,6 +342,16 @@ namespace Jinx
 		\sa PerformanceStats
 		*/
 		virtual PerformanceStats GetScriptPerformanceStats(bool resetStats = true) = 0;
+
+		// Strip debug info from bytecode
+		/**
+		Strip bytecode of debug info and return in a new buffer
+		\param bytecode A buffer containing compiled bytecode
+		\return A new buffer containing bytecode without debug info, or the same buffer if already stripped.  Returns a
+		null pointer on error.
+		\sa PerformanceStats
+		*/
+		virtual BufferPtr StripDebugInfo(BufferPtr bytecode) const = 0;
 
 	protected:
 		virtual ~IRuntime() {}
@@ -379,6 +393,7 @@ namespace Jinx
 			enableLogging(true), 
 			logSymbols(false),
 			logBytecode(false),
+			enableDebugInfo(true),
 			allocBlockSize(8192),
 			allocSpareBlocks(4),
 			maxInstructions(2000),
@@ -392,6 +407,8 @@ namespace Jinx
 		bool logSymbols;
 		/// Log a detailed list of bytecode after compilation
 		bool logBytecode;
+		/// Embed debug info in bytecode
+		bool enableDebugInfo;
 		/// Alloc memory function
 		AllocFn allocFn;
 		/// Realloc memory function
@@ -407,6 +424,9 @@ namespace Jinx
 		/// Maximum total script instrunctions
 		bool errorOnMaxInstrunctions;
 	};
+
+	/// Get Jinx version in string form for easier display
+	String GetVersionString();
 
 	/// Initializes global Jinx parameters
 	/**

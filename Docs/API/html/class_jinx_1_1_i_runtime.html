@@ -100,30 +100,32 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a48cee1961798f4870f7eb005ab17c6da"><td class="memItemLeft" align="right" valign="top">virtual BufferPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da">Compile</a> (const char *scriptText, String uniqueName=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
-<tr class="memdesc:a48cee1961798f4870f7eb005ab17c6da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile text string into bytecode.  <a href="#a48cee1961798f4870f7eb005ab17c6da">More...</a><br /></td></tr>
-<tr class="separator:a48cee1961798f4870f7eb005ab17c6da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85a3a6697eea6c30b8d02b4ca1dc2131"><td class="memItemLeft" align="right" valign="top">virtual BufferPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131">Compile</a> (const char *scriptText, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:a85a3a6697eea6c30b8d02b4ca1dc2131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile text string into bytecode.  <a href="#a85a3a6697eea6c30b8d02b4ca1dc2131">More...</a><br /></td></tr>
+<tr class="separator:a85a3a6697eea6c30b8d02b4ca1dc2131"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9e96bd4e6c94cfa5afc9a1aa27d02ef"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#aa9e96bd4e6c94cfa5afc9a1aa27d02ef">CreateScript</a> (BufferPtr bytecode, void *userContext=nullptr)=0</td></tr>
 <tr class="memdesc:aa9e96bd4e6c94cfa5afc9a1aa27d02ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a script from bytecode.  <a href="#aa9e96bd4e6c94cfa5afc9a1aa27d02ef">More...</a><br /></td></tr>
 <tr class="separator:aa9e96bd4e6c94cfa5afc9a1aa27d02ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7be96d806ee4c7b7e178c5ca4de118f4"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a7be96d806ee4c7b7e178c5ca4de118f4">CreateScript</a> (const char *scriptText, void *userContext=nullptr, String uniqueName=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
-<tr class="memdesc:a7be96d806ee4c7b7e178c5ca4de118f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and create script from text.  <a href="#a7be96d806ee4c7b7e178c5ca4de118f4">More...</a><br /></td></tr>
-<tr class="separator:a7be96d806ee4c7b7e178c5ca4de118f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1081f83d7a31eb7f0d58a2a3cac39ec5"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a1081f83d7a31eb7f0d58a2a3cac39ec5">ExecuteScript</a> (const char *scriptText, void *userContext=nullptr, String uniqueName=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
-<tr class="memdesc:a1081f83d7a31eb7f0d58a2a3cac39ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile, create, and execute a script.  <a href="#a1081f83d7a31eb7f0d58a2a3cac39ec5">More...</a><br /></td></tr>
-<tr class="separator:a1081f83d7a31eb7f0d58a2a3cac39ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d533f522cf7a9af3a36649a269cf706"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a6d533f522cf7a9af3a36649a269cf706">CreateScript</a> (const char *scriptText, void *userContext=nullptr, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:a6d533f522cf7a9af3a36649a269cf706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and create script from text.  <a href="#a6d533f522cf7a9af3a36649a269cf706">More...</a><br /></td></tr>
+<tr class="separator:a6d533f522cf7a9af3a36649a269cf706"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab85db498f2f35eb4d923b14d6f4385e"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#aab85db498f2f35eb4d923b14d6f4385e">ExecuteScript</a> (const char *scriptText, void *userContext=nullptr, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:aab85db498f2f35eb4d923b14d6f4385e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile, create, and execute a script.  <a href="#aab85db498f2f35eb4d923b14d6f4385e">More...</a><br /></td></tr>
+<tr class="separator:aab85db498f2f35eb4d923b14d6f4385e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_jinx_8h.html#aec5ab3b563503ea605b4197e3da148de">LibraryPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#ade7ef682dd686f45c59a6ca94d3ef85e">GetLibrary</a> (const String &amp;name)=0</td></tr>
 <tr class="memdesc:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve library by name or create empty library if not found.  <a href="#ade7ef682dd686f45c59a6ca94d3ef85e">More...</a><br /></td></tr>
 <tr class="separator:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d7746368465101742d064d7608da376"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="struct_jinx_1_1_performance_stats.html">PerformanceStats</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a6d7746368465101742d064d7608da376">GetScriptPerformanceStats</a> (bool resetStats=true)=0</td></tr>
 <tr class="memdesc:a6d7746368465101742d064d7608da376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get script performance stats.  <a href="#a6d7746368465101742d064d7608da376">More...</a><br /></td></tr>
 <tr class="separator:a6d7746368465101742d064d7608da376"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae213e0863588f58ea54c9133fb9439e9"><td class="memItemLeft" align="right" valign="top">virtual BufferPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#ae213e0863588f58ea54c9133fb9439e9">StripDebugInfo</a> (BufferPtr bytecode) const  =0</td></tr>
+<tr class="separator:ae213e0863588f58ea54c9133fb9439e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Jinx runtime interface. </p>
 <p>The Jinx runtime interface represents the entire runtime scripting environment. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a48cee1961798f4870f7eb005ab17c6da"></a>
+<a class="anchor" id="a85a3a6697eea6c30b8d02b4ca1dc2131"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -140,7 +142,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>uniqueName</em> = <code>String()</code>, </td>
+          <td class="paramname"><em>name</em> = <code>String()</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -165,7 +167,7 @@ Public Member Functions</h2></td></tr>
 <p>Pass a C-string filled with text to compile it to executable bytecode. This bytecode buffer is then passed to the <a class="el" href="class_jinx_1_1_i_runtime.html#aa9e96bd4e6c94cfa5afc9a1aa27d02ef" title="Create a script from bytecode. ">CreateScript()</a> function to create a script ready for execution. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
-    <tr><td class="paramname">uniqueName</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
+    <tr><td class="paramname">name</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
     <tr><td class="paramname">libraries</td><td>A list of libraries to import by default. </td></tr>
   </table>
   </dd>
@@ -208,19 +210,19 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Create a script from bytecode. </p>
-<p>Create script from compiled bytecode retrieved from the <a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a> function. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Create script from compiled bytecode retrieved from the <a class="el" href="class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131" title="Compile text string into bytecode. ">Compile()</a> function. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">bytecode</td><td>A BufferPtr containing the compiled bytecode generated by the output of the <a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a> function. </td></tr>
+    <tr><td class="paramname">bytecode</td><td>A BufferPtr containing the compiled bytecode generated by the output of the <a class="el" href="class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131" title="Compile text string into bytecode. ">Compile()</a> function. </td></tr>
     <tr><td class="paramname">userContext</td><td>A void pointer containing per-script user-defined data or object. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A ScriptPtr ready for execution. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_script.html" title="Script interface. ">IScript</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_script.html" title="Script interface. ">IScript</a> </dd></dl>
 
 </div>
 </div>
-<a class="anchor" id="a7be96d806ee4c7b7e178c5ca4de118f4"></a>
+<a class="anchor" id="a6d533f522cf7a9af3a36649a269cf706"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -243,7 +245,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>uniqueName</em> = <code>String()</code>, </td>
+          <td class="paramname"><em>name</em> = <code>String()</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -269,7 +271,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
     <tr><td class="paramname">userContext</td><td>A void pointer containing per-script user-defined data or object. </td></tr>
-    <tr><td class="paramname">uniqueName</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
+    <tr><td class="paramname">name</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
     <tr><td class="paramname">libraries</td><td>A list of libraries to import by default. </td></tr>
   </table>
   </dd>
@@ -278,7 +280,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a1081f83d7a31eb7f0d58a2a3cac39ec5"></a>
+<a class="anchor" id="aab85db498f2f35eb4d923b14d6f4385e"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -301,7 +303,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">String&#160;</td>
-          <td class="paramname"><em>uniqueName</em> = <code>String()</code>, </td>
+          <td class="paramname"><em>name</em> = <code>String()</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -327,7 +329,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
     <tr><td class="paramname">userContext</td><td>A void pointer containing per-script user-defined data or object. </td></tr>
-    <tr><td class="paramname">uniqueName</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
+    <tr><td class="paramname">name</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
     <tr><td class="paramname">libraries</td><td>A list of libraries to import by default. </td></tr>
   </table>
   </dd>
@@ -366,7 +368,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A LibraryPtr pointer to an <a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> interface. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a48cee1961798f4870f7eb005ab17c6da" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131" title="Compile text string into bytecode. ">Compile()</a>, <a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> </dd></dl>
 
 </div>
 </div>
@@ -400,6 +402,38 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A PerfStats structure containing various performance statistics </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_jinx_1_1_performance_stats.html" title="Performance stats. ">PerformanceStats</a> </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ae213e0863588f58ea54c9133fb9439e9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual BufferPtr Jinx::IRuntime::StripDebugInfo </td>
+          <td>(</td>
+          <td class="paramtype">BufferPtr&#160;</td>
+          <td class="paramname"><em>bytecode</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Strip bytecode of debug info and return in a new buffer </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytecode</td><td>A buffer containing compiled bytecode </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new buffer containing bytecode without debug info, or the same buffer if already stripped. Returns a null pointer on error. </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="struct_jinx_1_1_performance_stats.html" title="Performance stats. ">PerformanceStats</a> </dd></dl>
 
 </div>

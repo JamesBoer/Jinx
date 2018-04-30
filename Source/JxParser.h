@@ -16,7 +16,7 @@ namespace Jinx
 	class Parser
 	{
 	public:
-		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & uniqueName, std::initializer_list<String> libraries);
+		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & name, std::initializer_list<String> libraries);
 		
 		// Convert the symbol list into bytecode
 		bool Execute();
@@ -51,10 +51,10 @@ namespace Jinx
 				LogWriteLine("Error: Unexpected end of script");
 				return;
 			}
-			if (m_uniqueName.empty())
+			if (m_name.empty())
 				LogWrite("Error at line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			else
-				LogWrite("Error in '%s' at line %i, column %i: ", m_uniqueName.c_str(), m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+				LogWrite("Error in '%s' at line %i, column %i: ", m_name.c_str(), m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			LogWriteLine(format, std::forward<Args>(args)...);
 		}
 
@@ -96,6 +96,12 @@ namespace Jinx
 		void EmitId(RuntimeID id);
 		void EmitIndex(int32_t index);
 		void EmitValueType(ValueType type);
+
+		// Finalize bytecode header with final size
+		void WriteBytecodeHeader();
+
+		// Write optional debug info
+		void WriteDebugInfo();
 
 		// Advance to next sumbol
 		void NextSymbol();
@@ -170,13 +176,16 @@ namespace Jinx
 		RuntimeIPtr m_runtime;
 
 		// Unique name
-		String m_uniqueName;
+		String m_name;
 
 		// Symbol list to parse
 		const SymbolList & m_symbolList;
 
 		// Current symbol being parsed
 		SymbolListCItr m_currentSymbol;
+
+		// Last parsed line
+		uint32_t m_lastLine;
 
 		// Signal an error
 		bool m_error;
@@ -189,6 +198,9 @@ namespace Jinx
 
 		// Writes data to an output buffer
 		BinaryWriter m_writer;
+
+		// Write opcode debug data
+		std::vector<DebugLineEntry, Allocator<DebugLineEntry>> m_debugLines;
 
 		// Current library;
 		LibraryIPtr m_library;

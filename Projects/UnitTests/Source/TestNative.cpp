@@ -131,4 +131,27 @@ TEST_CASE("Test Native", "[Native]")
 		Variant gs2 = gv.GetString();
 		REQUIRE(gs == gs2);
 	}
+
+	SECTION("Test multiple executions of a script")
+	{
+		static const char * scriptText =
+			u8R"(
+					
+			set a to 123
+			
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto script = runtime->CreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		REQUIRE(script->IsFinished());
+		REQUIRE(script->GetVariable("a") == 123);
+		script->SetVariable("a", 1);
+		REQUIRE(script->Execute());
+		REQUIRE(script->IsFinished());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+
 }

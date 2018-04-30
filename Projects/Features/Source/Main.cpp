@@ -59,13 +59,14 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 
 int main(int argc, char ** argv)
 {
-	printf("Jinx version: %s\n", Jinx::VersionString);
+	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
 
 	// Add scope block to ensure all objects are destroyed for shutdown test
 	{
 		GlobalParams globalParams;
 		globalParams.logSymbols = true;
 		globalParams.logBytecode = true;
+		globalParams.enableDebugInfo = true;
         globalParams.maxInstructions = 5000;
 		globalParams.allocBlockSize = 1024 * 256;
 		globalParams.allocFn = [](size_t size) { return malloc(size); };
@@ -76,38 +77,16 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 			
-			import core
-
-			function func4 {integer a}
-				return call stack
-			end
-
-			function func3 {a}
-				return func4 a
-			end
-
-			function func2/func22 (opt1/opt2)
-				return func3 123
-			end
-
-			function func1/func11 (optional)
-				return func2
-			end
-
-			set a to func1
-
-			write line a
+			-- Test of diagnostic output
+			set x to 0
+			set y to 1
+			set z to "this is a test string"
+			set a to 1 / 0
 			
 			)";
 
 		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection());
-		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == "root");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == "func1/func11 (optional)");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(3) == "func2/func22 (opt1/opt2)");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(4) == "func3 {}");
-		REQUIRE(script->GetVariable("a").GetCollection()->at(5) == "func4 {integer}");
+		//REQUIRE(script);
 	}
 
 	Jinx::ShutDown();

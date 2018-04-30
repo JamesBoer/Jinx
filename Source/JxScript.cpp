@@ -14,7 +14,8 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
 	m_runtime(runtime),
 	m_userContext(userContext),
 	m_finished(false),
-	m_error(false)
+	m_error(false),
+	m_bytecodeStart(0)
 {
 	m_execution.reserve(6);
 	m_execution.push_back(ExecutionFrame(bytecode, "root"));
@@ -27,10 +28,18 @@ Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
 	BytecodeHeader header;
 	auto & reader = m_execution.back().reader;
 	reader.Read(&header, sizeof(header));
-	if (header.signature != BytecodeSignature || header.majorVer != BytecodeMajorVersion || header.minorVer != BytecodeMinorVersion)
+	if (header.signature != BytecodeSignature || header.version != BytecodeVersion || header.dataSize == 0)
 	{
 		Error("Invalid bytecode");
 	}
+
+	// Read the script name
+	reader.Read(&m_name);
+	if (m_name.empty())
+		m_name = "(unnamed)";
+
+	// Mark the starting position of the executable bytecode
+	m_bytecodeStart = reader.Tell();
 }
 
 Script::~Script()
@@ -51,9 +60,51 @@ Script::~Script()
 
 void Script::Error(const char * message)
 {
-	LogWriteLine("%s", message);
+	// Set flags to indicate a fatal runtime error
 	m_error = true;
 	m_finished = true;
+
+	// Try to determine line number in current script execution context
+	uint32_t lineNumber = 0;
+	auto & reader = m_execution.back().reader;
+	auto bytecodePos = reader.Tell();
+	reader.Seek(0);
+	BytecodeHeader bytecodeHeader;
+	reader.Read(&bytecodeHeader, sizeof(bytecodeHeader));
+	if (reader.Size() > sizeof(bytecodeHeader) + bytecodeHeader.dataSize)
+	{
+		// Validate debug info
+		reader.Seek(sizeof(bytecodeHeader) + bytecodeHeader.dataSize);
+		if (reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(DebugHeader))
+		{
+			LogWriteLine("Potentially corrupt bytecode debug data");
+			return;
+		}
+		DebugHeader debugHeader;
+		reader.Read(&debugHeader, sizeof(debugHeader));
+		if (debugHeader.signature != DebugSignature || 
+			reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(debugHeader) + debugHeader.dataSize)
+		{
+			LogWriteLine("Potentially corrupt bytecode debug data");
+			return;
+		}
+
+		// Read bytecode to line number table
+		for (uint32_t i = 0; i < debugHeader.lineEntryCount; ++i)
+		{
+			DebugLineEntry lineEntry;
+			reader.Read(&lineEntry, sizeof(lineEntry));
+			if (lineEntry.opcodePosition > bytecodePos)
+				break;
+			lineNumber = lineEntry.lineNumber;
+		}
+	}
+
+	// If we have a line number, use it.  Otherwise, just report what we know.
+	if (lineNumber)
+		LogWriteLine("Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
+	else
+		LogWriteLine("Runtime error in script '%s': %s", m_name.c_str(), message);
 }
 
 bool Script::Execute()
@@ -72,8 +123,9 @@ bool Script::Execute()
 	// Auto reset if finished
 	if (m_finished)
 	{
+		assert(m_execution.size() == 1);
 		m_finished = false;
-		m_execution.back().reader.Seek(sizeof(BytecodeHeader));
+		m_execution.back().reader.Seek(m_bytecodeStart);
 	}
 
 	// Mark script execution start time
@@ -289,6 +341,8 @@ bool Script::Execute()
 			break;
 			case Opcode::Exit:
 			{
+				while (m_execution.size() > 1)
+					m_execution.pop_back();
 				m_finished = true;
 			}
 			break;
@@ -867,7 +921,7 @@ bool Script::Execute()
 std::vector<String, Allocator<String>> Script::GetCallStack() const
 {
 	std::vector<String, Allocator<String>> strings;
-	for (const auto frame : m_execution)
+	for (const auto & frame : m_execution)
 		strings.push_back(frame.name);
 	return strings;
 }

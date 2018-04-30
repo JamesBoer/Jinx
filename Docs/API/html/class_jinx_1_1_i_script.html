@@ -112,6 +112,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a00c9be2222beda416088575b5b8d9918"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a00c9be2222beda416088575b5b8d9918">SetVariable</a> (const String &amp;name, const <a class="el" href="class_jinx_1_1_variant.html">Variant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:a00c9be2222beda416088575b5b8d9918"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set a variable by name.  <a href="#a00c9be2222beda416088575b5b8d9918">More...</a><br /></td></tr>
 <tr class="separator:a00c9be2222beda416088575b5b8d9918"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a189f984d66b18627e6a597ea577f0c5f"><td class="memItemLeft" align="right" valign="top">virtual const String &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a189f984d66b18627e6a597ea577f0c5f">GetName</a> () const  =0</td></tr>
+<tr class="memdesc:a189f984d66b18627e6a597ea577f0c5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the script name.  <a href="#a189f984d66b18627e6a597ea577f0c5f">More...</a><br /></td></tr>
+<tr class="separator:a189f984d66b18627e6a597ea577f0c5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0774d4b9c9bb71fc7a51e15ef280f8ea"><td class="memItemLeft" align="right" valign="top">virtual void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a0774d4b9c9bb71fc7a51e15ef280f8ea">GetUserContext</a> () const  =0</td></tr>
 <tr class="memdesc:a0774d4b9c9bb71fc7a51e15ef280f8ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a user context pointer.  <a href="#a0774d4b9c9bb71fc7a51e15ef280f8ea">More...</a><br /></td></tr>
 <tr class="separator:a0774d4b9c9bb71fc7a51e15ef280f8ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -172,6 +175,33 @@ Public Member Functions</h2></td></tr>
 
 <p>Return the library to which this script belongs. </p>
 <dl class="section return"><dt>Returns</dt><dd>This function returns a shared pointer to the library which this script belongs to. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a189f984d66b18627e6a597ea577f0c5f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual const String&amp; Jinx::IScript::GetName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the script name. </p>
+<dl class="section return"><dt>Returns</dt><dd>This returns the name of the script designated by the user when compiling from source. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>IRuntime::CompileScript(), <a class="el" href="class_jinx_1_1_i_runtime.html#aab85db498f2f35eb4d923b14d6f4385e" title="Compile, create, and execute a script. ">IRuntime::ExecuteScript()</a> </dd></dl>
 
 </div>
 </div>
