@@ -921,7 +921,7 @@ bool Script::Execute()
 std::vector<String, Allocator<String>> Script::GetCallStack() const
 {
 	std::vector<String, Allocator<String>> strings;
-	for (const auto frame : m_execution)
+	for (const auto & frame : m_execution)
 		strings.push_back(frame.name);
 	return strings;
 }
