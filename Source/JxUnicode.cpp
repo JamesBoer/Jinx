@@ -199,7 +199,7 @@ static void ConvertUtf16ToUtf32(const char16_t * utf16In, uint32_t inBufferCount
 	*numCharsOut = 2;
 }
 
-static void ConvertUtf32ToUtf16(char32_t utf32CodePoint, char16_t * utf16Out, uint32_t outBufferCount, size_t * numCharsOut)
+static void ConvertUtf32ToUtf16(char32_t utf32CodePoint, char16_t * utf16Out, size_t outBufferCount, size_t * numCharsOut)
 {
 	// Validate parameters
 	if (!utf16Out || outBufferCount == 0 || !numCharsOut)
