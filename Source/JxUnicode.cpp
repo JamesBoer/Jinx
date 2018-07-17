@@ -161,6 +161,79 @@ static void ConvertUtf32ToUtf8(char32_t utf32CodePoint, char * utf8Out, size_t o
 	}
 }
 
+static void ConvertUtf16ToUtf32(const char16_t * utf16In, uint32_t inBufferCount, char32_t * utf32CodePoint, size_t * numCharsOut)
+{
+	// Validate parameters
+	if (!utf16In || inBufferCount == 0 || !utf32CodePoint || !numCharsOut)
+	{
+		LogWriteLine("Invalid arguments passed to ConvertUtf16ToUtf32()");
+		return;
+	}
+
+	// Check for single-digit code points - simple conversion
+	if (utf16In[0] < 0xD800 || utf16In[0] > 0xDFFF)
+	{
+		*utf32CodePoint = utf16In[0];
+		*numCharsOut = 1;
+		return;
+	}
+
+	// Make sure we have a second word
+	if (inBufferCount < 2)
+	{
+		LogWriteLine("Invalid arguments passed to ConvertUtf16ToUtf32()");
+		return;
+	}
+
+	// Check for invalid range of second word
+	if (utf16In[1] < 0xDC00 || utf16In[1] > 0xDFFF)
+	{
+		LogWriteLine("Invalid data passed to ConvertUtf16ToUtf32()");
+		return;
+	}
+
+	// Set code point and indicate two words have been read
+	char32_t surrogate1 = ((utf16In[0] & 0x3FF) << 10);
+	char32_t surrogate2 = utf16In[1];
+	*utf32CodePoint = surrogate1 + (surrogate2 & 0x3ff) + 0x10000;
+	*numCharsOut = 2;
+}
+
+static void ConvertUtf32ToUtf16(char32_t utf32CodePoint, char16_t * utf16Out, uint32_t outBufferCount, size_t * numCharsOut)
+{
+	// Validate parameters
+	if (!utf16Out || outBufferCount == 0 || !numCharsOut)
+	{
+		LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf16()");
+		return;
+	}
+
+	// Check for 16-bit code point - simple conversion
+	if (utf32CodePoint < 0x10000)
+	{
+		utf16Out[0] = (char16_t)utf32CodePoint;
+		*numCharsOut = 1;
+	}
+	else
+	{
+		// Check to make sure we have two buffers to read
+		if (outBufferCount < 2)
+		{
+			LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf16()");
+			return;
+		}
+
+		// Calculate utf16 words and indicate two words have been generated
+		utf32CodePoint -= 0x10000;
+		char32_t surrogate1 = ((utf32CodePoint >> 10) & 0x3FF) + 0xD800;
+		char32_t surrogate2 = (utf32CodePoint & 0x3FF) + 0xDC00;
+		utf16Out[0] = (char16_t)surrogate1;
+		utf16Out[1] = (char16_t)surrogate2;
+		*numCharsOut = 2;
+	}
+}
+
+
 size_t Jinx::GetUtf8CharSize(const char * utf8Str)
 {
 	// Validate parameter
@@ -184,95 +257,95 @@ size_t Jinx::GetUtf8CharSize(const char * utf8Str)
 	return s;
 }
 
-// Workaround for VS 2015/2017 bug.  It's safest to leave the fix open-ended, as the workaround is still compliant
-// even if fixed in the future.  Note: May want to revist this periodically in case MS ever fixes this.
-#if _MSC_VER >= 1900
-
 StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
 {
-	std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t, Allocator<int16_t>, Allocator<char>> convert;
-	auto str = convert.from_bytes(utf8Str);
-	return StringU16(reinterpret_cast<const char16_t *>(str.data()));
-}
-
-String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16Str)
-{
-	std::wstring_convert<std::codecvt_utf8_utf16<int16_t>, int16_t, Allocator<int16_t>, Allocator<char>> convert;
-	auto p = reinterpret_cast<const int16_t *>(utf16Str.data());
-	return convert.to_bytes(p, p + utf16Str.size());
-}
-
-WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
-{
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-	auto str = convert.from_bytes(utf8Str);
-	return WString(reinterpret_cast<const wchar_t *>(str.data()));
-}
-
-String Jinx::ConvertWStringToUtf8(const WString & wStr)
-{
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-	auto p = reinterpret_cast<const wchar_t *>(wStr.data());
-	return convert.to_bytes(p, p + wStr.size());
-}
-
-#else
-
-StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
-{
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t, Allocator<char16_t>, Allocator<char>> convert;
-	return convert.from_bytes(utf8Str);
+	const char * cInStr = utf8Str.c_str();
+	const char * cInStrEnd = cInStr + utf8Str.size();
+	StringU16 outString;
+	outString.reserve(utf8Str.size());
+	char16_t outBuffer[3];
+	char32_t utf32CodePoint;
+	size_t numOut;
+	while (*cInStr != 0)
+	{
+		ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
+		cInStr += numOut;
+		ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, 3, &numOut);
+		outBuffer[numOut] = 0;
+		outString += outBuffer;
+	}
+	return outString;
 }
 
 String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 {
-	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t, Allocator<char16_t>, Allocator<char>> convert;
-	return convert.to_bytes(utf16_string);
+	const char16_t * cInStr = utf16_string.c_str();
+	const char16_t * cInStrEnd = cInStr + utf16_string.size();
+	String outString;
+	outString.reserve(utf16_string.size());
+	char outBuffer[5];
+	char32_t utf32CodePoint;
+	size_t numOut;
+	while (*cInStr != 0)
+	{
+		ConvertUtf16ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
+		cInStr += numOut;
+		ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, 3, &numOut);
+		outBuffer[numOut] = 0;
+		outString += outBuffer;
+	}
+	return outString;
 }
 
 WString Jinx::ConvertUtf8ToWString(const String & utf8Str)
 {
-	// Disable warning about constant if expression, as this is intentional.  Note that when C++ 17 is more widely
-	// supported, we could use if constexpr instead.
-#pragma warning(push)
-#pragma warning(disable:4127)	
-
-	if (sizeof(wchar_t) == 4)
+	// Compile-time check to determine size of wchar_t, and perform appropriate UTF-16 or UTF-32 conversion.
+	if constexpr(sizeof(wchar_t) == 4)
 	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-		return convert.from_bytes(utf8Str);      
+		const char * cInStr = utf8Str.c_str();
+		const char * cInStrEnd = cInStr + utf8Str.size();
+		WString outString;
+		outString.reserve(utf8Str.size());
+		char32_t utf32CodePoint;
+		size_t numOut;
+		while (*cInStr != 0)
+		{
+			ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
+			cInStr += numOut;
+			outString += static_cast<wchar_t>(utf32CodePoint);
+		}
+		return outString;
 	}
 	else
 	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-		return convert.from_bytes(utf8Str);    
+		return reinterpret_cast<const wchar_t *>(ConvertUtf8ToUtf16(utf8Str).c_str());
 	}
-
-#pragma warning(pop)
 }
 
 String Jinx::ConvertWStringToUtf8(const WString & wStr)
 {
-	// Disable warning about constant if expression, as this is intentional.  Note that when C++ 17 is more widely
-	// supported, we could use if constexpr instead.
-#pragma warning(push)
-#pragma warning(disable:4127)	
-
-	if (sizeof(wchar_t) == 4)
+	// Compile-time check to determine size of wchar_t, and perform appropriate UTF-16 or UTF-32 conversion
+	if constexpr(sizeof(wchar_t) == 4)
 	{
-		std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-		return convert.to_bytes(wStr);
+		auto cInStr = reinterpret_cast<const char32_t *>(wStr.c_str());
+		String outString;
+		outString.reserve(wStr.size());
+		char outBuffer[5];
+		size_t numOut;
+		while (*cInStr != 0)
+		{
+			ConvertUtf32ToUtf8(*cInStr, outBuffer, 3, &numOut);
+			outBuffer[numOut] = 0;
+			cInStr += numOut;
+			outString += outBuffer;
+		}
+		return outString;
 	}
 	else
 	{
-		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t, Allocator<wchar_t>, Allocator<char>> convert;
-		return convert.to_bytes(wStr);		
+		return ConvertUtf16ToUtf8(reinterpret_cast<const char16_t *>(wStr.c_str()));
 	}
-
-#pragma warning(pop)
 }
-
-#endif
 
 bool Jinx::IsCaseFolded(const String & source)
 {
