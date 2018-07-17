@@ -270,7 +270,7 @@ StringU16 Jinx::ConvertUtf8ToUtf16(const String & utf8Str)
 	{
 		ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
 		cInStr += numOut;
-		ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, 3, &numOut);
+		ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, countof(outBuffer), &numOut);
 		outBuffer[numOut] = 0;
 		outString += outBuffer;
 	}
@@ -290,7 +290,7 @@ String Jinx::ConvertUtf16ToUtf8(const StringU16 & utf16_string)
 	{
 		ConvertUtf16ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
 		cInStr += numOut;
-		ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, 3, &numOut);
+		ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, countof(outBuffer), &numOut);
 		outBuffer[numOut] = 0;
 		outString += outBuffer;
 	}
@@ -334,9 +334,9 @@ String Jinx::ConvertWStringToUtf8(const WString & wStr)
 		size_t numOut;
 		while (*cInStr != 0)
 		{
-			ConvertUtf32ToUtf8(*cInStr, outBuffer, 3, &numOut);
+			ConvertUtf32ToUtf8(*cInStr, outBuffer, countof(outBuffer), &numOut);
 			outBuffer[numOut] = 0;
-			cInStr += numOut;
+			++cInStr;
 			outString += outBuffer;
 		}
 		return outString;
