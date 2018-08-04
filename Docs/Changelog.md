@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.15.6] - 2018-07-17
+
+- Unicode conversion no longer uses deprecated standard libraries
+- Updated projects to compile in C++ 17 mode
+- Updated Doxygen binaries
+
 ## [0.15.5] - 2018-04-29
 
 - Added debug info to identify source line number for runtime errors

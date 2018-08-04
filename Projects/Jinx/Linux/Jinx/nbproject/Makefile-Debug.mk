@@ -62,8 +62,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-std=c++17
+CXXFLAGS=-std=c++17
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -87,107 +87,107 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libjinx.a: ${OBJECTFILES}
 ${OBJECTDIR}/_ext/5555977b/JxBuffer.o: ../../../../Source/JxBuffer.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxBuffer.o ../../../../Source/JxBuffer.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxBuffer.o ../../../../Source/JxBuffer.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxCollection.o: ../../../../Source/JxCollection.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxCollection.o ../../../../Source/JxCollection.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxCollection.o ../../../../Source/JxCollection.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxCommon.o: ../../../../Source/JxCommon.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxCommon.o ../../../../Source/JxCommon.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxCommon.o ../../../../Source/JxCommon.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxConversion.o: ../../../../Source/JxConversion.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxConversion.o ../../../../Source/JxConversion.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxConversion.o ../../../../Source/JxConversion.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxFunctionSignature.o: ../../../../Source/JxFunctionSignature.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxFunctionSignature.o ../../../../Source/JxFunctionSignature.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxFunctionSignature.o ../../../../Source/JxFunctionSignature.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxHash.o: ../../../../Source/JxHash.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxHash.o ../../../../Source/JxHash.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxHash.o ../../../../Source/JxHash.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxLexer.o: ../../../../Source/JxLexer.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLexer.o ../../../../Source/JxLexer.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLexer.o ../../../../Source/JxLexer.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxLibCore.o: ../../../../Source/JxLibCore.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLibCore.o ../../../../Source/JxLibCore.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLibCore.o ../../../../Source/JxLibCore.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxLibrary.o: ../../../../Source/JxLibrary.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLibrary.o ../../../../Source/JxLibrary.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLibrary.o ../../../../Source/JxLibrary.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxLogging.o: ../../../../Source/JxLogging.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLogging.o ../../../../Source/JxLogging.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxLogging.o ../../../../Source/JxLogging.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxMemory.o: ../../../../Source/JxMemory.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxMemory.o ../../../../Source/JxMemory.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxMemory.o ../../../../Source/JxMemory.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxMutex.o: ../../../../Source/JxMutex.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxMutex.o ../../../../Source/JxMutex.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxMutex.o ../../../../Source/JxMutex.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxParser.o: ../../../../Source/JxParser.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxParser.o ../../../../Source/JxParser.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxParser.o ../../../../Source/JxParser.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxPropertyName.o: ../../../../Source/JxPropertyName.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxPropertyName.o ../../../../Source/JxPropertyName.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxPropertyName.o ../../../../Source/JxPropertyName.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxRuntime.o: ../../../../Source/JxRuntime.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxRuntime.o ../../../../Source/JxRuntime.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxRuntime.o ../../../../Source/JxRuntime.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxScript.o: ../../../../Source/JxScript.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxScript.o ../../../../Source/JxScript.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxScript.o ../../../../Source/JxScript.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxSerialize.o: ../../../../Source/JxSerialize.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxSerialize.o ../../../../Source/JxSerialize.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxSerialize.o ../../../../Source/JxSerialize.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxUnicode.o: ../../../../Source/JxUnicode.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxUnicode.o ../../../../Source/JxUnicode.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxUnicode.o ../../../../Source/JxUnicode.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxUnicodeCaseFolding.o: ../../../../Source/JxUnicodeCaseFolding.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxUnicodeCaseFolding.o ../../../../Source/JxUnicodeCaseFolding.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxUnicodeCaseFolding.o ../../../../Source/JxUnicodeCaseFolding.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxVariableStackFrame.o: ../../../../Source/JxVariableStackFrame.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxVariableStackFrame.o ../../../../Source/JxVariableStackFrame.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxVariableStackFrame.o ../../../../Source/JxVariableStackFrame.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxVariant.o: ../../../../Source/JxVariant.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxVariant.o ../../../../Source/JxVariant.cpp
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxVariant.o ../../../../Source/JxVariant.cpp
 
 # Subprojects
 .build-subprojects:

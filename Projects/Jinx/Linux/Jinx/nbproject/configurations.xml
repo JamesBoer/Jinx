@@ -77,7 +77,7 @@
       </toolsSet>
       <compileType>
         <ccTool>
-          <standard>11</standard>
+          <commandLine>-std=c++17</commandLine>
         </ccTool>
         <archiverTool>
         </archiverTool>
@@ -220,7 +220,7 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
-          <standard>11</standard>
+          <commandLine>-std=c++17</commandLine>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
