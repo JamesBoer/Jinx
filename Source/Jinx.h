@@ -89,13 +89,13 @@ namespace Jinx
 	class IScript;
 
 	// Shared pointer to script object
-	typedef std::shared_ptr<IScript> ScriptPtr;
+	using ScriptPtr = std::shared_ptr<IScript>;
 
 	// Function parameters
-	typedef std::vector<Variant, Allocator<Variant>> Parameters;
+	using Parameters = std::vector<Variant, Allocator<Variant>>;
 
 	// Signature for native function callback
-	typedef std::function<Variant(ScriptPtr, const Parameters &)> FunctionCallback;
+	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
 
 	enum class Visibility
 	{
@@ -165,7 +165,7 @@ namespace Jinx
 	};
 
 	/// Shared pointer to library object
-	typedef std::shared_ptr<ILibrary> LibraryPtr;
+	using LibraryPtr = std::shared_ptr<ILibrary>;
 	
 
 	/// Script interface.
@@ -358,7 +358,7 @@ namespace Jinx
 	};
 
 	/// Shared pointer to runtime object
-	typedef std::shared_ptr<IRuntime> RuntimePtr;
+	using RuntimePtr = std::shared_ptr<IRuntime>;
 
 
 	/// Create a runtime object
@@ -369,16 +369,16 @@ namespace Jinx
 
 
 	/// Prototype for global memory allocation function callback
-	typedef std::function<void *(size_t)> AllocFn;
+	using AllocFn = std::function<void *(size_t)>;
 
 	/// Prototype for global memory re-allocation function callback
-	typedef std::function<void *(void *, size_t)> ReallocFn;
+	using ReallocFn = std::function<void *(void *, size_t)>;
 
 	/// Prototype for global memory free function callback
-	typedef std::function<void(void *)> FreeFn;
+	using FreeFn = std::function<void(void *)>;
 
 	/// Prototype for global logging function callback
-	typedef std::function<void(const char *)> LogFn;
+	using LogFn = std::function<void(const char *)>;
 
 
 	/// Initializes global Jinx parameters
