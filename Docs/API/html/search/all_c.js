@@ -7,5 +7,5 @@ var searchData=
   ['setvariable',['SetVariable',['../class_jinx_1_1_i_script.html#a00c9be2222beda416088575b5b8d9918',1,'Jinx::IScript']]],
   ['shutdown',['ShutDown',['../_jinx_8h.html#a7a1b0849201e9ffdc4adfd1d20ebce54',1,'Jinx']]],
   ['str',['Str',['../_jx_variant_8h.html#abd5271bd7d642ff13666a73edef95e06',1,'Jinx']]],
-  ['stripdebuginfo',['StripDebugInfo',['../class_jinx_1_1_i_runtime.html#ae213e0863588f58ea54c9133fb9439e9',1,'Jinx::IRuntime']]]
+  ['stripdebuginfo',['StripDebugInfo',['../class_jinx_1_1_i_runtime.html#a1b285910bd22c7c7ccdee2daadb09171',1,'Jinx::IRuntime']]]
 ];

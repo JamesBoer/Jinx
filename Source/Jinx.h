@@ -80,10 +80,10 @@ namespace Jinx
 	static const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	static const uint32_t MinorVersion = 15;
+	static const uint32_t MinorVersion = 16;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 6;
+	static const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -124,7 +124,7 @@ namespace Jinx
 		/// Register a native function for use by scripts
 		/**
 		This method registers a native function for use by script code.
-		\param visibility Indicates whether property is public or private.
+		\param visibility Indicates whether function is public or private.
 		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
 		standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
@@ -209,6 +209,17 @@ namespace Jinx
 		\param value The value of the variable to set
 		*/
 		virtual void SetVariable(const String & name, const Variant & value) = 0;
+
+		/// Register a local override function for this script instance
+		/**
+		\param library Pointer to library containing function to override
+		\param visibility Indicates whether function is public or private.
+		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
+		standard Jinx identifier naming rules.
+		\param function The callback function executed by the script.
+		\return Returns true on success or false on failure.
+		*/
+		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
 
 		/// Get the script name
 		/**

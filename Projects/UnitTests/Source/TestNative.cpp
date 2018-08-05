@@ -25,6 +25,83 @@ private:
 
 static TestClass s_testClass(99);
 
+class TestObject
+{
+public:
+	TestObject(Jinx::RuntimePtr runtime)
+	{
+		const char * scriptText =
+			u8R"(
+			
+			-- Call local override function 
+			test override 123
+			
+			)";
+		m_script = TestCreateScript(scriptText, runtime);
+	}
+
+	bool RegisterMemberFunction()
+	{
+		if (!m_script)
+			return false;
+		return m_script->RegisterFunction(nullptr, Jinx::Visibility::Private, { "test", "override", "{}" }, [this](ScriptPtr script, Parameters params) -> Variant
+		{
+			return TestFunction(script, params);
+		});
+	}
+
+	bool ExecuteScript()
+	{
+		if (!m_script)
+			return false;
+		return m_script->Execute();
+	}
+
+	int64_t GetTestValue() const { return m_testVal; }
+
+private:
+
+	Variant TestFunction(ScriptPtr script, Parameters params)
+	{
+		m_testVal = params[0].GetInteger();
+		return nullptr;
+	}
+
+	ScriptPtr m_script;
+	int64_t m_testVal = 0;
+};
+
+
+class TestContext
+{
+public:
+	TestContext(Jinx::RuntimePtr runtime)
+	{
+		const char * scriptText =
+			u8R"(
+			
+			-- Call local override function 
+			test user context 9999
+			
+			)";
+		m_script = TestCreateScript(scriptText, runtime, this);
+	}
+
+	bool ExecuteScript()
+	{
+		if (!m_script)
+			return false;
+		return m_script->Execute();
+	}
+
+	void SetValue(int64_t val) { m_testVal = val; }
+	int64_t GetTestValue() const { return m_testVal; }
+
+private:
+
+	ScriptPtr m_script;
+	int64_t m_testVal = 0;
+};
 
 static Variant ThisFunction(ScriptPtr script, Parameters params)
 {
@@ -70,6 +147,7 @@ TEST_CASE("Test Native", "[Native]")
 			set b to another function
 			set c to yet "one" another "two" function "three"
 			set d to member function
+			set e to lambda function
 
 			)";
 
@@ -80,6 +158,11 @@ TEST_CASE("Test Native", "[Native]")
 		library->RegisterFunction(Visibility::Public, { "another", "function" }, AnotherFunction);
 		library->RegisterFunction(Visibility::Public, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
 		library->RegisterFunction(Visibility::Public, { "member", "function" }, MemberFunction);
+		library->RegisterFunction(Visibility::Public, { "lambda", "function" }, [](ScriptPtr script, Parameters params)->Variant
+		{
+			return "lambda lambda lambda";
+		});
+
 		auto script = TestExecuteScript(scriptText, runtime, &s_testClass);
 		REQUIRE(script);
 		REQUIRE(s_functionCalled == true);
@@ -87,6 +170,36 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(script->GetVariable("b") == "forty two");
 		REQUIRE(script->GetVariable("c") == "one two three");
 		REQUIRE(script->GetVariable("d") == 99);
+		REQUIRE(script->GetVariable("e") == "lambda lambda lambda");
+	}
+
+	SECTION("Test script user context data")
+	{
+		auto runtime = TestCreateRuntime();
+		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "user", "context", "{integer}" }, [](ScriptPtr script, Parameters params) -> Variant
+		{
+			auto classPtr = static_cast<TestContext *>(script->GetUserContext());
+			classPtr->SetValue(params[0].GetInteger());
+			return nullptr;
+		});
+
+		TestContext obj(runtime);
+		REQUIRE(obj.ExecuteScript());
+		REQUIRE(obj.GetTestValue() == 9999);
+	}
+
+	SECTION("Test script override functions")
+	{
+		auto runtime = TestCreateRuntime();
+		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "override", "{}" }, [](ScriptPtr script, Parameters params) -> Variant
+		{
+			return nullptr;
+		});
+
+		TestObject obj(runtime);
+		REQUIRE(obj.RegisterMemberFunction());
+		REQUIRE(obj.ExecuteScript());
+		REQUIRE(obj.GetTestValue() == 123);
 	}
 
 	SECTION("Test native function execution")

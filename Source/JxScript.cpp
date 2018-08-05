@@ -185,7 +185,17 @@ bool Script::Execute()
 			{
 				RuntimeID id;
 				m_execution.back().reader.Read(&id, sizeof(id));
-				auto functionDef = m_runtime->FindFunction(id);
+				FunctionDefinitionPtr functionDef;
+				if (!m_functionMap.empty())
+				{
+					auto itr = m_functionMap.find(id);
+					if (itr != m_functionMap.end())
+						functionDef = itr->second;
+				}
+				if (!functionDef)
+				{
+					functionDef = m_runtime->FindFunction(id);
+				}
 				if (!functionDef)
 				{
 					Error("Could not find function definition");
@@ -970,6 +980,22 @@ Variant Script::Pop()
 void Script::Push(const Variant & value)
 {
 	m_stack.push_back(value);
+}
+
+bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+{
+	if (library == nullptr)
+		library = m_library;
+	auto libraryInt = std::static_pointer_cast<Library>(library);
+	auto signature = libraryInt->FindFunctionSignature(visibility, name);
+	if (!signature.IsValid())
+	{
+		Error("Script::RegisterFunction() error.  Could not find matching library function to override.");
+		return false;
+	}
+	auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
+	m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
+	return true;
 }
 
 void Script::SetVariable(const String & name, const Variant & value)

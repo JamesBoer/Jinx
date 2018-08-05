@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.16.0] - 2018-08-04
+
+- Added script-specific native function overrides
+
 ## [0.15.6] - 2018-07-17
 
 - Unicode conversion no longer uses deprecated standard libraries

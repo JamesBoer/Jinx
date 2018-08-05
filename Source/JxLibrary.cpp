@@ -132,6 +132,16 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initia
 	return functionSignature;
 }
 
+FunctionSignature Library::FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const
+{
+	std::lock_guard<Mutex> lock(m_functionMutex);
+	auto signature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
+	auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
+	if (itr == m_functionList.end())
+		return FunctionSignature();
+	return signature;
+}
+
 const FunctionPtrList Library::Functions() const
 {
 	std::lock_guard<Mutex> lock(m_functionMutex);

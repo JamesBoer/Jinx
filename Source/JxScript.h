@@ -19,6 +19,8 @@ namespace Jinx
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext);
 		virtual ~Script();
 
+		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+
 		bool Execute() override;
 		bool IsFinished() const override;
 
@@ -43,6 +45,7 @@ namespace Jinx
 	private:
 		typedef std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>> IdIndexMap;
 		typedef std::vector<size_t, Allocator<size_t>> ScopeStack;
+		typedef std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>> FunctionMap;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
@@ -87,6 +90,9 @@ namespace Jinx
 
 		// Current library
 		LibraryIPtr m_library;
+
+		// Local function overrides
+		FunctionMap m_functionMap;
 
 		// User context pointer
 		void * m_userContext;
