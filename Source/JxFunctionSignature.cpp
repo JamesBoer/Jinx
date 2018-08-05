@@ -177,15 +177,19 @@ bool Jinx::operator == (const FunctionSignaturePart & left, const FunctionSignat
 
 	// Check for any matches between the left and right sets of names.  We consider
 	// the signature parts equal if there are any matches.
-	for (auto & leftName : left.names)
+	if (left.partType == FunctionSignaturePartType::Name)
 	{
-		for (auto & rightName : right.names)
+		for (auto & leftName : left.names)
 		{
-			if (leftName == rightName)
-				return true;
+			for (auto & rightName : right.names)
+			{
+				if (leftName == rightName)
+					return true;
+			}
 		}
+		return false;
 	}
-	return false;
+	return true;
 }
 
 // FunctionSignature class comparison operator overload

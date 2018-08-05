@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['libraryptr',['LibraryPtr',['../_jinx_8h.html#aec5ab3b563503ea605b4197e3da148de',1,'Jinx']]],
-  ['logfn',['LogFn',['../_jinx_8h.html#a45db4c807b4a9b0b3a055b9b06fa0c15',1,'Jinx']]]
+  ['libraryptr',['LibraryPtr',['../_jinx_8h.html#a9a15aa942bfe1dfd6f95188f63b06a86',1,'Jinx']]],
+  ['logfn',['LogFn',['../_jinx_8h.html#a6a733fa1eb68d1f8200bc0e827d1955f',1,'Jinx']]]
 ];
