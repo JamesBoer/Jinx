@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.16.1] - 2018-08-11
+
+- Keywords are now case-insensitive
+- Added more detailed examples for function parameters
+
 ## [0.16.0] - 2018-08-04
 
 - Added script-specific native function overrides

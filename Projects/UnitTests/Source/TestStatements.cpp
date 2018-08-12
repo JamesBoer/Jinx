@@ -82,6 +82,23 @@ multiline comment
 		REQUIRE(script->GetVariable("X Y Z") == "Hello world!");
 	}
 
+	SECTION("Test keyword case insensitivity")
+	{
+		const char * scriptText =
+			u8R"(
+
+			Set a TO True
+			If a = TRUE
+				SET a To 12345
+			END
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 12345);
+	}
+
 	SECTION("Test multiple word variables and basic statements")
 	{
 		const char * scriptText =
