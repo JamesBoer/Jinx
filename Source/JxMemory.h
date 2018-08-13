@@ -49,51 +49,11 @@ namespace Jinx
 		return (T *)MemPoolAllocate(file, function, line, sizeof(T));
 	}
 
-	template<typename T>
-	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line)
+	template<typename T, typename... Args>
+	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line, Args&&... args)
 	{
 		T * obj = MemPoolAllocateType<T>(file, function, line);
-		new(obj)T();
-		return obj;
-	}
-
-	template<typename T, typename A1>
-	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line, A1 && arg1)
-	{
-		T * obj = MemPoolAllocateType<T>(file, function, line);
-		new(obj)T(std::forward<A1>(arg1));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2>
-	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line, A1 && arg1, A2 && arg2)
-	{
-		T * obj = MemPoolAllocateType<T>(file, function, line);
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2, typename A3>
-	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line, A1 && arg1, A2 && arg2, A3 && arg3)
-	{
-		T * obj = MemPoolAllocateType<T>(file, function, line);
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2), std::forward<A3>(arg3));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2, typename A3, typename A4>
-	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line, A1 && arg1, A2 && arg2, A3 && arg3, A4 && arg4)
-	{
-		T * obj = MemPoolAllocateType<T>(file, function, line);
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2), std::forward<A3>(arg3), std::forward<A4>(arg4));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2, typename A3, typename A4, typename A5>
-	T * MemPoolAllocateObject(const char * file, const char * function, uint32_t line, A1 && arg1, A2 && arg2, A3 && arg3, A4 && arg4, A5 && arg5)
-	{
-		T * obj = MemPoolAllocateType<T>(file, function, line);
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2), std::forward<A3>(arg3), std::forward<A4>(arg4), std::forward<A5>(arg5));
+		new(obj)T(std::forward<Args>(args)...);
 		return obj;
 	}
 
@@ -117,43 +77,11 @@ namespace Jinx
 		return obj;
 	}
 
-	template<typename T, typename A1>
-	T * MemPoolAllocateObject(A1 && arg1)
+	template<typename T, typename ... Args>
+	T * MemPoolAllocateObject(Args&&... args)
 	{
 		T * obj = MemPoolAllocateType<T>();
-		new(obj)T(std::forward<A1>(arg1));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2>
-	T * MemPoolAllocateObject(A1 && arg1, A2 && arg2)
-	{
-		T * obj = MemPoolAllocateType<T>();
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2, typename A3>
-	T * MemPoolAllocateObject(A1 && arg1, A2 && arg2, A3 && arg3)
-	{
-		T * obj = MemPoolAllocateType<T>();
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2), std::forward<A3>(arg3));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2, typename A3, typename A4>
-	T * MemPoolAllocateObject(A1 && arg1, A2 && arg2, A3 && arg3, A4 && arg4)
-	{
-		T * obj = MemPoolAllocateType<T>();
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2), std::forward<A3>(arg3), std::forward<A4>(arg4));
-		return obj;
-	}
-
-	template<typename T, typename A1, typename A2, typename A3, typename A4, typename A5>
-	T * MemPoolAllocateObject(A1 && arg1, A2 && arg2, A3 && arg3, A4 && arg4, A5 && arg5)
-	{
-		T * obj = MemPoolAllocateType<T>();
-		new(obj)T(std::forward<A1>(arg1), std::forward<A2>(arg2), std::forward<A3>(arg3), std::forward<A4>(arg4), std::forward<A5>(arg5));
+		new(obj)T(std::forward<Args>(args)...);
 		return obj;
 	}
 
