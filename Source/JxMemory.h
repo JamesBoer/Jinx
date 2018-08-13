@@ -32,7 +32,7 @@ namespace Jinx
 
 	// Fix unreferenced variable warnings
 	template<typename T>
-	constexpr int ref(const T &) { return 0; }
+	constexpr int unused(const T &) { return 0; }
 	
 	
 	// Stand-alone global allocation functions (debug and release version)
@@ -209,8 +209,8 @@ namespace Jinx
 		void construct(pointer ptr, const T& val) { new (static_cast<T*> (ptr)) T(val); }
 
 		template<typename U>
-		void destroy(U* ptr) { Jinx::ref(ptr); ptr->~U(); }
-		void destroy(pointer ptr) { Jinx::ref(ptr); ptr->~T(); }
+		void destroy(U* ptr) { Jinx::unused(ptr); ptr->~U(); }
+		void destroy(pointer ptr) { Jinx::unused(ptr); ptr->~T(); }
 
 		size_type max_size() const { return std::numeric_limits<std::size_t>::max() / sizeof(T); }
 	};
