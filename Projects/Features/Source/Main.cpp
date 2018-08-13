@@ -57,6 +57,15 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	return script;
 }
 
+class Test
+{
+public:
+	Test(int, float, std::string)
+	{
+
+	}
+};
+
 int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
@@ -87,6 +96,9 @@ int main(int argc, char ** argv)
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 12345);
+
+		auto t = JinxNew(Test, 123, 456.789f, "test");
+		JinxFree(t);
 	}
 
 	Jinx::ShutDown();
