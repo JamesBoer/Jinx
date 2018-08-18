@@ -1277,6 +1277,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 		Error("Empty function signature");
 		return FunctionSignature();
 	}
+	bool initialNames = false;
 	bool parsedParameter = false;
 	bool parsedNonKeywordName = false;
 	int parsedNameCount = 0;
@@ -1289,14 +1290,9 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 		FunctionSignaturePart part;
 		if (Accept(SymbolType::CurlyOpen))
 		{
-			if (parsedParameter)
+			if (initialNames && parsedNameCountSection <= optionalNameCountSection)
 			{
-				Error("Functions cannot have multiple variables without a name separating them");
-				return FunctionSignature();
-			}
-			if (parsedNameCount && parsedNameCountSection <= optionalNameCountSection)
-			{
-				Error("Arguments can't be separated soley by optional parameters");
+				Error("Initial arguments can't be separated soley by optional parameters");
 				return FunctionSignature();
 			}
 			part.partType = FunctionSignaturePartType::Parameter;
@@ -1321,6 +1317,7 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 			}
 			Expect(SymbolType::CurlyClose);
 			parsedParameter = true;
+			initialNames = false;
 			parsedNameCountSection = 0;
 			optionalNameCountSection = 0;
 		}
@@ -1332,6 +1329,8 @@ FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
 				Error("Invalid name in function signature");
 				return FunctionSignature();
 			}
+			if (parsedNameCount == 0)
+				initialNames = true;
 			parsedNameCount++;
 			parsedNameCountSection++;
 			if (IsKeyword(m_currentSymbol->type) == false)
@@ -1808,19 +1807,23 @@ void Parser::ParseExpression(SymbolListCItr endSymbol)
 		// If we finish the first subexpression with a common, then we're parsing an indexed list
 		if (Accept(SymbolType::Comma))
 		{
-			// Parse all subexpressions in comma-delimited list
-			uint32_t count = 1;
-			do
+			// Only continue if we're not limiting the expression range
+			if (m_currentSymbol != endSymbol)
 			{
-				Accept(SymbolType::NewLine);
-				ParseSubexpression(endSymbol);
-				++count;
-			} 
-			while (Accept(SymbolType::Comma));
+				// Parse all subexpressions in comma-delimited list
+				uint32_t count = 1;
+				do
+				{
+					Accept(SymbolType::NewLine);
+					ParseSubexpression(endSymbol);
+					++count;
+				} 
+				while (Accept(SymbolType::Comma));
 
-			// Pop all key-value pairs and push the results on the stack
-			EmitOpcode(Opcode::PushList);
-			EmitCount(count);
+				// Pop all key-value pairs and push the results on the stack
+				EmitOpcode(Opcode::PushList);
+				EmitCount(count);
+			}
 		}
 	}
 }
