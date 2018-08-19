@@ -57,6 +57,15 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	return script;
 }
 
+class Test
+{
+public:
+	Test(int, float, std::string)
+	{
+
+	}
+};
+
 int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
@@ -76,17 +85,20 @@ int main(int argc, char ** argv)
 
 		const char * scriptText =
 			u8R"(
-			
-			-- Test of diagnostic output
-			set x to 0
-			set y to 1
-			set z to "this is a test string"
-			set a to 1 / 0
-			
+
+			Set a TO True
+			If a = TRUE
+				SET a To 12345
+			END
+
 			)";
 
 		auto script = TestExecuteScript(scriptText);
-		//REQUIRE(script);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == 12345);
+
+		auto t = JinxNew(Test, 123, 456.789f, "test");
+		JinxFree(t);
 	}
 
 	Jinx::ShutDown();

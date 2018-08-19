@@ -702,14 +702,14 @@ void * Jinx::MemPoolAllocate(const char * file, const char * function, uint32_t 
 {
 	void * p;
 #if defined(JINX_DEBUG_USE_STD_ALLOC)
-	Jinx::ref(file);
-	Jinx::ref(function);
-	Jinx::ref(line);
+	Jinx::unused(file);
+	Jinx::unused(function);
+	Jinx::unused(line);
 	p = malloc(bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-	Jinx::ref(file);
-	Jinx::ref(function);
-	Jinx::ref(line);
+	Jinx::unused(file);
+	Jinx::unused(function);
+	Jinx::unused(line);
 	p = s_heap.Alloc(bytes);
 #else
 	p = s_heap.Alloc(bytes);
@@ -725,9 +725,9 @@ void * Jinx::MemPoolReallocate(const char * file, const char * function, uint32_
 {
 	void * p;
 #ifdef JINX_DEBUG_USE_STD_ALLOC
-	Jinx::ref(file);
-	Jinx::ref(function);
-	Jinx::ref(line);
+	Jinx::unused(file);
+	Jinx::unused(function);
+	Jinx::unused(line);
 	// The CRT debug library has a bug that prevents it from propertly detecting
 	// memory freed with realloc.
 #ifdef LAIR_DEBUG_ENABLE_STD_REALLOC_LEAK_FIX
@@ -739,9 +739,9 @@ void * Jinx::MemPoolReallocate(const char * file, const char * function, uint32_
 #endif
 	p = realloc(ptr, bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-	Jinx::ref(file);
-	Jinx::ref(function);
-	Jinx::ref(line);
+	Jinx::unused(file);
+	Jinx::unused(function);
+	Jinx::unused(line);
 	p = s_heap.Realloc(ptr, bytes);
 #else
 	if (ptr)

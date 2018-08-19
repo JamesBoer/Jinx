@@ -63,7 +63,7 @@ void Lexer::CreateSymbol(const String & name)
 {
 	Symbol symbol(SymbolType::NameValue, m_lineNumber, m_columnMarker);
 	symbol.text = FoldCase(name);
-	auto itr = m_symbolTypeMap.find(name);
+	auto itr = m_symbolTypeMap.find(symbol.text);
 	if (itr != m_symbolTypeMap.end())
 	{
 		symbol.type = itr->second;
@@ -73,12 +73,12 @@ void Lexer::CreateSymbol(const String & name)
 		// Special case detection of boolean 'true' and 'false' values.  We don't
 		// want to make these symbol types.  Instead, they need to be a BooleanValue
 		// type.
-		if (name == "true")
+		if (symbol.text == "true")
 		{
 			symbol.type = SymbolType::BooleanValue;
 			symbol.boolVal = true;
 		}
-		else if (name == "false")
+		else if (symbol.text == "false")
 		{
 			symbol.type = SymbolType::BooleanValue;
 			symbol.boolVal = false;

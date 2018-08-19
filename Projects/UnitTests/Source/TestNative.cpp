@@ -103,6 +103,16 @@ private:
 	int64_t m_testVal = 0;
 };
 
+class TestClass2
+{
+public:
+	TestClass2(int, float, std::string)
+	{
+
+	}
+};
+
+
 static Variant ThisFunction(ScriptPtr script, Parameters params)
 {
 	s_functionCalled = true;
@@ -131,6 +141,7 @@ static Variant MemberFunction(ScriptPtr script, Parameters params)
 	TestClass * testClass = static_cast<TestClass *>(script->GetUserContext());
 	return testClass->GetTestValue();
 }
+
 
 
 TEST_CASE("Test Native", "[Native]")
@@ -266,5 +277,11 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(script->GetVariable("a") == 123);
 	}
 
+	SECTION("Test jinx object allocator with parameter passing")
+	{
+		auto c = JinxNew(TestClass2, 123, 345.678f, "test");
+		REQUIRE(c);
+		JinxDelete(c);
+	}
 
 }
