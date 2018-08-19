@@ -86,18 +86,19 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 
-			function add {a} {b}  
-				return a + b
-			end
-	 
-			set a to add add 1, 2, 3
+			Set a TO True
+			If a = TRUE
+				SET a To 12345
+			END
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 6);
+		REQUIRE(script->GetVariable("a") == 12345);
 
+		auto t = JinxNew(Test, 123, 456.789f, "test");
+		JinxFree(t);
 	}
 
 	Jinx::ShutDown();
@@ -105,6 +106,11 @@ int main(int argc, char ** argv)
 	auto stats = GetMemoryStats();
 	REQUIRE(stats.currentAllocatedMemory == 0);
 	REQUIRE(stats.currentUsedMemory == 0);
+
+#ifdef _WINDOWS
+	printf("Press any key to continue...");
+	_getch();
+#endif
     
     return 0;
 }

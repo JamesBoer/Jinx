@@ -220,63 +220,6 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a") == 3);
 	}
 
-	SECTION("Test sequential parameters (pre)")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function {a} {b} add   
-				return a + b
-			end
-
-			set x to 1
-			set a to x, 2 add
-		
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 3);
-	}
-
-	SECTION("Test sequential parameters (mid)")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function add {a} {b} together   
-				return a + b
-			end
-
-			set x to 1
-			set a to add x, 2 together
-		
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 3);
-	}
-
-	SECTION("Test sequential parameters (post)")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function add {a} {b}  
-				return a + b
-			end
-
-			set x to 1
-			set a to add x, 2
-		
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 3);
-	}
-
 	SECTION("Test multi-part named parameters")
 	{
 		static const char * scriptText =
@@ -464,28 +407,6 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a") == 2);
 	}
 
-	SECTION("Test overloaded function names with different parameters #3")
-	{
-		static const char * scriptText =
-			u8R"(
-
-			function test
-				return 1
-			end
-
-			function {x} {y} test
-				return x + y
-			end
-
-			set a to 2, 3 test
-
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 5);
-	}
-
 	SECTION("Test simple chained functions")
 	{
 		static const char * scriptText =
@@ -506,24 +427,6 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("a") == 1);
 		REQUIRE(script->GetVariable("b") == 1);
 		REQUIRE(script->GetVariable("c") == 3);
-	}
-
-	SECTION("Test sequental params chained functions")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			function add {a} {b}  
-				return a + b
-			end
-	 
-			set a to add add 1, 2, 3
-
-			)";
-
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 6);
 	}
 
 	SECTION("Test compound function parameters")

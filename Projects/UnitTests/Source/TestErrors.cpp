@@ -527,7 +527,35 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 
-			function (test) {x} test {y} test
+			function (test) {x} test {y} (test)
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function declaration optional name part error #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x} (test) {y} (test)
+			end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function declaration optional name part error #3")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x} (test) (test) {y} (test)
 			end
 
 			)";
