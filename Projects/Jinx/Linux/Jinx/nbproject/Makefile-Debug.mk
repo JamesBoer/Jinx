@@ -46,7 +46,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/5555977b/JxLibrary.o \
 	${OBJECTDIR}/_ext/5555977b/JxLogging.o \
 	${OBJECTDIR}/_ext/5555977b/JxMemory.o \
-	${OBJECTDIR}/_ext/5555977b/JxMutex.o \
 	${OBJECTDIR}/_ext/5555977b/JxParser.o \
 	${OBJECTDIR}/_ext/5555977b/JxPropertyName.o \
 	${OBJECTDIR}/_ext/5555977b/JxRuntime.o \
@@ -138,11 +137,6 @@ ${OBJECTDIR}/_ext/5555977b/JxMemory.o: ../../../../Source/JxMemory.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxMemory.o ../../../../Source/JxMemory.cpp
-
-${OBJECTDIR}/_ext/5555977b/JxMutex.o: ../../../../Source/JxMutex.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5555977b/JxMutex.o ../../../../Source/JxMutex.cpp
 
 ${OBJECTDIR}/_ext/5555977b/JxParser.o: ../../../../Source/JxParser.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/5555977b
