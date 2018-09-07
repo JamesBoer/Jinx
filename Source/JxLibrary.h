@@ -50,11 +50,11 @@ namespace Jinx
 		String m_name;
 
 		// Track function definitions
-		mutable Mutex m_functionMutex;
+		mutable std::mutex m_functionMutex;
 		FunctionList m_functionList;
 
 		// Properties
-		mutable Mutex m_propertyMutex;
+		mutable std::mutex m_propertyMutex;
 		PropertyNameTable m_propertyNameTable;
 		size_t m_maxPropertyParts;
 

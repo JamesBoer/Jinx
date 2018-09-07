@@ -39,7 +39,6 @@ Copyright (c) 2016 James Boer
 #include "JxConversion.h"
 #include "JxSerialize.h"
 #include "JxPropertyName.h"
-#include "JxMutex.h"
 #include "JxLexer.h"
 #include "JxHash.h"
 #include "JxFunctionSignature.h"

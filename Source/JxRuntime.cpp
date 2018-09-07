@@ -32,7 +32,7 @@ Runtime::~Runtime()
 
 void Runtime::AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount)
 {
-	std::lock_guard<Mutex> lock(m_perfMutex);
+	std::lock_guard<std::mutex> lock(m_perfMutex);
 	m_perfStats.executionTimeNs += timeNs;
 	m_perfStats.instructionCount += instCount;
 	m_perfStats.scriptExecutionCount++;
@@ -70,7 +70,7 @@ BufferPtr Runtime::Compile(BufferPtr scriptBuffer, String name, std::initializer
 	// Track accumulated script compilation time and count
 	auto end = std::chrono::high_resolution_clock::now();
 	uint64_t compilationTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
-	std::lock_guard<Mutex> lock(m_perfMutex);
+	std::lock_guard<std::mutex> lock(m_perfMutex);
 	m_perfStats.scriptCompilationCount++;
 	m_perfStats.compilationTimeNs += compilationTimeNs;
 
@@ -122,7 +122,7 @@ ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, St
 
 FunctionDefinitionPtr Runtime::FindFunction(RuntimeID id) const
 {
-	std::lock_guard<Mutex> lock(m_functionMutex[id % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_functionMutex[id % NumMutexes]);
 	auto itr = m_functionMap.find(id);
 	if (itr == m_functionMap.end())
 		return nullptr;
@@ -131,7 +131,7 @@ FunctionDefinitionPtr Runtime::FindFunction(RuntimeID id) const
 
 PerformanceStats Runtime::GetScriptPerformanceStats(bool resetStats)
 {
-	std::lock_guard<Mutex> lock(m_perfMutex);
+	std::lock_guard<std::mutex> lock(m_perfMutex);
 	auto end = std::chrono::high_resolution_clock::now();
 	m_perfStats.perfTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - m_perfStartTime).count();
 	PerformanceStats s = m_perfStats;
@@ -145,7 +145,7 @@ PerformanceStats Runtime::GetScriptPerformanceStats(bool resetStats)
 
 Variant Runtime::GetProperty(RuntimeID id) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 	auto itr = m_propertyMap.find(id);
 	if (itr == m_propertyMap.end())
 		return Variant();
@@ -154,7 +154,7 @@ Variant Runtime::GetProperty(RuntimeID id) const
 
 Variant Runtime::GetPropertyKeyValue(RuntimeID id, const Variant & key)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 	auto itr = m_propertyMap.find(id);
 	if (itr == m_propertyMap.end())
 		return Variant();
@@ -170,7 +170,7 @@ Variant Runtime::GetPropertyKeyValue(RuntimeID id, const Variant & key)
 
 LibraryPtr Runtime::GetLibrary(const String & name)
 {
-	std::lock_guard<Mutex> lock(m_libraryMutex);
+	std::lock_guard<std::mutex> lock(m_libraryMutex);
 	auto itr = m_libraryMap.find(name);
 	if (itr == m_libraryMap.end())
 	{
@@ -183,7 +183,7 @@ LibraryPtr Runtime::GetLibrary(const String & name)
 
 bool Runtime::LibraryExists(const String & name) const
 {
-	std::lock_guard<Mutex> lock(m_libraryMutex);
+	std::lock_guard<std::mutex> lock(m_libraryMutex);
 	return m_libraryMap.find(name) != m_libraryMap.end();
 }
 
@@ -380,33 +380,33 @@ void Runtime::LogSymbols(const SymbolList & symbolList) const
 
 bool Runtime::PropertyExists(RuntimeID id) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 	return m_propertyMap.find(id) != m_propertyMap.end();
 }
 
 void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
 {
-	std::lock_guard<Mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
 	auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, bytecode, offset);
 	m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 }
 
 void Runtime::RegisterFunction(const FunctionSignature & signature, FunctionCallback function)
 {
-	std::lock_guard<Mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
 	auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
 	m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 }
 
 void Runtime::SetProperty(RuntimeID id, const Variant & value)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 	m_propertyMap[id] = value;
 }
 
 bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex[id % NumMutexes]);
+	std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 	auto itr = m_propertyMap.find(id);
 	if (itr == m_propertyMap.end())
 		return false;

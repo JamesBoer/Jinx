@@ -168,7 +168,7 @@ namespace Jinx
 		void FreeBlock(MemoryBlock * block);
 
 	private:
-		Mutex m_mutex;
+		std::mutex m_mutex;
 		BlockHeap * m_prev;
 		BlockHeap * m_next;
 		MemoryBlock * m_allocHead;
@@ -220,7 +220,7 @@ namespace Jinx
 	static thread_local BlockHeap	s_heap;
 
 	// List of all thread-local heaps
-	static Mutex s_mutex;
+	static std::mutex s_mutex;
 	static BlockHeap * s_head;
 	static BlockHeap * s_tail;
 
@@ -271,7 +271,7 @@ BlockHeap::BlockHeap() :
 	else
 	{
 		// Ensure thread-safe access to the global heap list
-		std::lock_guard<Mutex> lock(s_mutex);
+		std::lock_guard<std::mutex> lock(s_mutex);
 		assert(s_tail);
 		m_prev = s_tail;
 		s_tail->m_next = this;
@@ -292,7 +292,7 @@ void * BlockHeap::Alloc(size_t bytes)
 		return nullptr;
 
 	// Ensure thread-safe access to the allocator
-	std::lock_guard<Mutex> lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	// The required allocation size is request size plus the size of the memory header
 	size_t requestedBytes = bytes + sizeof(MemoryHeader);
@@ -425,7 +425,7 @@ MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 void BlockHeap::Free(void * ptr)
 {
 	// Ensure thread-safe access to the allocated blocks
-	std::lock_guard<Mutex> lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	// Retrieve the memory header from the raw pointer
 	MemoryHeader * header = reinterpret_cast<MemoryHeader*>(static_cast<char *>(ptr) - sizeof(MemoryHeader));
@@ -437,7 +437,7 @@ void BlockHeap::Free(void * ptr)
 void BlockHeap::Free(MemoryHeader * header)
 {
 	// Ensure thread-safe access to the allocated blocks
-	std::lock_guard<Mutex> lock(m_mutex);
+	std::lock_guard<std::mutex> lock(m_mutex);
 
 	// Free the memory from the allocated block
 	FreeInternal(header);
@@ -679,7 +679,7 @@ void BlockHeap::ShutDown()
 		return;
 
 	// Ensure thread-safe access to the global heap list
-	std::lock_guard<Mutex> lock(s_mutex);
+	std::lock_guard<std::mutex> lock(s_mutex);
 
 	// Remove block heap from global heap list
 	if (this == s_head)
@@ -837,7 +837,7 @@ void Jinx::InitializeMemory(const GlobalParams & params)
 void Jinx::ShutDownMemory()
 {
 #ifndef JINX_DEBUG_USE_STD_ALLOC
-	std::lock_guard<Mutex> lock(s_mutex);
+	std::lock_guard<std::mutex> lock(s_mutex);
 	BlockHeap * heap = s_head;
 	while (heap)
 	{
@@ -865,7 +865,7 @@ MemoryStats Jinx::GetMemoryStats()
 void Jinx::LogAllocations()
 {
 #ifndef JINX_DEBUG_USE_STD_ALLOC
-	std::lock_guard<Mutex> lock(s_mutex);
+	std::lock_guard<std::mutex> lock(s_mutex);
 	BlockHeap * heap = s_head;
 	while (heap)
 	{

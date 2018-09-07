@@ -34,7 +34,6 @@
     <ClInclude Include="..\..\..\..\Source\JxLibrary.h" />
     <ClInclude Include="..\..\..\..\Source\JxLogging.h" />
     <ClInclude Include="..\..\..\..\Source\JxMemory.h" />
-    <ClInclude Include="..\..\..\..\Source\JxMutex.h" />
     <ClInclude Include="..\..\..\..\Source\JxParser.h" />
     <ClInclude Include="..\..\..\..\Source\JxPropertyName.h" />
     <ClInclude Include="..\..\..\..\Source\JxRuntime.h" />
@@ -57,7 +56,6 @@
     <ClCompile Include="..\..\..\..\Source\JxLibrary.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxLogging.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxMemory.cpp" />
-    <ClCompile Include="..\..\..\..\Source\JxMutex.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxParser.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxPropertyName.cpp" />
     <ClCompile Include="..\..\..\..\Source\JxRuntime.cpp" />

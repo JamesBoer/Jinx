@@ -134,7 +134,7 @@ FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initia
 
 FunctionSignature Library::FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const
 {
-	std::lock_guard<Mutex> lock(m_functionMutex);
+	std::lock_guard<std::mutex> lock(m_functionMutex);
 	auto signature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
 	auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 	if (itr == m_functionList.end())
@@ -144,7 +144,7 @@ FunctionSignature Library::FindFunctionSignature(Visibility visibility, std::ini
 
 const FunctionPtrList Library::Functions() const
 {
-	std::lock_guard<Mutex> lock(m_functionMutex);
+	std::lock_guard<std::mutex> lock(m_functionMutex);
 	FunctionPtrList fnList;
 	fnList.reserve(m_functionList.size());
 	for (const auto & fn : m_functionList)
@@ -154,14 +154,14 @@ const FunctionPtrList Library::Functions() const
 
 bool Library::FunctionSignatureExists(const FunctionSignature & signature) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 	auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 	return itr == m_functionList.end() ? false : true;
 }
 
 PropertyName Library::GetPropertyName(const String & name)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 	auto itr = m_propertyNameTable.find(name);
 	if (itr == m_propertyNameTable.end())
 		return PropertyName();
@@ -170,7 +170,7 @@ PropertyName Library::GetPropertyName(const String & name)
 
 Variant Library::GetProperty(const String & name) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 	auto itr = m_propertyNameTable.find(name);
 	if (itr == m_propertyNameTable.end())
 		return Variant();
@@ -182,7 +182,7 @@ Variant Library::GetProperty(const String & name) const
 
 bool Library::PropertyNameExists(const String & name) const
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 	return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
 }
 
@@ -221,13 +221,13 @@ bool Library::RegisterFunction(Visibility visibility, std::initializer_list<Stri
 
 void Library::RegisterFunctionSignature(const FunctionSignature & signature)
 {
-	std::lock_guard<Mutex> lock(m_functionMutex);
+	std::lock_guard<std::mutex> lock(m_functionMutex);
 	m_functionList.push_back(signature);
 }
 
 bool Library::RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 
 	// Register the property name with the library
 	PropertyName prop(visibility == Visibility::Public ? VisibilityType::Public : VisibilityType::Private, access == Access::ReadOnly ? true : false, GetName(), name);
@@ -246,7 +246,7 @@ bool Library::RegisterProperty(Visibility visibility, Access access, const Strin
 
 bool Library::RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 	return RegisterPropertyNameInternal(propertyName, checkForDuplicates);
 }
 
@@ -262,7 +262,7 @@ bool Library::RegisterPropertyNameInternal(const PropertyName & propertyName, bo
 
 void Library::SetProperty(const String & name, const Variant & value)
 {
-	std::lock_guard<Mutex> lock(m_propertyMutex);
+	std::lock_guard<std::mutex> lock(m_propertyMutex);
 	auto itr = m_propertyNameTable.find(name);
 	if (itr == m_propertyNameTable.end())
 		return;
