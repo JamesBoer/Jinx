@@ -35,8 +35,6 @@
 		AA7D1C781D4D229000A5AAF3 /* JxLogging.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C4C1D4D229000A5AAF3 /* JxLogging.h */; };
 		AA7D1C791D4D229000A5AAF3 /* JxMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C4D1D4D229000A5AAF3 /* JxMemory.cpp */; };
 		AA7D1C7A1D4D229000A5AAF3 /* JxMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C4E1D4D229000A5AAF3 /* JxMemory.h */; };
-		AA7D1C7B1D4D229000A5AAF3 /* JxMutex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C4F1D4D229000A5AAF3 /* JxMutex.cpp */; };
-		AA7D1C7C1D4D229000A5AAF3 /* JxMutex.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C501D4D229000A5AAF3 /* JxMutex.h */; };
 		AA7D1C7D1D4D229000A5AAF3 /* JxParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C511D4D229000A5AAF3 /* JxParser.cpp */; };
 		AA7D1C7E1D4D229000A5AAF3 /* JxParser.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7D1C521D4D229000A5AAF3 /* JxParser.h */; };
 		AA7D1C7F1D4D229000A5AAF3 /* JxPropertyName.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AA7D1C531D4D229000A5AAF3 /* JxPropertyName.cpp */; };
@@ -84,8 +82,6 @@
 		AA7D1C4C1D4D229000A5AAF3 /* JxLogging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxLogging.h; path = ../../../../Source/JxLogging.h; sourceTree = "<group>"; };
 		AA7D1C4D1D4D229000A5AAF3 /* JxMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxMemory.cpp; path = ../../../../Source/JxMemory.cpp; sourceTree = "<group>"; };
 		AA7D1C4E1D4D229000A5AAF3 /* JxMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxMemory.h; path = ../../../../Source/JxMemory.h; sourceTree = "<group>"; };
-		AA7D1C4F1D4D229000A5AAF3 /* JxMutex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxMutex.cpp; path = ../../../../Source/JxMutex.cpp; sourceTree = "<group>"; };
-		AA7D1C501D4D229000A5AAF3 /* JxMutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxMutex.h; path = ../../../../Source/JxMutex.h; sourceTree = "<group>"; };
 		AA7D1C511D4D229000A5AAF3 /* JxParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxParser.cpp; path = ../../../../Source/JxParser.cpp; sourceTree = "<group>"; };
 		AA7D1C521D4D229000A5AAF3 /* JxParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JxParser.h; path = ../../../../Source/JxParser.h; sourceTree = "<group>"; };
 		AA7D1C531D4D229000A5AAF3 /* JxPropertyName.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = JxPropertyName.cpp; path = ../../../../Source/JxPropertyName.cpp; sourceTree = "<group>"; };
@@ -161,8 +157,6 @@
 				AA7D1C4C1D4D229000A5AAF3 /* JxLogging.h */,
 				AA7D1C4D1D4D229000A5AAF3 /* JxMemory.cpp */,
 				AA7D1C4E1D4D229000A5AAF3 /* JxMemory.h */,
-				AA7D1C4F1D4D229000A5AAF3 /* JxMutex.cpp */,
-				AA7D1C501D4D229000A5AAF3 /* JxMutex.h */,
 				AA7D1C511D4D229000A5AAF3 /* JxParser.cpp */,
 				AA7D1C521D4D229000A5AAF3 /* JxParser.h */,
 				AA7D1C531D4D229000A5AAF3 /* JxPropertyName.cpp */,
@@ -196,7 +190,6 @@
 				AA7D1C611D4D229000A5AAF3 /* JxBuffer.h in Headers */,
 				AA58FEE01EE208D7004168BB /* JxUnicodeCaseFolding.h in Headers */,
 				AA7D1C7E1D4D229000A5AAF3 /* JxParser.h in Headers */,
-				AA7D1C7C1D4D229000A5AAF3 /* JxMutex.h in Headers */,
 				AA7D1C881D4D229000A5AAF3 /* JxUnicode.h in Headers */,
 				AA7D1C861D4D229000A5AAF3 /* JxSerialize.h in Headers */,
 				AA7D1C721D4D229000A5AAF3 /* JxLexer.h in Headers */,
@@ -282,7 +275,6 @@
 				AA7D1C691D4D229000A5AAF3 /* JxFunctionSignature.cpp in Sources */,
 				AA7D1C871D4D229000A5AAF3 /* JxUnicode.cpp in Sources */,
 				AA7D1C811D4D229000A5AAF3 /* JxRuntime.cpp in Sources */,
-				AA7D1C7B1D4D229000A5AAF3 /* JxMutex.cpp in Sources */,
 				AA7D1C831D4D229000A5AAF3 /* JxScript.cpp in Sources */,
 				AA7D1C891D4D229000A5AAF3 /* JxVariant.cpp in Sources */,
 				AA7D1C601D4D229000A5AAF3 /* JxBuffer.cpp in Sources */,
