@@ -73,17 +73,21 @@ by James Boer, and distributed under the MIT license.
 #endif
 #endif
 
+#ifndef inline_t
+#define inline_t
+#endif
+
 /*! \namespace */
 namespace Jinx
 {
 	/// Major version number
-	static const uint32_t MajorVersion = 0;
+	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	static const uint32_t MinorVersion = 16;
+	const uint32_t MinorVersion = 16;
 
 	/// Patch number
-	static const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 1;
 
 	// Forward declaration
 	class IScript;

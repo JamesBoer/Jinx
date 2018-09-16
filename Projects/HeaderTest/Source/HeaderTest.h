@@ -6,22 +6,23 @@ Copyright (c) 2016 James Boer
 */
 
 #pragma once
-#ifndef JX_HASH_H__
-#define JX_HASH_H__
 
+#include "../../../Include/Jinx.hpp"
 
-namespace Jinx
+class Test
 {
-
-	namespace Impl
+public:
+/*
+	static int & TestVal()
 	{
+		static int test = 123;
+		return test;
+	}
+*/	
+	static inline int test = 123;
 
-		uint64_t GetHash(const void * data, size_t len);
-
-	} // namespace Impl
-
-} // namespace Jinx
-
-#endif // JX_HASH_H__
+private:
+};
 
 
+void CheckTestVal();

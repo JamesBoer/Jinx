@@ -13,17 +13,22 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	size_t GetUtf8CharSize(const char * utf8Str);
+	namespace Impl
+	{
 
-	StringU16 ConvertUtf8ToUtf16(const String & utf8Str);
-	String ConvertUtf16ToUtf8(const StringU16 & utf16Str);
-	
-	WString ConvertUtf8ToWString(const String & utf8Str);
-	String ConvertWStringToUtf8(const WString & wStr);
+		size_t GetUtf8CharSize(const char * utf8Str);
 
-	bool IsCaseFolded(const String & source);
-	String FoldCase(const String & source);
+		StringU16 ConvertUtf8ToUtf16(const String & utf8Str);
+		String ConvertUtf16ToUtf8(const StringU16 & utf16Str);
 
-};
+		WString ConvertUtf8ToWString(const String & utf8Str);
+		String ConvertWStringToUtf8(const WString & wStr);
+
+		bool IsCaseFolded(const String & source);
+		String FoldCase(const String & source);
+
+	} // namespace Impl
+
+} // namespace Jinx
 
 #endif // JX_UNICODE_H__

@@ -15,7 +15,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 	class Buffer;
-	typedef std::shared_ptr<Buffer> BufferPtr;
+	using BufferPtr = std::shared_ptr<Buffer>;
 
 	class Buffer 
 	{

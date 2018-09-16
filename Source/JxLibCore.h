@@ -11,10 +11,13 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx
 {
+	namespace Impl
+	{
+		void RegisterLibCore(RuntimePtr runtime);
 
-	void RegisterLibCore(RuntimePtr runtime);
+	} // namespace Impl
 
-};
+} // namespace Jinx
 
 
 

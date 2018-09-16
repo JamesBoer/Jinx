@@ -7,10 +7,13 @@ Copyright (c) 2016 James Boer
 
 #include "JxInternal.h"
 
-using namespace Jinx;
 
-
-CollectionPtr Jinx::CreateCollection()
+namespace Jinx
 {
-	return std::allocate_shared<Collection>(Allocator<Collection>());
-}
+	inline_t CollectionPtr Jinx::CreateCollection()
+	{
+		return std::allocate_shared<Collection>(Allocator<Collection>());
+	}
+
+} // namespace Jinx
+

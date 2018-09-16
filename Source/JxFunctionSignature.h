@@ -13,90 +13,95 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	enum class FunctionSignaturePartType
+	namespace Impl
 	{
-		Name,
-		Parameter,
-	};
 
-	struct FunctionSignaturePart
-	{
-		FunctionSignaturePart() :
-			partType(FunctionSignaturePartType::Name),
-			optional(false),
-			valueType(ValueType::Any)
-		{}
-		FunctionSignaturePartType partType;
-		bool optional;
-		ValueType valueType;
-		std::vector<String, Allocator<String>> names;
-	};
+		enum class FunctionSignaturePartType
+		{
+			Name,
+			Parameter,
+		};
 
-	typedef std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>> FunctionSignatureParts;
+		struct FunctionSignaturePart
+		{
+			FunctionSignaturePart() :
+				partType(FunctionSignaturePartType::Name),
+				optional(false),
+				valueType(ValueType::Any)
+			{}
+			FunctionSignaturePartType partType;
+			bool optional;
+			ValueType valueType;
+			std::vector<String, Allocator<String>> names;
+		};
 
-	// Function and member function signature object.
-	class FunctionSignature
-	{
-	public:
-		FunctionSignature();
-		FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
+		using FunctionSignatureParts = std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>>;
 
-		// Get unique function id
-		RuntimeID GetId() const { return m_id; }
+		// Function and member function signature object.
+		class FunctionSignature
+		{
+		public:
+			FunctionSignature();
+			FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
 
-		// Get human-readable name for debug purposes
-		String GetName() const;
+			// Get unique function id
+			RuntimeID GetId() const { return m_id; }
 
-		// Get signature length
-		size_t GetLength() const { return m_parts.size(); }
+			// Get human-readable name for debug purposes
+			String GetName() const;
 
-		// Get visibility level
-		VisibilityType GetVisibility() const { return m_visibility; }
+			// Get signature length
+			size_t GetLength() const { return m_parts.size(); }
 
-		// Get signature parts
-		const FunctionSignatureParts & GetParts() const { return m_parts; }
+			// Get visibility level
+			VisibilityType GetVisibility() const { return m_visibility; }
 
-		// Is this a valid signature?
-		inline bool IsValid() const { return !m_parts.empty(); }
+			// Get signature parts
+			const FunctionSignatureParts & GetParts() const { return m_parts; }
 
-		// Get a list of parameter parts
-		FunctionSignatureParts GetParameters() const;
+			// Is this a valid signature?
+			inline bool IsValid() const { return !m_parts.empty(); }
 
-		// Get number of parameters
-		size_t GetParameterCount() const;
+			// Get a list of parameter parts
+			FunctionSignatureParts GetParameters() const;
 
-		// Serialization
-		void Read(BinaryReader & reader);
-		void Write(BinaryWriter & writer) const;
+			// Get number of parameters
+			size_t GetParameterCount() const;
 
-	private:
+			// Serialization
+			void Read(BinaryReader & reader);
+			void Write(BinaryWriter & writer) const;
 
-		friend bool operator == (const FunctionSignature & left, const FunctionSignature & right);
+		private:
 
-	private:
+			friend bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-		// Unique id
-		RuntimeID m_id;
+		private:
 
-		// Visibility level
-		VisibilityType m_visibility;
+			// Unique id
+			RuntimeID m_id;
 
-		// Library name
-		String m_libraryName;
+			// Visibility level
+			VisibilityType m_visibility;
 
-		// Each signature is made up of any number of parts representing either part
-		// of the function name or a variable placeholder.
-		FunctionSignatureParts m_parts;
+			// Library name
+			String m_libraryName;
 
-	};
+			// Each signature is made up of any number of parts representing either part
+			// of the function name or a variable placeholder.
+			FunctionSignatureParts m_parts;
 
-	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
-	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
+		};
 
-	typedef std::list<FunctionSignature, Allocator<FunctionSignature>> FunctionList;
-	typedef std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>> FunctionPtrList;
+		bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
+		bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-};
+		using FunctionList = std::list<FunctionSignature, Allocator<FunctionSignature>>;
+		using  FunctionPtrList = std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>>;
+
+	} // namespace Impl
+
+} // namespace Impl
 
 #endif // JX_FUNCTION_SIGNATURE_H__
 

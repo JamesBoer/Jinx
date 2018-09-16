@@ -13,14 +13,18 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	void InitializeLogging(const GlobalParams & params);
-	
-	bool IsLogSymbolsEnabled();
-	bool IsLogBytecodeEnabled();
+	namespace Impl
+	{
+		void InitializeLogging(const GlobalParams & params);
 
-	void LogWrite(const char * format, ...);
-	void LogWriteLine(const char * format, ...);
-	
-};
+		bool IsLogSymbolsEnabled();
+		bool IsLogBytecodeEnabled();
+
+		void LogWrite(const char * format, ...);
+		void LogWriteLine(const char * format, ...);
+
+	} // namespace Impl
+
+} // namespace Jinx
 
 #endif // JX_LOGGING_H__

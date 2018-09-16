@@ -13,14 +13,20 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	struct CaseFoldingData
+	namespace Impl
 	{
-		char32_t sourceCodePoint;
-		char32_t destCodePoint1;
-		char32_t destCodePoint2;
-	};
 
-	bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2);
-};
+		struct CaseFoldingData
+		{
+			char32_t sourceCodePoint;
+			char32_t destCodePoint1;
+			char32_t destCodePoint2;
+		};
+
+		bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2);
+
+	} // namespace Impl
+
+} // namespace Jinx
 
 #endif // JX_UNICODE_CASE_FOLDING_H__

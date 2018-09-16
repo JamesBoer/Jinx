@@ -12,57 +12,63 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx
 {
-	class Library : public ILibrary
+
+	namespace Impl
 	{
-	public:
-		Library(RuntimeWPtr runtime, const String & name);
+		class Library : public ILibrary
+		{
+		public:
+			Library(RuntimeWPtr runtime, const String & name);
 
-		// ILibrary interface
-		bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
-		bool RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value) override;
-		Variant GetProperty(const String & name) const override;
-		void SetProperty(const String & name, const Variant & value) override;
+			// ILibrary interface
+			bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+			bool RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value) override;
+			Variant GetProperty(const String & name) const override;
+			void SetProperty(const String & name, const Variant & value) override;
 
-		// Internal name getter
-		const String & GetName() const { return m_name; }
-		
-		// Internal property functions
-		bool RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates);
-		bool PropertyNameExists(const String & name) const;
-		PropertyName GetPropertyName(const String & name);
-		size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
+			// Internal name getter
+			const String & GetName() const { return m_name; }
 
-		// Internal function signature functions
-		void RegisterFunctionSignature(const FunctionSignature & signature);
-		bool FunctionSignatureExists(const FunctionSignature & signature) const;
-		FunctionSignature FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const;
-		const FunctionPtrList Functions() const;
+			// Internal property functions
+			bool RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates);
+			bool PropertyNameExists(const String & name) const;
+			PropertyName GetPropertyName(const String & name);
+			size_t GetMaxPropertyParts() const { return m_maxPropertyParts; }
 
-	private:
-		
-		// Private internal functions
-		FunctionSignature CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const;
-		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
+			// Internal function signature functions
+			void RegisterFunctionSignature(const FunctionSignature & signature);
+			bool FunctionSignatureExists(const FunctionSignature & signature) const;
+			FunctionSignature FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const;
+			const FunctionPtrList Functions() const;
 
-		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>> PropertyNameTable;
+		private:
 
-		// Library name
-		String m_name;
+			// Private internal functions
+			FunctionSignature CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const;
+			bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
-		// Track function definitions
-		mutable std::mutex m_functionMutex;
-		FunctionList m_functionList;
+			using PropertyNameTable = std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>>;
 
-		// Properties
-		mutable std::mutex m_propertyMutex;
-		PropertyNameTable m_propertyNameTable;
-		size_t m_maxPropertyParts;
+			// Library name
+			String m_name;
 
-		// Weak ptr to runtime system
-		RuntimeWPtr m_runtime;
-	};
+			// Track function definitions
+			mutable std::mutex m_functionMutex;
+			FunctionList m_functionList;
 
-	typedef std::shared_ptr<Library> LibraryIPtr;
-};
+			// Properties
+			mutable std::mutex m_propertyMutex;
+			PropertyNameTable m_propertyNameTable;
+			size_t m_maxPropertyParts;
+
+			// Weak ptr to runtime system
+			RuntimeWPtr m_runtime;
+		};
+
+		using LibraryIPtr = std::shared_ptr<Library>;
+
+	} // namespace Impl
+
+} // namespace Jinx
 
 #endif // JX_LIBRARY_H__

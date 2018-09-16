@@ -106,6 +106,6 @@ namespace Jinx
 		size_t m_pos;
 	};
 
-};
+} // namespace Jinx
 
 #endif // JX_SERIALIZE_H__
