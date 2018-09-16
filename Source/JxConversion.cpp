@@ -13,52 +13,55 @@ namespace Jinx
 	namespace Impl
 	{
 
-		static uint8_t s_valueTypeToByte[] =
+		struct ConvTable
 		{
-			0,  // Null,
-			1,  // Number,
-			2,  // Integer,
-			3,  // Boolean,
-			4,  // String,
-			5,  // Collection,
-			6,  // CollectionItr,
-			7,  // UserData,
-			8,  // Buffer,
-			9,  // Guid,
-			10, // ValType,
-			11, // Any
+			static inline uint8_t valueTypeToByte[] =
+			{
+				0,  // Null,
+				1,  // Number,
+				2,  // Integer,
+				3,  // Boolean,
+				4,  // String,
+				5,  // Collection,
+				6,  // CollectionItr,
+				7,  // UserData,
+				8,  // Buffer,
+				9,  // Guid,
+				10, // ValType,
+				11, // Any
+			};
+
+			static_assert(countof(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+
+			static inline ValueType byteToValueType[] =
+			{
+				ValueType::Null,
+				ValueType::Number,
+				ValueType::Integer,
+				ValueType::Boolean,
+				ValueType::String,
+				ValueType::Collection,
+				ValueType::CollectionItr,
+				ValueType::UserObject,
+				ValueType::Buffer,
+				ValueType::Guid,
+				ValueType::ValType,
+				ValueType::Any,
+			};
+
+			static_assert(countof(byteToValueType) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 		};
-
-		static_assert(countof(s_valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
-
-		static ValueType s_byteToValueType[] =
-		{
-			ValueType::Null,
-			ValueType::Number,
-			ValueType::Integer,
-			ValueType::Boolean,
-			ValueType::String,
-			ValueType::Collection,
-			ValueType::CollectionItr,
-			ValueType::UserObject,
-			ValueType::Buffer,
-			ValueType::Guid,
-			ValueType::ValType,
-			ValueType::Any,
-		};
-
-		static_assert(countof(s_byteToValueType) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 
 		inline_t ValueType ByteToValueType(uint8_t byte)
 		{
 			assert(byte <= static_cast<size_t>(ValueType::NumValueTypes));
-			return s_byteToValueType[byte];
+			return ConvTable::byteToValueType[byte];
 		}
 
 		inline_t uint8_t ValueTypeToByte(ValueType type)
 		{
 			assert(static_cast<size_t>(type) <= static_cast<size_t>(ValueType::NumValueTypes));
-			return s_valueTypeToByte[static_cast<size_t>(type)];
+			return ConvTable::valueTypeToByte[static_cast<size_t>(type)];
 		}
 
 		inline_t bool StringToBoolean(const String & inValue, bool * outValue)

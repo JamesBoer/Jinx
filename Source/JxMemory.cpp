@@ -74,14 +74,15 @@ namespace Jinx
 		// End new and delete overloads
 
 
-
 	// External allocation functions
 	namespace Impl
 	{
-		static AllocFn s_allocFn = [](size_t size) { return malloc(size); };
-		static ReallocFn s_reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-		static FreeFn s_freeFn = [](void * p) { return free(p); };
-
+		struct Alloc
+		{
+			static inline AllocFn allocFn = [](size_t size) { return malloc(size); };
+			static inline ReallocFn reallocFn = [](void * p, size_t size) { return realloc(p, size); };
+			static inline FreeFn freeFn = [](void * p) { return free(p); };
+		};
 
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
@@ -183,9 +184,9 @@ namespace Jinx
 		class DefaultHeap
 		{
 		public:
-			void * Alloc(size_t bytes) { return s_allocFn(bytes); }
-			void * Realloc(void * ptr, size_t bytes) { return s_reallocFn(ptr, bytes); }
-			void Free(void * ptr) { s_freeFn(ptr); }
+			void * Alloc(size_t bytes) { return Alloc::allocFn(bytes); }
+			void * Realloc(void * ptr, size_t bytes) { return Alloc::reallocFn(ptr, bytes); }
+			void Free(void * ptr) { Alloc::freeFn(ptr); }
 			const MemoryStats & GetMemoryStats() const { return m_stats; }
 			void LogAllocations() {}
 			void ShutDown() {}
@@ -199,52 +200,50 @@ namespace Jinx
 
 #endif // #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
+		struct Mem
+		{
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
 #ifdef JINX_USE_MEMORY_GUARDS
-		static uint8_t s_memoryGuardCheck[MEMORY_GUARD_SIZE] =
-		{
-			MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
-			MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
-			MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
-			MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
-		};
-		static_assert(countof(s_memoryGuardCheck) == (size_t)MEMORY_GUARD_SIZE, "Memory guard array size mismatch");
+			static inline uint8_t memoryGuardCheck[MEMORY_GUARD_SIZE] =
+			{
+				MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
+				MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
+				MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
+				MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN, MEMORY_GUARD_PATTERN,
+			};
+			static_assert(countof(memoryGuardCheck) == (size_t)MEMORY_GUARD_SIZE, "Memory guard array size mismatch");
 
 #endif // JINX_USE_MEMORY_GUARDS
 
-		// Each thread has its own local heap.  This helps to avoid thread contention
-		// when scripts are executed on parallel threads.  Note that reallocs and frees
-		// are allowed to occur from different threads (preventing this would be unweildy), 
-		// so locks are still needed to ensure thread-safety inside the heap itself.
-		static thread_local BlockHeap	s_heap;
+			// Each thread has its own local heap.  This helps to avoid thread contention
+			// when scripts are executed on parallel threads.  Note that reallocs and frees
+			// are allowed to occur from different threads (preventing this would be unweildy), 
+			// so locks are still needed to ensure thread-safety inside the heap itself.
+			static inline thread_local BlockHeap	heap;
 
-		// List of all thread-local heaps
-		static std::mutex s_heapMutex;
-		static BlockHeap * s_head;
-		static BlockHeap * s_tail;
+			// List of all thread-local heaps
+			static inline std::mutex heapMutex;
+			static inline BlockHeap * head;
+			static inline BlockHeap * tail;
 
-		// Allocation parameters
-		static size_t s_allocBlockSize = (1024 * 32) - sizeof(MemoryBlock);
-		static size_t s_maxAllocSpareBlocks = 2;
+			// Allocation parameters
+			static inline size_t allocBlockSize = (1024 * 32) - sizeof(MemoryBlock);
+			static inline size_t maxAllocSpareBlocks = 2;
 
-		// Track global memory statistics
-		static std::atomic<uint64_t> s_externalAllocCount;
-		static std::atomic<uint64_t> s_externalFreeCount;
-		static std::atomic<uint64_t> s_internalAllocCount;
-		static std::atomic<uint64_t> s_internalFreeCount;
-		static std::atomic<uint64_t> s_currentBlockCount;
-		static std::atomic<uint64_t> s_currentAllocatedMemory;
-		static std::atomic<uint64_t> s_currentUsedMemory;
-
+			// Track global memory statistics
+			static inline std::atomic<uint64_t> externalAllocCount;
+			static inline std::atomic<uint64_t> externalFreeCount;
+			static inline std::atomic<uint64_t> internalAllocCount;
+			static inline std::atomic<uint64_t> internalFreeCount;
+			static inline std::atomic<uint64_t> currentBlockCount;
+			static inline std::atomic<uint64_t> currentAllocatedMemory;
+			static inline std::atomic<uint64_t> currentUsedMemory;
 
 #else // JINX_DISABLE_POOL_ALLOCATOR
-
-			static DefaultHeap s_heap;
-
+			static inline DefaultHeap heap;
 #endif // JINX_DISABLE_POOL_ALLOCATOR
-
-
+		};
 
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
@@ -258,21 +257,21 @@ namespace Jinx
 		{
 
 			// Add block heap to the global list
-			if (s_head == nullptr)
+			if (Mem::head == nullptr)
 			{
-				assert(s_tail == nullptr);
-				s_head = this;
+				assert(Mem::tail == nullptr);
+				Mem::head = this;
 				m_prev = nullptr;
-				s_tail = this;
+				Mem::tail = this;
 			}
 			else
 			{
 				// Ensure thread-safe access to the global heap list
-				std::lock_guard<std::mutex> lock(s_heapMutex);
-				assert(s_tail);
-				m_prev = s_tail;
-				s_tail->m_next = this;
-				s_tail = this;
+				std::lock_guard<std::mutex> lock(Mem::heapMutex);
+				assert(Mem::tail);
+				m_prev = Mem::tail;
+				Mem::tail->m_next = this;
+				Mem::tail = this;
 			}
 		}
 
@@ -356,8 +355,8 @@ namespace Jinx
 #endif 
 
 			// Update memory stats
-			s_currentUsedMemory += requestedBytes;
-			s_internalAllocCount++;
+			Mem::currentUsedMemory += requestedBytes;
+			Mem::internalAllocCount++;
 
 			// Return the allocated pointer advanced by the size of the memory header.  We'll
 			// reverse the process when freeing the memory.
@@ -366,7 +365,7 @@ namespace Jinx
 
 		inline_t MemoryBlock * BlockHeap::AllocBlock(size_t bytes)
 		{
-			size_t blockSize = s_allocBlockSize;
+			size_t blockSize = Mem::allocBlockSize;
 			if (bytes > blockSize)
 				blockSize = NextHighestMultiple(bytes, std::alignment_of<max_align_t>::value);
 
@@ -396,12 +395,12 @@ namespace Jinx
 			// If none is available, allocate a block
 			if (!newBlock)
 			{
-				newBlock = static_cast<MemoryBlock *>(Impl::s_allocFn(blockSize + sizeof(MemoryBlock)));
+				newBlock = static_cast<MemoryBlock *>(Impl::Alloc::allocFn(blockSize + sizeof(MemoryBlock)));
 				newBlock->capacity = blockSize;
 				newBlock->data = reinterpret_cast<uint8_t *>(newBlock) + sizeof(MemoryBlock);
-				s_currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
-				s_externalAllocCount++;
-				s_currentBlockCount++;
+				Mem::currentAllocatedMemory += (blockSize + sizeof(MemoryBlock));
+				Mem::externalAllocCount++;
+				Mem::currentBlockCount++;
 			}
 			newBlock->allocatedBytes = 0;
 			newBlock->usedBytes = 0;
@@ -446,8 +445,8 @@ namespace Jinx
 			MemoryBlock * memBlock = header->memBlock;
 
 #ifdef JINX_USE_MEMORY_GUARDS
-			assert(memcmp(header->memGuardHead, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
-			assert(memcmp(header->memGuardTail, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
+			assert(memcmp(header->memGuardHead, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
+			assert(memcmp(header->memGuardTail, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
 #endif 
 
 			// Assert we're not freeing more than we've allocated
@@ -461,8 +460,8 @@ namespace Jinx
 			memBlock->count--;
 
 			// Update memory stats
-			s_currentUsedMemory -= header->bytes;
-			s_internalFreeCount++;
+			Mem::currentUsedMemory -= header->bytes;
+			Mem::internalFreeCount++;
 
 #ifdef JINX_DEBUG_ALLOCATION
 
@@ -495,8 +494,8 @@ namespace Jinx
 			assert(block->count == 0);
 
 #ifdef JINX_USE_MEMORY_GUARDS
-			assert(memcmp(block->memGuardHead, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
-			assert(memcmp(block->memGuardTail, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
+			assert(memcmp(block->memGuardHead, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
+			assert(memcmp(block->memGuardTail, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0);
 #endif 
 
 			// Remove the block from the double linked-list.
@@ -510,7 +509,7 @@ namespace Jinx
 				block->next->prev = block->prev;
 
 			// Check first to see if we can put this on the spare list
-			if (m_allocSpareBlocks < s_maxAllocSpareBlocks)
+			if (m_allocSpareBlocks < Mem::maxAllocSpareBlocks)
 			{
 				block->allocatedBytes = 0;
 				block->usedBytes = 0;
@@ -533,12 +532,12 @@ namespace Jinx
 			else
 			{
 				// Track allocation stats
-				s_externalFreeCount++;
-				s_currentAllocatedMemory -= (block->capacity + sizeof(MemoryBlock));
-				s_currentBlockCount--;
+				Mem::externalFreeCount++;
+				Mem::currentAllocatedMemory -= (block->capacity + sizeof(MemoryBlock));
+				Mem::currentBlockCount--;
 
 				// Free the block of memory
-				Impl::s_freeFn(block);
+				Impl::Alloc::freeFn(block);
 			}
 		}
 
@@ -553,8 +552,8 @@ namespace Jinx
 				LogWriteLine("");
 				LogWriteLine("--- Memory Block ---");
 #ifdef JINX_USE_MEMORY_GUARDS
-				bool memGuardsIntact = (memcmp(memBlock->memGuardHead, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) &&
-					(memcmp(memBlock->memGuardTail, s_memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) ? true : false;
+				bool memGuardsIntact = (memcmp(memBlock->memGuardHead, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) &&
+					(memcmp(memBlock->memGuardTail, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) ? true : false;
 				LogWriteLine("Memory guards intact: %s", memGuardsIntact ? "true" : "false");
 #endif 		
 				LogWriteLine("Data = %p", memBlock->data);
@@ -638,9 +637,9 @@ namespace Jinx
 				next = curr->next;
 				if (curr->usedBytes == 0)
 				{
-					s_externalFreeCount++;
-					s_currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
-					Impl::s_freeFn(curr);
+					Mem::externalFreeCount++;
+					Mem::currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+					Impl::Alloc::freeFn(curr);
 				}
 				else
 				{
@@ -658,9 +657,9 @@ namespace Jinx
 				next = curr->next;
 				if (curr->usedBytes == 0)
 				{
-					s_externalFreeCount++;
-					s_currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
-					Impl::s_freeFn(curr);
+					Mem::externalFreeCount++;
+					Mem::currentAllocatedMemory -= (curr->capacity + sizeof(MemoryBlock));
+					Impl::Alloc::freeFn(curr);
 				}
 				else
 				{
@@ -676,15 +675,15 @@ namespace Jinx
 				return;
 
 			// Ensure thread-safe access to the global heap list
-			std::lock_guard<std::mutex> lock(s_heapMutex);
+			std::lock_guard<std::mutex> lock(Mem::heapMutex);
 
 			// Remove block heap from global heap list
-			if (this == s_head)
-				s_head = m_next;
+			if (this == Mem::head)
+				Mem::head = m_next;
 			else
 				m_prev->m_next = m_next;
-			if (this == s_tail)
-				s_tail = m_prev;
+			if (this == Mem::tail)
+				Mem::tail = m_prev;
 			else
 				m_next->m_prev = m_prev;
 			m_prev = nullptr;
@@ -709,9 +708,9 @@ namespace Jinx
 		Jinx::unused(file);
 		Jinx::unused(function);
 		Jinx::unused(line);
-		p = Impl::s_heap.Alloc(bytes);
+		p = Impl::Mem::heap.Alloc(bytes);
 #else
-		p = Impl::s_heap.Alloc(bytes);
+		p = Impl::Mem::heap.Alloc(bytes);
 		Impl::MemoryHeader * header = reinterpret_cast<Impl::MemoryHeader*>(static_cast<char *>(p) - sizeof(Impl::MemoryHeader));
 		header->file = file;
 		header->function = function;
@@ -741,7 +740,7 @@ namespace Jinx
 		Jinx::unused(file);
 		Jinx::unused(function);
 		Jinx::unused(line);
-		p = Impl::s_heap.Realloc(ptr, bytes);
+		p = Impl::Mem::heap.Realloc(ptr, bytes);
 #else
 		if (ptr)
 		{
@@ -750,7 +749,7 @@ namespace Jinx
 		}
 		else
 		{
-			p = Impl::s_heap.Realloc(ptr, bytes);
+			p = Impl::Mem::heap.Realloc(ptr, bytes);
 		}
 		if (p)
 		{
@@ -771,7 +770,7 @@ namespace Jinx
 #ifdef JINX_DEBUG_USE_STD_ALLOC
 		p = malloc(bytes);
 #else
-		p = Impl::s_heap.Alloc(bytes);
+		p = Impl::Mem::heap.Alloc(bytes);
 #endif
 		return p;
 	}
@@ -782,7 +781,7 @@ namespace Jinx
 #ifdef JINX_DEBUG_USE_STD_ALLOC
 		p = realloc(ptr, bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-		p = Impl::s_heap.Realloc(ptr, bytes);
+		p = Impl::Mem::heap.Realloc(ptr, bytes);
 #else
 		if (ptr)
 		{
@@ -791,7 +790,7 @@ namespace Jinx
 		}
 		else
 		{
-			p = Impl::s_heap.Realloc(ptr, bytes);
+			p = Impl::Mem::heap.Realloc(ptr, bytes);
 		}
 #endif
 		return p;
@@ -806,7 +805,7 @@ namespace Jinx
 #ifdef JINX_DEBUG_USE_STD_ALLOC
 		free(ptr);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-		Impl::s_heap.Free(ptr);
+		Impl::Mem::heap.Free(ptr);
 #else
 		Impl::MemoryHeader * header = reinterpret_cast<Impl::MemoryHeader*>(static_cast<char *>(ptr) - sizeof(Impl::MemoryHeader));
 		header->heap->Free(ptr);
@@ -819,16 +818,16 @@ namespace Jinx
 		{
 			// If you're using one custom memory function, you must use them ALL
 			assert(params.allocFn && params.reallocFn && params.freeFn);
-			Impl::s_allocFn = params.allocFn;
-			Impl::s_reallocFn = params.reallocFn;
-			Impl::s_freeFn = params.freeFn;
+			Impl::Alloc::allocFn = params.allocFn;
+			Impl::Alloc::reallocFn = params.reallocFn;
+			Impl::Alloc::freeFn = params.freeFn;
 		}
 
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 		// Alloc block size must be at least 4K (otherwise, what's the point of a block allocator?)
 		assert(params.allocBlockSize >= (1024 * 4));
-		Impl::s_allocBlockSize = params.allocBlockSize - sizeof(Impl::MemoryBlock);
-		Impl::s_maxAllocSpareBlocks = params.allocSpareBlocks;
+		Impl::Mem::allocBlockSize = params.allocBlockSize - sizeof(Impl::MemoryBlock);
+		Impl::Mem::maxAllocSpareBlocks = params.allocSpareBlocks;
 #endif
 
 	}
@@ -837,8 +836,8 @@ namespace Jinx
 	{
 #ifndef JINX_DEBUG_USE_STD_ALLOC
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
-		std::lock_guard<std::mutex> lock(Impl::s_heapMutex);
-		Impl::BlockHeap * heap = Impl::s_head;
+		std::lock_guard<std::mutex> lock(Impl::Mem::heapMutex);
+		Impl::BlockHeap * heap = Impl::Mem::head;
 		while (heap)
 		{
 			heap->ShutDown();
@@ -852,13 +851,13 @@ namespace Jinx
 	{
 		MemoryStats stats;
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
-		stats.externalAllocCount = Impl::s_externalAllocCount;
-		stats.externalFreeCount = Impl::s_externalFreeCount;
-		stats.internalAllocCount = Impl::s_internalAllocCount;
-		stats.internalFreeCount = Impl::s_internalFreeCount;
-		stats.currentBlockCount = Impl::s_currentBlockCount;
-		stats.currentAllocatedMemory = Impl::s_currentAllocatedMemory;
-		stats.currentUsedMemory = Impl::s_currentUsedMemory;
+		stats.externalAllocCount = Impl::Mem::externalAllocCount;
+		stats.externalFreeCount = Impl::Mem::externalFreeCount;
+		stats.internalAllocCount = Impl::Mem::internalAllocCount;
+		stats.internalFreeCount = Impl::Mem::internalFreeCount;
+		stats.currentBlockCount = Impl::Mem::currentBlockCount;
+		stats.currentAllocatedMemory = Impl::Mem::currentAllocatedMemory;
+		stats.currentUsedMemory = Impl::Mem::currentUsedMemory;
 #endif
 		return stats;
 	}
@@ -867,8 +866,8 @@ namespace Jinx
 	{
 #ifndef JINX_DEBUG_USE_STD_ALLOC
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
-		std::lock_guard<std::mutex> lock(Impl::s_heapMutex);
-		Impl::BlockHeap * heap = Impl::s_head;
+		std::lock_guard<std::mutex> lock(Impl::Mem::heapMutex);
+		Impl::BlockHeap * heap = Impl::Mem::head;
 		while (heap)
 		{
 			heap->LogAllocations();

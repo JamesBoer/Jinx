@@ -18,8 +18,5 @@ int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
     
-	Test::test = 999;
-	CheckTestVal();
-
     return 0;
 }

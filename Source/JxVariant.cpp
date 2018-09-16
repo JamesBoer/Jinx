@@ -12,26 +12,30 @@ namespace Jinx
 
 	namespace Impl
 	{
-		static bool s_allowValueCompare[] =
+		struct VarCmpTable
 		{
-			false,	// Null
-			true,	// Number
-			true,	// Integer
-			false,	// Boolean
-			true,	// String
-			false,	// Collection
-			false,	// CollectionItr
-			false,	// UserObject
-			false,	// Buffer
-			true,	// Guid
-			false,	// ValType
-		};
+			static inline bool allowValueCompare[] =
+			{
+				false,	// Null
+				true,	// Number
+				true,	// Integer
+				false,	// Boolean
+				true,	// String
+				false,	// Collection
+				false,	// CollectionItr
+				false,	// UserObject
+				false,	// Buffer
+				true,	// Guid
+				false,	// ValType
+			};
 
-		static_assert(countof(s_allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
+			static_assert(countof(allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
+
+		};
 
 		inline_t bool CheckValueTypeForCompare(ValueType type)
 		{
-			return s_allowValueCompare[static_cast<size_t>(type)];
+			return VarCmpTable::allowValueCompare[static_cast<size_t>(type)];
 		}
 
 	} // namespace Impl

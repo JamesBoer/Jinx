@@ -10,9 +10,6 @@ Copyright (c) 2016 James Boer
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#ifdef _WINDOWS
-#include <conio.h>
-#endif
 
 #include "../../../Source/Jinx.h"
 
@@ -106,11 +103,6 @@ int main(int argc, char ** argv)
 	auto stats = GetMemoryStats();
 	REQUIRE(stats.currentAllocatedMemory == 0);
 	REQUIRE(stats.currentUsedMemory == 0);
-
-#ifdef _WINDOWS
-	printf("Press any key to continue...");
-	_getch();
-#endif
     
     return 0;
 }
