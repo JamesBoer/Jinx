@@ -10,65 +10,60 @@ Copyright (c) 2016 James Boer
 #define JX_RUNTIME_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
-	namespace Impl
+	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
+	public:
+		Runtime();
+		virtual ~Runtime();
 
-		class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
-		{
-		public:
-			Runtime();
-			virtual ~Runtime();
+		// IRuntime interface
+		BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
+		ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		LibraryPtr GetLibrary(const String & name) override;
+		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
+		BufferPtr StripDebugInfo(BufferPtr bytecode) const override;
 
-			// IRuntime interface
-			BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
-			ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
-			ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
-			ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
-			LibraryPtr GetLibrary(const String & name) override;
-			PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
-			BufferPtr StripDebugInfo(BufferPtr bytecode) const override;
+		// Internal interface
+		BufferPtr Compile(BufferPtr scriptBuffer, String name, std::initializer_list<String> libraries);
+		inline LibraryIPtr GetLibraryInternal(const String & name) { return std::static_pointer_cast<Library>(GetLibrary(name)); }
+		FunctionDefinitionPtr FindFunction(RuntimeID id) const;
+		bool LibraryExists(const String & name) const;
+		void RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset);
+		void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
+		Variant GetProperty(RuntimeID id) const;
+		Variant GetPropertyKeyValue(RuntimeID id, const Variant & key);
+		bool PropertyExists(RuntimeID id) const;
+		void SetProperty(RuntimeID id, const Variant & value);
+		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
+		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 
-			// Internal interface
-			BufferPtr Compile(BufferPtr scriptBuffer, String name, std::initializer_list<String> libraries);
-			inline LibraryIPtr GetLibraryInternal(const String & name) { return std::static_pointer_cast<Library>(GetLibrary(name)); }
-			FunctionDefinitionPtr FindFunction(RuntimeID id) const;
-			bool LibraryExists(const String & name) const;
-			void RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset);
-			void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
-			Variant GetProperty(RuntimeID id) const;
-			Variant GetPropertyKeyValue(RuntimeID id, const Variant & key);
-			bool PropertyExists(RuntimeID id) const;
-			void SetProperty(RuntimeID id, const Variant & value);
-			bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
-			void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+	private:
 
-		private:
+		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, Allocator<std::pair<const String, LibraryIPtr>>>;
+		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
+		using PropertyMap = std::map<RuntimeID, Variant, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, Variant>>>;
+		void LogBytecode(const Parser & parser) const;
+		void LogSymbols(const SymbolList & symbolList) const;
 
-			using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, Allocator<std::pair<const String, LibraryIPtr>>>;
-			using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
-			using PropertyMap = std::map<RuntimeID, Variant, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, Variant>>>;
-			void LogBytecode(const Parser & parser) const;
-			void LogSymbols(const SymbolList & symbolList) const;
+	private:
 
-		private:
+		static const size_t NumMutexes = 8;
+		mutable std::mutex m_libraryMutex;
+		LibraryMap m_libraryMap;
+		mutable std::mutex m_functionMutex[NumMutexes];
+		FunctionMap m_functionMap;
+		mutable std::mutex m_propertyMutex[NumMutexes];
+		PropertyMap m_propertyMap;
+		std::mutex m_perfMutex;
+		PerformanceStats m_perfStats;
+		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
+	};
 
-			static const size_t NumMutexes = 8;
-			mutable std::mutex m_libraryMutex;
-			LibraryMap m_libraryMap;
-			mutable std::mutex m_functionMutex[NumMutexes];
-			FunctionMap m_functionMap;
-			mutable std::mutex m_propertyMutex[NumMutexes];
-			PropertyMap m_propertyMap;
-			std::mutex m_perfMutex;
-			PerformanceStats m_perfStats;
-			std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
-		};
-
-	} // namespace Impl
-
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 #endif // JX_RUNTIME_H__

@@ -1166,6 +1166,5 @@ namespace Jinx
 		return true;
 	}
 
-
 } // namespace Jinx
 

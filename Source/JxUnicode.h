@@ -10,25 +10,20 @@ Copyright (c) 2016 James Boer
 #define JX_UNICODE_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
-	namespace Impl
-	{
+	size_t GetUtf8CharSize(const char * utf8Str);
 
-		size_t GetUtf8CharSize(const char * utf8Str);
+	StringU16 ConvertUtf8ToUtf16(const String & utf8Str);
+	String ConvertUtf16ToUtf8(const StringU16 & utf16Str);
 
-		StringU16 ConvertUtf8ToUtf16(const String & utf8Str);
-		String ConvertUtf16ToUtf8(const StringU16 & utf16Str);
+	WString ConvertUtf8ToWString(const String & utf8Str);
+	String ConvertWStringToUtf8(const WString & wStr);
 
-		WString ConvertUtf8ToWString(const String & utf8Str);
-		String ConvertWStringToUtf8(const WString & wStr);
+	bool IsCaseFolded(const String & source);
+	String FoldCase(const String & source);
 
-		bool IsCaseFolded(const String & source);
-		String FoldCase(const String & source);
-
-	} // namespace Impl
-
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 #endif // JX_UNICODE_H__

@@ -9,257 +9,252 @@ Copyright (c) 2016 James Boer
 #ifndef JX_COMMON_H__
 #define JX_COMMON_H__
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
-	namespace Impl
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+	const uint32_t LogTabWidth = 4;
+
+	// All script opcodes
+	enum class Opcode
 	{
+		Add,
+		And,
+		CallFunc,
+		Cast,
+		Decrement,
+		Divide,
+		Equals,
+		EraseProp,
+		ErasePropElem,
+		EraseVar,
+		EraseVarElem,
+		Exit,
+		Function,
+		Greater,
+		GreaterEq,
+		Increment,
+		Jump,
+		JumpFalse,
+		JumpFalseCheck,
+		JumpTrue,
+		JumpTrueCheck,
+		Less,
+		LessEq,
+		Library,
+		LoopCount,
+		LoopOver,
+		Mod,
+		Multiply,
+		Not,
+		NotEquals,
+		Or,
+		Pop,
+		PopCount,
+		Property,
+		PushColl,
+		PushItr,
+		PushList,
+		PushProp,
+		PushPropKeyVal,
+		PushTop,
+		PushVar,
+		PushVarKey,
+		PushVal,
+		PushValKey,
+		Return,
+		ScopeBegin,
+		ScopeEnd,
+		SetIndex,
+		SetProp,
+		SetPropKeyVal,
+		SetVar,
+		SetVarKey,
+		Subtract,
+		Type,
+		Wait,
+		NumOpcodes,
+	};
 
-		using RuntimeID = uint64_t;
-		const RuntimeID InvalidID = 0;
-		const uint32_t LogTabWidth = 4;
+	const char * GetOpcodeText(Opcode opcode);
 
-		// All script opcodes
-		enum class Opcode
-		{
-			Add,
-			And,
-			CallFunc,
-			Cast,
-			Decrement,
-			Divide,
-			Equals,
-			EraseProp,
-			ErasePropElem,
-			EraseVar,
-			EraseVarElem,
-			Exit,
-			Function,
-			Greater,
-			GreaterEq,
-			Increment,
-			Jump,
-			JumpFalse,
-			JumpFalseCheck,
-			JumpTrue,
-			JumpTrueCheck,
-			Less,
-			LessEq,
-			Library,
-			LoopCount,
-			LoopOver,
-			Mod,
-			Multiply,
-			Not,
-			NotEquals,
-			Or,
-			Pop,
-			PopCount,
-			Property,
-			PushColl,
-			PushItr,
-			PushList,
-			PushProp,
-			PushPropKeyVal,
-			PushTop,
-			PushVar,
-			PushVarKey,
-			PushVal,
-			PushValKey,
-			Return,
-			ScopeBegin,
-			ScopeEnd,
-			SetIndex,
-			SetProp,
-			SetPropKeyVal,
-			SetVar,
-			SetVarKey,
-			Subtract,
-			Type,
-			Wait,
-			NumOpcodes,
-		};
+	// Symbols
+	enum class SymbolType
+	{
+		None,
+		Invalid,
+		NewLine,
+		NameValue,			// Value types begin
+		StringValue,
+		NumberValue,
+		IntegerValue,
+		BooleanValue,
+		ForwardSlash,		// Operator begin
+		Asterisk,
+		Plus,
+		Minus,
+		Equals,
+		NotEquals,
+		Percent,
+		Comma,
+		ParenOpen,
+		ParenClose,
+		CurlyOpen,
+		CurlyClose,
+		SquareOpen,
+		SquareClose,
+		Ellipse,
+		SingleQuote,
+		LessThan,
+		LessThanEquals,
+		GreaterThan,
+		GreaterThanEquals,
+		And,				// Keyword begin.  
+		As,
+		Begin,
+		Boolean,
+		Break,
+		By,
+		Collection,
+		Decrement,
+		Else,
+		End,
+		Erase,
+		External,
+		From,
+		Function,
+		Guid,
+		If,
+		Import,
+		Increment,
+		Integer,
+		Is,
+		Library,
+		Loop,
+		Not,
+		Null,
+		Number,
+		Object,
+		Or,
+		Over,
+		Private,
+		Public,
+		Readonly,
+		Return,
+		Set,
+		String,
+		To,
+		Type,
+		Until,
+		Wait,
+		While,
+		NumSymbols,
+	};
 
-		const char * GetOpcodeText(Opcode opcode);
+	const char * GetSymbolTypeText(SymbolType symbol);
 
-		// Symbols
-		enum class SymbolType
-		{
-			None,
-			Invalid,
-			NewLine,
-			NameValue,			// Value types begin
-			StringValue,
-			NumberValue,
-			IntegerValue,
-			BooleanValue,
-			ForwardSlash,		// Operator begin
-			Asterisk,
-			Plus,
-			Minus,
-			Equals,
-			NotEquals,
-			Percent,
-			Comma,
-			ParenOpen,
-			ParenClose,
-			CurlyOpen,
-			CurlyClose,
-			SquareOpen,
-			SquareClose,
-			Ellipse,
-			SingleQuote,
-			LessThan,
-			LessThanEquals,
-			GreaterThan,
-			GreaterThanEquals,
-			And,				// Keyword begin.  
-			As,
-			Begin,
-			Boolean,
-			Break,
-			By,
-			Collection,
-			Decrement,
-			Else,
-			End,
-			Erase,
-			External,
-			From,
-			Function,
-			Guid,
-			If,
-			Import,
-			Increment,
-			Integer,
-			Is,
-			Library,
-			Loop,
-			Not,
-			Null,
-			Number,
-			Object,
-			Or,
-			Over,
-			Private,
-			Public,
-			Readonly,
-			Return,
-			Set,
-			String,
-			To,
-			Type,
-			Until,
-			Wait,
-			While,
-			NumSymbols,
-		};
+	// Check to see if a symbol is a particular category
+	bool IsConstant(SymbolType symbol);
+	bool IsOperator(SymbolType symbol);
+	bool IsKeyword(SymbolType symbol);
 
-		const char * GetSymbolTypeText(SymbolType symbol);
+	// Get the name of a value type
+	const char * GetValueTypeName(ValueType valueType);
 
-		// Check to see if a symbol is a particular category
-		bool IsConstant(SymbolType symbol);
-		bool IsOperator(SymbolType symbol);
-		bool IsKeyword(SymbolType symbol);
+	// Visibility type 
+	enum class VisibilityType
+	{
+		Local,
+		Private,
+		Public,
+	};
 
-		// Get the name of a value type
-		const char * GetValueTypeName(ValueType valueType);
+	constexpr uint32_t MakeFourCC(char ch0, char ch1, char ch2, char ch3)
+	{
+		return ((uint32_t)(uint8_t)(ch0) | ((uint32_t)(uint8_t)(ch1) << 8 |
+			((uint32_t)(uint8_t)(ch2) << 16) | ((uint32_t)(uint8_t)(ch3) << 24)));
+	}
 
-		// Visibility type 
-		enum class VisibilityType
-		{
-			Local,
-			Private,
-			Public,
-		};
+	const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
+	const uint32_t BytecodeVersion = 0;
 
-		constexpr uint32_t MakeFourCC(char ch0, char ch1, char ch2, char ch3)
-		{
-			return ((uint32_t)(uint8_t)(ch0) | ((uint32_t)(uint8_t)(ch1) << 8 |
-				((uint32_t)(uint8_t)(ch2) << 16) | ((uint32_t)(uint8_t)(ch3) << 24)));
-		}
+	struct BytecodeHeader
+	{
+		BytecodeHeader() :
+			signature(BytecodeSignature),
+			version(BytecodeVersion),
+			dataSize(0)
+		{}
+		uint32_t signature;
+		uint32_t version;
+		uint32_t dataSize;
+	};
 
-		const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
-		const uint32_t BytecodeVersion = 0;
+	static_assert(sizeof(BytecodeHeader) == 12, "BytecodeHeader struct is not properly aligned on this platform");
 
-		struct BytecodeHeader
-		{
-			BytecodeHeader() :
-				signature(BytecodeSignature),
-				version(BytecodeVersion),
-				dataSize(0)
-			{}
-			uint32_t signature;
-			uint32_t version;
-			uint32_t dataSize;
-		};
+	const uint32_t DebugSignature = MakeFourCC('J', 'D', 'B', 'G');
 
-		static_assert(sizeof(BytecodeHeader) == 12, "BytecodeHeader struct is not properly aligned on this platform");
+	struct DebugHeader
+	{
+		DebugHeader() :
+			signature(DebugSignature),
+			lineEntryCount(0),
+			dataSize(0)
+		{}
+		uint32_t signature;
+		uint32_t lineEntryCount;
+		uint32_t dataSize;
+	};
 
-		const uint32_t DebugSignature = MakeFourCC('J', 'D', 'B', 'G');
+	static_assert(sizeof(DebugHeader) == 12, "DebugHeader struct is not properly aligned on this platform");
 
-		struct DebugHeader
-		{
-			DebugHeader() :
-				signature(DebugSignature),
-				lineEntryCount(0),
-				dataSize(0)
-			{}
-			uint32_t signature;
-			uint32_t lineEntryCount;
-			uint32_t dataSize;
-		};
+	struct DebugLineEntry
+	{
+		uint32_t opcodePosition;
+		uint32_t lineNumber;
+	};
 
-		static_assert(sizeof(DebugHeader) == 12, "DebugHeader struct is not properly aligned on this platform");
+	template <typename T>
+	inline T NextHighestMultiple(T val, T multiple)
+	{
+		return val + ((multiple - (val % multiple)) % multiple);
+	}
 
-		struct DebugLineEntry
-		{
-			uint32_t opcodePosition;
-			uint32_t lineNumber;
-		};
+	template<typename T, size_t s>
+	constexpr size_t countof(T(&)[s])
+	{
+		return s;
+	}
 
-		template <typename T>
-		inline T NextHighestMultiple(T val, T multiple)
-		{
-			return val + ((multiple - (val % multiple)) % multiple);
-		}
-
-		template<typename T, size_t s>
-		constexpr size_t countof(T(&)[s])
-		{
-			return s;
-		}
-
-		inline const char * StrCopy(char * dest, size_t destBufferSize, const char * source)
-		{
+	inline const char * StrCopy(char * dest, size_t destBufferSize, const char * source)
+	{
 #if defined(JINX_WINDOWS)
-			strncpy_s(dest, destBufferSize, source, ((size_t)-1));
-			return dest;
+		strncpy_s(dest, destBufferSize, source, ((size_t)-1));
+		return dest;
 #else
-			strncpy(dest, source, destBufferSize);
-			return dest;
+		strncpy(dest, source, destBufferSize);
+		return dest;
 #endif
-		}
+	}
 
-		// Get number of parts in name
-		size_t GetNamePartCount(const String & name);
+	// Get number of parts in name
+	size_t GetNamePartCount(const String & name);
 
-		// Generate runtime id from unique name information
-		RuntimeID GetVariableId(const char * name, size_t nameLen, size_t stackDepth);
+	// Generate runtime id from unique name information
+	RuntimeID GetVariableId(const char * name, size_t nameLen, size_t stackDepth);
 
-		RuntimeID GetRandomId();
-		uint32_t MaxInstructions();
-		bool ErrorOnMaxInstrunction();
-		bool EnableDebugInfo();
+	RuntimeID GetRandomId();
+	uint32_t MaxInstructions();
+	bool ErrorOnMaxInstrunction();
+	bool EnableDebugInfo();
 
-		// Forward declarations
-		class Runtime;
-		using RuntimeIPtr = std::shared_ptr<Runtime>;
-		using RuntimeWPtr = std::weak_ptr<Runtime>;
+	// Forward declarations
+	class Runtime;
+	using RuntimeIPtr = std::shared_ptr<Runtime>;
+	using RuntimeWPtr = std::weak_ptr<Runtime>;
 
-	} // namespace Impl
-
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 
 

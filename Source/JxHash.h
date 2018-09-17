@@ -10,17 +10,12 @@ Copyright (c) 2016 James Boer
 #define JX_HASH_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
-	namespace Impl
-	{
+	uint64_t GetHash(const void * data, size_t len);
 
-		uint64_t GetHash(const void * data, size_t len);
-
-	} // namespace Impl
-
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 #endif // JX_HASH_H__
 
