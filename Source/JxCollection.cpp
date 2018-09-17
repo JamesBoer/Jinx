@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx
 {
-	inline_t CollectionPtr Jinx::CreateCollection()
+	inline_t CollectionPtr CreateCollection()
 	{
 		return std::allocate_shared<Collection>(Allocator<Collection>());
 	}

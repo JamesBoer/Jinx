@@ -2762,7 +2762,7 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx
 {
-	inline CollectionPtr Jinx::CreateCollection()
+	inline CollectionPtr CreateCollection()
 	{
 		return std::allocate_shared<Collection>(Allocator<Collection>());
 	}
