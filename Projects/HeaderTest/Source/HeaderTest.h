@@ -8,3 +8,5 @@ Copyright (c) 2016 James Boer
 #pragma once
 
 #include "../../../Include/Jinx.hpp"
+
+bool TestExecuteScript(Jinx::RuntimePtr runtime);
