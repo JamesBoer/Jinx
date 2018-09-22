@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_LEXER_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	struct Symbol
@@ -36,9 +36,9 @@ namespace Jinx
 		uint32_t columnNumber;
 	};
 
-	typedef std::list<Symbol, Allocator<Symbol>> SymbolList;
-	typedef SymbolList::const_iterator SymbolListCItr;
-	typedef std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>> SymbolTypeMap;
+	using SymbolList = std::list<Symbol, Allocator<Symbol>>;
+	using SymbolListCItr = SymbolList::const_iterator;
+	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
 
 	class Lexer
 	{
@@ -111,6 +111,6 @@ namespace Jinx
 		SymbolTypeMap m_symbolTypeMap;
 	};
 
-};
+} // namespace Jinx::Impl
 
 #endif // JX_LEXER_H__

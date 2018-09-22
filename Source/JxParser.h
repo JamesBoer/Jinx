@@ -10,14 +10,14 @@ Copyright (c) 2016 James Boer
 #define JX_PARSER_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class Parser
 	{
 	public:
 		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & name, std::initializer_list<String> libraries);
-		
+
 		// Convert the symbol list into bytecode
 		bool Execute();
 
@@ -29,7 +29,7 @@ namespace Jinx
 
 	private:
 
-		typedef std::vector<std::tuple<FunctionSignaturePartType, size_t, bool>, Allocator<std::tuple<FunctionSignaturePartType, size_t, bool>>> FunctionPartData;
+		using FunctionPartData = std::vector<std::tuple<FunctionSignaturePartType, size_t, bool>, Allocator<std::tuple<FunctionSignaturePartType, size_t, bool>>>;
 
 		// Structure returned from function finding algorithm
 		struct FunctionMatch
@@ -41,7 +41,7 @@ namespace Jinx
 
 		// Log an error
 		template<class... Args>
-		void Error(const char * format, Args&&... args) 
+		void Error(const char * format, Args&&... args)
 		{
 			if (m_error)
 				return;
@@ -90,7 +90,7 @@ namespace Jinx
 		size_t EmitAddressPlaceholder();
 		void EmitAddressBackfill(size_t address);
 		void EmitCount(uint32_t count);
-		void EmitName(const String & name); 
+		void EmitName(const String & name);
 		void EmitOpcode(Opcode opcode);
 		void EmitValue(const Variant & value);
 		void EmitId(RuntimeID id);
@@ -170,7 +170,7 @@ namespace Jinx
 		void ParseScript();
 
 	private:
-		typedef std::map <RuntimeID, String, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, String>>> IDNameMap;
+		using IDNameMap = std::map <RuntimeID, String, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, String>>>;
 
 		// Runtime object
 		RuntimeIPtr m_runtime;
@@ -218,6 +218,6 @@ namespace Jinx
 		IDNameMap m_idNameMap;
 	};
 
-};
+} // namespace Jinx::Impl
 
 #endif // JX_PARSER_H__

@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_FUNCTION_SIGNATURE_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	enum class FunctionSignaturePartType
@@ -32,7 +32,7 @@ namespace Jinx
 		std::vector<String, Allocator<String>> names;
 	};
 
-	typedef std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>> FunctionSignatureParts;
+	using FunctionSignatureParts = std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>>;
 
 	// Function and member function signature object.
 	class FunctionSignature
@@ -93,10 +93,10 @@ namespace Jinx
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
 	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	typedef std::list<FunctionSignature, Allocator<FunctionSignature>> FunctionList;
-	typedef std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>> FunctionPtrList;
+	using FunctionList = std::list<FunctionSignature, Allocator<FunctionSignature>>;
+	using  FunctionPtrList = std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>>;
 
-};
+} // namespace Jinx::Impl
 
 #endif // JX_FUNCTION_SIGNATURE_H__
 

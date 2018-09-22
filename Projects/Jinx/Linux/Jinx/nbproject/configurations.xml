@@ -34,8 +34,6 @@
       <itemPath>../../../../Source/JxLogging.h</itemPath>
       <itemPath>../../../../Source/JxMemory.cpp</itemPath>
       <itemPath>../../../../Source/JxMemory.h</itemPath>
-      <itemPath>../../../../Source/JxMutex.cpp</itemPath>
-      <itemPath>../../../../Source/JxMutex.h</itemPath>
       <itemPath>../../../../Source/JxParser.cpp</itemPath>
       <itemPath>../../../../Source/JxParser.h</itemPath>
       <itemPath>../../../../Source/JxPropertyName.cpp</itemPath>
@@ -148,10 +146,6 @@
       <item path="../../../../Source/JxMemory.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../../../Source/JxMemory.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../../../Source/JxMutex.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../../../Source/JxMutex.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../../Source/JxParser.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -297,10 +291,6 @@
       <item path="../../../../Source/JxMemory.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../../../Source/JxMemory.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../../../Source/JxMutex.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../../../Source/JxMutex.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../../../Source/JxParser.cpp" ex="false" tool="1" flavor2="0">
       </item>

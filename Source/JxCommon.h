@@ -9,12 +9,11 @@ Copyright (c) 2016 James Boer
 #ifndef JX_COMMON_H__
 #define JX_COMMON_H__
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
-	typedef uint64_t RuntimeID;
+	using RuntimeID = uint64_t;
 	const RuntimeID InvalidID = 0;
-
 	const uint32_t LogTabWidth = 4;
 
 	// All script opcodes
@@ -110,7 +109,7 @@ namespace Jinx
 		LessThan,
 		LessThanEquals,
 		GreaterThan,
-		GreaterThanEquals, 
+		GreaterThanEquals,
 		And,				// Keyword begin.  
 		As,
 		Begin,
@@ -170,7 +169,7 @@ namespace Jinx
 		Private,
 		Public,
 	};
-	
+
 	constexpr uint32_t MakeFourCC(char ch0, char ch1, char ch2, char ch3)
 	{
 		return ((uint32_t)(uint8_t)(ch0) | ((uint32_t)(uint8_t)(ch1) << 8 |
@@ -252,9 +251,10 @@ namespace Jinx
 
 	// Forward declarations
 	class Runtime;
-	typedef std::shared_ptr<Runtime> RuntimeIPtr;
-	typedef std::weak_ptr<Runtime> RuntimeWPtr;
-};
+	using RuntimeIPtr = std::shared_ptr<Runtime>;
+	using RuntimeWPtr = std::weak_ptr<Runtime>;
+
+} // namespace Jinx::Impl
 
 
 

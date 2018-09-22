@@ -10,17 +10,17 @@ Copyright (c) 2016 James Boer
 #define JX_LOGGING_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	void InitializeLogging(const GlobalParams & params);
-	
+
 	bool IsLogSymbolsEnabled();
 	bool IsLogBytecodeEnabled();
 
 	void LogWrite(const char * format, ...);
 	void LogWriteLine(const char * format, ...);
-	
-};
+
+} // namespace Jinx::Impl
 
 #endif // JX_LOGGING_H__

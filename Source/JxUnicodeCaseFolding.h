@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_UNICODE_CASE_FOLDING_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	struct CaseFoldingData
@@ -21,6 +21,7 @@ namespace Jinx
 	};
 
 	bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2);
-};
+
+} // namespace Jinx::Impl
 
 #endif // JX_UNICODE_CASE_FOLDING_H__

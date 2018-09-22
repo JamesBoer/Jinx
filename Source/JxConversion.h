@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_CONVERSION_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	// Convert value type to byte and back
@@ -57,7 +57,8 @@ namespace Jinx
 
 	// GUID conversions
 	String GuidToString(const Guid & value);
-};
+
+} // namespace Jinx::Impl
 
 #endif // JX_CONVERSION_H__
 

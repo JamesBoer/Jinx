@@ -10,8 +10,9 @@ Copyright (c) 2016 James Boer
 #define JX_LIBRARY_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
+
 	class Library : public ILibrary
 	{
 	public:
@@ -25,7 +26,7 @@ namespace Jinx
 
 		// Internal name getter
 		const String & GetName() const { return m_name; }
-		
+
 		// Internal property functions
 		bool RegisterPropertyName(const PropertyName & propertyName, bool checkForDuplicates);
 		bool PropertyNameExists(const String & name) const;
@@ -39,22 +40,22 @@ namespace Jinx
 		const FunctionPtrList Functions() const;
 
 	private:
-		
+
 		// Private internal functions
 		FunctionSignature CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const;
 		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
-		typedef std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>> PropertyNameTable;
+		using PropertyNameTable = std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>>;
 
 		// Library name
 		String m_name;
 
 		// Track function definitions
-		mutable Mutex m_functionMutex;
+		mutable std::mutex m_functionMutex;
 		FunctionList m_functionList;
 
 		// Properties
-		mutable Mutex m_propertyMutex;
+		mutable std::mutex m_propertyMutex;
 		PropertyNameTable m_propertyNameTable;
 		size_t m_maxPropertyParts;
 
@@ -62,7 +63,8 @@ namespace Jinx
 		RuntimeWPtr m_runtime;
 	};
 
-	typedef std::shared_ptr<Library> LibraryIPtr;
-};
+	using LibraryIPtr = std::shared_ptr<Library>;
+
+} // namespace Jinx::Impl
 
 #endif // JX_LIBRARY_H__

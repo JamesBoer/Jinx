@@ -7,159 +7,159 @@ Copyright (c) 2016 James Boer
 
 #include "JxInternal.h"
 
-using namespace Jinx;
-
-
-Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
-	m_runtime(runtime),
-	m_userContext(userContext),
-	m_finished(false),
-	m_error(false),
-	m_bytecodeStart(0)
+namespace Jinx::Impl
 {
-	m_execution.reserve(6);
-	m_execution.push_back(ExecutionFrame(bytecode, "root"));
-	m_stack.reserve(32);
 
-	// Assume default unnamed library unless explicitly overridden
-	m_library = m_runtime->GetLibraryInternal("");
-
-	// Read bytecode header
-	BytecodeHeader header;
-	auto & reader = m_execution.back().reader;
-	reader.Read(&header, sizeof(header));
-	if (header.signature != BytecodeSignature || header.version != BytecodeVersion || header.dataSize == 0)
+	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
+		m_runtime(runtime),
+		m_userContext(userContext),
+		m_finished(false),
+		m_error(false),
+		m_bytecodeStart(0)
 	{
-		Error("Invalid bytecode");
+		m_execution.reserve(6);
+		m_execution.push_back(ExecutionFrame(bytecode, "root"));
+		m_stack.reserve(32);
+
+		// Assume default unnamed library unless explicitly overridden
+		m_library = m_runtime->GetLibraryInternal("");
+
+		// Read bytecode header
+		BytecodeHeader header;
+		auto & reader = m_execution.back().reader;
+		reader.Read(&header, sizeof(header));
+		if (header.signature != BytecodeSignature || header.version != BytecodeVersion || header.dataSize == 0)
+		{
+			Error("Invalid bytecode");
+		}
+
+		// Read the script name
+		reader.Read(&m_name);
+		if (m_name.empty())
+			m_name = "(unnamed)";
+
+		// Mark the starting position of the executable bytecode
+		m_bytecodeStart = reader.Tell();
 	}
 
-	// Read the script name
-	reader.Read(&m_name);
-	if (m_name.empty())
-		m_name = "(unnamed)";
-
-	// Mark the starting position of the executable bytecode
-	m_bytecodeStart = reader.Tell();
-}
-
-Script::~Script()
-{
-	// Clear potential circular references by explicitly destroying collection values
-	for (auto & s : m_stack)
+	inline_t Script::~Script()
 	{
-		if (s.IsCollection())
+		// Clear potential circular references by explicitly destroying collection values
+		for (auto & s : m_stack)
 		{
-			auto c = s.GetCollection();
-			for (auto & e : *c)
+			if (s.IsCollection())
 			{
-				e.second.SetNull();
+				auto c = s.GetCollection();
+				for (auto & e : *c)
+				{
+					e.second.SetNull();
+				}
 			}
 		}
 	}
-}
 
-void Script::Error(const char * message)
-{
-	// Set flags to indicate a fatal runtime error
-	m_error = true;
-	m_finished = true;
-
-	// Try to determine line number in current script execution context
-	uint32_t lineNumber = 0;
-	auto & reader = m_execution.back().reader;
-	auto bytecodePos = reader.Tell();
-	reader.Seek(0);
-	BytecodeHeader bytecodeHeader;
-	reader.Read(&bytecodeHeader, sizeof(bytecodeHeader));
-	if (reader.Size() > sizeof(bytecodeHeader) + bytecodeHeader.dataSize)
+	inline_t void Script::Error(const char * message)
 	{
-		// Validate debug info
-		reader.Seek(sizeof(bytecodeHeader) + bytecodeHeader.dataSize);
-		if (reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(DebugHeader))
+		// Set flags to indicate a fatal runtime error
+		m_error = true;
+		m_finished = true;
+
+		// Try to determine line number in current script execution context
+		uint32_t lineNumber = 0;
+		auto & reader = m_execution.back().reader;
+		auto bytecodePos = reader.Tell();
+		reader.Seek(0);
+		BytecodeHeader bytecodeHeader;
+		reader.Read(&bytecodeHeader, sizeof(bytecodeHeader));
+		if (reader.Size() > sizeof(bytecodeHeader) + bytecodeHeader.dataSize)
 		{
-			LogWriteLine("Potentially corrupt bytecode debug data");
-			return;
-		}
-		DebugHeader debugHeader;
-		reader.Read(&debugHeader, sizeof(debugHeader));
-		if (debugHeader.signature != DebugSignature || 
-			reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(debugHeader) + debugHeader.dataSize)
-		{
-			LogWriteLine("Potentially corrupt bytecode debug data");
-			return;
+			// Validate debug info
+			reader.Seek(sizeof(bytecodeHeader) + bytecodeHeader.dataSize);
+			if (reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(DebugHeader))
+			{
+				LogWriteLine("Potentially corrupt bytecode debug data");
+				return;
+			}
+			DebugHeader debugHeader;
+			reader.Read(&debugHeader, sizeof(debugHeader));
+			if (debugHeader.signature != DebugSignature ||
+				reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(debugHeader) + debugHeader.dataSize)
+			{
+				LogWriteLine("Potentially corrupt bytecode debug data");
+				return;
+			}
+
+			// Read bytecode to line number table
+			for (uint32_t i = 0; i < debugHeader.lineEntryCount; ++i)
+			{
+				DebugLineEntry lineEntry;
+				reader.Read(&lineEntry, sizeof(lineEntry));
+				if (lineEntry.opcodePosition > bytecodePos)
+					break;
+				lineNumber = lineEntry.lineNumber;
+			}
 		}
 
-		// Read bytecode to line number table
-		for (uint32_t i = 0; i < debugHeader.lineEntryCount; ++i)
-		{
-			DebugLineEntry lineEntry;
-			reader.Read(&lineEntry, sizeof(lineEntry));
-			if (lineEntry.opcodePosition > bytecodePos)
-				break;
-			lineNumber = lineEntry.lineNumber;
-		}
+		// If we have a line number, use it.  Otherwise, just report what we know.
+		if (lineNumber)
+			LogWriteLine("Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
+		else
+			LogWriteLine("Runtime error in script '%s': %s", m_name.c_str(), message);
 	}
 
-	// If we have a line number, use it.  Otherwise, just report what we know.
-	if (lineNumber)
-		LogWriteLine("Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
-	else
-		LogWriteLine("Runtime error in script '%s': %s", m_name.c_str(), message);
-}
-
-bool Script::Execute()
-{
-	// Don't continue executing if we've encountered an error
-	if (m_error)
-		return false;
-
-	// Make sure we have bytecode
-	if (!m_execution.back().bytecode)
+	inline_t bool Script::Execute()
 	{
-		Error("No bytecode to execute");
-		return false;
-	}
+		// Don't continue executing if we've encountered an error
+		if (m_error)
+			return false;
 
-	// Auto reset if finished
-	if (m_finished)
-	{
-		assert(m_execution.size() == 1);
-		m_finished = false;
-		m_execution.back().reader.Seek(m_bytecodeStart);
-	}
-
-	// Mark script execution start time
-	auto begin = std::chrono::high_resolution_clock::now();
-
-	uint32_t tickInstCount = 0;
-	uint32_t maxInstCount = MaxInstructions();
-
-	Opcode opcode;
-	do
-	{
-		// Read opcode instruction
-		uint8_t opByte;
-		m_execution.back().reader.Read(&opByte);
-		if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
+		// Make sure we have bytecode
+		if (!m_execution.back().bytecode)
 		{
-			Error("Invalid operation in bytecode");
+			Error("No bytecode to execute");
 			return false;
 		}
-		opcode = static_cast<Opcode>(opByte);
-		++tickInstCount;
-		if (tickInstCount >= maxInstCount)
+
+		// Auto reset if finished
+		if (m_finished)
 		{
-			if (ErrorOnMaxInstrunction())
-			{
-				Error("Exceeded max instruction count");
-				return false;
-			}
-			return true;
+			assert(m_execution.size() == 1);
+			m_finished = false;
+			m_execution.back().reader.Seek(m_bytecodeStart);
 		}
 
-		// Execute the current opcode
-		switch (opcode)
+		// Mark script execution start time
+		auto begin = std::chrono::high_resolution_clock::now();
+
+		uint32_t tickInstCount = 0;
+		uint32_t maxInstCount = MaxInstructions();
+
+		Opcode opcode;
+		do
 		{
+			// Read opcode instruction
+			uint8_t opByte;
+			m_execution.back().reader.Read(&opByte);
+			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
+			{
+				Error("Invalid operation in bytecode");
+				return false;
+			}
+			opcode = static_cast<Opcode>(opByte);
+			++tickInstCount;
+			if (tickInstCount >= maxInstCount)
+			{
+				if (ErrorOnMaxInstrunction())
+				{
+					Error("Exceeded max instruction count");
+					return false;
+				}
+				return true;
+			}
+
+			// Execute the current opcode
+			switch (opcode)
+			{
 			case Opcode::Add:
 			{
 				auto op2 = Pop();
@@ -219,7 +219,7 @@ bool Script::Execute()
 						params.push_back(param);
 					}
 					for (size_t i = 0; i < numParams; ++i)
-						m_stack.pop_back();			
+						m_stack.pop_back();
 					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
 					Push(retVal);
 				}
@@ -358,7 +358,7 @@ bool Script::Execute()
 			break;
 			case Opcode::Function:
 			{
-				FunctionSignature signature;	
+				FunctionSignature signature;
 				signature.Read(m_execution.back().reader);
 				if (signature.GetVisibility() != VisibilityType::Local)
 					m_library->RegisterFunctionSignature(signature);
@@ -915,125 +915,126 @@ bool Script::Execute()
 				return false;
 			}
 			break;
-		}
+			}
 
-	} 
-	while (opcode != Opcode::Exit && opcode != Opcode::Wait);
+		} while (opcode != Opcode::Exit && opcode != Opcode::Wait);
 
-	// Track accumulated script execution time
-	auto end = std::chrono::high_resolution_clock::now();
-	uint64_t executionTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
-	m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
+		// Track accumulated script execution time
+		auto end = std::chrono::high_resolution_clock::now();
+		uint64_t executionTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+		m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
 
-	return true;
-}
-
-std::vector<String, Allocator<String>> Script::GetCallStack() const
-{
-	std::vector<String, Allocator<String>> strings;
-	for (const auto & frame : m_execution)
-		strings.push_back(frame.name);
-	return strings;
-}
-
-Variant Script::GetVariable(const String & name) const
-{
-	const auto & foldedName = FoldCase(name);
-	RuntimeID id = GetVariableId(foldedName.c_str(), foldedName.size(), 1);
-	return GetVariable(id);
-}
-
-Variant Script::GetVariable(RuntimeID id) const
-{
-	auto & names = m_execution.back().ids;
-	auto itr = names.find(id);
-	if (itr != names.end())
-	{
-		auto index = itr->second;
-		if (index >= m_stack.size())
-		{
-			LogWriteLine("Attempted to access stack at invalid index");
-			return Variant();
-		}
-		return m_stack[itr->second];
+		return true;
 	}
-	return Variant();
-}
 
-bool Script::IsFinished() const
-{
-	return m_finished || m_error;
-}
-
-Variant Script::Pop()
-{
-	if (m_stack.empty())
+	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const
 	{
-		Error("Stack underflow");
+		std::vector<String, Allocator<String>> strings;
+		for (const auto & frame : m_execution)
+			strings.push_back(frame.name);
+		return strings;
+	}
+
+	inline_t Variant Script::GetVariable(const String & name) const
+	{
+		const auto & foldedName = FoldCase(name);
+		RuntimeID id = GetVariableId(foldedName.c_str(), foldedName.size(), 1);
+		return GetVariable(id);
+	}
+
+	inline_t Variant Script::GetVariable(RuntimeID id) const
+	{
+		auto & names = m_execution.back().ids;
+		auto itr = names.find(id);
+		if (itr != names.end())
+		{
+			auto index = itr->second;
+			if (index >= m_stack.size())
+			{
+				LogWriteLine("Attempted to access stack at invalid index");
+				return Variant();
+			}
+			return m_stack[itr->second];
+		}
 		return Variant();
 	}
-	auto var = m_stack.back();
-	m_stack.pop_back();
-	return var;
-}
 
-void Script::Push(const Variant & value)
-{
-	m_stack.push_back(value);
-}
-
-bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
-{
-	if (library == nullptr)
-		library = m_library;
-	auto libraryInt = std::static_pointer_cast<Library>(library);
-	auto signature = libraryInt->FindFunctionSignature(visibility, name);
-	if (!signature.IsValid())
+	inline_t bool Script::IsFinished() const
 	{
-		Error("Script::RegisterFunction() error.  Could not find matching library function to override.");
-		return false;
-	}
-	auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
-	m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
-	return true;
-}
-
-void Script::SetVariable(const String & name, const Variant & value)
-{
-	const auto & foldedName = FoldCase(name);
-	RuntimeID id = GetVariableId(foldedName.c_str(), foldedName.size(), 1);
-	SetVariable(id, value);
-}
-
-void Script::SetVariable(RuntimeID id, const Variant & value)
-{
-	// Search the current frame for the variable
-	auto & names = m_execution.back().ids;
-	auto itr = names.find(id);
-	if (itr != names.end())
-	{
-		auto index = itr->second;
-		if (index >= m_stack.size())
-		{
-			itr->second = m_stack.size();
-			m_stack.push_back(value);
-			return;
-		}
-		else
-		{
-			m_stack[itr->second] = value;
-			return;
-		}
+		return m_finished || m_error;
 	}
 
-	// If we don't find the name, create a new variable on the top of the stack
-	names.insert(std::make_pair(id, m_stack.size()));
-	m_stack.push_back(value);
-}
+	inline_t Variant Script::Pop()
+	{
+		if (m_stack.empty())
+		{
+			Error("Stack underflow");
+			return Variant();
+		}
+		auto var = m_stack.back();
+		m_stack.pop_back();
+		return var;
+	}
 
-void Script::SetVariableAtIndex(RuntimeID id, size_t index)
-{
-	assert(index < m_stack.size());
-	m_execution.back().ids.insert(std::make_pair(id, index));
-}
+	inline_t void Script::Push(const Variant & value)
+	{
+		m_stack.push_back(value);
+	}
+
+	inline_t bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	{
+		if (library == nullptr)
+			library = m_library;
+		auto libraryInt = std::static_pointer_cast<Library>(library);
+		auto signature = libraryInt->FindFunctionSignature(visibility, name);
+		if (!signature.IsValid())
+		{
+			Error("Script::RegisterFunction() error.  Could not find matching library function to override.");
+			return false;
+		}
+		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
+		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
+		return true;
+	}
+
+	inline_t void Script::SetVariable(const String & name, const Variant & value)
+	{
+		const auto & foldedName = FoldCase(name);
+		RuntimeID id = GetVariableId(foldedName.c_str(), foldedName.size(), 1);
+		SetVariable(id, value);
+	}
+
+	inline_t void Script::SetVariable(RuntimeID id, const Variant & value)
+	{
+		// Search the current frame for the variable
+		auto & names = m_execution.back().ids;
+		auto itr = names.find(id);
+		if (itr != names.end())
+		{
+			auto index = itr->second;
+			if (index >= m_stack.size())
+			{
+				itr->second = m_stack.size();
+				m_stack.push_back(value);
+				return;
+			}
+			else
+			{
+				m_stack[itr->second] = value;
+				return;
+			}
+		}
+
+		// If we don't find the name, create a new variable on the top of the stack
+		names.insert(std::make_pair(id, m_stack.size()));
+		m_stack.push_back(value);
+	}
+
+	inline_t void Script::SetVariableAtIndex(RuntimeID id, size_t index)
+	{
+		assert(index < m_stack.size());
+		m_execution.back().ids.insert(std::make_pair(id, index));
+	}
+
+} // namespace Jinx::Impl
 

@@ -103,13 +103,13 @@ namespace Jinx
 	class Allocator
 	{
 	public:
-		typedef size_t size_type;
-		typedef ptrdiff_t difference_type;
-		typedef T* pointer;
-		typedef const T* const_pointer;
-		typedef T& reference;
-		typedef const T& const_reference;
-		typedef T value_type;
+		using size_type = size_t;
+		using difference_type = ptrdiff_t;
+		using pointer = T*;
+		using const_pointer = const T*;
+		using reference = T&;
+		using const_reference = const T&;
+		using value_type = T;
 
 		Allocator() throw() {};
 		Allocator(const Allocator &) throw() { };
@@ -123,14 +123,14 @@ namespace Jinx
 		~Allocator() {}
 
 		template <typename U>
-		struct rebind { typedef Allocator<U> other; };
+		struct rebind { using other = Allocator<U>; };
 
 		pointer address(reference value) const { return &value; }
 		const_pointer address(const_reference value) const { return &value; }
 
-		pointer allocate(size_type n) { return static_cast<pointer> (Jinx::JinxAlloc(n * sizeof(value_type))); }
-		pointer allocate(size_type n, const void *) { return static_cast<pointer> (Jinx::JinxAlloc(n * sizeof(value_type))); }
-		void deallocate(void* ptr, size_type) { Jinx::JinxFree(static_cast<T*> (ptr)); }
+		pointer allocate(size_type n) { return static_cast<pointer> (JinxAlloc(n * sizeof(value_type))); }
+		pointer allocate(size_type n, const void *) { return static_cast<pointer> (JinxAlloc(n * sizeof(value_type))); }
+		void deallocate(void* ptr, size_type) { JinxFree(static_cast<T*> (ptr)); }
 
 		template<typename U, typename... Args>
 		void construct(U* ptr, Args&&  ... args) { ::new ((void*)(ptr)) U(std::forward<Args>(args)...); }
@@ -188,13 +188,13 @@ namespace Jinx
 	void LogAllocations();
 
 	// Define a custom UTF-8 string using internal allocator
-	typedef std::basic_string <char, std::char_traits<char>, Allocator<char>> String;
+	using String = std::basic_string <char, std::char_traits<char>, Allocator<char>>;
 
 	// Define a custom UTF-16 string using internal allocator
-	typedef std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>> StringU16;
+	using StringU16 = std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>>;
 
 	// Define a custom wide character string using internal allocator
-	typedef std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>> WString;
+	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
 
 };
 

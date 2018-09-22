@@ -9,12 +9,11 @@ Copyright (c) 2016 James Boer
 #ifndef JX_LIB_CORE_H__
 #define JX_LIB_CORE_H__
 
-namespace Jinx
+namespace Jinx::Impl
 {
-
 	void RegisterLibCore(RuntimePtr runtime);
 
-};
+} // namespace Jinx::Impl
 
 
 

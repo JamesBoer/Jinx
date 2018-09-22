@@ -7,52 +7,53 @@ Copyright (c) 2016 James Boer
 
 #include "JxInternal.h"
 
-using namespace Jinx;
-
-static void DebugWriteInternal(const Variant & var, bool writeNewLine)
+namespace Jinx::Impl
 {
-	if (var.IsCollection())
+
+	inline_t void DebugWriteInternal(const Variant & var, bool writeNewLine)
 	{
-		const auto & coll = *var.GetCollection();
-		for (const auto & v : coll)
+		if (var.IsCollection())
 		{
-			DebugWriteInternal(v.second, writeNewLine);
+			const auto & coll = *var.GetCollection();
+			for (const auto & v : coll)
+			{
+				DebugWriteInternal(v.second, writeNewLine);
+			}
+		}
+		else
+		{
+			auto str = var.GetString();
+			auto cstr = str.c_str();
+			if (cstr)
+				LogWrite(cstr);
+			if (writeNewLine)
+				LogWrite("\n");
 		}
 	}
-	else
+
+	inline_t Variant Write(ScriptPtr, Parameters params)
 	{
-		auto str = var.GetString();
-		auto cstr = str.c_str();
-		if (cstr)
-			LogWrite(cstr);
-		if (writeNewLine)
+		if (params.empty())
+			return nullptr;
+		DebugWriteInternal(params[0], false);
+		return nullptr;
+	}
+
+	inline_t Variant WriteLine(ScriptPtr, Parameters params)
+	{
+		if (params.empty())
+		{
 			LogWrite("\n");
-	}
-}
-
-static Variant Write(ScriptPtr, Parameters params)
-{
-	if (params.empty())
-		return nullptr;
-	DebugWriteInternal(params[0], false);
-	return nullptr;
-}
-
-static Variant WriteLine(ScriptPtr, Parameters params)
-{
-	if (params.empty())
-	{
-		LogWrite("\n");
+			return nullptr;
+		}
+		DebugWriteInternal(params[0], true);
 		return nullptr;
 	}
-	DebugWriteInternal(params[0], true);
-	return nullptr;
-}
 
-static Variant GetSize(ScriptPtr, Parameters params)
-{
-	switch (params[0].GetType())
+	inline_t Variant GetSize(ScriptPtr, Parameters params)
 	{
+		switch (params[0].GetType())
+		{
 		case ValueType::Collection:
 			return static_cast<int64_t>(params[0].GetCollection()->size());
 		case ValueType::String:
@@ -61,14 +62,14 @@ static Variant GetSize(ScriptPtr, Parameters params)
 			return static_cast<int64_t>(params[0].GetBuffer()->Size());
 		default:
 			break;
+		}
+		return nullptr;
 	}
-	return nullptr;
-}
 
-static Variant IsEmpty(ScriptPtr, Parameters params)
-{
-	switch (params[0].GetType())
+	inline_t Variant IsEmpty(ScriptPtr, Parameters params)
 	{
+		switch (params[0].GetType())
+		{
 		case ValueType::Collection:
 			return params[0].GetCollection()->empty();
 		case ValueType::String:
@@ -77,55 +78,57 @@ static Variant IsEmpty(ScriptPtr, Parameters params)
 			return params[0].GetBuffer()->Size() == 0;
 		default:
 			break;
-	}
-	return nullptr;
-}
-
-static Variant GetKey(ScriptPtr, Parameters params)
-{
-	if (!params[0].IsCollectionItr())
-	{
-		LogWriteLine("'get key' called with non-iterator param");
+		}
 		return nullptr;
 	}
-	return params[0].GetCollectionItr().first->first;
-}
 
-static Variant GetValue(ScriptPtr, Parameters params)
-{
-	if (!params[0].IsCollectionItr())
+	inline_t Variant GetKey(ScriptPtr, Parameters params)
 	{
-		LogWriteLine("'get value' called with non-iterator param");
-		return nullptr;
+		if (!params[0].IsCollectionItr())
+		{
+			LogWriteLine("'get key' called with non-iterator param");
+			return nullptr;
+		}
+		return params[0].GetCollectionItr().first->first;
 	}
-	return params[0].GetCollectionItr().first->second;
-}
 
-static Variant GetCallStack(ScriptPtr script, Parameters params)
-{
-	ScriptIPtr s = std::static_pointer_cast<Script>(script);
-	auto functions = s->GetCallStack();
-	auto var = CreateCollection();
-	int64_t index = 1;
-	for (const auto & fnName : functions)
-		var->insert(std::make_pair(index++, fnName));
-	return var;
-}
+	inline_t Variant GetValue(ScriptPtr, Parameters params)
+	{
+		if (!params[0].IsCollectionItr())
+		{
+			LogWriteLine("'get value' called with non-iterator param");
+			return nullptr;
+		}
+		return params[0].GetCollectionItr().first->second;
+	}
 
-void Jinx::RegisterLibCore(RuntimePtr runtime)
-{
-	auto library = runtime->GetLibrary("core");
+	inline_t Variant GetCallStack(ScriptPtr script, Parameters params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		auto functions = s->GetCallStack();
+		auto var = CreateCollection();
+		int64_t index = 1;
+		for (const auto & fnName : functions)
+			var->insert(std::make_pair(index++, fnName));
+		return var;
+	}
 
-	// Register core functions
-	library->RegisterFunction(Visibility::Public, { "write", "{}" }, Write);
-	library->RegisterFunction(Visibility::Public, { "write", "line", "{}" }, WriteLine);
-	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "size" }, GetSize);
-	library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
-	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
-	library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
-	library->RegisterFunction(Visibility::Public, { "(get)", "call", "stack" }, GetCallStack);
+	inline_t void RegisterLibCore(RuntimePtr runtime)
+	{
+		auto library = runtime->GetLibrary("core");
 
-	// Register core properties
-	library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
-}
+		// Register core functions
+		library->RegisterFunction(Visibility::Public, { "write", "{}" }, Write);
+		library->RegisterFunction(Visibility::Public, { "write", "line", "{}" }, WriteLine);
+		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "size" }, GetSize);
+		library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
+		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
+		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
+		library->RegisterFunction(Visibility::Public, { "(get)", "call", "stack" }, GetCallStack);
+
+		// Register core properties
+		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
+	}
+
+} // namespace Jinx::Impl
 

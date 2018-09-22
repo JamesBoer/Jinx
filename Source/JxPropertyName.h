@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_PROPERTY_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class PropertyName
@@ -41,8 +41,7 @@ namespace Jinx
 		size_t m_partCount;
 	};
 
-
-};
+} // namespace Jinx::Impl
 
 #endif // JX_PROPERTY_H__
 

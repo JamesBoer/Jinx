@@ -6,17 +6,7 @@ Copyright (c) 2016 James Boer
 */
 
 #pragma once
-#ifndef JX_HASH_H__
-#define JX_HASH_H__
 
+#include "../../../Include/Jinx.hpp"
 
-namespace Jinx::Impl
-{
-
-	uint64_t GetHash(const void * data, size_t len);
-
-} // namespace Jinx::Impl
-
-#endif // JX_HASH_H__
-
-
+bool TestExecuteScript(Jinx::RuntimePtr runtime);

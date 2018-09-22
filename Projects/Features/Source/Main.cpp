@@ -10,9 +10,6 @@ Copyright (c) 2016 James Boer
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#ifdef _WINDOWS
-#include <conio.h>
-#endif
 
 #include "../../../Source/Jinx.h"
 
@@ -57,15 +54,6 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	return script;
 }
 
-class Test
-{
-public:
-	Test(int, float, std::string)
-	{
-
-	}
-};
-
 int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
@@ -96,9 +84,6 @@ int main(int argc, char ** argv)
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 12345);
-
-		auto t = JinxNew(Test, 123, 456.789f, "test");
-		JinxFree(t);
 	}
 
 	Jinx::ShutDown();
@@ -106,11 +91,6 @@ int main(int argc, char ** argv)
 	auto stats = GetMemoryStats();
 	REQUIRE(stats.currentAllocatedMemory == 0);
 	REQUIRE(stats.currentUsedMemory == 0);
-
-#ifdef _WINDOWS
-	printf("Press any key to continue...");
-	_getch();
-#endif
     
     return 0;
 }

@@ -9,7 +9,7 @@ Copyright (c) 2016 James Boer
 #ifndef JX_VARIABLE_STACK_FRAME_H__
 #define JX_VARIABLE_STACK_FRAME_H__
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class VariableStackFrame
@@ -19,7 +19,7 @@ namespace Jinx
 
 		// Retrieve the max variable parts for the current frame
 		size_t GetMaxVariableParts() const;
-		
+
 		// Set max variable parts for the current frame
 		void SetMaxVariableParts(size_t varParts);
 
@@ -51,19 +51,19 @@ namespace Jinx
 
 		void CalculateMaxVariableParts();
 
-		typedef std::set<String, std::less<String>, Allocator<String>> VariableSet;
-		typedef std::vector<VariableSet, Allocator<VariableSet>> VariableStack;
+		using VariableSet = std::set<String, std::less<String>, Allocator<String>>;
+		using VariableStack = std::vector<VariableSet, Allocator<VariableSet>>;
 		struct FrameData
 		{
 			FrameData() : maxVariableParts(0) {}
 			VariableStack stack;
 			size_t maxVariableParts;
 		};
-		typedef std::vector<FrameData, Allocator<FrameData>> VariableFrames;
+		using VariableFrames = std::vector<FrameData, Allocator<FrameData>>;
 		VariableFrames m_frames;
 		String m_errorMessage;
 	};
 
-};
+} // namespace Jinx::Impl
 
 #endif // JX_VARIABLE_STACK_FRAME_H__

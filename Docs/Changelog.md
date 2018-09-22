@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.17.0] - 2018-09-22
+
+- Jinx is now available as an optional single-header library
+- Updated tests and documentation
+
 ## [0.16.1] - 2018-08-11
 
 - Keywords are now case-insensitive

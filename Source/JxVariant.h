@@ -25,7 +25,7 @@ namespace Jinx
 		virtual ~IUserObject() {};
 	};
 
-	typedef std::shared_ptr<IUserObject> UserObjectPtr;
+	using UserObjectPtr = std::shared_ptr<IUserObject>;
 
 	/// ValueType represents the type of value contained in a Variant object
 	enum class ValueType

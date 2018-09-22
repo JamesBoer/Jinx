@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_FUNCTION_DEFINITION_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class FunctionDefinition
@@ -46,9 +46,9 @@ namespace Jinx
 		FunctionCallback m_callback;
 	};
 	
-	typedef std::shared_ptr<FunctionDefinition> FunctionDefinitionPtr;
+	using FunctionDefinitionPtr = std::shared_ptr<FunctionDefinition>;
 
-};
+} // Jinx::Impl
 
 #endif // JX_FUNCTION_DEFINITION_H__
 

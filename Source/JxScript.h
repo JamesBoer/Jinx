@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_SCRIPT_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class Script : public IScript, public std::enable_shared_from_this<Script>
@@ -43,9 +43,9 @@ namespace Jinx
 		void SetVariable(RuntimeID id, const Variant & value);
 
 	private:
-		typedef std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>> IdIndexMap;
-		typedef std::vector<size_t, Allocator<size_t>> ScopeStack;
-		typedef std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>> FunctionMap;
+		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
+		using ScopeStack = std::vector<size_t, Allocator<size_t>>;
+		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
@@ -110,7 +110,8 @@ namespace Jinx
 		String m_name;
 	};
 
-	typedef std::shared_ptr<Script> ScriptIPtr;
-};
+	using ScriptIPtr = std::shared_ptr<Script>;
+
+} // namespace Jinx::Impl
 
 #endif // JX_SCRIPT_H__
