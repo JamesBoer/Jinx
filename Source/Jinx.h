@@ -84,7 +84,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 17;
+	const uint32_t MinorVersion = 18;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;

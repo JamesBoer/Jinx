@@ -47,6 +47,7 @@ namespace Jinx::Impl
 		LoopOver,
 		Mod,
 		Multiply,
+		Negate,
 		Not,
 		NotEquals,
 		Or,
