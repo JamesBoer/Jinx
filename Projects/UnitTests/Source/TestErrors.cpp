@@ -56,7 +56,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 	
-			set a to 3 + - 4
+			set a to 3 + * 4
 			
 			)";
 
@@ -69,7 +69,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 	
-			set a to (3 +) - 4
+			set a to (3 +) * 4
 			
 			)";
 

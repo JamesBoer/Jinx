@@ -74,16 +74,34 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 
-			Set a TO True
-			If a = TRUE
-				SET a To 12345
-			END
+				function {a} plus {b}
+					return a + b
+				end
+
+				function {a} times {b}
+					return a * b
+				end
+
+				set x to 3 plus 4 times 5
+				set y to 3 times 4 plus 5
+
+				function {x} squared
+					return x * x
+				end
+
+				function negative {x}
+					return -x
+				end
+
+				set z to negative 3 squared
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 12345);
+		REQUIRE(script->GetVariable("x") == 35);
+		REQUIRE(script->GetVariable("y") == 17);
+		REQUIRE(script->GetVariable("z") == 9);
 	}
 
 	Jinx::ShutDown();

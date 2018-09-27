@@ -59,6 +59,39 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("n").GetNumber() == Approx(6.206));
 	}
 
+	SECTION("Test unary negation operator")
+	{
+		const char * scriptText =
+			u8R"(
+
+				set a to -1
+				set b to - 2
+				set c to -(3)
+				set d to a - -b
+				set e to - a - -b
+				set f to a - -(b)
+				set g to - (a) - -b
+				set h to 123.456
+				set i to -h
+				set j to -(1 + 2)
+				set k to -a - -a	
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == -1);
+		REQUIRE(script->GetVariable("b") == -2);
+		REQUIRE(script->GetVariable("c") == -3);
+		REQUIRE(script->GetVariable("d") == -3);
+		REQUIRE(script->GetVariable("e") == -1);
+		REQUIRE(script->GetVariable("f") == -3);
+		REQUIRE(script->GetVariable("g") == -1);
+		REQUIRE(script->GetVariable("h").GetNumber() == Approx(123.456));
+		REQUIRE(script->GetVariable("i").GetNumber() == Approx(-123.456));
+		REQUIRE(script->GetVariable("j") == -3);
+		REQUIRE(script->GetVariable("k") == 0);
+	}
+
 	SECTION("Test mod operators with signs")
 	{
 		const char * scriptText =

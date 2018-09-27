@@ -581,6 +581,18 @@ namespace Jinx::Impl
 				Push(result);
 			}
 			break;
+			case Opcode::Negate:
+			{
+				auto op1 = Pop();
+				if (!op1.IsNumericType())
+				{
+					Error("Only numeric types can be negated");
+					return false;
+				}
+				auto result = op1 * -1;
+				Push(result);
+			}
+			break;
 			case Opcode::Not:
 			{
 				auto op1 = Pop();

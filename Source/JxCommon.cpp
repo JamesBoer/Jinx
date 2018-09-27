@@ -53,6 +53,7 @@ namespace Jinx
 				"loopover",
 				"mod",
 				"multiply",
+				"negate",
 				"not",
 				"notequals",
 				"or",

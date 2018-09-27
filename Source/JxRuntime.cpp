@@ -252,18 +252,18 @@ namespace Jinx::Impl
 				LogWrite("%s", GetValueTypeName(type));
 			}
 			break;
-			case Opcode::Library:
-			{
-				String name;
-				reader.Read(&name);
-				LogWrite("%s", name.c_str());
-			}
-			break;
 			case Opcode::Function:
 			{
 				FunctionSignature signature;
 				signature.Read(reader);
 				LogWrite("%s", parser.GetNameFromID(signature.GetId()).c_str());
+			}
+			break;
+			case Opcode::Library:
+			{
+				String name;
+				reader.Read(&name);
+				LogWrite("%s", name.c_str());
 			}
 			break;
 			case Opcode::Property:

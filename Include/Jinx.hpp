@@ -693,7 +693,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 17;
+	const uint32_t MinorVersion = 18;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -1164,6 +1164,7 @@ namespace Jinx::Impl
 		LoopOver,
 		Mod,
 		Multiply,
+		Negate,
 		Not,
 		NotEquals,
 		Or,
@@ -2830,6 +2831,7 @@ namespace Jinx
 				"loopover",
 				"mod",
 				"multiply",
+				"negate",
 				"not",
 				"notequals",
 				"or",
@@ -7121,6 +7123,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
+			bool negation = Accept(SymbolType::Minus);
 			FunctionMatch functionMatch = CheckFunctionCall(false, endSymbol);
 			if (functionMatch.signature)
 			{
@@ -7184,6 +7187,8 @@ namespace Jinx::Impl
 					Error("Expected operand");
 				}
 			}
+			if (negation)
+				EmitOpcode(Opcode::Negate);
 		}
 	}
 
@@ -7270,7 +7275,7 @@ namespace Jinx::Impl
 			}
 		}
 
-		// Emit negation opcode if required
+		// Emit not opcode if required
 		if (notOp)
 			EmitOpcode(Opcode::Not);
 
@@ -8392,18 +8397,18 @@ namespace Jinx::Impl
 				LogWrite("%s", GetValueTypeName(type));
 			}
 			break;
-			case Opcode::Library:
-			{
-				String name;
-				reader.Read(&name);
-				LogWrite("%s", name.c_str());
-			}
-			break;
 			case Opcode::Function:
 			{
 				FunctionSignature signature;
 				signature.Read(reader);
 				LogWrite("%s", parser.GetNameFromID(signature.GetId()).c_str());
+			}
+			break;
+			case Opcode::Library:
+			{
+				String name;
+				reader.Read(&name);
+				LogWrite("%s", name.c_str());
 			}
 			break;
 			case Opcode::Property:
@@ -9189,6 +9194,18 @@ namespace Jinx::Impl
 					Error("Invalid variable for mod");
 					return false;
 				}
+				Push(result);
+			}
+			break;
+			case Opcode::Negate:
+			{
+				auto op1 = Pop();
+				if (!op1.IsNumericType())
+				{
+					Error("Only numeric types can be negated");
+					return false;
+				}
+				auto result = op1 * -1;
 				Push(result);
 			}
 			break;

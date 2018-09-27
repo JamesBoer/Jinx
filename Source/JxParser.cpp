@@ -1565,6 +1565,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
+			bool negation = Accept(SymbolType::Minus);
 			FunctionMatch functionMatch = CheckFunctionCall(false, endSymbol);
 			if (functionMatch.signature)
 			{
@@ -1628,6 +1629,8 @@ namespace Jinx::Impl
 					Error("Expected operand");
 				}
 			}
+			if (negation)
+				EmitOpcode(Opcode::Negate);
 		}
 	}
 
@@ -1714,7 +1717,7 @@ namespace Jinx::Impl
 			}
 		}
 
-		// Emit negation opcode if required
+		// Emit not opcode if required
 		if (notOp)
 			EmitOpcode(Opcode::Not);
 
