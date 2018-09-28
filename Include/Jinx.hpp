@@ -22,27 +22,6 @@ Copyright (c) 2016 James Boer
 #ifndef JX_INTERNAL_H__
 #define JX_INTERNAL_H__
 
-#include <cassert>
-#include <cstdarg>
-#include <mutex>
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <list>
-#include <map>
-#include <set>
-#include <deque>
-#include <vector>
-#include <random>
-#include <cctype>
-#include <cinttypes>
-#include <string.h>
-#include <cstddef>
-#include <atomic>
-#include <locale>
-#include <codecvt>
-#include <climits>
-
 // begin --- Jinx.h --- 
 
 /*
@@ -90,6 +69,23 @@ The Jinx source code, documentation, and all related files are copyrighted (c) 2
 by James Boer, and distributed under the MIT license.
 */
 
+// Platform definitions
+#if defined(_WIN32) || defined(_WIN64)
+#define JINX_WINDOWS
+#pragma warning(push)
+#pragma warning(disable : 4530) // Silence warnings if exceptions are disabled
+#endif
+
+#if defined(__linux__) || defined(__linux)
+#define JINX_LINUX
+#endif
+
+#ifdef __APPLE__
+#ifdef __MACH__
+#define JINX_MACOS
+#endif
+#endif
+
 #include <memory>
 #include <functional>
 #include <vector>
@@ -98,6 +94,10 @@ by James Boer, and distributed under the MIT license.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+
+#ifdef JINX_WINDOWS
+#pragma warning(pop)
+#endif
 
 // begin --- JxMemory.h --- 
 
@@ -667,21 +667,6 @@ namespace Jinx
 
 
 
-// Platform definitions
-#if defined(_WIN32) || defined(_WIN64)
-#define JINX_WINDOWS
-#endif
-
-#if defined(__linux__) || defined(__linux)
-#define JINX_LINUX
-#endif
-
-#ifdef __APPLE__
-#ifdef __MACH__
-#define JINX_MACOS
-#endif
-#endif
-
 #ifndef inline_t
 #define inline_t
 #endif
@@ -1078,6 +1063,36 @@ namespace Jinx
 // end --- Jinx.h --- 
 
 
+
+#ifdef JINX_WINDOWS
+#pragma warning(push)
+#pragma warning(disable : 4530) // Silence warnings if exceptions are disabled
+#endif
+
+#include <cassert>
+#include <cstdarg>
+#include <mutex>
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <vector>
+#include <random>
+#include <cctype>
+#include <cinttypes>
+#include <string.h>
+#include <cstddef>
+#include <atomic>
+#include <locale>
+#include <codecvt>
+#include <climits>
+
+#ifdef JINX_WINDOWS
+#pragma warning(pop)
+#endif
 
 // begin --- JxLogging.h --- 
 
@@ -2745,6 +2760,8 @@ namespace Jinx
 	}
 
 } // namespace Jinx
+
+
 
 
 // end --- JxBuffer.cpp --- 

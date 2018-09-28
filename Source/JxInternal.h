@@ -9,6 +9,13 @@ Copyright (c) 2016 James Boer
 #ifndef JX_INTERNAL_H__
 #define JX_INTERNAL_H__
 
+#include "Jinx.h"
+
+#ifdef JINX_WINDOWS
+#pragma warning(push)
+#pragma warning(disable : 4530) // Silence warnings if exceptions are disabled
+#endif
+
 #include <cassert>
 #include <cstdarg>
 #include <mutex>
@@ -30,7 +37,10 @@ Copyright (c) 2016 James Boer
 #include <codecvt>
 #include <climits>
 
-#include "Jinx.h"
+#ifdef JINX_WINDOWS
+#pragma warning(pop)
+#endif
+
 #include "JxLogging.h"
 #include "JxCommon.h"
 #include "JxUnicode.h"
