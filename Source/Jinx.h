@@ -43,24 +43,11 @@ The Jinx source code, documentation, and all related files are copyrighted (c) 2
 by James Boer, and distributed under the MIT license.
 */
 
-#include <memory>
-#include <functional>
-#include <vector>
-#include <map>
-#include <string>
-#include <cstddef>
-#include <limits>
-#include <cstring>
-
-#include "JxMemory.h"
-#include "JxBuffer.h"
-#include "JxCollection.h"
-#include "JxGuid.h"
-#include "JxVariant.h"
-
 // Platform definitions
 #if defined(_WIN32) || defined(_WIN64)
 #define JINX_WINDOWS
+#pragma warning(push)
+#pragma warning(disable : 4530) // Silence warnings if exceptions are disabled
 #endif
 
 #if defined(__linux__) || defined(__linux)
@@ -72,6 +59,25 @@ by James Boer, and distributed under the MIT license.
 #define JINX_MACOS
 #endif
 #endif
+
+#include <memory>
+#include <functional>
+#include <vector>
+#include <map>
+#include <string>
+#include <cstddef>
+#include <limits>
+#include <cstring>
+
+#ifdef JINX_WINDOWS
+#pragma warning(pop)
+#endif
+
+#include "JxMemory.h"
+#include "JxBuffer.h"
+#include "JxCollection.h"
+#include "JxGuid.h"
+#include "JxVariant.h"
 
 #ifndef inline_t
 #define inline_t
