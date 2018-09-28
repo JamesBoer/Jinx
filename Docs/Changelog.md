@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 - Added unary negation operator (-)
 - Added new tests and updated documentation
+- Silenced MSVC warnings if C++ exceptions are disabled
 
 ## [0.17.0] - 2018-09-22
 
