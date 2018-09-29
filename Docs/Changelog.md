@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.18.1] - 2018-09-29
+
+- Minor improvement to parser error handling message
+- Added new parser error tests
+
 ## [0.18.0] - 2018-09-27
 
 - Added unary negation operator (-)

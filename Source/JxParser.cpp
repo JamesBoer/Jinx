@@ -1839,7 +1839,7 @@ namespace Jinx::Impl
 			auto propName = ParsePropertyName();
 			if (propName.IsReadOnly())
 			{
-				Error("Can't delete a readonly property");
+				Error("Can't erase a readonly property");
 				return;
 			}
 			if (Accept(SymbolType::SquareOpen))
@@ -1876,7 +1876,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
-			Error("Valid property or variable name expected after delete keyword");
+			Error("Valid property or variable name expected after erase keyword");
 			return;
 		}
 	}
