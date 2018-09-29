@@ -2248,15 +2248,14 @@ namespace Jinx::Impl
 			if (m_error)
 				return;
 			m_error = true;
-			if (m_currentSymbol == m_symbolList.end())
-			{
-				LogWriteLine("Error: Unexpected end of script");
-				return;
-			}
 			if (m_name.empty())
-				LogWrite("Error at line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+				LogWrite("Error at ");
 			else
-				LogWrite("Error in '%s' at line %i, column %i: ", m_name.c_str(), m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+				LogWrite("Error in %s at ", m_name.c_str());
+			if (m_currentSymbol == m_symbolList.end())
+				LogWrite("end of script: ");
+			else
+				LogWrite("line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			LogWriteLine(format, std::forward<Args>(args)...);
 		}
 
@@ -2760,8 +2759,6 @@ namespace Jinx
 	}
 
 } // namespace Jinx
-
-
 
 
 // end --- JxBuffer.cpp --- 
@@ -7414,7 +7411,7 @@ namespace Jinx::Impl
 			auto propName = ParsePropertyName();
 			if (propName.IsReadOnly())
 			{
-				Error("Can't delete a readonly property");
+				Error("Can't erase a readonly property");
 				return;
 			}
 			if (Accept(SymbolType::SquareOpen))
@@ -7451,7 +7448,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
-			Error("Valid property or variable name expected after delete keyword");
+			Error("Valid property or variable name expected after erase keyword");
 			return;
 		}
 	}
