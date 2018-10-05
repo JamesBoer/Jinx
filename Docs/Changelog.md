@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.18.2] - 2018-10-04
+
+- Replaced void* with std::any
+- Minor fixes to tutorial
+
 ## [0.18.1] - 2018-09-29
 
 - Minor improvement to parser error handling message

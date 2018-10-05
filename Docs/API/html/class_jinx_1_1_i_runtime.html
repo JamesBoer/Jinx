@@ -83,15 +83,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a85a3a6697eea6c30b8d02b4ca1dc2131"><td class="memItemLeft" align="right" valign="top">virtual BufferPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131">Compile</a> (const char *scriptText, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
 <tr class="memdesc:a85a3a6697eea6c30b8d02b4ca1dc2131"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile text string into bytecode.  <a href="#a85a3a6697eea6c30b8d02b4ca1dc2131">More...</a><br /></td></tr>
 <tr class="separator:a85a3a6697eea6c30b8d02b4ca1dc2131"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9e96bd4e6c94cfa5afc9a1aa27d02ef"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#aa9e96bd4e6c94cfa5afc9a1aa27d02ef">CreateScript</a> (BufferPtr bytecode, void *userContext=nullptr)=0</td></tr>
-<tr class="memdesc:aa9e96bd4e6c94cfa5afc9a1aa27d02ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a script from bytecode.  <a href="#aa9e96bd4e6c94cfa5afc9a1aa27d02ef">More...</a><br /></td></tr>
-<tr class="separator:aa9e96bd4e6c94cfa5afc9a1aa27d02ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6d533f522cf7a9af3a36649a269cf706"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a6d533f522cf7a9af3a36649a269cf706">CreateScript</a> (const char *scriptText, void *userContext=nullptr, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
-<tr class="memdesc:a6d533f522cf7a9af3a36649a269cf706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and create script from text.  <a href="#a6d533f522cf7a9af3a36649a269cf706">More...</a><br /></td></tr>
-<tr class="separator:a6d533f522cf7a9af3a36649a269cf706"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aab85db498f2f35eb4d923b14d6f4385e"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#aab85db498f2f35eb4d923b14d6f4385e">ExecuteScript</a> (const char *scriptText, void *userContext=nullptr, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
-<tr class="memdesc:aab85db498f2f35eb4d923b14d6f4385e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile, create, and execute a script.  <a href="#aab85db498f2f35eb4d923b14d6f4385e">More...</a><br /></td></tr>
-<tr class="separator:aab85db498f2f35eb4d923b14d6f4385e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82be192865ed4378221c93abc01eb3b9"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a82be192865ed4378221c93abc01eb3b9">CreateScript</a> (BufferPtr bytecode, std::any userContext=nullptr)=0</td></tr>
+<tr class="memdesc:a82be192865ed4378221c93abc01eb3b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a script from bytecode.  <a href="#a82be192865ed4378221c93abc01eb3b9">More...</a><br /></td></tr>
+<tr class="separator:a82be192865ed4378221c93abc01eb3b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa701adaee9d308dc3662d5dbc8869a0a"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#aa701adaee9d308dc3662d5dbc8869a0a">CreateScript</a> (const char *scriptText, std::any userContext=nullptr, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:aa701adaee9d308dc3662d5dbc8869a0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile and create script from text.  <a href="#aa701adaee9d308dc3662d5dbc8869a0a">More...</a><br /></td></tr>
+<tr class="separator:aa701adaee9d308dc3662d5dbc8869a0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ec35da85ef3ce2850f12aa3ee8312b2"><td class="memItemLeft" align="right" valign="top">virtual ScriptPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#a2ec35da85ef3ce2850f12aa3ee8312b2">ExecuteScript</a> (const char *scriptText, std::any userContext=nullptr, String name=String(), std::initializer_list&lt; String &gt; libraries={})=0</td></tr>
+<tr class="memdesc:a2ec35da85ef3ce2850f12aa3ee8312b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compile, create, and execute a script.  <a href="#a2ec35da85ef3ce2850f12aa3ee8312b2">More...</a><br /></td></tr>
+<tr class="separator:a2ec35da85ef3ce2850f12aa3ee8312b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="_jinx_8h.html#a9a15aa942bfe1dfd6f95188f63b06a86">LibraryPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_runtime.html#ade7ef682dd686f45c59a6ca94d3ef85e">GetLibrary</a> (const String &amp;name)=0</td></tr>
 <tr class="memdesc:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve library by name or create empty library if not found.  <a href="#ade7ef682dd686f45c59a6ca94d3ef85e">More...</a><br /></td></tr>
 <tr class="separator:ade7ef682dd686f45c59a6ca94d3ef85e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -146,7 +146,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Compile text string into bytecode. </p>
-<p>Pass a C-string filled with text to compile it to executable bytecode. This bytecode buffer is then passed to the <a class="el" href="class_jinx_1_1_i_runtime.html#aa9e96bd4e6c94cfa5afc9a1aa27d02ef" title="Create a script from bytecode. ">CreateScript()</a> function to create a script ready for execution. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Pass a C-string filled with text to compile it to executable bytecode. This bytecode buffer is then passed to the <a class="el" href="class_jinx_1_1_i_runtime.html#a82be192865ed4378221c93abc01eb3b9" title="Create a script from bytecode. ">CreateScript()</a> function to create a script ready for execution. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">scriptText</td><td>A C string containing text to compile to bytecode </td></tr>
     <tr><td class="paramname">name</td><td>The name of the script, typically the filename, used for debugging and diagnostic purposes. </td></tr>
@@ -155,12 +155,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A BufferPtr containing compiled bytecode on success or a nullptr on failure. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#aa9e96bd4e6c94cfa5afc9a1aa27d02ef" title="Create a script from bytecode. ">CreateScript()</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="class_jinx_1_1_i_runtime.html#a82be192865ed4378221c93abc01eb3b9" title="Create a script from bytecode. ">CreateScript()</a> </dd></dl>
 
 </div>
 </div>
-<a id="aa9e96bd4e6c94cfa5afc9a1aa27d02ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9e96bd4e6c94cfa5afc9a1aa27d02ef">&#9670;&nbsp;</a></span>CreateScript() <span class="overload">[1/2]</span></h2>
+<a id="a82be192865ed4378221c93abc01eb3b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82be192865ed4378221c93abc01eb3b9">&#9670;&nbsp;</a></span>CreateScript() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -177,7 +177,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *&#160;</td>
+          <td class="paramtype">std::any&#160;</td>
           <td class="paramname"><em>userContext</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
@@ -206,8 +206,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a6d533f522cf7a9af3a36649a269cf706"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d533f522cf7a9af3a36649a269cf706">&#9670;&nbsp;</a></span>CreateScript() <span class="overload">[2/2]</span></h2>
+<a id="aa701adaee9d308dc3662d5dbc8869a0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa701adaee9d308dc3662d5dbc8869a0a">&#9670;&nbsp;</a></span>CreateScript() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -224,7 +224,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *&#160;</td>
+          <td class="paramtype">std::any&#160;</td>
           <td class="paramname"><em>userContext</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
@@ -266,8 +266,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aab85db498f2f35eb4d923b14d6f4385e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aab85db498f2f35eb4d923b14d6f4385e">&#9670;&nbsp;</a></span>ExecuteScript()</h2>
+<a id="a2ec35da85ef3ce2850f12aa3ee8312b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ec35da85ef3ce2850f12aa3ee8312b2">&#9670;&nbsp;</a></span>ExecuteScript()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -284,7 +284,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *&#160;</td>
+          <td class="paramtype">std::any&#160;</td>
           <td class="paramname"><em>userContext</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>

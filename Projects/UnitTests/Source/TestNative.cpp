@@ -138,7 +138,7 @@ static Variant YetAnotherFunction(ScriptPtr script, Parameters params)
 
 static Variant MemberFunction(ScriptPtr script, Parameters params)
 {
-	TestClass * testClass = static_cast<TestClass *>(script->GetUserContext());
+	TestClass * testClass = std::any_cast<TestClass *>(script->GetUserContext());
 	return testClass->GetTestValue();
 }
 
@@ -189,7 +189,7 @@ TEST_CASE("Test Native", "[Native]")
 		auto runtime = TestCreateRuntime();
 		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "user", "context", "{integer}" }, [](ScriptPtr script, Parameters params) -> Variant
 		{
-			auto classPtr = static_cast<TestContext *>(script->GetUserContext());
+			auto classPtr = std::any_cast<TestContext *>(script->GetUserContext());
 			classPtr->SetValue(params[0].GetInteger());
 			return nullptr;
 		});

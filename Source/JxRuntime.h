@@ -21,9 +21,9 @@ namespace Jinx::Impl
 
 		// IRuntime interface
 		BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
-		ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(BufferPtr bytecode, std::any userContext) override;
+		ScriptPtr CreateScript(const char * scriptText, std::any userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptText, std::any userContext, String name, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		BufferPtr StripDebugInfo(BufferPtr bytecode) const override;

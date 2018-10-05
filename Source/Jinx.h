@@ -68,6 +68,7 @@ by James Boer, and distributed under the MIT license.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#include <any>
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
@@ -93,7 +94,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 18;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 2;
 
 	// Forward declaration
 	class IScript;
@@ -243,7 +244,7 @@ namespace Jinx
 		\return void pointer optionally passed at script creation.  This is intended to be
 		used by native library functions to retrieve user-specific data or objects.
 		*/
-		virtual void * GetUserContext() const = 0;
+		virtual std::any GetUserContext() const = 0;
 
 		/// Return the library to which this script belongs
 		/**
@@ -320,7 +321,7 @@ namespace Jinx
 		\return A ScriptPtr ready for execution.
 		\sa Compile(), IScript
 		*/
-		virtual ScriptPtr CreateScript(BufferPtr bytecode, void * userContext = nullptr) = 0;
+		virtual ScriptPtr CreateScript(BufferPtr bytecode, std::any userContext = nullptr) = 0;
 
 		/// Compile and create script from text
 		/**
@@ -332,7 +333,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, std::any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -345,7 +346,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, std::any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**

@@ -94,6 +94,7 @@ by James Boer, and distributed under the MIT license.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#include <any>
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
@@ -681,7 +682,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 18;
 
 	/// Patch number
-	const uint32_t PatchNumber = 0;
+	const uint32_t PatchNumber = 2;
 
 	// Forward declaration
 	class IScript;
@@ -831,7 +832,7 @@ namespace Jinx
 		\return void pointer optionally passed at script creation.  This is intended to be
 		used by native library functions to retrieve user-specific data or objects.
 		*/
-		virtual void * GetUserContext() const = 0;
+		virtual std::any GetUserContext() const = 0;
 
 		/// Return the library to which this script belongs
 		/**
@@ -908,7 +909,7 @@ namespace Jinx
 		\return A ScriptPtr ready for execution.
 		\sa Compile(), IScript
 		*/
-		virtual ScriptPtr CreateScript(BufferPtr bytecode, void * userContext = nullptr) = 0;
+		virtual ScriptPtr CreateScript(BufferPtr bytecode, std::any userContext = nullptr) = 0;
 
 		/// Compile and create script from text
 		/**
@@ -920,7 +921,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, std::any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -933,7 +934,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, std::any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**
@@ -2448,7 +2449,7 @@ namespace Jinx::Impl
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
-		Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext);
+		Script(RuntimeIPtr runtime, BufferPtr bytecode, std::any userContext);
 		virtual ~Script();
 
 		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
@@ -2460,7 +2461,7 @@ namespace Jinx::Impl
 		void SetVariable(const String & name, const Variant & value) override;
 
 		const String & GetName() const override { return m_name; }
-		void * GetUserContext() const override { return m_userContext; }
+		std::any GetUserContext() const override { return m_userContext; }
 		LibraryPtr GetLibrary() const override { return m_library; }
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
@@ -2527,7 +2528,7 @@ namespace Jinx::Impl
 		FunctionMap m_functionMap;
 
 		// User context pointer
-		void * m_userContext;
+		std::any m_userContext;
 
 		// Initial position of bytecode for this script
 		size_t m_bytecodeStart;
@@ -2578,9 +2579,9 @@ namespace Jinx::Impl
 
 		// IRuntime interface
 		BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
-		ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(BufferPtr bytecode, std::any userContext) override;
+		ScriptPtr CreateScript(const char * scriptText, std::any userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptText, std::any userContext, String name, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		BufferPtr StripDebugInfo(BufferPtr bytecode) const override;
@@ -8245,12 +8246,12 @@ namespace Jinx::Impl
 		return Compile(scriptBuffer, name, libraries);
 	}
 
-	inline ScriptPtr Runtime::CreateScript(BufferPtr bytecode, void * userContext)
+	inline ScriptPtr Runtime::CreateScript(BufferPtr bytecode, std::any userContext)
 	{
 		return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode), userContext);
 	}
 
-	inline ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries)
+	inline ScriptPtr Runtime::CreateScript(const char * scriptText, std::any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile script text to bytecode
 		auto bytecode = Compile(scriptText, name, libraries);
@@ -8261,7 +8262,7 @@ namespace Jinx::Impl
 		return CreateScript(bytecode, userContext);
 	}
 
-	inline ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, String name, std::initializer_list<String> libraries)
+	inline ScriptPtr Runtime::ExecuteScript(const char * scriptcode, std::any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile the text to bytecode
 		auto bytecode = Compile(scriptcode, name, libraries);
@@ -8640,7 +8641,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
+	inline Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, std::any userContext) :
 		m_runtime(runtime),
 		m_userContext(userContext),
 		m_finished(false),

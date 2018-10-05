@@ -16,7 +16,7 @@ namespace Jinx::Impl
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
-		Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext);
+		Script(RuntimeIPtr runtime, BufferPtr bytecode, std::any userContext);
 		virtual ~Script();
 
 		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
@@ -28,7 +28,7 @@ namespace Jinx::Impl
 		void SetVariable(const String & name, const Variant & value) override;
 
 		const String & GetName() const override { return m_name; }
-		void * GetUserContext() const override { return m_userContext; }
+		std::any GetUserContext() const override { return m_userContext; }
 		LibraryPtr GetLibrary() const override { return m_library; }
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
@@ -95,7 +95,7 @@ namespace Jinx::Impl
 		FunctionMap m_functionMap;
 
 		// User context pointer
-		void * m_userContext;
+		std::any m_userContext;
 
 		// Initial position of bytecode for this script
 		size_t m_bytecodeStart;

@@ -29,7 +29,7 @@ Jinx::RuntimePtr TestCreateRuntime()
 	return Jinx::CreateRuntime();
 }
 
-ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, void * userContext)
+ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, std::any userContext)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();
@@ -43,7 +43,7 @@ ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, vo
 	return runtime->CreateScript(bytecode, userContext);
 }
 
-Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime, void * userContext)
+Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime, std::any userContext)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();
