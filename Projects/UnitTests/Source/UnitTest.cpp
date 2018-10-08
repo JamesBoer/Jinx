@@ -16,8 +16,10 @@ Jinx::RuntimePtr TestCreateRuntime()
 	if (!s_initializedGlobals)
 	{
 		GlobalParams globalParams;
-		globalParams.allocBlockSize = 1024 * 256;
+		globalParams.enableLogging = true;
+		globalParams.logBytecode = true;
 		globalParams.logFn = [](const char *) {};
+		globalParams.allocBlockSize = 1024 * 256;
 		globalParams.allocFn = [](size_t size) { return malloc(size); };
 		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 		globalParams.freeFn = [](void * p) { free(p); };

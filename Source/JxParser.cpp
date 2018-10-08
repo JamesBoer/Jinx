@@ -639,8 +639,8 @@ namespace Jinx::Impl
 							// Make sure the library exists
 							if (!m_runtime->LibraryExists(libName))
 							{
-								LogWriteLine("Warning: Unable to find library '%s'", libName.c_str());
-								continue;
+								LogWriteLine("Unable to find library '%s'", libName.c_str());
+								return FunctionMatch();
 							}
 
 							// Search for function in this library
@@ -650,16 +650,16 @@ namespace Jinx::Impl
 							{
 								if (match.signature)
 								{
-									LogWriteLine("Warning: Ambiguous function name detected.  Use library name to disambiguate.");
-									return match;
+									LogWriteLine("Ambiguous function name detected.  Use library name to disambiguate.");
+									return FunctionMatch();
 								}
 								else
 								{
 									match = newMatch;
 									if (match.signature->GetVisibility() == VisibilityType::Private && library != m_library)
 									{
-										LogWriteLine("Warning: Scope does not allow calling of library function");
-										return match;
+										LogWriteLine("Unable to call library function with private scope.");
+										return FunctionMatch();
 									}
 								}
 							}
@@ -827,31 +827,6 @@ namespace Jinx::Impl
 			return VisibilityType::Public;
 		}
 		return VisibilityType::Local;
-	}
-
-	inline_t Opcode Parser::ParseLogicalOperator()
-	{
-		if (m_error || m_currentSymbol == m_symbolList.end())
-			return Opcode::NumOpcodes;
-
-		Opcode opcode = Opcode::NumOpcodes;
-		switch (m_currentSymbol->type)
-		{
-		case SymbolType::And:
-			opcode = Opcode::And;
-			break;
-		case SymbolType::Or:
-			opcode = Opcode::Or;
-			break;
-		case SymbolType::Not:
-			opcode = Opcode::Not;
-			break;
-		default:
-			Error("Unknown type when parsing condition keyword");
-			break;
-		}
-		NextSymbol();
-		return opcode;
 	}
 
 	inline_t Opcode Parser::ParseBinaryOperator()
@@ -2449,11 +2424,7 @@ namespace Jinx::Impl
 				Error("Expected valid name after 'import' keyword");
 				return;
 			}
-			if (!Expect(SymbolType::NewLine))
-			{
-				Error("Expected new line after library import name");
-				return;
-			}
+			Expect(SymbolType::NewLine);
 
 			// Check to make sure we're not adding duplicates
 			bool foundDup = false;
@@ -2468,7 +2439,14 @@ namespace Jinx::Impl
 
 			// Add library to the list of imported libraries for this script
 			if (!foundDup)
+			{
 				m_importList.push_back(name);
+				if (!m_runtime->LibraryExists(name))
+				{
+					Error("Could not find library named '%s'", name.c_str());
+					break;
+				}
+			}
 		}
 	}
 
@@ -2488,11 +2466,7 @@ namespace Jinx::Impl
 				Error("Expected valid name after 'library' keyword");
 				return;
 			}
-			if (!Expect(SymbolType::NewLine))
-			{
-				Error("Expected new line after library name");
-				return;
-			}
+			Expect(SymbolType::NewLine);
 			m_library = m_runtime->GetLibraryInternal(libraryName);
 		}
 

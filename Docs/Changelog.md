@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.18.3] - 2018-10-07
+
+- Added additional tests
+
 ## [0.18.2] - 2018-10-04
 
 - Replaced void* with std::any

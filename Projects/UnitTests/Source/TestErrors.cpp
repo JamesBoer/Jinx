@@ -634,6 +634,32 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test import error #1")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			import junk
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test import error #2")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			import 123
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test library property scope error #1")
 	{
 		static const char * scriptText1 =
@@ -686,6 +712,74 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script2 = TestExecuteScript(scriptText2, runtime);
 		REQUIRE(script1);
 		REQUIRE(!script2);
+	}
+
+	SECTION("Test library function scope error")
+	{
+		static const char * scriptText1 =
+			u8R"(
+	
+			library test
+
+			private function func
+			end
+			
+			)";
+
+		static const char * scriptText2 =
+			u8R"(
+	
+			import test
+	 
+			func	
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto script1 = TestExecuteScript(scriptText1, runtime);
+		auto script2 = TestExecuteScript(scriptText2, runtime);
+		REQUIRE(script1);
+		REQUIRE(!script2);
+	}
+
+	SECTION("Test ambiguous function name")
+	{
+		static const char * scriptText1 =
+			u8R"(
+	
+			library test1
+
+			public function func
+            end
+			
+			)";
+
+		static const char * scriptText2 =
+			u8R"(
+	
+			library test2
+
+			public function func
+            end
+			
+			)";
+
+		static const char * scriptText3 =
+			u8R"(
+	
+			import test1
+			import test2
+	 
+			func
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto script1 = TestExecuteScript(scriptText1, runtime);
+		auto script2 = TestExecuteScript(scriptText2, runtime);
+		auto script3 = TestExecuteScript(scriptText3, runtime);
+		REQUIRE(script1);
+		REQUIRE(script2);
 	}
 
 	SECTION("Test duplicate property error #1")

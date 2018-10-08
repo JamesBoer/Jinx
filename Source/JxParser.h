@@ -137,7 +137,6 @@ namespace Jinx::Impl
 		// Parsing functions advance the current symbol, looking for a pattern of symbols
 		// and injecting the compiled results into the bytecode buffer.
 		VisibilityType ParseScope();
-		Opcode ParseLogicalOperator();
 		Opcode ParseBinaryOperator();
 		Variant ParseValue();
 		ValueType ParseValueType();
