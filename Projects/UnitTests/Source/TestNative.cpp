@@ -284,4 +284,71 @@ TEST_CASE("Test Native", "[Native]")
 		JinxDelete(c);
 	}
 
+	SECTION("Test Jinx function execution from C++")
+	{
+		const char * scriptText =
+			u8R"(
+
+				private function {a} minus {b}
+					return a - b
+				end
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto id = script->FindFunction(nullptr, Visibility::Private, { "{}", "minus", "{}" });
+		REQUIRE(id != InvalidID);
+		auto val = script->CallFunction(id, { 5, 2 });
+		REQUIRE(val == 3);
+	}
+
+	SECTION("Test native function execution from C++")
+	{
+		auto runtime = TestCreateRuntime();
+		auto library = runtime->GetLibrary("test");
+		library->RegisterFunction(Visibility::Public, { "native", "function" }, [](ScriptPtr script, Parameters params)->Variant
+		{
+			return "Mary had a little lambda";
+		});
+
+		auto script = TestExecuteScript("", runtime);
+		REQUIRE(script);
+		auto id = script->FindFunction(library, Visibility::Public, { "native", "function" });
+		REQUIRE(id != InvalidID);
+		auto val = script->CallFunction(id, {});
+		REQUIRE(val == "Mary had a little lambda");
+	}
+
+	SECTION("Test native function with concurrent execution from C++")
+	{
+		const char * scriptText =
+			u8R"(
+
+				private function {a} minus {b}
+					return a - b
+				end
+
+				set x to 0
+				loop from 1 to 3
+					increment x
+					wait
+				end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		auto id = script->FindFunction(nullptr, Visibility::Private, { "{}", "minus", "{}" });
+		REQUIRE(id != InvalidID);
+		while (!script->IsFinished())
+		{
+			auto val = script->CallFunction(id, { 5, 2 });
+			REQUIRE(val == 3);
+			REQUIRE(script->Execute());
+		}
+		REQUIRE(script->GetVariable("x") == 3);
+	}
+
 }

@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.19.0] - 2018-10-09
+
+- Added API to find and call Jinx functions from C++
+
 ## [0.18.3] - 2018-10-07
 
 - Added additional tests

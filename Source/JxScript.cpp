@@ -802,11 +802,14 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
+				bool exit = m_execution.back().waitOnReturn;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
 					m_stack.pop_back();
 				Push(val);
+				if (exit)
+					opcode = Opcode::Wait;
 			}
 			break;
 			case Opcode::ScopeBegin:
@@ -928,8 +931,8 @@ namespace Jinx::Impl
 			}
 			break;
 			}
-
-		} while (opcode != Opcode::Exit && opcode != Opcode::Wait);
+		} 
+		while (opcode != Opcode::Exit && opcode != Opcode::Wait);
 
 		// Track accumulated script execution time
 		auto end = std::chrono::high_resolution_clock::now();
@@ -937,6 +940,75 @@ namespace Jinx::Impl
 		m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
 
 		return true;
+	}
+
+	inline_t RuntimeID Script::FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name)
+	{
+		if (library == nullptr)
+			library = m_library;
+		auto libraryInt = std::static_pointer_cast<Library>(library);
+		return libraryInt->FindFunctionSignature(visibility, name).GetId();
+	}
+
+	inline_t Variant Script::CallFunction(RuntimeID id, Parameters params)
+	{
+		for (const auto & param : params)
+			Push(param);
+		return CallFunction(id);
+	}
+
+	inline_t Variant Script::CallFunction(RuntimeID id)
+	{
+		FunctionDefinitionPtr functionDef;
+		if (!m_functionMap.empty())
+		{
+			auto itr = m_functionMap.find(id);
+			if (itr != m_functionMap.end())
+				functionDef = itr->second;
+		}
+		if (!functionDef)
+		{
+			functionDef = m_runtime->FindFunction(id);
+		}
+		if (!functionDef)
+		{
+			Error("Could not find function definition");
+			return false;
+		}
+		// Check to see if this is a bytecode function
+		if (functionDef->GetBytecode())
+		{
+			m_execution.push_back(ExecutionFrame(functionDef));
+			m_execution.back().waitOnReturn = true;
+			m_execution.back().reader.Seek(functionDef->GetOffset());
+			bool finished = m_finished;
+			m_finished = false;
+			if (!Execute())
+				return nullptr;
+			m_finished = finished;
+			m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
+			return Pop();
+		}
+		// Otherwise, call a native function callback
+		else if (functionDef->GetCallback())
+		{
+			Parameters params;
+			size_t numParams = functionDef->GetParameterCount();
+			for (size_t i = 0; i < numParams; ++i)
+			{
+				size_t index = m_stack.size() - (numParams - i);
+				auto param = m_stack[index];
+				params.push_back(param);
+			}
+			for (size_t i = 0; i < numParams; ++i)
+				m_stack.pop_back();
+			return functionDef->GetCallback()(shared_from_this(), params);
+		}
+		else
+		{
+			Error("Error in function definition");
+		}
+		return nullptr;
 	}
 
 	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const

@@ -91,10 +91,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 18;
+	const uint32_t MinorVersion = 19;
 
 	/// Patch number
-	const uint32_t PatchNumber = 3;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -108,6 +108,9 @@ namespace Jinx
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
 
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
 	enum class Visibility
 	{
 		Public,
@@ -119,7 +122,6 @@ namespace Jinx
 		ReadWrite,
 		ReadOnly,
 	};
-
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -221,6 +223,24 @@ namespace Jinx
 		*/
 		virtual void SetVariable(const String & name, const Variant & value) = 0;
 
+		/// Find the ID of a library function
+		/**
+		\param library Pointer to library containing function to call
+		\param visibility Indicates whether function is public or private.
+		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to
+		standard Jinx identifier naming rules.
+		\return Returns a valid RuntimeID on success, InvalidID on failure.
+		*/
+		virtual RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) = 0;
+
+		/// Call a library function
+		/**
+		\param id RuntimeID of the function to call
+		\param params Vector of Variants to act as function parameters
+		\return Returns the Variant containing the function return value, or null for no value.
+		*/
+		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
+
 		/// Register a local override function for this script instance
 		/**
 		\param library Pointer to library containing function to override
@@ -231,6 +251,7 @@ namespace Jinx
 		\return Returns true on success or false on failure.
 		*/
 		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+
 
 		/// Get the script name
 		/**

@@ -12,8 +12,6 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
 	const uint32_t LogTabWidth = 4;
 
 	// All script opcodes

@@ -679,10 +679,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 18;
+	const uint32_t MinorVersion = 19;
 
 	/// Patch number
-	const uint32_t PatchNumber = 3;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -696,6 +696,9 @@ namespace Jinx
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
 
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
 	enum class Visibility
 	{
 		Public,
@@ -707,7 +710,6 @@ namespace Jinx
 		ReadWrite,
 		ReadOnly,
 	};
-
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -809,6 +811,24 @@ namespace Jinx
 		*/
 		virtual void SetVariable(const String & name, const Variant & value) = 0;
 
+		/// Find the ID of a library function
+		/**
+		\param library Pointer to library containing function to call
+		\param visibility Indicates whether function is public or private.
+		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to
+		standard Jinx identifier naming rules.
+		\return Returns a valid RuntimeID on success, InvalidID on failure.
+		*/
+		virtual RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) = 0;
+
+		/// Call a library function
+		/**
+		\param id RuntimeID of the function to call
+		\param params Vector of Variants to act as function parameters
+		\return Returns the Variant containing the function return value, or null for no value.
+		*/
+		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
+
 		/// Register a local override function for this script instance
 		/**
 		\param library Pointer to library containing function to override
@@ -819,6 +839,7 @@ namespace Jinx
 		\return Returns true on success or false on failure.
 		*/
 		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+
 
 		/// Get the script name
 		/**
@@ -1145,8 +1166,6 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
 	const uint32_t LogTabWidth = 4;
 
 	// All script opcodes
@@ -2452,6 +2471,8 @@ namespace Jinx::Impl
 		virtual ~Script();
 
 		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+		RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) override;
+		Variant CallFunction(RuntimeID id, Parameters params);
 
 		bool Execute() override;
 		bool IsFinished() const override;
@@ -2474,6 +2495,8 @@ namespace Jinx::Impl
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
+		Variant CallFunction(RuntimeID id);
+
 	private:
 		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
 		using ScopeStack = std::vector<size_t, Allocator<size_t>>;
@@ -2485,7 +2508,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n), waitOnReturn(false)
 			{
 				scopeStack.reserve(32);
 			}
@@ -2512,6 +2535,9 @@ namespace Jinx::Impl
 
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop;
+
+			// Stop execution at the end of this frame
+			bool waitOnReturn;
 		};
 
 		// Execution frame stack
@@ -9406,11 +9432,14 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
+				bool exit = m_execution.back().waitOnReturn;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
 					m_stack.pop_back();
 				Push(val);
+				if (exit)
+					opcode = Opcode::Wait;
 			}
 			break;
 			case Opcode::ScopeBegin:
@@ -9532,8 +9561,8 @@ namespace Jinx::Impl
 			}
 			break;
 			}
-
-		} while (opcode != Opcode::Exit && opcode != Opcode::Wait);
+		} 
+		while (opcode != Opcode::Exit && opcode != Opcode::Wait);
 
 		// Track accumulated script execution time
 		auto end = std::chrono::high_resolution_clock::now();
@@ -9541,6 +9570,75 @@ namespace Jinx::Impl
 		m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
 
 		return true;
+	}
+
+	inline RuntimeID Script::FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name)
+	{
+		if (library == nullptr)
+			library = m_library;
+		auto libraryInt = std::static_pointer_cast<Library>(library);
+		return libraryInt->FindFunctionSignature(visibility, name).GetId();
+	}
+
+	inline Variant Script::CallFunction(RuntimeID id, Parameters params)
+	{
+		for (const auto & param : params)
+			Push(param);
+		return CallFunction(id);
+	}
+
+	inline Variant Script::CallFunction(RuntimeID id)
+	{
+		FunctionDefinitionPtr functionDef;
+		if (!m_functionMap.empty())
+		{
+			auto itr = m_functionMap.find(id);
+			if (itr != m_functionMap.end())
+				functionDef = itr->second;
+		}
+		if (!functionDef)
+		{
+			functionDef = m_runtime->FindFunction(id);
+		}
+		if (!functionDef)
+		{
+			Error("Could not find function definition");
+			return false;
+		}
+		// Check to see if this is a bytecode function
+		if (functionDef->GetBytecode())
+		{
+			m_execution.push_back(ExecutionFrame(functionDef));
+			m_execution.back().waitOnReturn = true;
+			m_execution.back().reader.Seek(functionDef->GetOffset());
+			bool finished = m_finished;
+			m_finished = false;
+			if (!Execute())
+				return nullptr;
+			m_finished = finished;
+			m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
+			return Pop();
+		}
+		// Otherwise, call a native function callback
+		else if (functionDef->GetCallback())
+		{
+			Parameters params;
+			size_t numParams = functionDef->GetParameterCount();
+			for (size_t i = 0; i < numParams; ++i)
+			{
+				size_t index = m_stack.size() - (numParams - i);
+				auto param = m_stack[index];
+				params.push_back(param);
+			}
+			for (size_t i = 0; i < numParams; ++i)
+				m_stack.pop_back();
+			return functionDef->GetCallback()(shared_from_this(), params);
+		}
+		else
+		{
+			Error("Error in function definition");
+		}
+		return nullptr;
 	}
 
 	inline std::vector<String, Allocator<String>> Script::GetCallStack() const

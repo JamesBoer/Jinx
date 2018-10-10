@@ -74,34 +74,17 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 
-				function {a} plus {b}
-					return a + b
+				private function {a} minus {b}
+					return a - b
 				end
-
-				function {a} times {b}
-					return a * b
-				end
-
-				set x to 3 plus 4 times 5
-				set y to 3 times 4 plus 5
-
-				function {x} squared
-					return x * x
-				end
-
-				function negative {x}
-					return -x
-				end
-
-				set z to negative 3 squared
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("x") == 35);
-		REQUIRE(script->GetVariable("y") == 17);
-		REQUIRE(script->GetVariable("z") == 9);
+		auto id = script->FindFunction(nullptr, Visibility::Private, {"{}", "minus", "{}"});
+		auto val = script->CallFunction(id, {5, 2});
+		REQUIRE(val == 3);
 	}
 
 	Jinx::ShutDown();
