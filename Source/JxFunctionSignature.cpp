@@ -33,7 +33,7 @@ namespace Jinx::Impl
 		{
 			// Library functions require a predictable ID.
 			// Create a unique id based on a hash of the library name, signature text, and parameters
-			String hashString = libraryName;
+			String hashString = m_libraryName;
 			hashString.reserve(64);
 			for (auto itr = m_parts.begin(); itr != m_parts.end();)
 			{

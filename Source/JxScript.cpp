@@ -942,12 +942,12 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline_t RuntimeID Script::FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name)
+	inline_t RuntimeID Script::FindFunction(LibraryPtr library, const String & name)
 	{
 		if (library == nullptr)
 			library = m_library;
 		auto libraryInt = std::static_pointer_cast<Library>(library);
-		return libraryInt->FindFunctionSignature(visibility, name).GetId();
+		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
 	}
 
 	inline_t Variant Script::CallFunction(RuntimeID id, Parameters params)
@@ -1065,7 +1065,7 @@ namespace Jinx::Impl
 		m_stack.push_back(value);
 	}
 
-	inline_t bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	inline_t bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function)
 	{
 		if (library == nullptr)
 			library = m_library;

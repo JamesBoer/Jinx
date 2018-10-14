@@ -44,7 +44,7 @@ public:
 	{
 		if (!m_script)
 			return false;
-		return m_script->RegisterFunction(nullptr, Jinx::Visibility::Private, { "test", "override", "{}" }, [this](ScriptPtr script, Parameters params) -> Variant
+		return m_script->RegisterFunction(nullptr, Jinx::Visibility::Private, { "test override {}" }, [this](ScriptPtr script, Parameters params) -> Variant
 		{
 			return TestFunction(script, params);
 		});
@@ -164,12 +164,12 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto runtime = TestCreateRuntime();
 		auto library = runtime->GetLibrary("test");
-		library->RegisterFunction(Visibility::Public, {"this", "function"}, ThisFunction);
-		library->RegisterFunction(Visibility::Public, { "that", "function" }, ThatFunction);
-		library->RegisterFunction(Visibility::Public, { "another", "function" }, AnotherFunction);
-		library->RegisterFunction(Visibility::Public, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
-		library->RegisterFunction(Visibility::Public, { "member", "function" }, MemberFunction);
-		library->RegisterFunction(Visibility::Public, { "lambda", "function" }, [](ScriptPtr script, Parameters params)->Variant
+		library->RegisterFunction(Visibility::Public, {"this function"}, ThisFunction);
+		library->RegisterFunction(Visibility::Public, { "that function" }, ThatFunction);
+		library->RegisterFunction(Visibility::Public, { "another function" }, AnotherFunction);
+		library->RegisterFunction(Visibility::Public, { "yet {} another {} function {}"}, YetAnotherFunction);
+		library->RegisterFunction(Visibility::Public, { "member function" }, MemberFunction);
+		library->RegisterFunction(Visibility::Public, { "lambda function" }, [](ScriptPtr script, Parameters params)->Variant
 		{
 			return "lambda lambda lambda";
 		});
@@ -187,7 +187,7 @@ TEST_CASE("Test Native", "[Native]")
 	SECTION("Test script user context data")
 	{
 		auto runtime = TestCreateRuntime();
-		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "user", "context", "{integer}" }, [](ScriptPtr script, Parameters params) -> Variant
+		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test user context {integer}" }, [](ScriptPtr script, Parameters params) -> Variant
 		{
 			auto classPtr = std::any_cast<TestContext *>(script->GetUserContext());
 			classPtr->SetValue(params[0].GetInteger());
@@ -202,7 +202,7 @@ TEST_CASE("Test Native", "[Native]")
 	SECTION("Test script override functions")
 	{
 		auto runtime = TestCreateRuntime();
-		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "override", "{}" }, [](ScriptPtr script, Parameters params) -> Variant
+		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test override {}" }, [](ScriptPtr script, Parameters params) -> Variant
 		{
 			return nullptr;
 		});
@@ -297,7 +297,7 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		auto id = script->FindFunction(nullptr, Visibility::Private, { "{}", "minus", "{}" });
+		auto id = script->FindFunction(nullptr, { "{} minus {}" });
 		REQUIRE(id != InvalidID);
 		auto val = script->CallFunction(id, { 5, 2 });
 		REQUIRE(val == 3);
@@ -307,14 +307,14 @@ TEST_CASE("Test Native", "[Native]")
 	{
 		auto runtime = TestCreateRuntime();
 		auto library = runtime->GetLibrary("test");
-		library->RegisterFunction(Visibility::Public, { "native", "function" }, [](ScriptPtr script, Parameters params)->Variant
+		library->RegisterFunction(Visibility::Public, { "native call" }, [](ScriptPtr script, Parameters params)->Variant
 		{
 			return "Mary had a little lambda";
 		});
 
 		auto script = TestExecuteScript("", runtime);
 		REQUIRE(script);
-		auto id = script->FindFunction(library, Visibility::Public, { "native", "function" });
+		auto id = script->FindFunction(library, { "native call" });
 		REQUIRE(id != InvalidID);
 		auto val = script->CallFunction(id, {});
 		REQUIRE(val == "Mary had a little lambda");
@@ -340,7 +340,7 @@ TEST_CASE("Test Native", "[Native]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->Execute());
-		auto id = script->FindFunction(nullptr, Visibility::Private, { "{}", "minus", "{}" });
+		auto id = script->FindFunction(nullptr, { "{} minus {}" });
 		REQUIRE(id != InvalidID);
 		while (!script->IsFinished())
 		{

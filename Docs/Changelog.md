@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.20.0] - 2018-10-14
+
+- Changed API functions registering function callbacks to use string instead of initializer lists
+- IString::FindFunction() no longer requires a Visibility type parameter
+- Function names passed via API are now processed using the same lexer and parser as scripts, ensuring more robust error checking
+- Fixed minor error in tutorial
+
 ## [0.19.0] - 2018-10-09
 
 - Added API to find and call Jinx functions from C++

@@ -13,6 +13,14 @@ namespace Jinx::Impl
 	inline_t Runtime::Runtime()
 	{
 		m_perfStartTime = std::chrono::high_resolution_clock::now();
+
+		// Build symbol type map, excluding symbols without a text representation
+		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
+		{
+			SymbolType symType = static_cast<SymbolType>(i);
+			auto symTypeText = GetSymbolTypeText(symType);
+			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+		}
 	}
 
 	inline_t Runtime::~Runtime()
@@ -47,7 +55,7 @@ namespace Jinx::Impl
 		auto begin = std::chrono::high_resolution_clock::now();
 
 		// Lex script text into tokens
-		Lexer lexer(scriptBuffer, name);
+		Lexer lexer(m_symbolTypeMap, reinterpret_cast<const char *>(scriptBuffer->Ptr()), reinterpret_cast<const char *>(scriptBuffer->Ptr() + scriptBuffer->Size()), name);
 
 		// Exit if errors when lexing
 		if (!lexer.Execute())

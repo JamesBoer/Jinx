@@ -41,6 +41,7 @@ namespace Jinx::Impl
 		void SetProperty(RuntimeID id, const Variant & value);
 		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
 
@@ -62,6 +63,7 @@ namespace Jinx::Impl
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
+		SymbolTypeMap m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl

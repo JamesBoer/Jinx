@@ -17,125 +17,19 @@ namespace Jinx::Impl
 	{
 	}
 
-	inline_t FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const
+	inline_t FunctionSignature Library::CreateFunctionSignature(Visibility visibility, const String & name) const
 	{
-		// Build function signature parts from parameters
-		FunctionSignatureParts parts;
-		for (const auto & n : name)
-		{
-			// Validate name
-			if (n.empty())
-			{
-				LogWriteLine("Registered function requires a valid name");
-				return FunctionSignature();
-			}
-
-			FunctionSignaturePart part;
-			if (n.empty())
-			{
-				LogWriteLine("Empty identifier in function signature");
-				return FunctionSignature();
-			}
-			else if (n[0] == '{')
-			{
-				// Validate parameter part and parse optional type
-				String np;
-				np.reserve(32);
-				const char * p = n.c_str();
-				const char * e = p + n.size();
-				bool term = false;
-				++p;
-				while (p != e)
-				{
-					if (*p == '}')
-					{
-						++p;
-						term = true;
-						break;
-					}
-					else if (*p != ' ')
-					{
-						np += (char)(*p);
-						part.names.push_back(np);
-					}
-					++p;
-				}
-				if (!term)
-				{
-					LogWriteLine("Argument not properly terminated in function signature");
-					return FunctionSignature();
-				}
-				if (!np.empty())
-				{
-					if (!StringToValueType(np, &part.valueType))
-					{
-						LogWriteLine("Unknown parameter value in function signature");
-						return FunctionSignature();
-					}
-				}
-				while (p != e)
-				{
-					if (*p != ' ')
-					{
-						LogWriteLine("Invalid symbols after closing argument brace");
-						return FunctionSignature();
-					}
-					++p;
-				}
-				part.partType = FunctionSignaturePartType::Parameter;
-			}
-			else
-			{
-				// Break names into component parts
-				String np;
-				np.reserve(32);
-				const char * p = n.c_str();
-				const char * e = p + n.size();
-				bool optional = *p == '(';
-				if (optional)
-				{
-					if (n.size() < 3 || n[n.size() - 1] != ')')
-					{
-						LogWriteLine("Error when parsing optional name component");
-						return FunctionSignature();
-					}
-					++p;
-					--e;
-				}
-				while (p != e)
-				{
-					if (*p == '/')
-					{
-						part.names.push_back(np);
-						np.clear();
-					}
-					else if (*p == '{' || *p == '}')
-					{
-						LogWriteLine("Illegal characters { or } found in name.  Missing comma?");
-						return FunctionSignature();
-					}
-					else
-					{
-						np += (char)(*p);
-					}
-					++p;
-				}
-				part.partType = FunctionSignaturePartType::Name;
-				part.optional = optional;
-				part.names.push_back(np);
-			}
-			parts.push_back(part);
-		}
-
-		// Create functions signature
-		FunctionSignature functionSignature(publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), parts);
-		return functionSignature;
+		Lexer lexer(m_runtime.lock()->GetSymbolTypeMap(), name.c_str(), name.c_str() + name.size(), name);
+		if (!lexer.Execute())
+			return FunctionSignature();
+		Parser parser(m_runtime.lock(), lexer.GetSymbolList(), name);
+		return parser.ParseFunctionSignature(visibility == Visibility::Public ? VisibilityType::Public : VisibilityType::Private, m_name);
 	}
 
-	inline_t FunctionSignature Library::FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const
+	inline_t FunctionSignature Library::FindFunctionSignature(Visibility visibility, const String & name) const
 	{
+		auto signature = CreateFunctionSignature(visibility, name);
 		std::lock_guard<std::mutex> lock(m_functionMutex);
-		auto signature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
@@ -186,9 +80,9 @@ namespace Jinx::Impl
 		return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
 	}
 
-	inline_t bool Library::RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	inline_t bool Library::RegisterFunction(Visibility visibility, const String & name, FunctionCallback function)
 	{
-		if (name.size() < 1)
+		if (name.empty())
 		{
 			LogWriteLine("Registered function requires a valid name");
 			return false;
@@ -200,20 +94,20 @@ namespace Jinx::Impl
 		}
 
 		// Calculate the function signature
-		FunctionSignature functionSignature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
-		if (!functionSignature.IsValid())
+		auto signature = CreateFunctionSignature(visibility, name);
+		if (!signature.IsValid())
 			return false;
 
 		// Register function in library table.  This allows the the parser to find
 		// and use this function.
-		RegisterFunctionSignature(functionSignature);
+		RegisterFunctionSignature(signature);
 
 		// Register the function definition with the runtime system for 
 		// runtime lookups.
 		auto runtime = m_runtime.lock();
 		if (!runtime)
 			return false;
-		runtime->RegisterFunction(functionSignature, function);
+		runtime->RegisterFunction(signature, function);
 
 		// Return success
 		return true;

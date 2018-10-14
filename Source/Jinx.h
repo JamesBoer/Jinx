@@ -91,7 +91,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 19;
+	const uint32_t MinorVersion = 20;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -138,12 +138,12 @@ namespace Jinx
 		/**
 		This method registers a native function for use by script code.
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, const String & name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**
@@ -226,12 +226,11 @@ namespace Jinx
 		/// Find the ID of a library function
 		/**
 		\param library Pointer to library containing function to call
-		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\return Returns a valid RuntimeID on success, InvalidID on failure.
 		*/
-		virtual RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) = 0;
+		virtual RuntimeID FindFunction(LibraryPtr library, const String & name) = 0;
 
 		/// Call a library function
 		/**
@@ -245,12 +244,12 @@ namespace Jinx
 		/**
 		\param library Pointer to library containing function to override
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}", 
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) = 0;
 
 
 		/// Get the script name

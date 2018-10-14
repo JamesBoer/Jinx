@@ -10,24 +10,17 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t Lexer::Lexer(BufferPtr buffer, const String & name) :
-		m_buffer(buffer),
+	inline_t Lexer::Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name) :
 		m_name(name),
-		m_start(nullptr),
-		m_end(nullptr),
+		m_start(start),
+		m_end(end),
+		m_symbolTypeMap(symbolTypeMap),
 		m_current(nullptr),
 		m_columnNumber(1),
 		m_columnMarker(1),
 		m_lineNumber(1),
 		m_error(false)
 	{
-		// Build symbol type map, excluding symbols without a text representation
-		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
-		{
-			SymbolType symType = static_cast<SymbolType>(i);
-			auto symTypeText = GetSymbolTypeText(symType);
-			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
-		}
 	}
 
 	inline_t void Lexer::AdvanceCurrent()
@@ -98,9 +91,7 @@ namespace Jinx::Impl
 
 	inline_t bool Lexer::Execute()
 	{
-		m_start = reinterpret_cast<const char *>(m_buffer->Ptr());
 		m_current = m_start;
-		m_end = m_start + m_buffer->Size();
 
 		// Create a list of tokens for the parser to analyze
 		while (!IsEndOfText())

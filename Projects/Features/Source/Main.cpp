@@ -58,19 +58,9 @@ int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
 
+	//Initialize(GlobalParams());
 	// Add scope block to ensure all objects are destroyed for shutdown test
 	{
-		GlobalParams globalParams;
-		globalParams.logSymbols = true;
-		globalParams.logBytecode = true;
-		globalParams.enableDebugInfo = true;
-        globalParams.maxInstructions = 5000;
-		globalParams.allocBlockSize = 1024 * 256;
-		globalParams.allocFn = [](size_t size) { return malloc(size); };
-		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-		globalParams.freeFn = [](void * p) { free(p); };
-		Jinx::Initialize(globalParams);
-
 		const char * scriptText =
 			u8R"(
 
@@ -82,16 +72,10 @@ int main(int argc, char ** argv)
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		auto id = script->FindFunction(nullptr, Visibility::Private, {"{}", "minus", "{}"});
+		auto id = script->FindFunction(nullptr, Visibility::Private, "{} minus {}");
 		auto val = script->CallFunction(id, {5, 2});
 		REQUIRE(val == 3);
 	}
-
-	Jinx::ShutDown();
-
-	auto stats = GetMemoryStats();
-	REQUIRE(stats.currentAllocatedMemory == 0);
-	REQUIRE(stats.currentUsedMemory == 0);
-    
+	//ShutDown();
     return 0;
 }

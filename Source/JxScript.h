@@ -19,8 +19,8 @@ namespace Jinx::Impl
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, std::any userContext);
 		virtual ~Script();
 
-		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
-		RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) override;
+		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
+		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params);
 
 		bool Execute() override;

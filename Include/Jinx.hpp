@@ -679,7 +679,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 19;
+	const uint32_t MinorVersion = 20;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -726,12 +726,12 @@ namespace Jinx
 		/**
 		This method registers a native function for use by script code.
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, const String & name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**
@@ -814,12 +814,11 @@ namespace Jinx
 		/// Find the ID of a library function
 		/**
 		\param library Pointer to library containing function to call
-		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\return Returns a valid RuntimeID on success, InvalidID on failure.
 		*/
-		virtual RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) = 0;
+		virtual RuntimeID FindFunction(LibraryPtr library, const String & name) = 0;
 
 		/// Call a library function
 		/**
@@ -833,12 +832,12 @@ namespace Jinx
 		/**
 		\param library Pointer to library containing function to override
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}", 
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) = 0;
 
 
 		/// Get the script name
@@ -1407,6 +1406,9 @@ namespace Jinx::Impl
 	using RuntimeIPtr = std::shared_ptr<Runtime>;
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
 
+	// Shared aliases
+	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
+
 } // namespace Jinx::Impl
 
 
@@ -1779,13 +1781,12 @@ namespace Jinx::Impl
 
 	using SymbolList = std::list<Symbol, Allocator<Symbol>>;
 	using SymbolListCItr = SymbolList::const_iterator;
-	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
 
 	class Lexer
 	{
 	public:
 		// Lex the script text
-		Lexer(BufferPtr buffer, const String & name);
+		Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name);
 
 		// Do lexing pass to create token list
 		bool Execute();
@@ -1839,7 +1840,6 @@ namespace Jinx::Impl
 		void ParseWhitespaceAndNewlines();
 
 	private:
-		BufferPtr m_buffer;
 		String m_name;
 		SymbolList m_symbolList;
 		const char * m_start;
@@ -1849,7 +1849,7 @@ namespace Jinx::Impl
 		uint32_t m_columnMarker;
 		uint32_t m_lineNumber;
 		bool m_error;
-		SymbolTypeMap m_symbolTypeMap;
+		const SymbolTypeMap & m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl
@@ -2086,7 +2086,7 @@ namespace Jinx::Impl
 		Library(RuntimeWPtr runtime, const String & name);
 
 		// ILibrary interface
-		bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+		bool RegisterFunction(Visibility visibility, const String & name, FunctionCallback function) override;
 		bool RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value) override;
 		Variant GetProperty(const String & name) const override;
 		void SetProperty(const String & name, const Variant & value) override;
@@ -2103,13 +2103,15 @@ namespace Jinx::Impl
 		// Internal function signature functions
 		void RegisterFunctionSignature(const FunctionSignature & signature);
 		bool FunctionSignatureExists(const FunctionSignature & signature) const;
-		FunctionSignature FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const;
+		FunctionSignature FindFunctionSignature(Visibility visibility, const String & name) const;
 		const FunctionPtrList Functions() const;
 
 	private:
 
+		// Create a function signature from a string
+		FunctionSignature CreateFunctionSignature(Visibility visibility, const String & name) const;
+
 		// Private internal functions
-		FunctionSignature CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const;
 		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
 		using PropertyNameTable = std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>>;
@@ -2239,9 +2241,13 @@ namespace Jinx::Impl
 	{
 	public:
 		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & name, std::initializer_list<String> libraries);
+		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & name);
 
 		// Convert the symbol list into bytecode
 		bool Execute();
+
+		// Parse and create a function signature from symbol list and library name
+		FunctionSignature ParseFunctionSignature(VisibilityType access, const String & libraryName);
 
 		// Retrieve the generated bytecode
 		BufferPtr GetBytecode() const { return m_bytecode; }
@@ -2370,7 +2376,7 @@ namespace Jinx::Impl
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 		String ParseFunctionNamePart();
-		FunctionSignature ParseFunctionSignature(VisibilityType access);
+		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
 		void ParseFunctionDefinition(VisibilityType scope);
 		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
@@ -2470,8 +2476,8 @@ namespace Jinx::Impl
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, std::any userContext);
 		virtual ~Script();
 
-		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
-		RuntimeID FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name) override;
+		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
+		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params);
 
 		bool Execute() override;
@@ -2624,6 +2630,7 @@ namespace Jinx::Impl
 		void SetProperty(RuntimeID id, const Variant & value);
 		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
 
@@ -2645,6 +2652,7 @@ namespace Jinx::Impl
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
+		SymbolTypeMap m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl
@@ -3396,7 +3404,7 @@ namespace Jinx::Impl
 		{
 			// Library functions require a predictable ID.
 			// Create a unique id based on a hash of the library name, signature text, and parameters
-			String hashString = libraryName;
+			String hashString = m_libraryName;
 			hashString.reserve(64);
 			for (auto itr = m_parts.begin(); itr != m_parts.end();)
 			{
@@ -3671,24 +3679,17 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline Lexer::Lexer(BufferPtr buffer, const String & name) :
-		m_buffer(buffer),
+	inline Lexer::Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name) :
 		m_name(name),
-		m_start(nullptr),
-		m_end(nullptr),
+		m_start(start),
+		m_end(end),
+		m_symbolTypeMap(symbolTypeMap),
 		m_current(nullptr),
 		m_columnNumber(1),
 		m_columnMarker(1),
 		m_lineNumber(1),
 		m_error(false)
 	{
-		// Build symbol type map, excluding symbols without a text representation
-		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
-		{
-			SymbolType symType = static_cast<SymbolType>(i);
-			auto symTypeText = GetSymbolTypeText(symType);
-			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
-		}
 	}
 
 	inline void Lexer::AdvanceCurrent()
@@ -3759,9 +3760,7 @@ namespace Jinx::Impl
 
 	inline bool Lexer::Execute()
 	{
-		m_start = reinterpret_cast<const char *>(m_buffer->Ptr());
 		m_current = m_start;
-		m_end = m_start + m_buffer->Size();
 
 		// Create a list of tokens for the parser to analyze
 		while (!IsEndOfText())
@@ -4313,13 +4312,13 @@ namespace Jinx::Impl
 		auto library = runtime->GetLibrary("core");
 
 		// Register core functions
-		library->RegisterFunction(Visibility::Public, { "write", "{}" }, Write);
-		library->RegisterFunction(Visibility::Public, { "write", "line", "{}" }, WriteLine);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "size" }, GetSize);
-		library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
-		library->RegisterFunction(Visibility::Public, { "(get)", "call", "stack" }, GetCallStack);
+		library->RegisterFunction(Visibility::Public, { "write {}" }, Write);
+		library->RegisterFunction(Visibility::Public, { "write line {}" }, WriteLine);
+		library->RegisterFunction(Visibility::Public, { "{} (get) size" }, GetSize);
+		library->RegisterFunction(Visibility::Public, { "{} (is) empty" }, IsEmpty);
+		library->RegisterFunction(Visibility::Public, { "{} (get) key" }, GetKey);
+		library->RegisterFunction(Visibility::Public, { "{} (get) value" }, GetValue);
+		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
@@ -4352,125 +4351,19 @@ namespace Jinx::Impl
 	{
 	}
 
-	inline FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const
+	inline FunctionSignature Library::CreateFunctionSignature(Visibility visibility, const String & name) const
 	{
-		// Build function signature parts from parameters
-		FunctionSignatureParts parts;
-		for (const auto & n : name)
-		{
-			// Validate name
-			if (n.empty())
-			{
-				LogWriteLine("Registered function requires a valid name");
-				return FunctionSignature();
-			}
-
-			FunctionSignaturePart part;
-			if (n.empty())
-			{
-				LogWriteLine("Empty identifier in function signature");
-				return FunctionSignature();
-			}
-			else if (n[0] == '{')
-			{
-				// Validate parameter part and parse optional type
-				String np;
-				np.reserve(32);
-				const char * p = n.c_str();
-				const char * e = p + n.size();
-				bool term = false;
-				++p;
-				while (p != e)
-				{
-					if (*p == '}')
-					{
-						++p;
-						term = true;
-						break;
-					}
-					else if (*p != ' ')
-					{
-						np += (char)(*p);
-						part.names.push_back(np);
-					}
-					++p;
-				}
-				if (!term)
-				{
-					LogWriteLine("Argument not properly terminated in function signature");
-					return FunctionSignature();
-				}
-				if (!np.empty())
-				{
-					if (!StringToValueType(np, &part.valueType))
-					{
-						LogWriteLine("Unknown parameter value in function signature");
-						return FunctionSignature();
-					}
-				}
-				while (p != e)
-				{
-					if (*p != ' ')
-					{
-						LogWriteLine("Invalid symbols after closing argument brace");
-						return FunctionSignature();
-					}
-					++p;
-				}
-				part.partType = FunctionSignaturePartType::Parameter;
-			}
-			else
-			{
-				// Break names into component parts
-				String np;
-				np.reserve(32);
-				const char * p = n.c_str();
-				const char * e = p + n.size();
-				bool optional = *p == '(';
-				if (optional)
-				{
-					if (n.size() < 3 || n[n.size() - 1] != ')')
-					{
-						LogWriteLine("Error when parsing optional name component");
-						return FunctionSignature();
-					}
-					++p;
-					--e;
-				}
-				while (p != e)
-				{
-					if (*p == '/')
-					{
-						part.names.push_back(np);
-						np.clear();
-					}
-					else if (*p == '{' || *p == '}')
-					{
-						LogWriteLine("Illegal characters { or } found in name.  Missing comma?");
-						return FunctionSignature();
-					}
-					else
-					{
-						np += (char)(*p);
-					}
-					++p;
-				}
-				part.partType = FunctionSignaturePartType::Name;
-				part.optional = optional;
-				part.names.push_back(np);
-			}
-			parts.push_back(part);
-		}
-
-		// Create functions signature
-		FunctionSignature functionSignature(publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), parts);
-		return functionSignature;
+		Lexer lexer(m_runtime.lock()->GetSymbolTypeMap(), name.c_str(), name.c_str() + name.size(), name);
+		if (!lexer.Execute())
+			return FunctionSignature();
+		Parser parser(m_runtime.lock(), lexer.GetSymbolList(), name);
+		return parser.ParseFunctionSignature(visibility == Visibility::Public ? VisibilityType::Public : VisibilityType::Private, m_name);
 	}
 
-	inline FunctionSignature Library::FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const
+	inline FunctionSignature Library::FindFunctionSignature(Visibility visibility, const String & name) const
 	{
+		auto signature = CreateFunctionSignature(visibility, name);
 		std::lock_guard<std::mutex> lock(m_functionMutex);
-		auto signature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
@@ -4521,9 +4414,9 @@ namespace Jinx::Impl
 		return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
 	}
 
-	inline bool Library::RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	inline bool Library::RegisterFunction(Visibility visibility, const String & name, FunctionCallback function)
 	{
-		if (name.size() < 1)
+		if (name.empty())
 		{
 			LogWriteLine("Registered function requires a valid name");
 			return false;
@@ -4535,20 +4428,20 @@ namespace Jinx::Impl
 		}
 
 		// Calculate the function signature
-		FunctionSignature functionSignature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
-		if (!functionSignature.IsValid())
+		auto signature = CreateFunctionSignature(visibility, name);
+		if (!signature.IsValid())
 			return false;
 
 		// Register function in library table.  This allows the the parser to find
 		// and use this function.
-		RegisterFunctionSignature(functionSignature);
+		RegisterFunctionSignature(signature);
 
 		// Register the function definition with the runtime system for 
 		// runtime lookups.
 		auto runtime = m_runtime.lock();
 		if (!runtime)
 			return false;
-		runtime->RegisterFunction(functionSignature, function);
+		runtime->RegisterFunction(signature, function);
 
 		// Return success
 		return true;
@@ -5624,6 +5517,19 @@ namespace Jinx::Impl
 			m_debugLines.reserve(1024);
 	}
 
+	inline Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name) :
+		m_runtime(runtime),
+		m_name(name),
+		m_symbolList(symbolList),
+		m_lastLine(1),
+		m_error(false),
+		m_breakAddress(false),
+		m_bytecode(CreateBuffer()),
+		m_writer(m_bytecode)
+	{
+		m_currentSymbol = symbolList.begin();
+	}
+
 	inline bool Parser::Execute()
 	{
 		// Reserve 1K space
@@ -5641,6 +5547,12 @@ namespace Jinx::Impl
 
 		// Return error status
 		return !m_error;
+	}
+
+	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
+	{
+		m_library = m_runtime->GetLibraryInternal(libraryName);
+		return ParseFunctionSignature(access, false);
 	}
 
 	inline String Parser::GetNameFromID(RuntimeID id) const
@@ -6843,7 +6755,7 @@ namespace Jinx::Impl
 		return s;
 	}
 
-	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
+	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, bool signatureOnly)
 	{
 		if (Check(SymbolType::NewLine))
 		{
@@ -6887,7 +6799,7 @@ namespace Jinx::Impl
 					}
 					part.names.push_back(paramName);
 				}
-				else
+				else if (signatureOnly)
 				{
 					Error("No variable name or class identifier found in function signature");
 					return FunctionSignature();
@@ -6966,12 +6878,17 @@ namespace Jinx::Impl
 			return FunctionSignature();
 		}
 
-		// Emit function definition opcode
-		EmitOpcode(Opcode::Function);
-
 		// Create the function signature
 		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
-		signature.Write(m_writer);
+
+		// This flag indicates that we're not generating bytecode, so no need to output that data.
+		if (signatureOnly)
+		{
+			// Emit function definition opcode
+			EmitOpcode(Opcode::Function);
+			signature.Write(m_writer);
+		}
+
 		return signature;
 	}
 
@@ -8172,6 +8089,14 @@ namespace Jinx::Impl
 	inline Runtime::Runtime()
 	{
 		m_perfStartTime = std::chrono::high_resolution_clock::now();
+
+		// Build symbol type map, excluding symbols without a text representation
+		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
+		{
+			SymbolType symType = static_cast<SymbolType>(i);
+			auto symTypeText = GetSymbolTypeText(symType);
+			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+		}
 	}
 
 	inline Runtime::~Runtime()
@@ -8206,7 +8131,7 @@ namespace Jinx::Impl
 		auto begin = std::chrono::high_resolution_clock::now();
 
 		// Lex script text into tokens
-		Lexer lexer(scriptBuffer, name);
+		Lexer lexer(m_symbolTypeMap, reinterpret_cast<const char *>(scriptBuffer->Ptr()), reinterpret_cast<const char *>(scriptBuffer->Ptr() + scriptBuffer->Size()), name);
 
 		// Exit if errors when lexing
 		if (!lexer.Execute())
@@ -9572,12 +9497,12 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline RuntimeID Script::FindFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name)
+	inline RuntimeID Script::FindFunction(LibraryPtr library, const String & name)
 	{
 		if (library == nullptr)
 			library = m_library;
 		auto libraryInt = std::static_pointer_cast<Library>(library);
-		return libraryInt->FindFunctionSignature(visibility, name).GetId();
+		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
 	}
 
 	inline Variant Script::CallFunction(RuntimeID id, Parameters params)
@@ -9695,7 +9620,7 @@ namespace Jinx::Impl
 		m_stack.push_back(value);
 	}
 
-	inline bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	inline bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function)
 	{
 		if (library == nullptr)
 			library = m_library;

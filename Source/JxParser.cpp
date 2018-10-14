@@ -26,6 +26,19 @@ namespace Jinx::Impl
 			m_debugLines.reserve(1024);
 	}
 
+	inline_t Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name) :
+		m_runtime(runtime),
+		m_name(name),
+		m_symbolList(symbolList),
+		m_lastLine(1),
+		m_error(false),
+		m_breakAddress(false),
+		m_bytecode(CreateBuffer()),
+		m_writer(m_bytecode)
+	{
+		m_currentSymbol = symbolList.begin();
+	}
+
 	inline_t bool Parser::Execute()
 	{
 		// Reserve 1K space
@@ -43,6 +56,12 @@ namespace Jinx::Impl
 
 		// Return error status
 		return !m_error;
+	}
+
+	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
+	{
+		m_library = m_runtime->GetLibraryInternal(libraryName);
+		return ParseFunctionSignature(access, false);
 	}
 
 	inline_t String Parser::GetNameFromID(RuntimeID id) const
@@ -1245,7 +1264,7 @@ namespace Jinx::Impl
 		return s;
 	}
 
-	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
+	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, bool signatureOnly)
 	{
 		if (Check(SymbolType::NewLine))
 		{
@@ -1289,7 +1308,7 @@ namespace Jinx::Impl
 					}
 					part.names.push_back(paramName);
 				}
-				else
+				else if (signatureOnly)
 				{
 					Error("No variable name or class identifier found in function signature");
 					return FunctionSignature();
@@ -1368,12 +1387,17 @@ namespace Jinx::Impl
 			return FunctionSignature();
 		}
 
-		// Emit function definition opcode
-		EmitOpcode(Opcode::Function);
-
 		// Create the function signature
 		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
-		signature.Write(m_writer);
+
+		// This flag indicates that we're not generating bytecode, so no need to output that data.
+		if (signatureOnly)
+		{
+			// Emit function definition opcode
+			EmitOpcode(Opcode::Function);
+			signature.Write(m_writer);
+		}
+
 		return signature;
 	}
 
