@@ -21,7 +21,7 @@ namespace Jinx::Impl
 
 		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
-		Variant CallFunction(RuntimeID id, Parameters params);
+		Variant CallFunction(RuntimeID id, Parameters params) override;
 
 		bool Execute() override;
 		bool IsFinished() const override;
