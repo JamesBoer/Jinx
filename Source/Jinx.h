@@ -60,6 +60,14 @@ by James Boer, and distributed under the MIT license.
 #endif
 #endif
 
+/*
+On macOS, use of std::any is restricted to applications targeting versions 10.14 and up (Mohave) due to
+limitations in std::any_cast.  As such, Jinx provides optional void * aliases in place of std::any in
+case a project wishes to target macOS clients earlier than 10.14.
+*/
+
+#define JINX_USE_ANY
+
 #include <memory>
 #include <functional>
 #include <vector>
@@ -68,7 +76,9 @@ by James Boer, and distributed under the MIT license.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#ifdef JINX_USE_ANY
 #include <any>
+#endif
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
@@ -110,6 +120,16 @@ namespace Jinx
 
 	using RuntimeID = uint64_t;
 	const RuntimeID InvalidID = 0;
+
+#ifdef JINX_USE_ANY
+	using Any = std::any;
+#define JinxAny std::any
+#define JinxAnyCast std::any_cast
+#else
+	using Any = void *;
+#define JinxAny Jinx::Any
+#define JinxAnyCast reinterpret_cast
+#endif
 
 	enum class Visibility
 	{
@@ -264,7 +284,7 @@ namespace Jinx
 		\return void pointer optionally passed at script creation.  This is intended to be
 		used by native library functions to retrieve user-specific data or objects.
 		*/
-		virtual std::any GetUserContext() const = 0;
+		virtual Any GetUserContext() const = 0;
 
 		/// Return the library to which this script belongs
 		/**
@@ -341,7 +361,7 @@ namespace Jinx
 		\return A ScriptPtr ready for execution.
 		\sa Compile(), IScript
 		*/
-		virtual ScriptPtr CreateScript(BufferPtr bytecode, std::any userContext = nullptr) = 0;
+		virtual ScriptPtr CreateScript(BufferPtr bytecode, Any userContext = nullptr) = 0;
 
 		/// Compile and create script from text
 		/**
@@ -353,7 +373,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, std::any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, Any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -366,7 +386,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, std::any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, Any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**

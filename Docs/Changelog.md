@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 - IString::FindFunction() no longer requires a Visibility type parameter
 - Function names passed via API are now processed using the same lexer and parser as scripts, ensuring more robust error checking
 - Fixed minor error in tutorial
+- Add std::any aliases due to macOS platform limitations
 
 ## [0.19.0] - 2018-10-09
 

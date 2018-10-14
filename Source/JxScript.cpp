@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, std::any userContext) :
+	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
 		m_userContext(userContext),
 		m_finished(false),

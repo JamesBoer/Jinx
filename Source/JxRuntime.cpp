@@ -94,12 +94,12 @@ namespace Jinx::Impl
 		return Compile(scriptBuffer, name, libraries);
 	}
 
-	inline_t ScriptPtr Runtime::CreateScript(BufferPtr bytecode, std::any userContext)
+	inline_t ScriptPtr Runtime::CreateScript(BufferPtr bytecode, Any userContext)
 	{
 		return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode), userContext);
 	}
 
-	inline_t ScriptPtr Runtime::CreateScript(const char * scriptText, std::any userContext, String name, std::initializer_list<String> libraries)
+	inline_t ScriptPtr Runtime::CreateScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile script text to bytecode
 		auto bytecode = Compile(scriptText, name, libraries);
@@ -110,7 +110,7 @@ namespace Jinx::Impl
 		return CreateScript(bytecode, userContext);
 	}
 
-	inline_t ScriptPtr Runtime::ExecuteScript(const char * scriptcode, std::any userContext, String name, std::initializer_list<String> libraries)
+	inline_t ScriptPtr Runtime::ExecuteScript(const char * scriptcode, Any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile the text to bytecode
 		auto bytecode = Compile(scriptcode, name, libraries);
