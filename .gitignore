@@ -9,6 +9,8 @@ release/
 *.ipch
 *.db-shm
 *.db-wal
+*.ide-shm
+*.ide-wal
 db.lock
 storage.ide
 
