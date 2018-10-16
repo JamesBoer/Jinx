@@ -12,8 +12,6 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
 	const uint32_t LogTabWidth = 4;
 
 	// All script opcodes
@@ -254,6 +252,9 @@ namespace Jinx::Impl
 	class Runtime;
 	using RuntimeIPtr = std::shared_ptr<Runtime>;
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
+
+	// Shared aliases
+	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
 
 } // namespace Jinx::Impl
 

@@ -80,9 +80,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5ac85a58721ff35f87247730e47e77b1"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_library.html#a5ac85a58721ff35f87247730e47e77b1">RegisterFunction</a> (Visibility visibility, std::initializer_list&lt; String &gt; name, FunctionCallback function)=0</td></tr>
-<tr class="memdesc:a5ac85a58721ff35f87247730e47e77b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a native function for use by scripts.  <a href="#a5ac85a58721ff35f87247730e47e77b1">More...</a><br /></td></tr>
-<tr class="separator:a5ac85a58721ff35f87247730e47e77b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64126532a15c72254e32114d796737ff"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_library.html#a64126532a15c72254e32114d796737ff">RegisterFunction</a> (Visibility visibility, const String &amp;name, FunctionCallback function)=0</td></tr>
+<tr class="memdesc:a64126532a15c72254e32114d796737ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a native function for use by scripts.  <a href="#a64126532a15c72254e32114d796737ff">More...</a><br /></td></tr>
+<tr class="separator:a64126532a15c72254e32114d796737ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf209831e54668f48fc9f241cb545825"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825">RegisterProperty</a> (Visibility visibility, Access access, const String &amp;name, const <a class="el" href="class_jinx_1_1_variant.html">Variant</a> &amp;value)=0</td></tr>
 <tr class="memdesc:adf209831e54668f48fc9f241cb545825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a property for use by scripts.  <a href="#adf209831e54668f48fc9f241cb545825">More...</a><br /></td></tr>
 <tr class="separator:adf209831e54668f48fc9f241cb545825"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -95,7 +95,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="class_jinx_1_1_i_library.html" title="ILibrary represents a single module of script code. ">ILibrary</a> represents a single module of script code. </p>
-<p>Multiple scripts can be compiled as part of a single library. This interface allows the creation of native functions that script code can execute via <a class="el" href="class_jinx_1_1_i_library.html#a5ac85a58721ff35f87247730e47e77b1" title="Register a native function for use by scripts. ">RegisterFunction()</a> and properties through the use of the <a class="el" href="class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825" title="Register a property for use by scripts. ">RegisterProperty()</a> function. You can also get or set property values using the <a class="el" href="class_jinx_1_1_i_library.html#ab5df0f09aa9355332ce77312ce9762d6" title="Get property value. ">GetProperty()</a> and <a class="el" href="class_jinx_1_1_i_library.html#a32346265f79792d69d6ffe5e4945d9d9" title="Set property value. ">SetProperty()</a> functions. </p>
+<p>Multiple scripts can be compiled as part of a single library. This interface allows the creation of native functions that script code can execute via <a class="el" href="class_jinx_1_1_i_library.html#a64126532a15c72254e32114d796737ff" title="Register a native function for use by scripts. ">RegisterFunction()</a> and properties through the use of the <a class="el" href="class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825" title="Register a property for use by scripts. ">RegisterProperty()</a> function. You can also get or set property values using the <a class="el" href="class_jinx_1_1_i_library.html#ab5df0f09aa9355332ce77312ce9762d6" title="Get property value. ">GetProperty()</a> and <a class="el" href="class_jinx_1_1_i_library.html#a32346265f79792d69d6ffe5e4945d9d9" title="Set property value. ">SetProperty()</a> functions. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ab5df0f09aa9355332ce77312ce9762d6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab5df0f09aa9355332ce77312ce9762d6">&#9670;&nbsp;</a></span>GetProperty()</h2>
@@ -132,8 +132,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a5ac85a58721ff35f87247730e47e77b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5ac85a58721ff35f87247730e47e77b1">&#9670;&nbsp;</a></span>RegisterFunction()</h2>
+<a id="a64126532a15c72254e32114d796737ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64126532a15c72254e32114d796737ff">&#9670;&nbsp;</a></span>RegisterFunction()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -150,7 +150,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::initializer_list&lt; String &gt;&#160;</td>
+          <td class="paramtype">const String &amp;&#160;</td>
           <td class="paramname"><em>name</em>, </td>
         </tr>
         <tr>
@@ -176,7 +176,7 @@ Public Member Functions</h2></td></tr>
 <p>This method registers a native function for use by script code. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">visibility</td><td>Indicates whether function is public or private. </td></tr>
-    <tr><td class="paramname">name</td><td>A list of names and parameters. Parameters are indicated with a "{}" string, while names are expected to conform to standard Jinx identifier naming rules. </td></tr>
+    <tr><td class="paramname">name</td><td>String containing all function nameparts and parameters. Parameters are indicated with "{}", while names are expected to conform to standard Jinx identifier naming rules. </td></tr>
     <tr><td class="paramname">function</td><td>The callback function executed by the script. </td></tr>
   </table>
   </dd>

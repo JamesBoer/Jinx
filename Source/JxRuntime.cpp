@@ -13,6 +13,14 @@ namespace Jinx::Impl
 	inline_t Runtime::Runtime()
 	{
 		m_perfStartTime = std::chrono::high_resolution_clock::now();
+
+		// Build symbol type map, excluding symbols without a text representation
+		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
+		{
+			SymbolType symType = static_cast<SymbolType>(i);
+			auto symTypeText = GetSymbolTypeText(symType);
+			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+		}
 	}
 
 	inline_t Runtime::~Runtime()
@@ -47,7 +55,7 @@ namespace Jinx::Impl
 		auto begin = std::chrono::high_resolution_clock::now();
 
 		// Lex script text into tokens
-		Lexer lexer(scriptBuffer, name);
+		Lexer lexer(m_symbolTypeMap, reinterpret_cast<const char *>(scriptBuffer->Ptr()), reinterpret_cast<const char *>(scriptBuffer->Ptr() + scriptBuffer->Size()), name);
 
 		// Exit if errors when lexing
 		if (!lexer.Execute())
@@ -86,12 +94,12 @@ namespace Jinx::Impl
 		return Compile(scriptBuffer, name, libraries);
 	}
 
-	inline_t ScriptPtr Runtime::CreateScript(BufferPtr bytecode, void * userContext)
+	inline_t ScriptPtr Runtime::CreateScript(BufferPtr bytecode, Any userContext)
 	{
 		return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode), userContext);
 	}
 
-	inline_t ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries)
+	inline_t ScriptPtr Runtime::CreateScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile script text to bytecode
 		auto bytecode = Compile(scriptText, name, libraries);
@@ -102,7 +110,7 @@ namespace Jinx::Impl
 		return CreateScript(bytecode, userContext);
 	}
 
-	inline_t ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, String name, std::initializer_list<String> libraries)
+	inline_t ScriptPtr Runtime::ExecuteScript(const char * scriptcode, Any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile the text to bytecode
 		auto bytecode = Compile(scriptcode, name, libraries);

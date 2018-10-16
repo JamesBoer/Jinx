@@ -1,8 +1,5 @@
 var searchData=
 [
-  ['setproperty',['SetProperty',['../class_jinx_1_1_i_library.html#a32346265f79792d69d6ffe5e4945d9d9',1,'Jinx::ILibrary']]],
-  ['setvariable',['SetVariable',['../class_jinx_1_1_i_script.html#a00c9be2222beda416088575b5b8d9918',1,'Jinx::IScript']]],
-  ['shutdown',['ShutDown',['../_jinx_8h.html#a7a1b0849201e9ffdc4adfd1d20ebce54',1,'Jinx']]],
-  ['str',['Str',['../_jx_variant_8h.html#abd5271bd7d642ff13666a73edef95e06',1,'Jinx']]],
-  ['stripdebuginfo',['StripDebugInfo',['../class_jinx_1_1_i_runtime.html#a1b285910bd22c7c7ccdee2daadb09171',1,'Jinx::IRuntime']]]
+  ['registerfunction',['RegisterFunction',['../class_jinx_1_1_i_library.html#a64126532a15c72254e32114d796737ff',1,'Jinx::ILibrary::RegisterFunction()'],['../class_jinx_1_1_i_script.html#a110daa4cd18479749d3e507cf921f4df',1,'Jinx::IScript::RegisterFunction()']]],
+  ['registerproperty',['RegisterProperty',['../class_jinx_1_1_i_library.html#adf209831e54668f48fc9f241cb545825',1,'Jinx::ILibrary']]]
 ];

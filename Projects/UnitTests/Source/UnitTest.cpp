@@ -16,8 +16,10 @@ Jinx::RuntimePtr TestCreateRuntime()
 	if (!s_initializedGlobals)
 	{
 		GlobalParams globalParams;
-		globalParams.allocBlockSize = 1024 * 256;
+		globalParams.enableLogging = true;
+		globalParams.logBytecode = true;
 		globalParams.logFn = [](const char *) {};
+		globalParams.allocBlockSize = 1024 * 256;
 		globalParams.allocFn = [](size_t size) { return malloc(size); };
 		globalParams.reallocFn = [](void * p, size_t size) { return realloc(p, size); };
 		globalParams.freeFn = [](void * p) { free(p); };
@@ -29,7 +31,7 @@ Jinx::RuntimePtr TestCreateRuntime()
 	return Jinx::CreateRuntime();
 }
 
-ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, void * userContext)
+ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, JinxAny userContext)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();
@@ -43,7 +45,7 @@ ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime, vo
 	return runtime->CreateScript(bytecode, userContext);
 }
 
-Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime, void * userContext)
+Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime, JinxAny userContext)
 {
 	if (!runtime)
 		runtime = TestCreateRuntime();

@@ -118,13 +118,13 @@ namespace Jinx::Impl
 		auto library = runtime->GetLibrary("core");
 
 		// Register core functions
-		library->RegisterFunction(Visibility::Public, { "write", "{}" }, Write);
-		library->RegisterFunction(Visibility::Public, { "write", "line", "{}" }, WriteLine);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "size" }, GetSize);
-		library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
-		library->RegisterFunction(Visibility::Public, { "(get)", "call", "stack" }, GetCallStack);
+		library->RegisterFunction(Visibility::Public, { "write {}" }, Write);
+		library->RegisterFunction(Visibility::Public, { "write line {}" }, WriteLine);
+		library->RegisterFunction(Visibility::Public, { "{} (get) size" }, GetSize);
+		library->RegisterFunction(Visibility::Public, { "{} (is) empty" }, IsEmpty);
+		library->RegisterFunction(Visibility::Public, { "{} (get) key" }, GetKey);
+		library->RegisterFunction(Visibility::Public, { "{} (get) value" }, GetValue);
+		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");

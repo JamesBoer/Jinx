@@ -38,13 +38,12 @@ namespace Jinx::Impl
 
 	using SymbolList = std::list<Symbol, Allocator<Symbol>>;
 	using SymbolListCItr = SymbolList::const_iterator;
-	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
 
 	class Lexer
 	{
 	public:
 		// Lex the script text
-		Lexer(BufferPtr buffer, const String & name);
+		Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name);
 
 		// Do lexing pass to create token list
 		bool Execute();
@@ -98,7 +97,6 @@ namespace Jinx::Impl
 		void ParseWhitespaceAndNewlines();
 
 	private:
-		BufferPtr m_buffer;
 		String m_name;
 		SymbolList m_symbolList;
 		const char * m_start;
@@ -108,7 +106,7 @@ namespace Jinx::Impl
 		uint32_t m_columnMarker;
 		uint32_t m_lineNumber;
 		bool m_error;
-		SymbolTypeMap m_symbolTypeMap;
+		const SymbolTypeMap & m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl

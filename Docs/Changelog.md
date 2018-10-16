@@ -1,6 +1,32 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.20.0] - 2018-10-14
+
+- Changed API functions registering function callbacks to use string instead of initializer lists
+- IString::FindFunction() no longer requires a Visibility type parameter
+- Function names passed via API are now processed using the same lexer and parser as scripts, ensuring more robust error checking
+- Fixed minor error in tutorial
+- Add std::any aliases due to macOS platform limitations
+
+## [0.19.0] - 2018-10-09
+
+- Added API to find and call Jinx functions from C++
+
+## [0.18.3] - 2018-10-07
+
+- Added additional tests
+
+## [0.18.2] - 2018-10-04
+
+- Replaced void* with std::any
+- Minor fixes to tutorial
+
+## [0.18.1] - 2018-09-29
+
+- Minor improvement to parser error handling message
+- Added new parser error tests
+
 ## [0.18.0] - 2018-09-27
 
 - Added unary negation operator (-)

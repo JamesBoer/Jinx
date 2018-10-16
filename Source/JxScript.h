@@ -16,10 +16,12 @@ namespace Jinx::Impl
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
-		Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext);
+		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);
 		virtual ~Script();
 
-		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
+		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
+		Variant CallFunction(RuntimeID id, Parameters params) override;
 
 		bool Execute() override;
 		bool IsFinished() const override;
@@ -28,7 +30,7 @@ namespace Jinx::Impl
 		void SetVariable(const String & name, const Variant & value) override;
 
 		const String & GetName() const override { return m_name; }
-		void * GetUserContext() const override { return m_userContext; }
+		Any GetUserContext() const override { return m_userContext; }
 		LibraryPtr GetLibrary() const override { return m_library; }
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
@@ -42,6 +44,8 @@ namespace Jinx::Impl
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
+		Variant CallFunction(RuntimeID id);
+
 	private:
 		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
 		using ScopeStack = std::vector<size_t, Allocator<size_t>>;
@@ -53,7 +57,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n), waitOnReturn(false)
 			{
 				scopeStack.reserve(32);
 			}
@@ -80,6 +84,9 @@ namespace Jinx::Impl
 
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop;
+
+			// Stop execution at the end of this frame
+			bool waitOnReturn;
 		};
 
 		// Execution frame stack
@@ -95,7 +102,7 @@ namespace Jinx::Impl
 		FunctionMap m_functionMap;
 
 		// User context pointer
-		void * m_userContext;
+		Any m_userContext;
 
 		// Initial position of bytecode for this script
 		size_t m_bytecodeStart;

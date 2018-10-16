@@ -21,9 +21,9 @@ namespace Jinx::Impl
 
 		// IRuntime interface
 		BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
-		ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(BufferPtr bytecode, Any userContext) override;
+		ScriptPtr CreateScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		BufferPtr StripDebugInfo(BufferPtr bytecode) const override;
@@ -41,6 +41,7 @@ namespace Jinx::Impl
 		void SetProperty(RuntimeID id, const Variant & value);
 		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
 
@@ -62,6 +63,7 @@ namespace Jinx::Impl
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
+		SymbolTypeMap m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl

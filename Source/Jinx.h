@@ -60,6 +60,14 @@ by James Boer, and distributed under the MIT license.
 #endif
 #endif
 
+/*
+On macOS, use of std::any is restricted to applications targeting versions 10.14 and up (Mohave) due to
+limitations in std::any_cast.  As such, Jinx provides optional void * aliases in place of std::any in
+case a project wishes to target macOS clients earlier than 10.14.
+*/
+
+#define JINX_USE_ANY
+
 #include <memory>
 #include <functional>
 #include <vector>
@@ -68,6 +76,9 @@ by James Boer, and distributed under the MIT license.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#ifdef JINX_USE_ANY
+#include <any>
+#endif
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
@@ -90,7 +101,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 18;
+	const uint32_t MinorVersion = 20;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -107,6 +118,19 @@ namespace Jinx
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
 
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
+#ifdef JINX_USE_ANY
+	using Any = std::any;
+#define JinxAny std::any
+#define JinxAnyCast std::any_cast
+#else
+	using Any = void *;
+#define JinxAny Jinx::Any
+#define JinxAnyCast reinterpret_cast
+#endif
+
 	enum class Visibility
 	{
 		Public,
@@ -118,7 +142,6 @@ namespace Jinx
 		ReadWrite,
 		ReadOnly,
 	};
-
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -135,12 +158,12 @@ namespace Jinx
 		/**
 		This method registers a native function for use by script code.
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, const String & name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**
@@ -220,16 +243,34 @@ namespace Jinx
 		*/
 		virtual void SetVariable(const String & name, const Variant & value) = 0;
 
+		/// Find the ID of a library function
+		/**
+		\param library Pointer to library containing function to call
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
+		\return Returns a valid RuntimeID on success, InvalidID on failure.
+		*/
+		virtual RuntimeID FindFunction(LibraryPtr library, const String & name) = 0;
+
+		/// Call a library function
+		/**
+		\param id RuntimeID of the function to call
+		\param params Vector of Variants to act as function parameters
+		\return Returns the Variant containing the function return value, or null for no value.
+		*/
+		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
+
 		/// Register a local override function for this script instance
 		/**
 		\param library Pointer to library containing function to override
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}", 
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) = 0;
+
 
 		/// Get the script name
 		/**
@@ -243,7 +284,7 @@ namespace Jinx
 		\return void pointer optionally passed at script creation.  This is intended to be
 		used by native library functions to retrieve user-specific data or objects.
 		*/
-		virtual void * GetUserContext() const = 0;
+		virtual Any GetUserContext() const = 0;
 
 		/// Return the library to which this script belongs
 		/**
@@ -320,7 +361,7 @@ namespace Jinx
 		\return A ScriptPtr ready for execution.
 		\sa Compile(), IScript
 		*/
-		virtual ScriptPtr CreateScript(BufferPtr bytecode, void * userContext = nullptr) = 0;
+		virtual ScriptPtr CreateScript(BufferPtr bytecode, Any userContext = nullptr) = 0;
 
 		/// Compile and create script from text
 		/**
@@ -332,7 +373,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, Any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -345,7 +386,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, Any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**

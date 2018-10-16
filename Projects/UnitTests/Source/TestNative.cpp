@@ -44,7 +44,7 @@ public:
 	{
 		if (!m_script)
 			return false;
-		return m_script->RegisterFunction(nullptr, Jinx::Visibility::Private, { "test", "override", "{}" }, [this](ScriptPtr script, Parameters params) -> Variant
+		return m_script->RegisterFunction(nullptr, Jinx::Visibility::Private, { "test override {}" }, [this](ScriptPtr script, Parameters params) -> Variant
 		{
 			return TestFunction(script, params);
 		});
@@ -138,7 +138,7 @@ static Variant YetAnotherFunction(ScriptPtr script, Parameters params)
 
 static Variant MemberFunction(ScriptPtr script, Parameters params)
 {
-	TestClass * testClass = static_cast<TestClass *>(script->GetUserContext());
+	TestClass * testClass = JinxAnyCast<TestClass *>(script->GetUserContext());
 	return testClass->GetTestValue();
 }
 
@@ -164,12 +164,12 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto runtime = TestCreateRuntime();
 		auto library = runtime->GetLibrary("test");
-		library->RegisterFunction(Visibility::Public, {"this", "function"}, ThisFunction);
-		library->RegisterFunction(Visibility::Public, { "that", "function" }, ThatFunction);
-		library->RegisterFunction(Visibility::Public, { "another", "function" }, AnotherFunction);
-		library->RegisterFunction(Visibility::Public, { "yet", "{}", "another", "{}", "function", "{}"}, YetAnotherFunction);
-		library->RegisterFunction(Visibility::Public, { "member", "function" }, MemberFunction);
-		library->RegisterFunction(Visibility::Public, { "lambda", "function" }, [](ScriptPtr script, Parameters params)->Variant
+		library->RegisterFunction(Visibility::Public, {"this function"}, ThisFunction);
+		library->RegisterFunction(Visibility::Public, { "that function" }, ThatFunction);
+		library->RegisterFunction(Visibility::Public, { "another function" }, AnotherFunction);
+		library->RegisterFunction(Visibility::Public, { "yet {} another {} function {}"}, YetAnotherFunction);
+		library->RegisterFunction(Visibility::Public, { "member function" }, MemberFunction);
+		library->RegisterFunction(Visibility::Public, { "lambda function" }, [](ScriptPtr script, Parameters params)->Variant
 		{
 			return "lambda lambda lambda";
 		});
@@ -187,9 +187,9 @@ TEST_CASE("Test Native", "[Native]")
 	SECTION("Test script user context data")
 	{
 		auto runtime = TestCreateRuntime();
-		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "user", "context", "{integer}" }, [](ScriptPtr script, Parameters params) -> Variant
+		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test user context {integer}" }, [](ScriptPtr script, Parameters params) -> Variant
 		{
-			auto classPtr = static_cast<TestContext *>(script->GetUserContext());
+			auto classPtr = JinxAnyCast<TestContext *>(script->GetUserContext());
 			classPtr->SetValue(params[0].GetInteger());
 			return nullptr;
 		});
@@ -202,7 +202,7 @@ TEST_CASE("Test Native", "[Native]")
 	SECTION("Test script override functions")
 	{
 		auto runtime = TestCreateRuntime();
-		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test", "override", "{}" }, [](ScriptPtr script, Parameters params) -> Variant
+		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test override {}" }, [](ScriptPtr script, Parameters params) -> Variant
 		{
 			return nullptr;
 		});
@@ -282,6 +282,73 @@ TEST_CASE("Test Native", "[Native]")
 		auto c = JinxNew(TestClass2, 123, 345.678f, "test");
 		REQUIRE(c);
 		JinxDelete(c);
+	}
+
+	SECTION("Test Jinx function execution from C++")
+	{
+		const char * scriptText =
+			u8R"(
+
+				private function {a} minus {b}
+					return a - b
+				end
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto id = script->FindFunction(nullptr, { "{} minus {}" });
+		REQUIRE(id != InvalidID);
+		auto val = script->CallFunction(id, { 5, 2 });
+		REQUIRE(val == 3);
+	}
+
+	SECTION("Test native function execution from C++")
+	{
+		auto runtime = TestCreateRuntime();
+		auto library = runtime->GetLibrary("test");
+		library->RegisterFunction(Visibility::Public, { "native call" }, [](ScriptPtr script, Parameters params)->Variant
+		{
+			return "Mary had a little lambda";
+		});
+
+		auto script = TestExecuteScript("", runtime);
+		REQUIRE(script);
+		auto id = script->FindFunction(library, { "native call" });
+		REQUIRE(id != InvalidID);
+		auto val = script->CallFunction(id, {});
+		REQUIRE(val == "Mary had a little lambda");
+	}
+
+	SECTION("Test native function with concurrent execution from C++")
+	{
+		const char * scriptText =
+			u8R"(
+
+				private function {a} minus {b}
+					return a - b
+				end
+
+				set x to 0
+				loop from 1 to 3
+					increment x
+					wait
+				end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		auto id = script->FindFunction(nullptr, { "{} minus {}" });
+		REQUIRE(id != InvalidID);
+		while (!script->IsFinished())
+		{
+			auto val = script->CallFunction(id, { 5, 2 });
+			REQUIRE(val == 3);
+			REQUIRE(script->Execute());
+		}
+		REQUIRE(script->GetVariable("x") == 3);
 	}
 
 }

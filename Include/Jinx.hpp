@@ -86,6 +86,14 @@ by James Boer, and distributed under the MIT license.
 #endif
 #endif
 
+/*
+On macOS, use of std::any is restricted to applications targeting versions 10.14 and up (Mohave) due to
+limitations in std::any_cast.  As such, Jinx provides optional void * aliases in place of std::any in
+case a project wishes to target macOS clients earlier than 10.14.
+*/
+
+#define JINX_USE_ANY
+
 #include <memory>
 #include <functional>
 #include <vector>
@@ -94,6 +102,9 @@ by James Boer, and distributed under the MIT license.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#ifdef JINX_USE_ANY
+#include <any>
+#endif
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
@@ -678,7 +689,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 18;
+	const uint32_t MinorVersion = 20;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -695,6 +706,19 @@ namespace Jinx
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
 
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
+#ifdef JINX_USE_ANY
+	using Any = std::any;
+#define JinxAny std::any
+#define JinxAnyCast std::any_cast
+#else
+	using Any = void *;
+#define JinxAny Jinx::Any
+#define JinxAnyCast reinterpret_cast
+#endif
+
 	enum class Visibility
 	{
 		Public,
@@ -706,7 +730,6 @@ namespace Jinx
 		ReadWrite,
 		ReadOnly,
 	};
-
 
 	/// ILibrary represents a single module of script code.
 	/** 
@@ -723,12 +746,12 @@ namespace Jinx
 		/**
 		This method registers a native function for use by script code.
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(Visibility visibility, const String & name, FunctionCallback function) = 0;
 
 		/// Register a property for use by scripts
 		/**
@@ -808,16 +831,34 @@ namespace Jinx
 		*/
 		virtual void SetVariable(const String & name, const Variant & value) = 0;
 
+		/// Find the ID of a library function
+		/**
+		\param library Pointer to library containing function to call
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}",
+		while names are expected to conform to standard Jinx identifier naming rules.
+		\return Returns a valid RuntimeID on success, InvalidID on failure.
+		*/
+		virtual RuntimeID FindFunction(LibraryPtr library, const String & name) = 0;
+
+		/// Call a library function
+		/**
+		\param id RuntimeID of the function to call
+		\param params Vector of Variants to act as function parameters
+		\return Returns the Variant containing the function return value, or null for no value.
+		*/
+		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
+
 		/// Register a local override function for this script instance
 		/**
 		\param library Pointer to library containing function to override
 		\param visibility Indicates whether function is public or private.
-		\param name A list of names and parameters.  Parameters are indicated with a "{}" string, while names are expected to conform to 
-		standard Jinx identifier naming rules.
+		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}", 
+		while names are expected to conform to standard Jinx identifier naming rules.
 		\param function The callback function executed by the script.
 		\return Returns true on success or false on failure.
 		*/
-		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) = 0;
+		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) = 0;
+
 
 		/// Get the script name
 		/**
@@ -831,7 +872,7 @@ namespace Jinx
 		\return void pointer optionally passed at script creation.  This is intended to be
 		used by native library functions to retrieve user-specific data or objects.
 		*/
-		virtual void * GetUserContext() const = 0;
+		virtual Any GetUserContext() const = 0;
 
 		/// Return the library to which this script belongs
 		/**
@@ -908,7 +949,7 @@ namespace Jinx
 		\return A ScriptPtr ready for execution.
 		\sa Compile(), IScript
 		*/
-		virtual ScriptPtr CreateScript(BufferPtr bytecode, void * userContext = nullptr) = 0;
+		virtual ScriptPtr CreateScript(BufferPtr bytecode, Any userContext = nullptr) = 0;
 
 		/// Compile and create script from text
 		/**
@@ -920,7 +961,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr CreateScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr CreateScript(const char * scriptText, Any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Compile, create, and execute a script
 		/**
@@ -933,7 +974,7 @@ namespace Jinx
 		\param libraries A list of libraries to import by default.
 		\return A ScriptPtr containing compiled bytecode on success or a nullptr on failure.
 		*/
-		virtual ScriptPtr ExecuteScript(const char * scriptText, void * userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
+		virtual ScriptPtr ExecuteScript(const char * scriptText, Any userContext = nullptr, String name = String(), std::initializer_list<String> libraries = {}) = 0;
 
 		/// Retrieve library by name or create empty library if not found
 		/**
@@ -1144,8 +1185,6 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
 	const uint32_t LogTabWidth = 4;
 
 	// All script opcodes
@@ -1386,6 +1425,9 @@ namespace Jinx::Impl
 	class Runtime;
 	using RuntimeIPtr = std::shared_ptr<Runtime>;
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
+
+	// Shared aliases
+	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
 
 } // namespace Jinx::Impl
 
@@ -1759,13 +1801,12 @@ namespace Jinx::Impl
 
 	using SymbolList = std::list<Symbol, Allocator<Symbol>>;
 	using SymbolListCItr = SymbolList::const_iterator;
-	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
 
 	class Lexer
 	{
 	public:
 		// Lex the script text
-		Lexer(BufferPtr buffer, const String & name);
+		Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name);
 
 		// Do lexing pass to create token list
 		bool Execute();
@@ -1819,7 +1860,6 @@ namespace Jinx::Impl
 		void ParseWhitespaceAndNewlines();
 
 	private:
-		BufferPtr m_buffer;
 		String m_name;
 		SymbolList m_symbolList;
 		const char * m_start;
@@ -1829,7 +1869,7 @@ namespace Jinx::Impl
 		uint32_t m_columnMarker;
 		uint32_t m_lineNumber;
 		bool m_error;
-		SymbolTypeMap m_symbolTypeMap;
+		const SymbolTypeMap & m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl
@@ -2066,7 +2106,7 @@ namespace Jinx::Impl
 		Library(RuntimeWPtr runtime, const String & name);
 
 		// ILibrary interface
-		bool RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+		bool RegisterFunction(Visibility visibility, const String & name, FunctionCallback function) override;
 		bool RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value) override;
 		Variant GetProperty(const String & name) const override;
 		void SetProperty(const String & name, const Variant & value) override;
@@ -2083,13 +2123,15 @@ namespace Jinx::Impl
 		// Internal function signature functions
 		void RegisterFunctionSignature(const FunctionSignature & signature);
 		bool FunctionSignatureExists(const FunctionSignature & signature) const;
-		FunctionSignature FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const;
+		FunctionSignature FindFunctionSignature(Visibility visibility, const String & name) const;
 		const FunctionPtrList Functions() const;
 
 	private:
 
+		// Create a function signature from a string
+		FunctionSignature CreateFunctionSignature(Visibility visibility, const String & name) const;
+
 		// Private internal functions
-		FunctionSignature CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const;
 		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
 		using PropertyNameTable = std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>>;
@@ -2219,9 +2261,13 @@ namespace Jinx::Impl
 	{
 	public:
 		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & name, std::initializer_list<String> libraries);
+		Parser(RuntimeIPtr runtime, const SymbolList &symbolList, const String & name);
 
 		// Convert the symbol list into bytecode
 		bool Execute();
+
+		// Parse and create a function signature from symbol list and library name
+		FunctionSignature ParseFunctionSignature(VisibilityType access, const String & libraryName);
 
 		// Retrieve the generated bytecode
 		BufferPtr GetBytecode() const { return m_bytecode; }
@@ -2248,15 +2294,14 @@ namespace Jinx::Impl
 			if (m_error)
 				return;
 			m_error = true;
-			if (m_currentSymbol == m_symbolList.end())
-			{
-				LogWriteLine("Error: Unexpected end of script");
-				return;
-			}
 			if (m_name.empty())
-				LogWrite("Error at line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+				LogWrite("Error at ");
 			else
-				LogWrite("Error in '%s' at line %i, column %i: ", m_name.c_str(), m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+				LogWrite("Error in %s at ", m_name.c_str());
+			if (m_currentSymbol == m_symbolList.end())
+				LogWrite("end of script: ");
+			else
+				LogWrite("line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			LogWriteLine(format, std::forward<Args>(args)...);
 		}
 
@@ -2340,7 +2385,6 @@ namespace Jinx::Impl
 		// Parsing functions advance the current symbol, looking for a pattern of symbols
 		// and injecting the compiled results into the bytecode buffer.
 		VisibilityType ParseScope();
-		Opcode ParseLogicalOperator();
 		Opcode ParseBinaryOperator();
 		Variant ParseValue();
 		ValueType ParseValueType();
@@ -2352,7 +2396,7 @@ namespace Jinx::Impl
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 		String ParseFunctionNamePart();
-		FunctionSignature ParseFunctionSignature(VisibilityType access);
+		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
 		void ParseFunctionDefinition(VisibilityType scope);
 		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
@@ -2449,10 +2493,12 @@ namespace Jinx::Impl
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
-		Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext);
+		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);
 		virtual ~Script();
 
-		bool RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function) override;
+		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
+		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
+		Variant CallFunction(RuntimeID id, Parameters params) override;
 
 		bool Execute() override;
 		bool IsFinished() const override;
@@ -2461,7 +2507,7 @@ namespace Jinx::Impl
 		void SetVariable(const String & name, const Variant & value) override;
 
 		const String & GetName() const override { return m_name; }
-		void * GetUserContext() const override { return m_userContext; }
+		Any GetUserContext() const override { return m_userContext; }
 		LibraryPtr GetLibrary() const override { return m_library; }
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
@@ -2475,6 +2521,8 @@ namespace Jinx::Impl
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
+		Variant CallFunction(RuntimeID id);
+
 	private:
 		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
 		using ScopeStack = std::vector<size_t, Allocator<size_t>>;
@@ -2486,7 +2534,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n), waitOnReturn(false)
 			{
 				scopeStack.reserve(32);
 			}
@@ -2513,6 +2561,9 @@ namespace Jinx::Impl
 
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop;
+
+			// Stop execution at the end of this frame
+			bool waitOnReturn;
 		};
 
 		// Execution frame stack
@@ -2528,7 +2579,7 @@ namespace Jinx::Impl
 		FunctionMap m_functionMap;
 
 		// User context pointer
-		void * m_userContext;
+		Any m_userContext;
 
 		// Initial position of bytecode for this script
 		size_t m_bytecodeStart;
@@ -2579,9 +2630,9 @@ namespace Jinx::Impl
 
 		// IRuntime interface
 		BufferPtr Compile(const char * scriptText, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr CreateScript(BufferPtr bytecode, void * userContext) override;
-		ScriptPtr CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
-		ScriptPtr ExecuteScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr CreateScript(BufferPtr bytecode, Any userContext) override;
+		ScriptPtr CreateScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries) override;
+		ScriptPtr ExecuteScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries) override;
 		LibraryPtr GetLibrary(const String & name) override;
 		PerformanceStats GetScriptPerformanceStats(bool resetStats = true) override;
 		BufferPtr StripDebugInfo(BufferPtr bytecode) const override;
@@ -2599,6 +2650,7 @@ namespace Jinx::Impl
 		void SetProperty(RuntimeID id, const Variant & value);
 		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
 
@@ -2620,6 +2672,7 @@ namespace Jinx::Impl
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
+		SymbolTypeMap m_symbolTypeMap;
 	};
 
 } // namespace Jinx::Impl
@@ -2760,8 +2813,6 @@ namespace Jinx
 	}
 
 } // namespace Jinx
-
-
 
 
 // end --- JxBuffer.cpp --- 
@@ -3373,7 +3424,7 @@ namespace Jinx::Impl
 		{
 			// Library functions require a predictable ID.
 			// Create a unique id based on a hash of the library name, signature text, and parameters
-			String hashString = libraryName;
+			String hashString = m_libraryName;
 			hashString.reserve(64);
 			for (auto itr = m_parts.begin(); itr != m_parts.end();)
 			{
@@ -3648,24 +3699,17 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline Lexer::Lexer(BufferPtr buffer, const String & name) :
-		m_buffer(buffer),
+	inline Lexer::Lexer(const SymbolTypeMap & symbolTypeMap, const char * start, const char * end, const String & name) :
 		m_name(name),
-		m_start(nullptr),
-		m_end(nullptr),
+		m_start(start),
+		m_end(end),
+		m_symbolTypeMap(symbolTypeMap),
 		m_current(nullptr),
 		m_columnNumber(1),
 		m_columnMarker(1),
 		m_lineNumber(1),
 		m_error(false)
 	{
-		// Build symbol type map, excluding symbols without a text representation
-		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
-		{
-			SymbolType symType = static_cast<SymbolType>(i);
-			auto symTypeText = GetSymbolTypeText(symType);
-			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
-		}
 	}
 
 	inline void Lexer::AdvanceCurrent()
@@ -3736,9 +3780,7 @@ namespace Jinx::Impl
 
 	inline bool Lexer::Execute()
 	{
-		m_start = reinterpret_cast<const char *>(m_buffer->Ptr());
 		m_current = m_start;
-		m_end = m_start + m_buffer->Size();
 
 		// Create a list of tokens for the parser to analyze
 		while (!IsEndOfText())
@@ -4290,13 +4332,13 @@ namespace Jinx::Impl
 		auto library = runtime->GetLibrary("core");
 
 		// Register core functions
-		library->RegisterFunction(Visibility::Public, { "write", "{}" }, Write);
-		library->RegisterFunction(Visibility::Public, { "write", "line", "{}" }, WriteLine);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "size" }, GetSize);
-		library->RegisterFunction(Visibility::Public, { "{}", "(is)", "empty" }, IsEmpty);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "key" }, GetKey);
-		library->RegisterFunction(Visibility::Public, { "{}", "(get)", "value" }, GetValue);
-		library->RegisterFunction(Visibility::Public, { "(get)", "call", "stack" }, GetCallStack);
+		library->RegisterFunction(Visibility::Public, { "write {}" }, Write);
+		library->RegisterFunction(Visibility::Public, { "write line {}" }, WriteLine);
+		library->RegisterFunction(Visibility::Public, { "{} (get) size" }, GetSize);
+		library->RegisterFunction(Visibility::Public, { "{} (is) empty" }, IsEmpty);
+		library->RegisterFunction(Visibility::Public, { "{} (get) key" }, GetKey);
+		library->RegisterFunction(Visibility::Public, { "{} (get) value" }, GetValue);
+		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
@@ -4329,125 +4371,19 @@ namespace Jinx::Impl
 	{
 	}
 
-	inline FunctionSignature Library::CreateFunctionSignature(bool publicScope, std::initializer_list<String> name) const
+	inline FunctionSignature Library::CreateFunctionSignature(Visibility visibility, const String & name) const
 	{
-		// Build function signature parts from parameters
-		FunctionSignatureParts parts;
-		for (const auto & n : name)
-		{
-			// Validate name
-			if (n.empty())
-			{
-				LogWriteLine("Registered function requires a valid name");
-				return FunctionSignature();
-			}
-
-			FunctionSignaturePart part;
-			if (n.empty())
-			{
-				LogWriteLine("Empty identifier in function signature");
-				return FunctionSignature();
-			}
-			else if (n[0] == '{')
-			{
-				// Validate parameter part and parse optional type
-				String np;
-				np.reserve(32);
-				const char * p = n.c_str();
-				const char * e = p + n.size();
-				bool term = false;
-				++p;
-				while (p != e)
-				{
-					if (*p == '}')
-					{
-						++p;
-						term = true;
-						break;
-					}
-					else if (*p != ' ')
-					{
-						np += (char)(*p);
-						part.names.push_back(np);
-					}
-					++p;
-				}
-				if (!term)
-				{
-					LogWriteLine("Argument not properly terminated in function signature");
-					return FunctionSignature();
-				}
-				if (!np.empty())
-				{
-					if (!StringToValueType(np, &part.valueType))
-					{
-						LogWriteLine("Unknown parameter value in function signature");
-						return FunctionSignature();
-					}
-				}
-				while (p != e)
-				{
-					if (*p != ' ')
-					{
-						LogWriteLine("Invalid symbols after closing argument brace");
-						return FunctionSignature();
-					}
-					++p;
-				}
-				part.partType = FunctionSignaturePartType::Parameter;
-			}
-			else
-			{
-				// Break names into component parts
-				String np;
-				np.reserve(32);
-				const char * p = n.c_str();
-				const char * e = p + n.size();
-				bool optional = *p == '(';
-				if (optional)
-				{
-					if (n.size() < 3 || n[n.size() - 1] != ')')
-					{
-						LogWriteLine("Error when parsing optional name component");
-						return FunctionSignature();
-					}
-					++p;
-					--e;
-				}
-				while (p != e)
-				{
-					if (*p == '/')
-					{
-						part.names.push_back(np);
-						np.clear();
-					}
-					else if (*p == '{' || *p == '}')
-					{
-						LogWriteLine("Illegal characters { or } found in name.  Missing comma?");
-						return FunctionSignature();
-					}
-					else
-					{
-						np += (char)(*p);
-					}
-					++p;
-				}
-				part.partType = FunctionSignaturePartType::Name;
-				part.optional = optional;
-				part.names.push_back(np);
-			}
-			parts.push_back(part);
-		}
-
-		// Create functions signature
-		FunctionSignature functionSignature(publicScope ? VisibilityType::Public : VisibilityType::Private, GetName(), parts);
-		return functionSignature;
+		Lexer lexer(m_runtime.lock()->GetSymbolTypeMap(), name.c_str(), name.c_str() + name.size(), name);
+		if (!lexer.Execute())
+			return FunctionSignature();
+		Parser parser(m_runtime.lock(), lexer.GetSymbolList(), name);
+		return parser.ParseFunctionSignature(visibility == Visibility::Public ? VisibilityType::Public : VisibilityType::Private, m_name);
 	}
 
-	inline FunctionSignature Library::FindFunctionSignature(Visibility visibility, std::initializer_list<String> name) const
+	inline FunctionSignature Library::FindFunctionSignature(Visibility visibility, const String & name) const
 	{
+		auto signature = CreateFunctionSignature(visibility, name);
 		std::lock_guard<std::mutex> lock(m_functionMutex);
-		auto signature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
@@ -4498,9 +4434,9 @@ namespace Jinx::Impl
 		return m_propertyNameTable.find(name) == m_propertyNameTable.end() ? false : true;
 	}
 
-	inline bool Library::RegisterFunction(Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	inline bool Library::RegisterFunction(Visibility visibility, const String & name, FunctionCallback function)
 	{
-		if (name.size() < 1)
+		if (name.empty())
 		{
 			LogWriteLine("Registered function requires a valid name");
 			return false;
@@ -4512,20 +4448,20 @@ namespace Jinx::Impl
 		}
 
 		// Calculate the function signature
-		FunctionSignature functionSignature = CreateFunctionSignature(visibility == Visibility::Public ? true : false, name);
-		if (!functionSignature.IsValid())
+		auto signature = CreateFunctionSignature(visibility, name);
+		if (!signature.IsValid())
 			return false;
 
 		// Register function in library table.  This allows the the parser to find
 		// and use this function.
-		RegisterFunctionSignature(functionSignature);
+		RegisterFunctionSignature(signature);
 
 		// Register the function definition with the runtime system for 
 		// runtime lookups.
 		auto runtime = m_runtime.lock();
 		if (!runtime)
 			return false;
-		runtime->RegisterFunction(functionSignature, function);
+		runtime->RegisterFunction(signature, function);
 
 		// Return success
 		return true;
@@ -5601,6 +5537,19 @@ namespace Jinx::Impl
 			m_debugLines.reserve(1024);
 	}
 
+	inline Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name) :
+		m_runtime(runtime),
+		m_name(name),
+		m_symbolList(symbolList),
+		m_lastLine(1),
+		m_error(false),
+		m_breakAddress(false),
+		m_bytecode(CreateBuffer()),
+		m_writer(m_bytecode)
+	{
+		m_currentSymbol = symbolList.begin();
+	}
+
 	inline bool Parser::Execute()
 	{
 		// Reserve 1K space
@@ -5618,6 +5567,12 @@ namespace Jinx::Impl
 
 		// Return error status
 		return !m_error;
+	}
+
+	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
+	{
+		m_library = m_runtime->GetLibraryInternal(libraryName);
+		return ParseFunctionSignature(access, false);
 	}
 
 	inline String Parser::GetNameFromID(RuntimeID id) const
@@ -6214,8 +6169,8 @@ namespace Jinx::Impl
 							// Make sure the library exists
 							if (!m_runtime->LibraryExists(libName))
 							{
-								LogWriteLine("Warning: Unable to find library '%s'", libName.c_str());
-								continue;
+								LogWriteLine("Unable to find library '%s'", libName.c_str());
+								return FunctionMatch();
 							}
 
 							// Search for function in this library
@@ -6225,16 +6180,16 @@ namespace Jinx::Impl
 							{
 								if (match.signature)
 								{
-									LogWriteLine("Warning: Ambiguous function name detected.  Use library name to disambiguate.");
-									return match;
+									LogWriteLine("Ambiguous function name detected.  Use library name to disambiguate.");
+									return FunctionMatch();
 								}
 								else
 								{
 									match = newMatch;
 									if (match.signature->GetVisibility() == VisibilityType::Private && library != m_library)
 									{
-										LogWriteLine("Warning: Scope does not allow calling of library function");
-										return match;
+										LogWriteLine("Unable to call library function with private scope.");
+										return FunctionMatch();
 									}
 								}
 							}
@@ -6402,31 +6357,6 @@ namespace Jinx::Impl
 			return VisibilityType::Public;
 		}
 		return VisibilityType::Local;
-	}
-
-	inline Opcode Parser::ParseLogicalOperator()
-	{
-		if (m_error || m_currentSymbol == m_symbolList.end())
-			return Opcode::NumOpcodes;
-
-		Opcode opcode = Opcode::NumOpcodes;
-		switch (m_currentSymbol->type)
-		{
-		case SymbolType::And:
-			opcode = Opcode::And;
-			break;
-		case SymbolType::Or:
-			opcode = Opcode::Or;
-			break;
-		case SymbolType::Not:
-			opcode = Opcode::Not;
-			break;
-		default:
-			Error("Unknown type when parsing condition keyword");
-			break;
-		}
-		NextSymbol();
-		return opcode;
 	}
 
 	inline Opcode Parser::ParseBinaryOperator()
@@ -6845,7 +6775,7 @@ namespace Jinx::Impl
 		return s;
 	}
 
-	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope)
+	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, bool signatureOnly)
 	{
 		if (Check(SymbolType::NewLine))
 		{
@@ -6889,7 +6819,7 @@ namespace Jinx::Impl
 					}
 					part.names.push_back(paramName);
 				}
-				else
+				else if (signatureOnly)
 				{
 					Error("No variable name or class identifier found in function signature");
 					return FunctionSignature();
@@ -6968,12 +6898,17 @@ namespace Jinx::Impl
 			return FunctionSignature();
 		}
 
-		// Emit function definition opcode
-		EmitOpcode(Opcode::Function);
-
 		// Create the function signature
 		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
-		signature.Write(m_writer);
+
+		// This flag indicates that we're not generating bytecode, so no need to output that data.
+		if (signatureOnly)
+		{
+			// Emit function definition opcode
+			EmitOpcode(Opcode::Function);
+			signature.Write(m_writer);
+		}
+
 		return signature;
 	}
 
@@ -7414,7 +7349,7 @@ namespace Jinx::Impl
 			auto propName = ParsePropertyName();
 			if (propName.IsReadOnly())
 			{
-				Error("Can't delete a readonly property");
+				Error("Can't erase a readonly property");
 				return;
 			}
 			if (Accept(SymbolType::SquareOpen))
@@ -7451,7 +7386,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
-			Error("Valid property or variable name expected after delete keyword");
+			Error("Valid property or variable name expected after erase keyword");
 			return;
 		}
 	}
@@ -8024,11 +7959,7 @@ namespace Jinx::Impl
 				Error("Expected valid name after 'import' keyword");
 				return;
 			}
-			if (!Expect(SymbolType::NewLine))
-			{
-				Error("Expected new line after library import name");
-				return;
-			}
+			Expect(SymbolType::NewLine);
 
 			// Check to make sure we're not adding duplicates
 			bool foundDup = false;
@@ -8043,7 +7974,14 @@ namespace Jinx::Impl
 
 			// Add library to the list of imported libraries for this script
 			if (!foundDup)
+			{
 				m_importList.push_back(name);
+				if (!m_runtime->LibraryExists(name))
+				{
+					Error("Could not find library named '%s'", name.c_str());
+					break;
+				}
+			}
 		}
 	}
 
@@ -8063,11 +8001,7 @@ namespace Jinx::Impl
 				Error("Expected valid name after 'library' keyword");
 				return;
 			}
-			if (!Expect(SymbolType::NewLine))
-			{
-				Error("Expected new line after library name");
-				return;
-			}
+			Expect(SymbolType::NewLine);
 			m_library = m_runtime->GetLibraryInternal(libraryName);
 		}
 
@@ -8175,6 +8109,14 @@ namespace Jinx::Impl
 	inline Runtime::Runtime()
 	{
 		m_perfStartTime = std::chrono::high_resolution_clock::now();
+
+		// Build symbol type map, excluding symbols without a text representation
+		for (size_t i = static_cast<size_t>(SymbolType::ForwardSlash); i < static_cast<size_t>(SymbolType::NumSymbols); ++i)
+		{
+			SymbolType symType = static_cast<SymbolType>(i);
+			auto symTypeText = GetSymbolTypeText(symType);
+			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+		}
 	}
 
 	inline Runtime::~Runtime()
@@ -8209,7 +8151,7 @@ namespace Jinx::Impl
 		auto begin = std::chrono::high_resolution_clock::now();
 
 		// Lex script text into tokens
-		Lexer lexer(scriptBuffer, name);
+		Lexer lexer(m_symbolTypeMap, reinterpret_cast<const char *>(scriptBuffer->Ptr()), reinterpret_cast<const char *>(scriptBuffer->Ptr() + scriptBuffer->Size()), name);
 
 		// Exit if errors when lexing
 		if (!lexer.Execute())
@@ -8248,12 +8190,12 @@ namespace Jinx::Impl
 		return Compile(scriptBuffer, name, libraries);
 	}
 
-	inline ScriptPtr Runtime::CreateScript(BufferPtr bytecode, void * userContext)
+	inline ScriptPtr Runtime::CreateScript(BufferPtr bytecode, Any userContext)
 	{
 		return std::allocate_shared<Script>(Allocator<Script>(), shared_from_this(), std::static_pointer_cast<Buffer>(bytecode), userContext);
 	}
 
-	inline ScriptPtr Runtime::CreateScript(const char * scriptText, void * userContext, String name, std::initializer_list<String> libraries)
+	inline ScriptPtr Runtime::CreateScript(const char * scriptText, Any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile script text to bytecode
 		auto bytecode = Compile(scriptText, name, libraries);
@@ -8264,7 +8206,7 @@ namespace Jinx::Impl
 		return CreateScript(bytecode, userContext);
 	}
 
-	inline ScriptPtr Runtime::ExecuteScript(const char * scriptcode, void * userContext, String name, std::initializer_list<String> libraries)
+	inline ScriptPtr Runtime::ExecuteScript(const char * scriptcode, Any userContext, String name, std::initializer_list<String> libraries)
 	{
 		// Compile the text to bytecode
 		auto bytecode = Compile(scriptcode, name, libraries);
@@ -8643,7 +8585,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, void * userContext) :
+	inline Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
 		m_userContext(userContext),
 		m_finished(false),
@@ -9435,11 +9377,14 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
+				bool exit = m_execution.back().waitOnReturn;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
 					m_stack.pop_back();
 				Push(val);
+				if (exit)
+					opcode = Opcode::Wait;
 			}
 			break;
 			case Opcode::ScopeBegin:
@@ -9561,8 +9506,8 @@ namespace Jinx::Impl
 			}
 			break;
 			}
-
-		} while (opcode != Opcode::Exit && opcode != Opcode::Wait);
+		} 
+		while (opcode != Opcode::Exit && opcode != Opcode::Wait);
 
 		// Track accumulated script execution time
 		auto end = std::chrono::high_resolution_clock::now();
@@ -9570,6 +9515,75 @@ namespace Jinx::Impl
 		m_runtime->AddPerformanceParams(m_finished, executionTimeNs, tickInstCount);
 
 		return true;
+	}
+
+	inline RuntimeID Script::FindFunction(LibraryPtr library, const String & name)
+	{
+		if (library == nullptr)
+			library = m_library;
+		auto libraryInt = std::static_pointer_cast<Library>(library);
+		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
+	}
+
+	inline Variant Script::CallFunction(RuntimeID id, Parameters params)
+	{
+		for (const auto & param : params)
+			Push(param);
+		return CallFunction(id);
+	}
+
+	inline Variant Script::CallFunction(RuntimeID id)
+	{
+		FunctionDefinitionPtr functionDef;
+		if (!m_functionMap.empty())
+		{
+			auto itr = m_functionMap.find(id);
+			if (itr != m_functionMap.end())
+				functionDef = itr->second;
+		}
+		if (!functionDef)
+		{
+			functionDef = m_runtime->FindFunction(id);
+		}
+		if (!functionDef)
+		{
+			Error("Could not find function definition");
+			return false;
+		}
+		// Check to see if this is a bytecode function
+		if (functionDef->GetBytecode())
+		{
+			m_execution.push_back(ExecutionFrame(functionDef));
+			m_execution.back().waitOnReturn = true;
+			m_execution.back().reader.Seek(functionDef->GetOffset());
+			bool finished = m_finished;
+			m_finished = false;
+			if (!Execute())
+				return nullptr;
+			m_finished = finished;
+			m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
+			return Pop();
+		}
+		// Otherwise, call a native function callback
+		else if (functionDef->GetCallback())
+		{
+			Parameters params;
+			size_t numParams = functionDef->GetParameterCount();
+			for (size_t i = 0; i < numParams; ++i)
+			{
+				size_t index = m_stack.size() - (numParams - i);
+				auto param = m_stack[index];
+				params.push_back(param);
+			}
+			for (size_t i = 0; i < numParams; ++i)
+				m_stack.pop_back();
+			return functionDef->GetCallback()(shared_from_this(), params);
+		}
+		else
+		{
+			Error("Error in function definition");
+		}
+		return nullptr;
 	}
 
 	inline std::vector<String, Allocator<String>> Script::GetCallStack() const
@@ -9626,7 +9640,7 @@ namespace Jinx::Impl
 		m_stack.push_back(value);
 	}
 
-	inline bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, std::initializer_list<String> name, FunctionCallback function)
+	inline bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function)
 	{
 		if (library == nullptr)
 			library = m_library;
