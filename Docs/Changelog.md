@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.21.0] - 2018-10-21
+
+- Removed local script function override
+
 ## [0.20.0] - 2018-10-14
 
 - Changed API functions registering function callbacks to use string instead of initializer lists
