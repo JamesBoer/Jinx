@@ -689,7 +689,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 20;
+	const uint32_t MinorVersion = 21;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -847,18 +847,6 @@ namespace Jinx
 		\return Returns the Variant containing the function return value, or null for no value.
 		*/
 		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
-
-		/// Register a local override function for this script instance
-		/**
-		\param library Pointer to library containing function to override
-		\param visibility Indicates whether function is public or private.
-		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}", 
-		while names are expected to conform to standard Jinx identifier naming rules.
-		\param function The callback function executed by the script.
-		\return Returns true on success or false on failure.
-		*/
-		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) = 0;
-
 
 		/// Get the script name
 		/**
@@ -2496,7 +2484,6 @@ namespace Jinx::Impl
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);
 		virtual ~Script();
 
-		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params) override;
 
@@ -2574,9 +2561,6 @@ namespace Jinx::Impl
 
 		// Current library
 		LibraryIPtr m_library;
-
-		// Local function overrides
-		FunctionMap m_functionMap;
 
 		// User context pointer
 		Any m_userContext;
@@ -8760,17 +8744,7 @@ namespace Jinx::Impl
 			{
 				RuntimeID id;
 				m_execution.back().reader.Read(&id, sizeof(id));
-				FunctionDefinitionPtr functionDef;
-				if (!m_functionMap.empty())
-				{
-					auto itr = m_functionMap.find(id);
-					if (itr != m_functionMap.end())
-						functionDef = itr->second;
-				}
-				if (!functionDef)
-				{
-					functionDef = m_runtime->FindFunction(id);
-				}
+				FunctionDefinitionPtr functionDef = m_runtime->FindFunction(id);
 				if (!functionDef)
 				{
 					Error("Could not find function definition");
@@ -9534,17 +9508,7 @@ namespace Jinx::Impl
 
 	inline Variant Script::CallFunction(RuntimeID id)
 	{
-		FunctionDefinitionPtr functionDef;
-		if (!m_functionMap.empty())
-		{
-			auto itr = m_functionMap.find(id);
-			if (itr != m_functionMap.end())
-				functionDef = itr->second;
-		}
-		if (!functionDef)
-		{
-			functionDef = m_runtime->FindFunction(id);
-		}
+		FunctionDefinitionPtr functionDef = m_runtime->FindFunction(id);
 		if (!functionDef)
 		{
 			Error("Could not find function definition");
@@ -9638,22 +9602,6 @@ namespace Jinx::Impl
 	inline void Script::Push(const Variant & value)
 	{
 		m_stack.push_back(value);
-	}
-
-	inline bool Script::RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function)
-	{
-		if (library == nullptr)
-			library = m_library;
-		auto libraryInt = std::static_pointer_cast<Library>(library);
-		auto signature = libraryInt->FindFunctionSignature(visibility, name);
-		if (!signature.IsValid())
-		{
-			Error("Script::RegisterFunction() error.  Could not find matching library function to override.");
-			return false;
-		}
-		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
-		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
-		return true;
 	}
 
 	inline void Script::SetVariable(const String & name, const Variant & value)
@@ -11630,6 +11578,7 @@ namespace Jinx::Impl
 			{ 0x1E91F, 0x1E941, 0x0000},
 			{ 0x1E920, 0x1E942, 0x0000},
 			{ 0x1E921, 0x1E943, 0x0000},
+
 		};
 	};
 

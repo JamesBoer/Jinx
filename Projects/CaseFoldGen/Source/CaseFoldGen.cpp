@@ -27,40 +27,47 @@ Copyright (c) 2017 James Boer
 
 #include "JxInternal.h"
 
-using namespace Jinx;
-
-static const CaseFoldingData s_caseFoldingTable[] =
+namespace Jinx::Impl
 {
+
+	struct FoldTable
+	{
+		static inline const CaseFoldingData caseFoldingTable[] =
+		{
 )";
 
 // Tail string
 static const char s_strCppTail[] =
-u8R"(};
+u8R"(
+		};
+	};
 
-bool Jinx::FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
-{
-	int32_t lower = 0;
-	int32_t upper = static_cast<int32_t>(countof(s_caseFoldingTable)) - 1;
-	while (lower <= upper)
+	inline_t bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
 	{
-		int32_t split = (lower + upper) / 2;
-		char32_t currPoint = s_caseFoldingTable[split].sourceCodePoint;
-		if (currPoint < sourceCodePoint)
-			lower = split + 1;
-		else if (currPoint > sourceCodePoint)
-			upper = split - 1;
-		else
+		int32_t lower = 0;
+		int32_t upper = static_cast<int32_t>(countof(Impl::FoldTable::caseFoldingTable)) - 1;
+		while (lower <= upper)
 		{
-			const auto & result = s_caseFoldingTable[split];
-			if (destCodePoint1)
-				*destCodePoint1 = result.destCodePoint1;
-			if (destCodePoint2)
-				*destCodePoint2 = result.destCodePoint2;
-			return true;
+			int32_t split = (lower + upper) / 2;
+			char32_t currPoint = Impl::FoldTable::caseFoldingTable[split].sourceCodePoint;
+			if (currPoint < sourceCodePoint)
+				lower = split + 1;
+			else if (currPoint > sourceCodePoint)
+				upper = split - 1;
+			else
+			{
+				const auto & result = Impl::FoldTable::caseFoldingTable[split];
+				if (destCodePoint1)
+					*destCodePoint1 = result.destCodePoint1;
+				if (destCodePoint2)
+					*destCodePoint2 = result.destCodePoint2;
+				return true;
+			}
 		}
+		return false;
 	}
-	return false;
-}
+
+} // namespace Jinx::Impl
 
 )";
 
@@ -151,7 +158,7 @@ int main()
     // Write all extracted folding data in a table
     for (const auto & fd : foldingData)
     {
-        s += "\t{ ";
+        s += "\t\t\t{ ";
         s += "0x";
         s += fd.source;
         s += ", 0x";

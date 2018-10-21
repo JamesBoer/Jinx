@@ -25,53 +25,6 @@ private:
 
 static TestClass s_testClass(99);
 
-class TestObject
-{
-public:
-	TestObject(Jinx::RuntimePtr runtime)
-	{
-		const char * scriptText =
-			u8R"(
-			
-			-- Call local override function 
-			test override 123
-			
-			)";
-		m_script = TestCreateScript(scriptText, runtime);
-	}
-
-	bool RegisterMemberFunction()
-	{
-		if (!m_script)
-			return false;
-		return m_script->RegisterFunction(nullptr, Jinx::Visibility::Private, { "test override {}" }, [this](ScriptPtr script, Parameters params) -> Variant
-		{
-			return TestFunction(script, params);
-		});
-	}
-
-	bool ExecuteScript()
-	{
-		if (!m_script)
-			return false;
-		return m_script->Execute();
-	}
-
-	int64_t GetTestValue() const { return m_testVal; }
-
-private:
-
-	Variant TestFunction(ScriptPtr script, Parameters params)
-	{
-		m_testVal = params[0].GetInteger();
-		return nullptr;
-	}
-
-	ScriptPtr m_script;
-	int64_t m_testVal = 0;
-};
-
-
 class TestContext
 {
 public:
@@ -197,20 +150,6 @@ TEST_CASE("Test Native", "[Native]")
 		TestContext obj(runtime);
 		REQUIRE(obj.ExecuteScript());
 		REQUIRE(obj.GetTestValue() == 9999);
-	}
-
-	SECTION("Test script override functions")
-	{
-		auto runtime = TestCreateRuntime();
-		runtime->GetLibrary("")->RegisterFunction(Visibility::Private, { "test override {}" }, [](ScriptPtr script, Parameters params) -> Variant
-		{
-			return nullptr;
-		});
-
-		TestObject obj(runtime);
-		REQUIRE(obj.RegisterMemberFunction());
-		REQUIRE(obj.ExecuteScript());
-		REQUIRE(obj.GetTestValue() == 123);
 	}
 
 	SECTION("Test native function execution")

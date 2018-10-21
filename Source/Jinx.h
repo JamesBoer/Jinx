@@ -101,7 +101,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 20;
+	const uint32_t MinorVersion = 21;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -259,18 +259,6 @@ namespace Jinx
 		\return Returns the Variant containing the function return value, or null for no value.
 		*/
 		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
-
-		/// Register a local override function for this script instance
-		/**
-		\param library Pointer to library containing function to override
-		\param visibility Indicates whether function is public or private.
-		\param name String containing all function nameparts and parameters.  Parameters are indicated with "{}", 
-		while names are expected to conform to standard Jinx identifier naming rules.
-		\param function The callback function executed by the script.
-		\return Returns true on success or false on failure.
-		*/
-		virtual bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) = 0;
-
 
 		/// Get the script name
 		/**

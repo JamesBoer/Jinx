@@ -98,9 +98,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af4df3369ab82192a9a00c7eae47d7e15"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_jinx_1_1_variant.html">Variant</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#af4df3369ab82192a9a00c7eae47d7e15">CallFunction</a> (RuntimeID id, Parameters params)=0</td></tr>
 <tr class="memdesc:af4df3369ab82192a9a00c7eae47d7e15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call a library function.  <a href="#af4df3369ab82192a9a00c7eae47d7e15">More...</a><br /></td></tr>
 <tr class="separator:af4df3369ab82192a9a00c7eae47d7e15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a110daa4cd18479749d3e507cf921f4df"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a110daa4cd18479749d3e507cf921f4df">RegisterFunction</a> (<a class="el" href="_jinx_8h.html#a9a15aa942bfe1dfd6f95188f63b06a86">LibraryPtr</a> library, Visibility visibility, const String &amp;name, FunctionCallback function)=0</td></tr>
-<tr class="memdesc:a110daa4cd18479749d3e507cf921f4df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a local override function for this script instance.  <a href="#a110daa4cd18479749d3e507cf921f4df">More...</a><br /></td></tr>
-<tr class="separator:a110daa4cd18479749d3e507cf921f4df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9911d5bcc3cae4c97ed134173d871a17"><td class="memItemLeft" align="right" valign="top">virtual const String &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_jinx_1_1_i_script.html#a9911d5bcc3cae4c97ed134173d871a17">GetName</a> () const =0</td></tr>
 <tr class="memdesc:a9911d5bcc3cae4c97ed134173d871a17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the script name.  <a href="#a9911d5bcc3cae4c97ed134173d871a17">More...</a><br /></td></tr>
 <tr class="separator:a9911d5bcc3cae4c97ed134173d871a17"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -380,66 +377,6 @@ Public Member Functions</h2></td></tr>
 
 <p>Checks if the script is finished executing. </p>
 <p>Determines if the script has finished executed or hit a fatal error </p><dl class="section return"><dt>Returns</dt><dd>true if finished, false if still executing. </dd></dl>
-
-</div>
-</div>
-<a id="a110daa4cd18479749d3e507cf921f4df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a110daa4cd18479749d3e507cf921f4df">&#9670;&nbsp;</a></span>RegisterFunction()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual bool Jinx::IScript::RegisterFunction </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="_jinx_8h.html#a9a15aa942bfe1dfd6f95188f63b06a86">LibraryPtr</a>&#160;</td>
-          <td class="paramname"><em>library</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Visibility&#160;</td>
-          <td class="paramname"><em>visibility</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const String &amp;&#160;</td>
-          <td class="paramname"><em>name</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">FunctionCallback&#160;</td>
-          <td class="paramname"><em>function</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Register a local override function for this script instance. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">library</td><td>Pointer to library containing function to override </td></tr>
-    <tr><td class="paramname">visibility</td><td>Indicates whether function is public or private. </td></tr>
-    <tr><td class="paramname">name</td><td>String containing all function nameparts and parameters. Parameters are indicated with "{}", while names are expected to conform to standard Jinx identifier naming rules. </td></tr>
-    <tr><td class="paramname">function</td><td>The callback function executed by the script. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Returns true on success or false on failure. </dd></dl>
 
 </div>
 </div>

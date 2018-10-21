@@ -19,7 +19,6 @@ namespace Jinx::Impl
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);
 		virtual ~Script();
 
-		bool RegisterFunction(LibraryPtr library, Visibility visibility, const String & name, FunctionCallback function) override;
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params) override;
 
@@ -97,9 +96,6 @@ namespace Jinx::Impl
 
 		// Current library
 		LibraryIPtr m_library;
-
-		// Local function overrides
-		FunctionMap m_functionMap;
 
 		// User context pointer
 		Any m_userContext;
