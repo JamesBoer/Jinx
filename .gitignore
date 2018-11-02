@@ -13,6 +13,7 @@ release/
 *.ide-wal
 db.lock
 storage.ide
+.vs/
 
 # Xcode
 .DS_Store
