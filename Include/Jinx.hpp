@@ -689,10 +689,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 21;
+	const uint32_t MinorVersion = 22;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
