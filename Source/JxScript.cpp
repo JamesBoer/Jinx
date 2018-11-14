@@ -13,9 +13,9 @@ namespace Jinx::Impl
 	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
 		m_userContext(userContext),
-		m_finished(false),
-		m_error(false),
-		m_bytecodeStart(0)
+		m_bytecodeStart(0),
+        m_finished(false),
+        m_error(false)
 	{
 		m_execution.reserve(6);
 		m_execution.push_back(ExecutionFrame(bytecode, "root"));

@@ -248,11 +248,11 @@ namespace Jinx
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
 		inline_t BlockHeap::BlockHeap() :
+            m_next(nullptr),
 			m_allocHead(nullptr),
 			m_allocTail(nullptr),
 			m_spareHead(nullptr),
 			m_spareTail(nullptr),
-			m_next(nullptr),
 			m_allocSpareBlocks(0)
 		{
 
