@@ -104,6 +104,7 @@ namespace Jinx::Impl
 
 	inline_t Variant GetCallStack(ScriptPtr script, Parameters params)
 	{
+        unused(params);
 		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto functions = s->GetCallStack();
 		auto var = CreateCollection();

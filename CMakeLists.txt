@@ -68,7 +68,7 @@ add_library(${PROJECT_NAME} ${source_list})
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
 else()
-	target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
 # Create filters to represent folder structure
