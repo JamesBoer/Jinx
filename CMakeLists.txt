@@ -64,6 +64,13 @@ set(
 # Create library as project name
 add_library(${PROJECT_NAME} ${source_list})
 
+# Set warning level
+if(MSVC)
+	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+else()
+	target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
+endif()
+
 # Create filters to represent folder structure
 foreach(source IN LISTS source_list)
     get_filename_component(source_path "${source}" PATH)
