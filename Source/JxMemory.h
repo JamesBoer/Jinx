@@ -14,6 +14,8 @@ Copyright (c) 2016 James Boer
 #define JINX_DEBUG_ALLOCATION
 #endif // _DEBUG
 
+#define JINX_ALLOC_REBIND_NOT_USED
+
 #ifdef JINX_DEBUG_ALLOCATION
 #define JinxAlloc(bytes) MemPoolAllocate(__FILE__, __FUNCTION__, __LINE__, bytes)
 #define JinxRealloc(ptr, bytes) MemPoolReallocate(__FILE__, __FUNCTION__, __LINE__, ptr, bytes)
@@ -30,11 +32,6 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	// Fix unreferenced variable warnings
-	template<typename T>
-	constexpr int unused(const T &) { return 0; }
-	
-	
 	// Stand-alone global allocation functions (debug and release version)
 
 #ifdef JINX_DEBUG_ALLOCATION
@@ -98,7 +95,7 @@ namespace Jinx
 		MemPoolFree(obj);
 	}
 
-	// Jinx allocator for use in STL containers																										
+	// Jinx allocator for use in STL containers
 	template <typename T>
 	class Allocator
 	{
@@ -112,18 +109,20 @@ namespace Jinx
 		using value_type = T;
 
 		Allocator() throw() {};
-		Allocator(const Allocator &) throw() { };
+		Allocator(const Allocator &) throw() { }
 
 		template<typename U>
-		Allocator(const Allocator<U>&) throw() { };
+		Allocator(const Allocator<U>&) throw() { }
 
 		template<typename U>
-        Allocator & operator = (const Allocator<U> & other) { unused(other); return *this; }
-        Allocator & operator = (const Allocator & other) { unused(other); return *this; }
+        Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
+        Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
 		~Allocator() {}
 
+#ifndef JINX_ALLOC_REBIND_NOT_USED
 		template <typename U>
-		struct rebind { using other = Allocator<U>; };
+		struct rebind { using other = Allocator<U>; }
+#endif // JINX_ALLOC_REBIND_NOT_USED
 
 		pointer address(reference value) const { return &value; }
 		const_pointer address(const_reference value) const { return &value; }
@@ -137,8 +136,8 @@ namespace Jinx
 		void construct(pointer ptr, const T& val) { new (static_cast<T*> (ptr)) T(val); }
 
 		template<typename U>
-		void destroy(U* ptr) { Jinx::unused(ptr); ptr->~U(); }
-		void destroy(pointer ptr) { Jinx::unused(ptr); ptr->~T(); }
+		void destroy([[maybe_unused]] U* ptr) { ptr->~U(); }
+		void destroy([[maybe_unused]] pointer ptr) { ptr->~T(); }
 
 		size_type max_size() const { return std::numeric_limits<std::size_t>::max() / sizeof(T); }
 	};
@@ -196,6 +195,6 @@ namespace Jinx
 	// Define a custom wide character string using internal allocator
 	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
 
-};
+}
 
 #endif // JX_MEMORY_H__

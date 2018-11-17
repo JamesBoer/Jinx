@@ -496,6 +496,6 @@ namespace Jinx
 	*/
 	void ShutDown();
 
-};
+}
 
 #endif // JINX_H__

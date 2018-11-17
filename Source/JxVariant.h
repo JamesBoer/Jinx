@@ -208,6 +208,6 @@ namespace Jinx
 	inline String Str(const StringU16 & str) { return Variant(str).GetString(); }
 	inline String Str(const WString & str) { return Variant(str).GetString(); }
 
-};
+}
 
 #endif // JX_VARIANT_H__
