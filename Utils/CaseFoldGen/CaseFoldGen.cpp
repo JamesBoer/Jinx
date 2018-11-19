@@ -85,7 +85,7 @@ int main()
 {
     // Open and read file into memory, then close
     FILE * file;
-    auto err = fopen_s(&file, "..//..//..//Source//CaseFolding.txt", "r");
+    auto err = fopen_s(&file, "..//..//Utils//CaseFoldGen//CaseFolding.txt", "r");
     if (err != 0)
         return -1;
     fseek(file, 0, SEEK_END);
@@ -146,7 +146,7 @@ int main()
     }
     
     // Open converted source file for writing
-    err = fopen_s(&file, "..//..//..//Source//JxUnicodeCaseFolding.cpp", "w");
+    err = fopen_s(&file, "..//..//Source//JxUnicodeCaseFolding.cpp", "w");
     if (err != 0)
         return -1;
 

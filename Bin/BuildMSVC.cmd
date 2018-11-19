@@ -38,5 +38,11 @@ cd UnitTests/
 cmake ../../Tests/UnitTests/ -G "Visual Studio 15 2017" -A x64
 cd ..
 
+rem build case fold gen app
+mkdir CaseFoldGen
+cd CaseFoldGen/
+cmake ../../Utils/CaseFoldGen/ -G "Visual Studio 15 2017" -A x64
+cd ..
+
 cd ..
 pause

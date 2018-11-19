@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [0.22.0] - 2018-11-13
+## [0.22.0] - 2018-11-18
 
 - Add CMake support
 - Reorganize folders to separate source from projects
