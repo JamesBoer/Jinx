@@ -1,4 +1,4 @@
-﻿/*
+/*
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
@@ -518,9 +518,6 @@ int main(int argc, char * argv[])
 	globalParams.logBytecode = false;
 	globalParams.enableLogging = false;
 	Jinx::Initialize(globalParams);
-
-	const int StartingPermutation = 0;
-	const int StartingScript = 0;
 
 	// Validate that all scripts compile and execute successfully
 	for (auto i = 0u; i < countof(s_testScripts); ++i)
