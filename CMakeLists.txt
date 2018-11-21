@@ -1,6 +1,6 @@
 
 # Require minimum standard version of CMake
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.10)
 
 # Set project name
 project(Jinx)
@@ -22,7 +22,7 @@ function(set_folders source_list folder_name)
 endfunction()
 
 # Build a test or utility executable
-function(build_executable project_name source_list is_linked is_startup)
+function(build_executable project_name source_list is_linked is_startup requires_pthreads)
 
 	# Create executable as project name
 	add_executable(${project_name} ${source_list})
@@ -33,15 +33,22 @@ function(build_executable project_name source_list is_linked is_startup)
 	set(CMAKE_CXX_EXTENSIONS OFF)
 	
 	# Set the executable as the default startup project
-	if (is_startup)
+	if(is_startup)
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Features)
 	endif()
 	
 	# Add Jinx library
-	if (is_linked)
+	if(is_linked)
 		target_link_libraries(${project_name} Jinx)
 	endif()
 	
+	# Add pthreads
+	if(requires_pthreads AND UNIX AND NOT APPLE)
+		set(THREADS_PREFER_PTHREAD_FLAG ON)
+		find_package(Threads REQUIRED)
+		target_link_libraries(${project_name} Threads::Threads)
+	endif()
+
 	# Create IDE folder structure
 	set_folders("${source_list}" Source)
 
@@ -150,11 +157,11 @@ if(NOT JINX_IS_SUBPROJECT)
 		"Tests/UnitTests/UnitTest.cpp"
 		"Tests/UnitTests/UnitTest.h"
 	)
-	build_executable(Features "Tests/Features/Main.cpp" TRUE FALSE)	
-	build_executable(FuzzTests "Tests/FuzzTests/Main.cpp" TRUE FALSE)	
-	build_executable(HeaderTest "${headertest_source_list}" FALSE FALSE)
-	build_executable(PerfTest "Tests/PerfTest/Main.cpp" TRUE FALSE)
-	build_executable(UnitTests "${unittests_source_list}" TRUE TRUE)
+	build_executable(Features "Tests/Features/Main.cpp" TRUE FALSE FALSE)	
+	build_executable(FuzzTests "Tests/FuzzTests/Main.cpp" TRUE FALSE TRUE)	
+	build_executable(HeaderTest "${headertest_source_list}" FALSE FALSE FALSE)
+	build_executable(PerfTest "Tests/PerfTest/Main.cpp" TRUE FALSE TRUE)
+	build_executable(UnitTests "${unittests_source_list}" TRUE TRUE FALSE)
 	if(MSVC)
 		build_executable(CaseFoldGen "Utils/CaseFoldGen/Main.cpp" FALSE FALSE)
 	endif()
