@@ -57,8 +57,8 @@ endfunction()
 # Enable IDE folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Check if reproc is included via add_subdirectory.
-get_directory_property(JINX_IS_SUBPROJECT PARENT_DIRECTORY)
+# Check if Jinx is included via add_subdirectory.
+get_directory_property(jinx_is_subproject PARENT_DIRECTORY)
 
 set(
     jinx_source_list
@@ -127,10 +127,7 @@ endif()
 auto_set_folders(jinx_source_list)
 
 # Only build the test suite and utilities if this is not a subproject
-if(NOT JINX_IS_SUBPROJECT)
-
-	# Default to static linking for standalone build - otherwise defer to parent
-	#set(BUILD_SHARED_LIBS OFF)
+if(NOT jinx_is_subproject)
 
 	set(
 		headertest_source_list
@@ -163,7 +160,7 @@ if(NOT JINX_IS_SUBPROJECT)
 	build_executable(PerfTest "Tests/PerfTest/Main.cpp" TRUE FALSE TRUE)
 	build_executable(UnitTests "${unittests_source_list}" TRUE TRUE FALSE)
 	if(MSVC)
-		build_executable(CaseFoldGen "Utils/CaseFoldGen/Main.cpp" FALSE FALSE)
+		build_executable(CaseFoldGen "Utils/CaseFoldGen/Main.cpp" FALSE FALSE FALSE)
 	endif()
 
 endif()
