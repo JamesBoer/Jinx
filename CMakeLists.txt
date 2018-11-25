@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.10)
 project(Jinx)
 
 # Set folders based on file structure
-function(auto_set_folders source_list)
+function(jinx_auto_set_folders source_list)
 	foreach(source IN LISTS "${source_list}")
 		get_filename_component(source_path "${source}" PATH)
 		string(REPLACE "/" "\\" source_path_folder "${source_path}")
@@ -15,14 +15,14 @@ function(auto_set_folders source_list)
 endfunction()
 
 # Set folders manuallly
-function(set_folders source_list folder_name)
+function(jinx_set_folders source_list folder_name)
 	foreach(source IN LISTS source_list)
 		source_group("\\${folder_name}" FILES "${source}")
 	endforeach()
 endfunction()
 
 # Build a test or utility executable
-function(build_executable project_name source_list is_linked is_startup requires_pthreads)
+function(jinx_build_executable project_name source_list is_linked is_startup requires_pthreads)
 
 	# Create executable as project name
 	add_executable(${project_name} ${source_list})
@@ -34,7 +34,7 @@ function(build_executable project_name source_list is_linked is_startup requires
 	
 	# Set the executable as the default startup project
 	if(is_startup)
-		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Features)
+		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${project_name})
 	endif()
 	
 	# Add Jinx library
@@ -50,15 +50,12 @@ function(build_executable project_name source_list is_linked is_startup requires
 	endif()
 
 	# Create IDE folder structure
-	set_folders("${source_list}" Source)
+	jinx_set_folders("${source_list}" Source)
 
 endfunction()
 
 # Enable IDE folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Check if Jinx is included via add_subdirectory.
-get_directory_property(jinx_is_subproject PARENT_DIRECTORY)
 
 set(
     jinx_source_list
@@ -124,7 +121,10 @@ else()
 endif()
 
 # Create IDE folder structure
-auto_set_folders(jinx_source_list)
+jinx_auto_set_folders(jinx_source_list)
+
+# Check if Jinx is included via add_subdirectory.
+get_directory_property(jinx_is_subproject PARENT_DIRECTORY)
 
 # Only build the test suite and utilities if this is not a subproject
 if(NOT jinx_is_subproject)
@@ -154,13 +154,13 @@ if(NOT jinx_is_subproject)
 		"Tests/UnitTests/UnitTest.cpp"
 		"Tests/UnitTests/UnitTest.h"
 	)
-	build_executable(Features "Tests/Features/Main.cpp" TRUE FALSE FALSE)	
-	build_executable(FuzzTests "Tests/FuzzTests/Main.cpp" TRUE FALSE TRUE)	
-	build_executable(HeaderTest "${headertest_source_list}" FALSE FALSE FALSE)
-	build_executable(PerfTest "Tests/PerfTest/Main.cpp" TRUE FALSE TRUE)
-	build_executable(UnitTests "${unittests_source_list}" TRUE TRUE FALSE)
+	jinx_build_executable(Features "Tests/Features/Main.cpp" TRUE FALSE FALSE)	
+	jinx_build_executable(FuzzTests "Tests/FuzzTests/Main.cpp" TRUE FALSE TRUE)	
+	jinx_build_executable(HeaderTest "${headertest_source_list}" FALSE FALSE FALSE)
+	jinx_build_executable(PerfTest "Tests/PerfTest/Main.cpp" TRUE FALSE TRUE)
+	jinx_build_executable(UnitTests "${unittests_source_list}" TRUE TRUE FALSE)
 	if(MSVC)
-		build_executable(CaseFoldGen "Utils/CaseFoldGen/Main.cpp" FALSE FALSE FALSE)
+		jinx_build_executable(CaseFoldGen "Utils/CaseFoldGen/Main.cpp" FALSE FALSE FALSE)
 	endif()
 
 endif()
