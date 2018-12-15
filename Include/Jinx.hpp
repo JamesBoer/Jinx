@@ -128,6 +128,8 @@ Copyright (c) 2016 James Boer
 #define JINX_DEBUG_ALLOCATION
 #endif // _DEBUG
 
+#define JINX_ALLOC_REBIND_NOT_USED
+
 #ifdef JINX_DEBUG_ALLOCATION
 #define JinxAlloc(bytes) MemPoolAllocate(__FILE__, __FUNCTION__, __LINE__, bytes)
 #define JinxRealloc(ptr, bytes) MemPoolReallocate(__FILE__, __FUNCTION__, __LINE__, ptr, bytes)
@@ -144,11 +146,6 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 
-	// Fix unreferenced variable warnings
-	template<typename T>
-	constexpr int unused(const T &) { return 0; }
-	
-	
 	// Stand-alone global allocation functions (debug and release version)
 
 #ifdef JINX_DEBUG_ALLOCATION
@@ -212,7 +209,7 @@ namespace Jinx
 		MemPoolFree(obj);
 	}
 
-	// Jinx allocator for use in STL containers																										
+	// Jinx allocator for use in STL containers
 	template <typename T>
 	class Allocator
 	{
@@ -226,18 +223,20 @@ namespace Jinx
 		using value_type = T;
 
 		Allocator() throw() {};
-		Allocator(const Allocator &) throw() { };
+		Allocator(const Allocator &) throw() { }
 
 		template<typename U>
-		Allocator(const Allocator<U>&) throw() { };
+		Allocator(const Allocator<U>&) throw() { }
 
 		template<typename U>
-		Allocator & operator = (const Allocator<U> & other) { return *this; }
-		Allocator & operator = (const Allocator & other) { return *this; }
+        Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
+        Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
 		~Allocator() {}
 
+#ifndef JINX_ALLOC_REBIND_NOT_USED
 		template <typename U>
-		struct rebind { using other = Allocator<U>; };
+		struct rebind { using other = Allocator<U>; }
+#endif // JINX_ALLOC_REBIND_NOT_USED
 
 		pointer address(reference value) const { return &value; }
 		const_pointer address(const_reference value) const { return &value; }
@@ -251,8 +250,8 @@ namespace Jinx
 		void construct(pointer ptr, const T& val) { new (static_cast<T*> (ptr)) T(val); }
 
 		template<typename U>
-		void destroy(U* ptr) { Jinx::unused(ptr); ptr->~U(); }
-		void destroy(pointer ptr) { Jinx::unused(ptr); ptr->~T(); }
+		void destroy([[maybe_unused]] U* ptr) { ptr->~U(); }
+		void destroy([[maybe_unused]] pointer ptr) { ptr->~T(); }
 
 		size_type max_size() const { return std::numeric_limits<std::size_t>::max() / sizeof(T); }
 	};
@@ -310,9 +309,10 @@ namespace Jinx
 	// Define a custom wide character string using internal allocator
 	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
 
-};
+}
 
 #endif // JX_MEMORY_H__
+
 
 // end --- JxMemory.h --- 
 
@@ -362,7 +362,7 @@ namespace Jinx
 
 
 	BufferPtr CreateBuffer();
-};
+}
 
 #endif // JX_BUFFER_H__
 
@@ -395,7 +395,7 @@ namespace Jinx
 	using CollectionItr = Collection::iterator;
 	using CollectionItrPair = std::pair<CollectionItr, CollectionPtr>;
 	CollectionPtr CreateCollection();
-};
+}
 
 #endif // JX_COLLECTION_H__
 
@@ -446,7 +446,7 @@ namespace Jinx
 		return !(left == right);
 	}
 
-};
+}
 
 
 
@@ -670,7 +670,7 @@ namespace Jinx
 	inline String Str(const StringU16 & str) { return Variant(str).GetString(); }
 	inline String Str(const WString & str) { return Variant(str).GetString(); }
 
-};
+}
 
 #endif // JX_VARIANT_H__
 
@@ -689,7 +689,7 @@ namespace Jinx
 	const uint32_t MajorVersion = 0;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 21;
+	const uint32_t MinorVersion = 22;
 
 	/// Patch number
 	const uint32_t PatchNumber = 0;
@@ -1084,7 +1084,7 @@ namespace Jinx
 	*/
 	void ShutDown();
 
-};
+}
 
 #endif // JINX_H__
 
@@ -2032,9 +2032,9 @@ namespace Jinx::Impl
 		FunctionDefinition(const FunctionSignature & signature, BufferPtr bytecode, size_t offset) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
-			m_name(signature.GetName()),
-			m_bytecode(bytecode),
-			m_offset(offset)
+            m_bytecode(bytecode),
+            m_offset(offset),
+            m_name(signature.GetName())
 		{}
 		FunctionDefinition(const FunctionSignature & signature, FunctionCallback callback) :
 			m_id(signature.GetId()),
@@ -3316,7 +3316,7 @@ namespace Jinx::Impl
 		assert(outValue);
 		Guid guid;
 		unsigned long p0;
-		int p1, p2, p3, p4, p5, p6, p7, p8, p9, p10;
+		unsigned int p1, p2, p3, p4, p5, p6, p7, p8, p9, p10;
 #ifdef JINX_WINDOWS
 		int err = sscanf_s(value.c_str(), "%08lX-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
 			&p0, &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8, &p9, &p10);
@@ -3640,7 +3640,9 @@ namespace Jinx::Impl
 		switch (len)
 		{
 		case 3: h ^= data[2] << 16;
+		[[fallthrough]];
 		case 2: h ^= data[1] << 8;
+		[[fallthrough]];
 		case 1: h ^= data[0];
 			h *= m;
 		};
@@ -3687,12 +3689,12 @@ namespace Jinx::Impl
 		m_name(name),
 		m_start(start),
 		m_end(end),
-		m_symbolTypeMap(symbolTypeMap),
-		m_current(nullptr),
+        m_current(nullptr),
 		m_columnNumber(1),
 		m_columnMarker(1),
 		m_lineNumber(1),
-		m_error(false)
+        m_error(false),
+        m_symbolTypeMap(symbolTypeMap)
 	{
 	}
 
@@ -4300,7 +4302,7 @@ namespace Jinx::Impl
 		return params[0].GetCollectionItr().first->second;
 	}
 
-	inline Variant GetCallStack(ScriptPtr script, Parameters params)
+	inline Variant GetCallStack(ScriptPtr script, [[maybe_unused]] Parameters params)
 	{
 		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto functions = s->GetCallStack();
@@ -4855,11 +4857,11 @@ namespace Jinx
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
 		inline BlockHeap::BlockHeap() :
+            m_next(nullptr),
 			m_allocHead(nullptr),
 			m_allocTail(nullptr),
 			m_spareHead(nullptr),
 			m_spareTail(nullptr),
-			m_next(nullptr),
 			m_allocSpareBlocks(0)
 		{
 
@@ -8032,9 +8034,9 @@ namespace Jinx::Impl
 {
 
 	inline PropertyName::PropertyName() :
+        m_id(0),
+        m_visibility(VisibilityType::Local),
 		m_readOnly(false),
-		m_visibility(VisibilityType::Local),
-		m_id(0),
 		m_partCount(0)
 	{
 	}
@@ -8572,9 +8574,9 @@ namespace Jinx::Impl
 	inline Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
 		m_userContext(userContext),
-		m_finished(false),
-		m_error(false),
-		m_bytecodeStart(0)
+		m_bytecodeStart(0),
+        m_finished(false),
+        m_error(false)
 	{
 		m_execution.reserve(6);
 		m_execution.push_back(ExecutionFrame(bytecode, "root"));

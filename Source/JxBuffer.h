@@ -40,6 +40,6 @@ namespace Jinx
 
 
 	BufferPtr CreateBuffer();
-};
+}
 
 #endif // JX_BUFFER_H__

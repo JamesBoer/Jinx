@@ -20,7 +20,7 @@ namespace Jinx
 	using CollectionItr = Collection::iterator;
 	using CollectionItrPair = std::pair<CollectionItr, CollectionPtr>;
 	CollectionPtr CreateCollection();
-};
+}
 
 #endif // JX_COLLECTION_H__
 

@@ -37,7 +37,7 @@ namespace Jinx
 		return !(left == right);
 	}
 
-};
+}
 
 
 

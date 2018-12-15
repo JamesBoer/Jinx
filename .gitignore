@@ -1,3 +1,6 @@
+# CMake
+Build/
+
 # Visual Studio
 debug/
 release/
@@ -13,6 +16,7 @@ release/
 *.ide-wal
 db.lock
 storage.ide
+.vs/
 
 # Xcode
 .DS_Store

@@ -102,7 +102,7 @@ namespace Jinx::Impl
 		return params[0].GetCollectionItr().first->second;
 	}
 
-	inline_t Variant GetCallStack(ScriptPtr script, Parameters params)
+	inline_t Variant GetCallStack(ScriptPtr script, [[maybe_unused]] Parameters params)
 	{
 		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto functions = s->GetCallStack();

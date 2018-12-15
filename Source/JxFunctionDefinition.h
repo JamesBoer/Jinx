@@ -19,9 +19,9 @@ namespace Jinx::Impl
 		FunctionDefinition(const FunctionSignature & signature, BufferPtr bytecode, size_t offset) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
-			m_name(signature.GetName()),
-			m_bytecode(bytecode),
-			m_offset(offset)
+            m_bytecode(bytecode),
+            m_offset(offset),
+            m_name(signature.GetName())
 		{}
 		FunctionDefinition(const FunctionSignature & signature, FunctionCallback callback) :
 			m_id(signature.GetId()),

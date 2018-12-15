@@ -10,9 +10,9 @@ You can [visit the main Jinx website here](http://www.jinx-lang.org/), or [see r
 
 Jinx requires a C++ 17 compliant compiler to build, and it is available both as a traditional or header-only library.  
 
-To build the traditional library, copy all the files within the ```Source``` folder to your project, add them via your IDE or build system of choice, and include ```Source/Jinx.h``` from your own source files.  
+Jinx supports the CMake build system, so for CMake users, adding Jinx should be as simple as pointing your build scripts to the root folder of the project.  Stand-alone build scripts for several platforms/IDEs are found in the ```Bin``` folder.  Alternatively, to build the library manually, copy all the files within the ```Source``` folder to your project, add them via your IDE or build system of choice, and include ```Source/Jinx.h``` from your own source files.  This should be reasonably simple, since the entire library is contained in a single folder.
 
-Using the header-only version is even simple.  Include the ```Include/Jinx.hpp``` header file, which contains the entire library.
+Using the header-only version is even simple.  Include the header file ```Include/Jinx.hpp``` from your own source, which contains the entire library in a single amalgamated header.
 
 ## Your First Jinx Script
 
@@ -44,5 +44,5 @@ There is a [more comprehensive tutorial](https://www.jinx-lang.org/Tutorial.pdf)
 
 Jinx is currently in beta, being tested in a few projects under real world conditions.  The language or APIs are unlikely to change in any significant way, except to fix bugs or rectify major shortcomings discovered.
 
-It is expected that Jinx will be released as a stable (1.0) version 2019.
+It is currently estimated that a stable (1.0) version will be releasted before 2019.
 

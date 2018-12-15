@@ -1,6 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.22.0] - 2018-11-18
+
+- Add CMake support
+- Reorganize folders to separate source from projects
+
+## [0.21.1] - 2018-11-02
+
+- Added missing 'set' keyword to C# editor library
+
 ## [0.21.0] - 2018-10-21
 
 - Removed local script function override
