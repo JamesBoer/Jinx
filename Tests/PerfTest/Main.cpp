@@ -13,10 +13,6 @@ Copyright (c) 2016 James Boer
 
 #include "../../Source/Jinx.h"
 
-#ifdef JINX_WINDOWS
-#include <conio.h>
-#endif
-
 using namespace Jinx;
 
 
@@ -249,11 +245,6 @@ int main(int argc, char * argv[])
 	printf("Current allocated memory: %" PRIu64 " bytes\n", memoryStats.currentAllocatedMemory);
 	printf("Current used memory: %" PRIu64 " bytes\n", memoryStats.currentUsedMemory);
 	printf("\n");
-
-#ifdef JINX_WINDOWS
-	printf("Press any key to continue...");
-	_getch();
-#endif
 
 	return 0;
 }
