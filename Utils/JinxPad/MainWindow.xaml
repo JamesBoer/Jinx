@@ -11,6 +11,7 @@
     Closing="OnClosing"
     Closed="OnClosed"
     mc:Ignorable="d"
+    Icon="Resources/Jinx.ico"
     Title="Jinx Editor" 
     Height="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowHeight, Mode=TwoWay}"
     Width="{Binding Source={x:Static p:Settings.Default}, Path=MainWindowWidth, Mode=TwoWay}"
