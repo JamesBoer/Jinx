@@ -2,12 +2,15 @@
 # Require minimum standard version of CMake
 cmake_minimum_required (VERSION 3.10)
 
+# Add C# utilities for building tools
+include(CSharpUtilities)
+
 # Set project name
 project(Jinx)
 
 # Set folders based on file structure
 function(jinx_auto_set_folders source_list)
-	foreach(source IN LISTS "${source_list}")
+	foreach(source IN LISTS source_list)
 		get_filename_component(source_path "${source}" PATH)
 		string(REPLACE "/" "\\" source_path_folder "${source_path}")
 		source_group("${source_path_folder}" FILES "${source}")
@@ -161,6 +164,8 @@ if(NOT jinx_is_subproject)
 	jinx_build_executable(UnitTests "${unittests_source_list}" TRUE TRUE FALSE)
 	if(MSVC)
 		jinx_build_executable(CaseFoldGen "Utils/CaseFoldGen/Main.cpp" FALSE FALSE FALSE)
+		add_subdirectory(Utils/JinxTools)		
+		add_subdirectory(Utils/JinxPad)	
 	endif()
 
 endif()
