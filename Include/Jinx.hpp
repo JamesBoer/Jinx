@@ -692,7 +692,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 22;
 
 	/// Patch number
-	const uint32_t PatchNumber = 0;
+	const uint32_t PatchNumber = 1;
 
 	// Forward declaration
 	class IScript;
@@ -4832,7 +4832,7 @@ namespace Jinx
 			static inline thread_local BlockHeap	heap;
 
 			// List of all thread-local heaps
-			static inline std::mutex heapMutex;
+			static inline std::recursive_mutex heapMutex;
 			static inline BlockHeap * head;
 			static inline BlockHeap * tail;
 
@@ -4865,6 +4865,9 @@ namespace Jinx
 			m_allocSpareBlocks(0)
 		{
 
+			// Ensure thread-safe access to the global heap list
+			std::lock_guard<std::recursive_mutex> lock(Mem::heapMutex);
+
 			// Add block heap to the global list
 			if (Mem::head == nullptr)
 			{
@@ -4875,8 +4878,6 @@ namespace Jinx
 			}
 			else
 			{
-				// Ensure thread-safe access to the global heap list
-				std::lock_guard<std::mutex> lock(Mem::heapMutex);
 				assert(Mem::tail);
 				m_prev = Mem::tail;
 				Mem::tail->m_next = this;
@@ -5284,7 +5285,7 @@ namespace Jinx
 				return;
 
 			// Ensure thread-safe access to the global heap list
-			std::lock_guard<std::mutex> lock(Mem::heapMutex);
+			std::lock_guard<std::recursive_mutex> lock(Mem::heapMutex);
 
 			// Remove block heap from global heap list
 			if (this == Mem::head)
@@ -5445,7 +5446,7 @@ namespace Jinx
 	{
 #ifndef JINX_DEBUG_USE_STD_ALLOC
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
-		std::lock_guard<std::mutex> lock(Impl::Mem::heapMutex);
+		std::lock_guard<std::recursive_mutex> lock(Impl::Mem::heapMutex);
 		Impl::BlockHeap * heap = Impl::Mem::head;
 		while (heap)
 		{
@@ -5475,7 +5476,7 @@ namespace Jinx
 	{
 #ifndef JINX_DEBUG_USE_STD_ALLOC
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
-		std::lock_guard<std::mutex> lock(Impl::Mem::heapMutex);
+		std::lock_guard<std::recursive_mutex> lock(Impl::Mem::heapMutex);
 		Impl::BlockHeap * heap = Impl::Mem::head;
 		while (heap)
 		{
