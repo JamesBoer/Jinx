@@ -98,13 +98,13 @@ case a project wishes to target macOS clients earlier than 10.14.
 namespace Jinx
 {
 	/// Major version number
-	const uint32_t MajorVersion = 0;
+	const uint32_t MajorVersion = 1;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 22;
+	const uint32_t MinorVersion = 0;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;

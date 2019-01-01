@@ -686,13 +686,13 @@ namespace Jinx
 namespace Jinx
 {
 	/// Major version number
-	const uint32_t MajorVersion = 0;
+	const uint32_t MajorVersion = 1;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 22;
+	const uint32_t MinorVersion = 0;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -9127,7 +9127,7 @@ namespace Jinx::Impl
 				auto result = op1 * op2;
 				if (result.IsNull())
 				{
-					Error("Invalid variable for mod");
+					Error("Invalid variable for multiply");
 					return false;
 				}
 				Push(result);
