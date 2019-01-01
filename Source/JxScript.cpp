@@ -565,7 +565,7 @@ namespace Jinx::Impl
 				auto result = op1 * op2;
 				if (result.IsNull())
 				{
-					Error("Invalid variable for mod");
+					Error("Invalid variable for multiply");
 					return false;
 				}
 				Push(result);
