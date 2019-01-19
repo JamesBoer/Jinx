@@ -692,7 +692,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 0;
 
 	/// Patch number
-	const uint32_t PatchNumber = 0;
+	const uint32_t PatchNumber = 1;
 
 	// Forward declaration
 	class IScript;
@@ -10010,8 +10010,8 @@ namespace Jinx::Impl
 		String outString;
 		outString.reserve(utf16_string.size());
 		char outBuffer[5];
-		char32_t utf32CodePoint;
-		size_t numOut;
+		char32_t utf32CodePoint = 0;
+		size_t numOut = 0;
 		while (*cInStr != 0)
 		{
 			Impl::ConvertUtf16ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
