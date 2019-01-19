@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2019-01-19
+
+- Fix unused variable warning in gcc
+
 ## [1.0.0] - 2019-01-01
 
 - Jinx stable release

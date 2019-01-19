@@ -287,8 +287,8 @@ namespace Jinx::Impl
 		String outString;
 		outString.reserve(utf16_string.size());
 		char outBuffer[5];
-		char32_t utf32CodePoint;
-		size_t numOut;
+		char32_t utf32CodePoint = 0;
+		size_t numOut = 0;
 		while (*cInStr != 0)
 		{
 			Impl::ConvertUtf16ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
