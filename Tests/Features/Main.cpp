@@ -64,17 +64,16 @@ int main(int argc, char ** argv)
 		const char * scriptText =
 			u8R"(
 
-				private function {a} minus {b}
-					return a - b
+				function calculate volume from width: {w} height: {h} depth: {d}
+					return w * h * d
 				end
+
+				set x to calculate volume from width: 3 height: 4 depth: 5
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		auto id = script->FindFunction(nullptr, "{} minus {}");
-		auto val = script->CallFunction(id, {5, 2});
-		REQUIRE(val == 3);
+		REQUIRE(script->GetVariable("x") == 60);
 	}
 	ShutDown();
     return 0;
