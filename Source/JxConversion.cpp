@@ -221,6 +221,133 @@ namespace Jinx::Impl
 		return true;
 	}
 
+	inline_t char GetBreakToken(const String & value)
+	{
+		size_t tabCount = 0;
+		size_t commaCount = 0;
+		for (size_t i = 0; i < value.size(); ++i)
+		{
+			char c = value[i];
+			if (c == '\t')
+				++tabCount;
+			else if (c == ';')
+				++commaCount;
+			else if (c == '\n' && i != 0)
+				break;
+		}
+		if (tabCount == 0 && commaCount == 0)
+			return 0;
+		return (tabCount > commaCount) ? '\t' : ',';
+	}
+
+	inline_t void ParseWhitespace(const char ** current, const char * end)
+	{
+		while (**current != *end)
+		{
+			char c = **current;
+			if (c != '\t' && c != ' ' && c != '\r' && c != '\n')
+				break;
+			++(*current);
+		}
+	}
+
+	inline_t Variant ParseVariant(const char * begin, const char * end)
+	{
+		String value;
+		while (begin != end)
+		{
+			value += *begin;
+			++begin;
+		}
+		Guid guid;
+		if (StringToGuid(value, &guid))
+			return guid;
+		int64_t integer;
+		if (StringToInteger(value, &integer))
+			return integer;
+		double number;
+		if (StringToNumber(value, &number))
+			return number;
+		bool boolean;
+		if (StringToBoolean(value, &boolean))
+			return boolean;
+		return value;
+	}
+
+	inline_t std::vector<Variant, Jinx::Allocator<Variant>> ParseRow(char breakToken, const char ** current, const char * end)
+	{
+		std::vector<Variant, Jinx::Allocator<Variant>> variants;
+
+		const char * begin = *current;
+		while (**current != *end)
+		{
+			if (begin == nullptr)
+				begin = *current;
+			const char c = **current;
+			if (c == breakToken || c == '\n')
+			{
+				variants.push_back(ParseVariant(begin, *current));
+				begin = nullptr;
+				if (c == '\n')
+				{
+					++(*current);
+					break;
+				}
+			}
+			++(*current);
+		}
+
+		if (begin && begin != end)
+			variants.push_back(ParseVariant(begin, end));
+
+		return variants;
+	}
+
+	inline_t bool StringToCollection(const String & value, CollectionPtr * outValue)
+	{
+
+		// First check what type of delimiter is used, tabs or semicolons
+		char breakToken = GetBreakToken(value);
+		if (breakToken == 0)
+			return false;
+		
+		// Parse first row, which we'll uses as index values into each subsequent row
+		const char * current = value.data();
+		const char * end = current + value.size();
+		ParseWhitespace(&current, end);
+		auto header = ParseRow(breakToken, &current, end);
+		if (header.empty())
+			return false;
+
+		*outValue = CreateCollection();
+		CollectionPtr coll = *outValue;
+
+		// Parse and create a collection for each row, and assign column ids from header
+		while (true)
+		{
+			const auto & row = ParseRow(breakToken, &current, end);
+			if (row.empty())
+				break;
+			if (row.size() != header.size())
+			{
+				*outValue = nullptr;
+				return false;
+			}
+			const auto & rowName = row[0];
+			auto rowColl = CreateCollection();
+			coll->insert({rowName, rowColl });
+			for (size_t i = 0; i < row.size(); ++i)
+			{
+				const auto & headerName = header[i];
+				const auto & rowVal = row[i];
+				rowColl->insert({ headerName, rowVal });
+			}
+		}
+
+		return true;
+	}
+
+
 	inline_t String GuidToString(const Guid & value)
 	{
 		char buffer[64];
