@@ -230,7 +230,7 @@ namespace Jinx::Impl
 			char c = value[i];
 			if (c == '\t')
 				++tabCount;
-			else if (c == ';')
+			else if (c == ',')
 				++commaCount;
 			else if (c == '\n' && i != 0)
 				break;

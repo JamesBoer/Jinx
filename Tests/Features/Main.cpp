@@ -66,12 +66,12 @@ int main(int argc, char ** argv)
 	{
 		const char * tableText =
 u8R"(
-Name Field	Integer Field	Float Field	Text Field
-Test Name A	1	4.5	This is a simple test.
-Test Name B	2	123.456	More to test…
-Test Name C	3	22.3345	Even more tests of text
-Still Another Test Name	4	1.5	Still more text
-Yet Another Test Name	5	99.99	Yet more text to test
+Name Field,Integer Field,Float Field,Test Field
+Test Name A,1,4.5,This is a simple test.
+Test Name B,2,123.456,More to test…
+Test Name C,3,22.3345,Even more tests of text
+Still Another Test Name,4,1.5,Still more text
+Yet Another Test Name,5,99.99,Yet more text to test
 )";
 
 
