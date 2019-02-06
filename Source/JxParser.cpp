@@ -1046,18 +1046,16 @@ namespace Jinx::Impl
 		return String();
 	}
 
-	inline_t bool Parser::ParseSubscript()
+	inline_t void Parser::ParseSubscript()
 	{
 		if (m_error || m_currentSymbol == m_symbolList.end())
-			return false;
-		bool subscript = false;
+			return;
 		while (Accept(SymbolType::SquareOpen))
 		{
 			ParseExpression();
 			Expect(SymbolType::SquareClose);
-			subscript = true;
+			EmitOpcode(Opcode::PushKeyVal);
 		}
-		return subscript;
 	}
 
 	inline_t void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
@@ -1540,8 +1538,7 @@ namespace Jinx::Impl
 		m_idNameMap[match.signature->GetId()] = match.signature->GetName();
 
 		// Check for post-function index operator
-		if (ParseSubscript())
-			EmitOpcode(Opcode::PushValKey);
+		ParseSubscript();
 	}
 
 	inline_t void Parser::ParseCast()
@@ -1583,19 +1580,19 @@ namespace Jinx::Impl
 					Error("Unable to find property name in library");
 					return;
 				}
-				bool subscript = ParseSubscript();
-				EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
+				EmitOpcode(Opcode::PushProp);
 				EmitId(propertyName.GetId());
 				m_idNameMap[propertyName.GetId()] = propertyName.GetName();
+				ParseSubscript();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
 			}
 			else if (CheckVariable())
 			{
 				String name = ParseVariable();
-				bool subscript = ParseSubscript();
-				EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
+				EmitOpcode(Opcode::PushVar);
 				EmitId(VariableNameToRuntimeID(name));
+				ParseSubscript();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
 			}
@@ -2252,7 +2249,7 @@ namespace Jinx::Impl
 						}
 
 						// Check for subscript operator
-						bool subscript = ParseSubscript();
+						//bool subscript = ParseSubscript();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -2262,7 +2259,8 @@ namespace Jinx::Impl
 						Expect(SymbolType::NewLine);
 
 						// Assign property
-						EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
+						//EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
+						EmitOpcode(Opcode::SetProp);
 						EmitId(propertyName.GetId());
 						m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 					}
@@ -2273,7 +2271,7 @@ namespace Jinx::Impl
 						String name = ParseMultiName({ SymbolType::To, SymbolType::SquareOpen });
 
 						// Check for subscript operator
-						bool subscript = ParseSubscript();
+						//bool subscript = ParseSubscript();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -2286,7 +2284,8 @@ namespace Jinx::Impl
 						VariableAssign(name);
 
 						// Assign a variable.  
-						EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
+						//EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
+						EmitOpcode(Opcode::SetVar);
 						EmitId(VariableNameToRuntimeID(name));
 					}
 				}

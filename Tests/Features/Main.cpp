@@ -64,37 +64,20 @@ int main(int argc, char ** argv)
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
-		const char * tableText =
-u8R"(
-Name Field,Integer Field,Float Field,Test Field
-Test Name A,1,4.5,This is a simple test.
-Test Name B,2,123.456,More to test…
-Test Name C,3,22.3345,Even more tests of text
-Still Another Test Name,4,1.5,Still more text
-Yet Another Test Name,5,99.99,Yet more text to test
-)";
-
-
 		const char * scriptText =
 			u8R"(
 
-				external table text
-				
-				set table to table text as collection
-				set row to table["Test Name C"]
-				set test1 to row["Integer Field"]
+				set t to ["one", ["two", 2], ["three", 3], ["four", 4]]
+				set a to t["one"]["two"]
 			)";
 
-		auto runtime = TestCreateRuntime();
-		auto script = TestCreateScript(scriptText, runtime);
-		script->SetVariable("table text", tableText);
+		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script->Execute());
-		REQUIRE(script->GetVariable("table").IsCollection());
-		auto rowColl = script->GetVariable("table").GetCollection();
-		auto columnColl = rowColl->at("Test Name C");
-		auto val = columnColl.GetCollection()->at("Integer Field");
-		REQUIRE(val == 3);
-		//REQUIRE(script->GetVariable("test1") == 3);
+		REQUIRE(script->GetVariable("t").IsCollection());
+		auto t = script->GetVariable("t").GetCollection();
+		auto t1 = t->at("one");
+		auto t2 = t1.GetCollection()->at("two");
+		REQUIRE(t2 == 2);
 	}
 	ShutDown();
     return 0;

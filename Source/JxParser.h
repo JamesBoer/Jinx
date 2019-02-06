@@ -147,7 +147,7 @@ namespace Jinx::Impl
 		String ParseName();
 		String ParseMultiName(std::initializer_list<SymbolType> symbols);
 		String ParseVariable();
-		bool ParseSubscript();
+		void ParseSubscript();
 		void ParsePropertyDeclaration(VisibilityType scope, bool readOnly);
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);

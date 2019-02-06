@@ -674,6 +674,32 @@ namespace Jinx::Impl
 				Push(itr);
 			}
 			break;
+			case Opcode::PushKeyVal:
+			{
+				auto key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					return false;
+				}
+				auto coll = Pop();
+				if (!coll.IsCollection())
+				{
+					Error("Expected collection type");
+					return false;
+				}
+				auto itr = coll.GetCollection()->find(key);
+				if (itr == coll.GetCollection()->end())
+				{
+					Error("Specified key does not exist in collection");
+					return false;
+				}
+				else
+				{
+					Push(itr->second);
+				}
+			}
+			break;
 			case Opcode::PushList:
 			{
 				uint32_t count;
@@ -704,15 +730,6 @@ namespace Jinx::Impl
 				Push(val);
 			}
 			break;
-			case Opcode::PushPropKeyVal:
-			{
-				uint64_t id;
-				m_execution.back().reader.Read(&id);
-				auto key = Pop();
-				auto var = m_runtime->GetPropertyKeyValue(id, key);
-				Push(var);
-			}
-			break;
 			case Opcode::PushTop:
 			{
 				assert(m_stack.size() >= 1);
@@ -728,63 +745,11 @@ namespace Jinx::Impl
 				Push(var);
 			}
 			break;
-			case Opcode::PushVarKey:
-			{
-				RuntimeID id;
-				m_execution.back().reader.Read(&id);
-				auto var = GetVariable(id);
-				auto key = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-						return false;
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
-			}
-			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(m_execution.back().reader);
 				Push(val);
-			}
-			break;
-			case Opcode::PushValKey:
-			{
-				auto key = Pop();
-				auto var = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-						return false;
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
 			}
 			break;
 			case Opcode::Return:

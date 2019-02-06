@@ -239,9 +239,7 @@ namespace Jinx::Impl
 			case Opcode::EraseVar:
 			case Opcode::EraseVarElem:
 			case Opcode::PushProp:
-			case Opcode::PushPropKeyVal:
 			case Opcode::PushVar:
-			case Opcode::PushVarKey:
 			case Opcode::SetProp:
 			case Opcode::SetPropKeyVal:
 			case Opcode::SetVar:
