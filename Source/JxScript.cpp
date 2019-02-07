@@ -845,23 +845,43 @@ namespace Jinx::Impl
 				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-/*
-				Variant val = Pop();
-				Variant key = Pop();
-				if (!key.IsKeyType())
-				{
-					Error("Invalid key type");
-					return false;
-				}
-				Variant prop = GetVariable(id);
-				if (!prop.IsCollection())
+				Variant coll = GetVariable(id);
+				if (!coll.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
 					return false;
 				}
-				auto collection = prop.GetCollection();
-				(*collection)[key] = val;
-*/
+				Variant val = Pop();
+				Variant key = m_stack[m_stack.size() - subscripts];
+				for (uint32_t i = 0; i < (subscripts - 1); ++i)
+				{
+					size_t index = m_stack.size() - (subscripts - i);
+					key = m_stack[index];
+					if (!key.IsKeyType())
+					{
+						Error("Invalid key type");
+						return false;
+					}
+					auto itr = coll.GetCollection()->find(key);
+					if (itr == coll.GetCollection()->end())
+					{
+						Variant newColl = CreateCollection();
+						coll.GetCollection()->insert(std::make_pair(key, newColl));
+						coll = newColl;
+					}
+					else if (itr->second.IsCollection())
+					{
+						coll = itr->second;
+					}
+					else
+					{
+						Error("Expected collection when accessing by key");
+						return false;
+					}
+				}
+				(*coll.GetCollection())[key] = val;
+				for (uint32_t i = 0; i < subscripts; ++i)
+					Pop();
 			}
 			break;
 			case Opcode::Subtract:

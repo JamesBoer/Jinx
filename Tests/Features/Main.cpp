@@ -68,14 +68,14 @@ int main(int argc, char ** argv)
 			u8R"(
 
 				set a to []
-				set a["thirty-four"] to 34
+				set a["one"]["two"] to 3
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script->Execute());
+		REQUIRE(script);
 		REQUIRE(script->GetVariable("a").IsCollection());
-		REQUIRE(script->GetVariable("a").GetCollection()->at("thirty-four") == 34);
+		REQUIRE(script->GetVariable("a").GetCollection()->at("one").GetCollection()->at("two") == 3);
 	}
 	ShutDown();
     return 0;

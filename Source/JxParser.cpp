@@ -1046,7 +1046,19 @@ namespace Jinx::Impl
 		return String();
 	}
 
-	inline_t uint32_t Parser::ParseSubscript()
+	inline_t void Parser::ParseSubscriptGet()
+	{
+		if (m_error || m_currentSymbol == m_symbolList.end())
+			return;
+		while (Accept(SymbolType::SquareOpen))
+		{
+			ParseExpression();
+			Expect(SymbolType::SquareClose);
+			EmitOpcode(Opcode::PushKeyVal);
+		}
+	}
+
+	inline_t uint32_t Parser::ParseSubscriptSet()
 	{
 		if (m_error || m_currentSymbol == m_symbolList.end())
 			return 0;
@@ -1055,7 +1067,6 @@ namespace Jinx::Impl
 		{
 			ParseExpression();
 			Expect(SymbolType::SquareClose);
-			EmitOpcode(Opcode::PushKeyVal);
 			++count;
 		}
 		return count;
@@ -1541,7 +1552,7 @@ namespace Jinx::Impl
 		m_idNameMap[match.signature->GetId()] = match.signature->GetName();
 
 		// Check for post-function index operator
-		ParseSubscript();
+		ParseSubscriptGet();
 	}
 
 	inline_t void Parser::ParseCast()
@@ -1586,7 +1597,7 @@ namespace Jinx::Impl
 				EmitOpcode(Opcode::PushProp);
 				EmitId(propertyName.GetId());
 				m_idNameMap[propertyName.GetId()] = propertyName.GetName();
-				ParseSubscript();
+				ParseSubscriptGet();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
 			}
@@ -1595,7 +1606,7 @@ namespace Jinx::Impl
 				String name = ParseVariable();
 				EmitOpcode(Opcode::PushVar);
 				EmitId(VariableNameToRuntimeID(name));
-				ParseSubscript();
+				ParseSubscriptGet();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
 			}
@@ -1817,7 +1828,8 @@ namespace Jinx::Impl
 					Accept(SymbolType::NewLine);
 					ParseSubexpression(endSymbol);
 					++count;
-				} while (Accept(SymbolType::Comma));
+				} 
+				while (Accept(SymbolType::Comma));
 
 				// Pop all key-value pairs and push the results on the stack
 				EmitOpcode(Opcode::PushList);
@@ -2252,7 +2264,7 @@ namespace Jinx::Impl
 						}
 
 						// Check for subscript operators
-						uint32_t subscripts = ParseSubscript();
+						uint32_t subscripts = ParseSubscriptSet();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -2279,7 +2291,7 @@ namespace Jinx::Impl
 						String name = ParseMultiName({ SymbolType::To, SymbolType::SquareOpen });
 
 						// Check for subscript operator
-						uint32_t subscripts = ParseSubscript();
+						uint32_t subscripts = ParseSubscriptSet();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
