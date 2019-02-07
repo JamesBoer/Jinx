@@ -64,20 +64,18 @@ int main(int argc, char ** argv)
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
-		const char * scriptText =
+		static const char * scriptText =
 			u8R"(
 
-				set t to ["one", ["two", 2], ["three", 3], ["four", 4]]
-				set a to t["one"]["two"]
+				set a to []
+				set a["thirty-four"] to 34
+
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script->Execute());
-		REQUIRE(script->GetVariable("t").IsCollection());
-		auto t = script->GetVariable("t").GetCollection();
-		auto t1 = t->at("one");
-		auto t2 = t1.GetCollection()->at("two");
-		REQUIRE(t2 == 2);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at("thirty-four") == 34);
 	}
 	ShutDown();
     return 0;

@@ -811,8 +811,11 @@ namespace Jinx::Impl
 			break;
 			case Opcode::SetPropKeyVal:
 			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
+/*
 				Variant val = Pop();
 				Variant key = Pop();
 				if (!key.IsKeyType())
@@ -825,6 +828,7 @@ namespace Jinx::Impl
 					Error("Expected collection when accessing by key");
 					return false;
 				}
+*/
 			}
 			break;
 			case Opcode::SetVar:
@@ -835,10 +839,13 @@ namespace Jinx::Impl
 				SetVariable(id, val);
 			}
 			break;
-			case Opcode::SetVarKey:
+			case Opcode::SetVarKeyVal:
 			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
+/*
 				Variant val = Pop();
 				Variant key = Pop();
 				if (!key.IsKeyType())
@@ -854,6 +861,7 @@ namespace Jinx::Impl
 				}
 				auto collection = prop.GetCollection();
 				(*collection)[key] = val;
+*/
 			}
 			break;
 			case Opcode::Subtract:

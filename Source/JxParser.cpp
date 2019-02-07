@@ -1046,16 +1046,19 @@ namespace Jinx::Impl
 		return String();
 	}
 
-	inline_t void Parser::ParseSubscript()
+	inline_t uint32_t Parser::ParseSubscript()
 	{
 		if (m_error || m_currentSymbol == m_symbolList.end())
-			return;
+			return 0;
+		uint32_t count = 0;
 		while (Accept(SymbolType::SquareOpen))
 		{
 			ParseExpression();
 			Expect(SymbolType::SquareClose);
 			EmitOpcode(Opcode::PushKeyVal);
+			++count;
 		}
+		return count;
 	}
 
 	inline_t void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
@@ -2248,8 +2251,8 @@ namespace Jinx::Impl
 							return false;
 						}
 
-						// Check for subscript operator
-						//bool subscript = ParseSubscript();
+						// Check for subscript operators
+						uint32_t subscripts = ParseSubscript();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -2259,8 +2262,13 @@ namespace Jinx::Impl
 						Expect(SymbolType::NewLine);
 
 						// Assign property
-						//EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
-						EmitOpcode(Opcode::SetProp);
+						if (subscripts)
+						{
+							EmitOpcode(Opcode::SetPropKeyVal);
+							EmitCount(subscripts);
+						}
+						else
+							EmitOpcode(Opcode::SetProp);
 						EmitId(propertyName.GetId());
 						m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 					}
@@ -2271,7 +2279,7 @@ namespace Jinx::Impl
 						String name = ParseMultiName({ SymbolType::To, SymbolType::SquareOpen });
 
 						// Check for subscript operator
-						//bool subscript = ParseSubscript();
+						uint32_t subscripts = ParseSubscript();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -2283,9 +2291,14 @@ namespace Jinx::Impl
 						// Add to variable table
 						VariableAssign(name);
 
-						// Assign a variable.  
-						//EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
-						EmitOpcode(Opcode::SetVar);
+						// Assign a variable. 
+						if (subscripts)
+						{
+							EmitOpcode(Opcode::SetVarKeyVal);
+							EmitCount(subscripts);
+						}
+						else
+							EmitOpcode(Opcode::SetVar);
 						EmitId(VariableNameToRuntimeID(name));
 					}
 				}

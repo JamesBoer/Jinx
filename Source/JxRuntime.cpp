@@ -161,22 +161,6 @@ namespace Jinx::Impl
 		return itr->second;
 	}
 
-	inline_t Variant Runtime::GetPropertyKeyValue(RuntimeID id, const Variant & key)
-	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-		auto itr = m_propertyMap.find(id);
-		if (itr == m_propertyMap.end())
-			return Variant();
-		auto & var = itr->second;
-		if (!var.IsCollection())
-			return Variant();
-		auto collPtr = var.GetCollection();
-		auto vitr = collPtr->find(key);
-		if (vitr == collPtr->end())
-			return Variant();
-		return vitr->second;
-	}
-
 	inline_t LibraryPtr Runtime::GetLibrary(const String & name)
 	{
 		std::lock_guard<std::mutex> lock(m_libraryMutex);
@@ -241,13 +225,21 @@ namespace Jinx::Impl
 			case Opcode::PushProp:
 			case Opcode::PushVar:
 			case Opcode::SetProp:
-			case Opcode::SetPropKeyVal:
 			case Opcode::SetVar:
-			case Opcode::SetVarKey:
 			{
 				RuntimeID id;
 				reader.Read(&id);
 				LogWrite("%s", parser.GetNameFromID(id).c_str());
+			}
+			break;
+			case Opcode::SetPropKeyVal:
+			case Opcode::SetVarKeyVal:
+			{
+				uint32_t subscripts;
+				reader.Read(&subscripts);
+				RuntimeID id;
+				reader.Read(&id);
+				LogWrite("%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::Cast:
@@ -409,20 +401,6 @@ namespace Jinx::Impl
 	{
 		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 		m_propertyMap[id] = value;
-	}
-
-	inline_t bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value)
-	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-		auto itr = m_propertyMap.find(id);
-		if (itr == m_propertyMap.end())
-			return false;
-		auto & variant = itr->second;
-		if (!variant.IsCollection())
-			return false;
-		auto collPtr = variant.GetCollection();
-		(*collPtr)[key] = value;
-		return true;
 	}
 
 	inline_t BufferPtr Runtime::StripDebugInfo(BufferPtr bytecode) const

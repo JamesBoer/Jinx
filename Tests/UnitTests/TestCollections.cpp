@@ -446,4 +446,18 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("a") == 2);
 	}
 
+	SECTION("Test deeply nexted collection access reads")
+	{
+		static const char * scriptText =
+			u8R"(
+
+				set t to ["one", ["two", ["three", ["four", ["five", 5]]]]]
+				set a to t["one"]["two"]["three"]["four"]["five"]
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("a") == 5);
+	}
+
 }

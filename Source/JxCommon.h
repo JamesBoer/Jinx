@@ -67,7 +67,7 @@ namespace Jinx::Impl
 		SetProp,
 		SetPropKeyVal,
 		SetVar,
-		SetVarKey,
+		SetVarKeyVal,
 		Subtract,
 		Type,
 		Wait,
