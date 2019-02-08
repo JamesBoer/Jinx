@@ -174,7 +174,7 @@ namespace Jinx::Impl
 	}
 
 	const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
-	const uint32_t BytecodeVersion = 0;
+	const uint32_t BytecodeVersion = 1;
 
 	struct BytecodeHeader
 	{

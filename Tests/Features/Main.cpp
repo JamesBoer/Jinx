@@ -64,29 +64,40 @@ int main(int argc, char ** argv)
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
+		static const char * tableText =
+			u8R"(
+Name Field,Integer Field,Float Field,Text Field
+Test Name A,1,4.5,This is a simple test.
+Test Name B,2,123.456,More to test…
+Test Name C,3,22.3345,Even more tests of text
+Still Another Test Name,4,1.5,Still more text
+Yet Another Test Name,5,99.99,Yet more text to test
+)";
+
 		static const char * scriptText =
 			u8R"(
 
-				set private a to []
-				set a["one"] to 2
+				external text
+				
+				set table to text as collection
 
-				set private b to []
-				set b["one"]["two"] to 3
-
-				set private c to ["one", []]
-				set c["one"]["two"]["three"] to 4
-
+				set a to table["Test Name A"]["Name Field"]
+				set b to table["Test Name B"]["Integer Field"]
+				set c to table["Test Name C"]["Float Field"]
+				set d to table["Still Another Test Name"]["Text Field"]
+				set e to table["Yet Another Test Name"]["Text Field"]
 			)";
 
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
-        REQUIRE(script->GetLibrary()->GetProperty("a").GetCollection()->at("one") == 2);
-        REQUIRE(script->GetLibrary()->GetProperty("b").IsCollection());
-        REQUIRE(script->GetLibrary()->GetProperty("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
-        REQUIRE(script->GetLibrary()->GetProperty("c").IsCollection());
-        REQUIRE(script->GetLibrary()->GetProperty("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
-    }
+		auto script = TestCreateScript(scriptText);
+		script->SetVariable("text", tableText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a") == "Test Name A");
+		REQUIRE(script->GetVariable("b") == 2);
+		REQUIRE(script->GetVariable("c") == 22.3345);
+		REQUIRE(script->GetVariable("d") == "Still more text");
+		REQUIRE(script->GetVariable("e") == "Yet more text to test");
+	}
 	ShutDown();
     return 0;
 }

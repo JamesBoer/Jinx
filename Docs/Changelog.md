@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2019-02-07
+
+- Fix index operator to allow arbitrary nesting depth
+- Add CSV or tab-delimited table support via string to collection cast
+- Fix path error in CMake file
+- Updated tutorial
+
 ## [1.0.1] - 2019-01-20
 
 - Fix unused variable warning in gcc
