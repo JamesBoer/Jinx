@@ -124,7 +124,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetCollection()->at(1) == 5);
 		REQUIRE(script->GetVariable("a").GetCollection()->at(3).GetCollection()->at(2) == 6);
 	}
-/*
+
 	SECTION("Test collection addition of elements using assignment")
 	{
 		static const char * scriptText =
@@ -151,7 +151,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(3) != collection->end());
 		REQUIRE(collection->find(3)->second == 1);
 	}
-*/
+
 	SECTION("Test collection initialization list of key-value pairs")
 	{
 		static const char * scriptText =
@@ -232,7 +232,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(3) != collection->end());
 		REQUIRE(collection->find(3)->second == "blue");
 	}
-/*
+
 	SECTION("Test assignment of collection element by index operator for variable")
 	{
 		static const char * scriptText =
@@ -255,8 +255,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(2) != collection->end());
 		REQUIRE(collection->find(2)->second == "magenta");
 	}
-*/
-/*
+
 	SECTION("Test assignment of collection element by index operator for property")
 	{
 		static const char * scriptText =
@@ -281,7 +280,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(2) != collection->end());
 		REQUIRE(collection->find(2)->second == "magenta");
 	}
-*/
+
 	SECTION("Test assignment of collection variable by key")
 	{
 		static const char * scriptText =
@@ -318,7 +317,6 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("b") == "green");
 	}
 
-/*
 	SECTION("Test adding auto-indexed value to existing collection")
 	{
 		static const char * scriptText =
@@ -342,7 +340,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(4) != collection->end());
 		REQUIRE(collection->find(4)->second == "purple");
 	}
-*/
+
 	SECTION("Test erasing single element from collection by key")
 	{
 		static const char * scriptText =
@@ -391,7 +389,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->size() == 2);
 		REQUIRE(collection->find(3) == collection->end());
 	}
-/*
+
 	SECTION("Test collections in collections assignment")
 	{
 		static const char * scriptText =
@@ -410,7 +408,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("a").GetCollection()->at(1).IsCollection());
 		REQUIRE(script->GetVariable("b").IsCollection());
 	}
-*/
+
 	SECTION("Test nested collection declaration")
 	{
 		static const char * scriptText =
@@ -446,7 +444,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("a") == 2);
 	}
 
-	SECTION("Test deeply nexted collection access reads")
+	SECTION("Test deeply nested collection access reads on vars")
 	{
 		static const char * scriptText =
 			u8R"(
@@ -459,5 +457,71 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->Execute());
 		REQUIRE(script->GetVariable("a") == 5);
 	}
+
+    SECTION("Test deeply nested collection access reads on properties")
+    {
+        static const char * scriptText =
+            u8R"(
+
+				set private t to ["one", ["two", ["three", ["four", ["five", 5]]]]]
+				set private a to t["one"]["two"]["three"]["four"]["five"]
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script->Execute());
+        REQUIRE(script->GetLibrary()->GetProperty("a") == 5);
+    }
+
+    SECTION("Test mixed nested collection var assignment with existing and non-existing keys")
+    {
+        static const char * scriptText =
+            u8R"(
+
+				set a to []
+				set a["one"] to 2
+
+				set b to []
+				set b["one"]["two"] to 3
+
+				set c to ["one", []]
+				set c["one"]["two"]["three"] to 4
+
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script);
+        REQUIRE(script->GetVariable("a").IsCollection());
+        REQUIRE(script->GetVariable("a").GetCollection()->at("one") == 2);
+        REQUIRE(script->GetVariable("b").IsCollection());
+        REQUIRE(script->GetVariable("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
+        REQUIRE(script->GetVariable("c").IsCollection());
+        REQUIRE(script->GetVariable("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
+    }
+
+    SECTION("Test mixed nested collection property assignment with existing and non-existing keys")
+    {
+        static const char * scriptText =
+            u8R"(
+
+				set private a to []
+				set a["one"] to 2
+
+				set private b to []
+				set b["one"]["two"] to 3
+
+				set private c to ["one", []]
+				set c["one"]["two"]["three"] to 4
+
+			)";
+
+        auto script = TestExecuteScript(scriptText);
+        REQUIRE(script);
+        REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
+        REQUIRE(script->GetLibrary()->GetProperty("a").GetCollection()->at("one") == 2);
+        REQUIRE(script->GetLibrary()->GetProperty("b").IsCollection());
+        REQUIRE(script->GetLibrary()->GetProperty("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
+        REQUIRE(script->GetLibrary()->GetProperty("c").IsCollection());
+        REQUIRE(script->GetLibrary()->GetProperty("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
+    }
 
 }

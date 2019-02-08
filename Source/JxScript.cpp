@@ -815,20 +815,52 @@ namespace Jinx::Impl
 				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-/*
-				Variant val = Pop();
-				Variant key = Pop();
-				if (!key.IsKeyType())
-				{
-					Error("Invalid key type");
-					return false;
-				}
-				if (!m_runtime->SetPropertyKeyValue(id, key, val))
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-*/
+                m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
+                {
+                    if (!coll.IsCollection())
+                    {
+                        this->Error("Expected collection when accessing by key");
+                        return;
+                    }
+                    auto collection = coll.GetCollection();
+                    Variant val = Pop();
+                    Variant key;
+            
+                    for (uint32_t i = 0; i < subscripts; ++i)
+                    {
+                        size_t index = m_stack.size() - (subscripts - i);
+                        key = m_stack[index];
+                        if (!key.IsKeyType())
+                        {
+                            Error("Invalid key type");
+                            return;
+                        }
+                        if (i < (subscripts - 1))
+                        {
+                            auto itr = collection->find(key);
+                            if (itr == collection->end())
+                            {
+                                Variant newColl = CreateCollection();
+                                collection->insert(std::make_pair(key, newColl));
+                                collection = newColl.GetCollection();
+                            }
+                            else if (itr->second.IsCollection())
+                            {
+                                collection = itr->second.GetCollection();
+                                Variant newColl = CreateCollection();
+                                collection->insert(std::make_pair(key, newColl));
+                            }
+                            else
+                            {
+                                Error("Expected collection when accessing by key");
+                                return;
+                            }
+                        }
+                    }
+                    (*collection)[key] = val;
+                    for (uint32_t i = 0; i < subscripts; ++i)
+                        Pop();                 
+                });
 			}
 			break;
 			case Opcode::SetVar:
@@ -851,9 +883,10 @@ namespace Jinx::Impl
 					Error("Expected collection when accessing by key");
 					return false;
 				}
+                auto collection = coll.GetCollection();
 				Variant val = Pop();
-				Variant key = m_stack[m_stack.size() - subscripts];
-				for (uint32_t i = 0; i < (subscripts - 1); ++i)
+				Variant key;
+				for (uint32_t i = 0; i < subscripts; ++i)
 				{
 					size_t index = m_stack.size() - (subscripts - i);
 					key = m_stack[index];
@@ -862,24 +895,29 @@ namespace Jinx::Impl
 						Error("Invalid key type");
 						return false;
 					}
-					auto itr = coll.GetCollection()->find(key);
-					if (itr == coll.GetCollection()->end())
-					{
-						Variant newColl = CreateCollection();
-						coll.GetCollection()->insert(std::make_pair(key, newColl));
-						coll = newColl;
-					}
-					else if (itr->second.IsCollection())
-					{
-						coll = itr->second;
-					}
-					else
-					{
-						Error("Expected collection when accessing by key");
-						return false;
-					}
+                    if (i < (subscripts - 1))
+                    {
+					    auto itr = collection->find(key);
+					    if (itr == collection->end())
+					    {
+						    Variant newColl = CreateCollection();
+                            collection->insert(std::make_pair(key, newColl));
+                            collection = newColl.GetCollection();
+					    }
+					    else if (itr->second.IsCollection())
+					    {
+                            collection = itr->second.GetCollection();
+						    Variant newColl = CreateCollection();
+                            collection->insert(std::make_pair(key, newColl));
+					    }
+					    else
+					    {
+						    Error("Expected collection when accessing by key");
+						    return false;
+					    }
+                    }
 				}
-				(*coll.GetCollection())[key] = val;
+				(*collection)[key] = val;
 				for (uint32_t i = 0; i < subscripts; ++i)
 					Pop();
 			}

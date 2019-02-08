@@ -67,16 +67,26 @@ int main(int argc, char ** argv)
 		static const char * scriptText =
 			u8R"(
 
-				set a to []
-				set a["one"]["two"] to 3
+				set private a to []
+				set a["one"] to 2
+
+				set private b to []
+				set b["one"]["two"] to 3
+
+				set private c to ["one", []]
+				set c["one"]["two"]["three"] to 4
 
 			)";
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a").IsCollection());
-		REQUIRE(script->GetVariable("a").GetCollection()->at("one").GetCollection()->at("two") == 3);
-	}
+		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
+        REQUIRE(script->GetLibrary()->GetProperty("a").GetCollection()->at("one") == 2);
+        REQUIRE(script->GetLibrary()->GetProperty("b").IsCollection());
+        REQUIRE(script->GetLibrary()->GetProperty("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
+        REQUIRE(script->GetLibrary()->GetProperty("c").IsCollection());
+        REQUIRE(script->GetLibrary()->GetProperty("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
+    }
 	ShutDown();
     return 0;
 }
