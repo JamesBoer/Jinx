@@ -364,6 +364,29 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection->find(2) == collection->end());
 	}
 
+	SECTION("Test erasing single element from property collection by key")
+	{
+		static const char * scriptText =
+			u8R"(
+			import core
+
+			-- Create collection using an initialization list of key-value pairs		
+			set private a to [1, "red"], [2, "green"], [3, "blue"]
+			
+			-- Erase element by key
+			erase a[2] 
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
+		auto collection = script->GetLibrary()->GetProperty("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 2);
+		REQUIRE(collection->find(2) == collection->end());
+	}
+
 	SECTION("Test erasing single element from collection in loop")
 	{
 		static const char * scriptText =
@@ -388,6 +411,76 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(collection);
 		REQUIRE(collection->size() == 2);
 		REQUIRE(collection->find(3) == collection->end());
+	}
+
+	SECTION("Test erasing single element from property collection in loop")
+	{
+		static const char * scriptText =
+			u8R"(
+			import core
+
+			-- Create collection using an initialization list of key-value pairs		
+			set private a to [1, "red"], [2, "green"], [3, "blue"]
+
+			loop i over a
+				if i value = "blue"
+					erase i
+				end
+			end
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
+		auto collection = script->GetLibrary()->GetProperty("a").GetCollection();
+		REQUIRE(collection);
+		REQUIRE(collection->size() == 2);
+		REQUIRE(collection->find(3) == collection->end());
+	}
+
+	SECTION("Test erasing single element from nested collection")
+	{
+		static const char * scriptText =
+			u8R"(
+			import core
+
+			-- Create collection using a nested initialization list of key-value pairs		
+			set a to ["one", ["two", ["three", 3]]]
+
+			erase a ["one"]["two"]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		auto collection = script->GetVariable("a").GetCollection();
+		REQUIRE(collection);
+		collection = collection->at("one").GetCollection();
+		REQUIRE(collection->size() == 0);
+	}
+
+	SECTION("Test erasing single element from nested property collection")
+	{
+		static const char * scriptText =
+			u8R"(
+			import core
+
+			-- Create collection using a nested initialization list of key-value pairs		
+			set private a to ["one", ["two", ["three", 3]]]
+
+			erase a ["one"]["two"]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
+		auto collection = script->GetLibrary()->GetProperty("a").GetCollection();
+		REQUIRE(collection);
+		collection = collection->at("one").GetCollection();
+		REQUIRE(collection->size() == 0);
 	}
 
 	SECTION("Test collections in collections assignment")

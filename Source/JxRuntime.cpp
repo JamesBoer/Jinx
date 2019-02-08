@@ -218,10 +218,7 @@ namespace Jinx::Impl
 			switch (opcode)
 			{
 			case Opcode::CallFunc:
-			case Opcode::EraseProp:
-			case Opcode::ErasePropElem:
-			case Opcode::EraseVar:
-			case Opcode::EraseVarElem:
+			case Opcode::EraseItr:
 			case Opcode::PushProp:
 			case Opcode::PushVar:
 			case Opcode::SetProp:
@@ -232,6 +229,8 @@ namespace Jinx::Impl
 				LogWrite("%s", parser.GetNameFromID(id).c_str());
 			}
 			break;
+			case Opcode::ErasePropKeyVal:
+			case Opcode::EraseVarKeyVal:
 			case Opcode::SetPropKeyVal:
 			case Opcode::SetVarKeyVal:
 			{
