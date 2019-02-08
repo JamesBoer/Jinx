@@ -3401,12 +3401,18 @@ namespace Jinx::Impl
 			if (begin == nullptr)
 				begin = *current;
 			const char c = **current;
-			if (c == breakToken || c == '\n')
+			if (c == breakToken || c == '\n' || c == '\r')
 			{
 				variants.push_back(ParseVariant(begin, *current));
 				begin = nullptr;
-				if (c == '\n')
+				if (c == '\n' || c == '\r')
 				{
+                    if (**current != *end)
+                    {
+                        const char nc = *((*current) + 1);
+                        if (nc == '\n' || nc == '\r')
+                            ++(*current);
+                    }
 					++(*current);
 					break;
 				}
