@@ -23,7 +23,7 @@ set(
 	"MainWindow.xaml"
 	"MainWindow.xaml.cs"
 )
-add_executable(${PROJECT_NAME} WIN32 ${jinxpad_source} C:/Projects/Jinx/Utils/JinxPad/Resources/Jinx.ico)
+add_executable(${PROJECT_NAME} WIN32 ${jinxpad_source} ${CMAKE_CURRENT_SOURCE_DIR}/Resources/Jinx.ico)
 set_property(SOURCE App.xaml PROPERTY VS_XAML_TYPE "ApplicationDefinition")
 set_source_files_properties("Resources/Jinx.png" "Resources/Jinx.ico" PROPERTIES VS_TOOL_OVERRIDE "Resource")
 csharp_set_xaml_cs_properties(${jinxpad_source})
