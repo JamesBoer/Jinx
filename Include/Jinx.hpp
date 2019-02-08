@@ -689,10 +689,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 1;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 0;
+	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -1215,14 +1215,12 @@ namespace Jinx::Impl
 		Property,
 		PushColl,
 		PushItr,
+		PushKeyVal,
 		PushList,
 		PushProp,
-		PushPropKeyVal,
 		PushTop,
 		PushVar,
-		PushVarKey,
 		PushVal,
-		PushValKey,
 		Return,
 		ScopeBegin,
 		ScopeEnd,
@@ -1230,7 +1228,7 @@ namespace Jinx::Impl
 		SetProp,
 		SetPropKeyVal,
 		SetVar,
-		SetVarKey,
+		SetVarKeyVal,
 		Subtract,
 		Type,
 		Wait,
@@ -1337,7 +1335,7 @@ namespace Jinx::Impl
 	}
 
 	const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
-	const uint32_t BytecodeVersion = 0;
+	const uint32_t BytecodeVersion = 1;
 
 	struct BytecodeHeader
 	{
@@ -1559,6 +1557,7 @@ namespace Jinx::Impl
 	bool StringToInteger(const String & value, int64_t * outValue);
 	bool StringToValueType(const String & value, ValueType * outValue);
 	bool StringToGuid(const String & value, Guid * outValue);
+	bool StringToCollection(const String & value, CollectionPtr * outValue);
 
 	// GUID conversions
 	String GuidToString(const Guid & value);
@@ -2379,7 +2378,8 @@ namespace Jinx::Impl
 		String ParseName();
 		String ParseMultiName(std::initializer_list<SymbolType> symbols);
 		String ParseVariable();
-		bool ParseSubscript();
+		void ParseSubscriptGet();
+		uint32_t ParseSubscriptSet();
 		void ParsePropertyDeclaration(VisibilityType scope, bool readOnly);
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
@@ -2629,11 +2629,10 @@ namespace Jinx::Impl
 		void RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset);
 		void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
 		Variant GetProperty(RuntimeID id) const;
-		Variant GetPropertyKeyValue(RuntimeID id, const Variant & key);
 		bool PropertyExists(RuntimeID id) const;
-		void SetProperty(RuntimeID id, const Variant & value);
-		bool SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value);
-		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		void SetProperty(RuntimeID id, std::function<void(Variant &)> fn);
+        void SetProperty(RuntimeID id, const Variant & value);
+        void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
@@ -2892,22 +2891,20 @@ namespace Jinx
 				"property",
 				"pushcoll",
 				"pushitr",
+				"pushkeyval",
 				"pushlist",
 				"pushprop",
-				"pushpropkey",
 				"pushtop",
 				"pushvar",
-				"pushvarkey",
 				"pushval",
-				"pushvalkey",
 				"return",
 				"scopebegin",
 				"scopeend",
 				"setindex",
 				"setprop",
-				"setpropkey",
+				"setpropkeyval",
 				"setvar",
-				"setvarkey",
+				"setvarkeyval",
 				"subtract",
 				"type",
 				"wait",
@@ -3340,6 +3337,139 @@ namespace Jinx::Impl
 		*outValue = guid;
 		return true;
 	}
+
+	inline char GetBreakToken(const String & value)
+	{
+		size_t tabCount = 0;
+		size_t commaCount = 0;
+		for (size_t i = 0; i < value.size(); ++i)
+		{
+			char c = value[i];
+			if (c == '\t')
+				++tabCount;
+			else if (c == ',')
+				++commaCount;
+			else if (c == '\n' && i != 0)
+				break;
+		}
+		if (tabCount == 0 && commaCount == 0)
+			return 0;
+		return (tabCount > commaCount) ? '\t' : ',';
+	}
+
+	inline void ParseWhitespace(const char ** current, const char * end)
+	{
+		while (**current != *end)
+		{
+			char c = **current;
+			if (c != '\t' && c != ' ' && c != '\r' && c != '\n')
+				break;
+			++(*current);
+		}
+	}
+
+	inline Variant ParseVariant(const char * begin, const char * end)
+	{
+		String value;
+		while (begin != end)
+		{
+			value += *begin;
+			++begin;
+		}
+		Guid guid;
+		if (StringToGuid(value, &guid))
+			return guid;
+		int64_t integer;
+		if (StringToInteger(value, &integer))
+			return integer;
+		double number;
+		if (StringToNumber(value, &number))
+			return number;
+		bool boolean;
+		if (StringToBoolean(value, &boolean))
+			return boolean;
+		return value;
+	}
+
+	inline std::vector<Variant, Jinx::Allocator<Variant>> ParseRow(char breakToken, const char ** current, const char * end)
+	{
+		std::vector<Variant, Jinx::Allocator<Variant>> variants;
+
+		const char * begin = *current;
+		while (**current != *end)
+		{
+			if (begin == nullptr)
+				begin = *current;
+			const char c = **current;
+			if (c == breakToken || c == '\n' || c == '\r')
+			{
+				variants.push_back(ParseVariant(begin, *current));
+				begin = nullptr;
+				if (c == '\n' || c == '\r')
+				{
+                    if (**current != *end)
+                    {
+                        const char nc = *((*current) + 1);
+                        if (nc == '\n' || nc == '\r')
+                            ++(*current);
+                    }
+					++(*current);
+					break;
+				}
+			}
+			++(*current);
+		}
+
+		if (begin && begin != end)
+			variants.push_back(ParseVariant(begin, end));
+
+		return variants;
+	}
+
+	inline bool StringToCollection(const String & value, CollectionPtr * outValue)
+	{
+
+		// First check what type of delimiter is used, tabs or semicolons
+		char breakToken = GetBreakToken(value);
+		if (breakToken == 0)
+			return false;
+		
+		// Parse first row, which we'll uses as index values into each subsequent row
+		const char * current = value.data();
+		const char * end = current + value.size();
+		ParseWhitespace(&current, end);
+		auto header = ParseRow(breakToken, &current, end);
+		if (header.empty())
+			return false;
+
+		*outValue = CreateCollection();
+		CollectionPtr coll = *outValue;
+
+		// Parse and create a collection for each row, and assign column ids from header
+		while (true)
+		{
+			const auto & row = ParseRow(breakToken, &current, end);
+			if (row.empty())
+				break;
+			if (row.size() != header.size())
+			{
+				*outValue = nullptr;
+				return false;
+			}
+			const auto & rowName = row[0];
+			auto rowColl = CreateCollection();
+			coll->insert({rowName, rowColl });
+			for (size_t i = 0; i < row.size(); ++i)
+			{
+				const auto & headerName = header[i];
+				const auto & rowVal = row[i];
+				rowColl->insert({ headerName, rowVal });
+			}
+		}
+
+		return true;
+	}
+
 
 	inline String GuidToString(const Guid & value)
 	{
@@ -6544,18 +6674,30 @@ namespace Jinx::Impl
 		return String();
 	}
 
-	inline bool Parser::ParseSubscript()
+	inline void Parser::ParseSubscriptGet()
 	{
 		if (m_error || m_currentSymbol == m_symbolList.end())
-			return false;
-		bool subscript = false;
+			return;
 		while (Accept(SymbolType::SquareOpen))
 		{
 			ParseExpression();
 			Expect(SymbolType::SquareClose);
-			subscript = true;
+			EmitOpcode(Opcode::PushKeyVal);
 		}
-		return subscript;
+	}
+
+	inline uint32_t Parser::ParseSubscriptSet()
+	{
+		if (m_error || m_currentSymbol == m_symbolList.end())
+			return 0;
+		uint32_t count = 0;
+		while (Accept(SymbolType::SquareOpen))
+		{
+			ParseExpression();
+			Expect(SymbolType::SquareClose);
+			++count;
+		}
+		return count;
 	}
 
 	inline void Parser::ParsePropertyDeclaration(VisibilityType scope, bool readOnly)
@@ -7038,8 +7180,7 @@ namespace Jinx::Impl
 		m_idNameMap[match.signature->GetId()] = match.signature->GetName();
 
 		// Check for post-function index operator
-		if (ParseSubscript())
-			EmitOpcode(Opcode::PushValKey);
+		ParseSubscriptGet();
 	}
 
 	inline void Parser::ParseCast()
@@ -7081,19 +7222,19 @@ namespace Jinx::Impl
 					Error("Unable to find property name in library");
 					return;
 				}
-				bool subscript = ParseSubscript();
-				EmitOpcode(subscript ? Opcode::PushPropKeyVal : Opcode::PushProp);
+				EmitOpcode(Opcode::PushProp);
 				EmitId(propertyName.GetId());
 				m_idNameMap[propertyName.GetId()] = propertyName.GetName();
+				ParseSubscriptGet();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
 			}
 			else if (CheckVariable())
 			{
 				String name = ParseVariable();
-				bool subscript = ParseSubscript();
-				EmitOpcode(subscript ? Opcode::PushVarKey : Opcode::PushVar);
+				EmitOpcode(Opcode::PushVar);
 				EmitId(VariableNameToRuntimeID(name));
+				ParseSubscriptGet();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
 			}
@@ -7315,7 +7456,8 @@ namespace Jinx::Impl
 					Accept(SymbolType::NewLine);
 					ParseSubexpression(endSymbol);
 					++count;
-				} while (Accept(SymbolType::Comma));
+				} 
+				while (Accept(SymbolType::Comma));
 
 				// Pop all key-value pairs and push the results on the stack
 				EmitOpcode(Opcode::PushList);
@@ -7749,8 +7891,8 @@ namespace Jinx::Impl
 							return false;
 						}
 
-						// Check for subscript operator
-						bool subscript = ParseSubscript();
+						// Check for subscript operators
+						uint32_t subscripts = ParseSubscriptSet();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -7760,7 +7902,13 @@ namespace Jinx::Impl
 						Expect(SymbolType::NewLine);
 
 						// Assign property
-						EmitOpcode(subscript ? Opcode::SetPropKeyVal : Opcode::SetProp);
+						if (subscripts)
+						{
+							EmitOpcode(Opcode::SetPropKeyVal);
+							EmitCount(subscripts);
+						}
+						else
+							EmitOpcode(Opcode::SetProp);
 						EmitId(propertyName.GetId());
 						m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 					}
@@ -7771,7 +7919,7 @@ namespace Jinx::Impl
 						String name = ParseMultiName({ SymbolType::To, SymbolType::SquareOpen });
 
 						// Check for subscript operator
-						bool subscript = ParseSubscript();
+						uint32_t subscripts = ParseSubscriptSet();
 
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
@@ -7783,8 +7931,14 @@ namespace Jinx::Impl
 						// Add to variable table
 						VariableAssign(name);
 
-						// Assign a variable.  
-						EmitOpcode(subscript ? Opcode::SetVarKey : Opcode::SetVar);
+						// Assign a variable. 
+						if (subscripts)
+						{
+							EmitOpcode(Opcode::SetVarKeyVal);
+							EmitCount(subscripts);
+						}
+						else
+							EmitOpcode(Opcode::SetVar);
 						EmitId(VariableNameToRuntimeID(name));
 					}
 				}
@@ -8244,22 +8398,6 @@ namespace Jinx::Impl
 		return itr->second;
 	}
 
-	inline Variant Runtime::GetPropertyKeyValue(RuntimeID id, const Variant & key)
-	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-		auto itr = m_propertyMap.find(id);
-		if (itr == m_propertyMap.end())
-			return Variant();
-		auto & var = itr->second;
-		if (!var.IsCollection())
-			return Variant();
-		auto collPtr = var.GetCollection();
-		auto vitr = collPtr->find(key);
-		if (vitr == collPtr->end())
-			return Variant();
-		return vitr->second;
-	}
-
 	inline LibraryPtr Runtime::GetLibrary(const String & name)
 	{
 		std::lock_guard<std::mutex> lock(m_libraryMutex);
@@ -8322,17 +8460,23 @@ namespace Jinx::Impl
 			case Opcode::EraseVar:
 			case Opcode::EraseVarElem:
 			case Opcode::PushProp:
-			case Opcode::PushPropKeyVal:
 			case Opcode::PushVar:
-			case Opcode::PushVarKey:
 			case Opcode::SetProp:
-			case Opcode::SetPropKeyVal:
 			case Opcode::SetVar:
-			case Opcode::SetVarKey:
 			{
 				RuntimeID id;
 				reader.Read(&id);
 				LogWrite("%s", parser.GetNameFromID(id).c_str());
+			}
+			break;
+			case Opcode::SetPropKeyVal:
+			case Opcode::SetVarKeyVal:
+			{
+				uint32_t subscripts;
+				reader.Read(&subscripts);
+				RuntimeID id;
+				reader.Read(&id);
+				LogWrite("%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::Cast:
@@ -8490,24 +8634,17 @@ namespace Jinx::Impl
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
+    inline void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
+    {
+        std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+        auto& prop = m_propertyMap[id];
+        fn(prop);
+    }
+
 	inline void Runtime::SetProperty(RuntimeID id, const Variant & value)
 	{
 		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 		m_propertyMap[id] = value;
-	}
-
-	inline bool Runtime::SetPropertyKeyValue(RuntimeID id, const Variant & key, const Variant & value)
-	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-		auto itr = m_propertyMap.find(id);
-		if (itr == m_propertyMap.end())
-			return false;
-		auto & variant = itr->second;
-		if (!variant.IsCollection())
-			return false;
-		auto collPtr = variant.GetCollection();
-		(*collPtr)[key] = value;
-		return true;
 	}
 
 	inline BufferPtr Runtime::StripDebugInfo(BufferPtr bytecode) const
@@ -9236,6 +9373,32 @@ namespace Jinx::Impl
 				Push(itr);
 			}
 			break;
+			case Opcode::PushKeyVal:
+			{
+				auto key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					return false;
+				}
+				auto coll = Pop();
+				if (!coll.IsCollection())
+				{
+					Error("Expected collection type");
+					return false;
+				}
+				auto itr = coll.GetCollection()->find(key);
+				if (itr == coll.GetCollection()->end())
+				{
+					Error("Specified key does not exist in collection");
+					return false;
+				}
+				else
+				{
+					Push(itr->second);
+				}
+			}
+			break;
 			case Opcode::PushList:
 			{
 				uint32_t count;
@@ -9266,15 +9429,6 @@ namespace Jinx::Impl
 				Push(val);
 			}
 			break;
-			case Opcode::PushPropKeyVal:
-			{
-				uint64_t id;
-				m_execution.back().reader.Read(&id);
-				auto key = Pop();
-				auto var = m_runtime->GetPropertyKeyValue(id, key);
-				Push(var);
-			}
-			break;
 			case Opcode::PushTop:
 			{
 				assert(m_stack.size() >= 1);
@@ -9290,63 +9444,11 @@ namespace Jinx::Impl
 				Push(var);
 			}
 			break;
-			case Opcode::PushVarKey:
-			{
-				RuntimeID id;
-				m_execution.back().reader.Read(&id);
-				auto var = GetVariable(id);
-				auto key = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-						return false;
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
-			}
-			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(m_execution.back().reader);
 				Push(val);
-			}
-			break;
-			case Opcode::PushValKey:
-			{
-				auto key = Pop();
-				auto var = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-						return false;
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
 			}
 			break;
 			case Opcode::Return:
@@ -9408,20 +9510,56 @@ namespace Jinx::Impl
 			break;
 			case Opcode::SetPropKeyVal:
 			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				Variant val = Pop();
-				Variant key = Pop();
-				if (!key.IsKeyType())
-				{
-					Error("Invalid key type");
-					return false;
-				}
-				if (!m_runtime->SetPropertyKeyValue(id, key, val))
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
+                m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
+                {
+                    if (!coll.IsCollection())
+                    {
+                        this->Error("Expected collection when accessing by key");
+                        return;
+                    }
+                    auto collection = coll.GetCollection();
+                    Variant val = Pop();
+                    Variant key;
+            
+                    for (uint32_t i = 0; i < subscripts; ++i)
+                    {
+                        size_t index = m_stack.size() - (subscripts - i);
+                        key = m_stack[index];
+                        if (!key.IsKeyType())
+                        {
+                            Error("Invalid key type");
+                            return;
+                        }
+                        if (i < (subscripts - 1))
+                        {
+                            auto itr = collection->find(key);
+                            if (itr == collection->end())
+                            {
+                                Variant newColl = CreateCollection();
+                                collection->insert(std::make_pair(key, newColl));
+                                collection = newColl.GetCollection();
+                            }
+                            else if (itr->second.IsCollection())
+                            {
+                                collection = itr->second.GetCollection();
+                                Variant newColl = CreateCollection();
+                                collection->insert(std::make_pair(key, newColl));
+                            }
+                            else
+                            {
+                                Error("Expected collection when accessing by key");
+                                return;
+                            }
+                        }
+                    }
+                    (*collection)[key] = val;
+                    for (uint32_t i = 0; i < subscripts; ++i)
+                        Pop();                 
+                });
 			}
 			break;
 			case Opcode::SetVar:
@@ -9432,25 +9570,55 @@ namespace Jinx::Impl
 				SetVariable(id, val);
 			}
 			break;
-			case Opcode::SetVarKey:
+			case Opcode::SetVarKeyVal:
 			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				Variant val = Pop();
-				Variant key = Pop();
-				if (!key.IsKeyType())
-				{
-					Error("Invalid key type");
-					return false;
-				}
-				Variant prop = GetVariable(id);
-				if (!prop.IsCollection())
+				Variant coll = GetVariable(id);
+				if (!coll.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
 					return false;
 				}
-				auto collection = prop.GetCollection();
+                auto collection = coll.GetCollection();
+				Variant val = Pop();
+				Variant key;
+				for (uint32_t i = 0; i < subscripts; ++i)
+				{
+					size_t index = m_stack.size() - (subscripts - i);
+					key = m_stack[index];
+					if (!key.IsKeyType())
+					{
+						Error("Invalid key type");
+						return false;
+					}
+                    if (i < (subscripts - 1))
+                    {
+					    auto itr = collection->find(key);
+					    if (itr == collection->end())
+					    {
+						    Variant newColl = CreateCollection();
+                            collection->insert(std::make_pair(key, newColl));
+                            collection = newColl.GetCollection();
+					    }
+					    else if (itr->second.IsCollection())
+					    {
+                            collection = itr->second.GetCollection();
+						    Variant newColl = CreateCollection();
+                            collection->insert(std::make_pair(key, newColl));
+					    }
+					    else
+					    {
+						    Error("Expected collection when accessing by key");
+						    return false;
+					    }
+                    }
+				}
 				(*collection)[key] = val;
+				for (uint32_t i = 0; i < subscripts; ++i)
+					Pop();
 			}
 			break;
 			case Opcode::Subtract:
@@ -12159,6 +12327,18 @@ namespace Jinx
 						SetBoolean(boolean);
 						return true;
 					}
+					case ValueType::Collection:
+					{
+						auto collection = CreateCollection();
+						if (!Impl::StringToCollection(m_string, &collection))
+						{
+							Impl::LogWriteLine("Error converting string to collection type", m_string.c_str());
+							SetNull();
+							return false;
+						}
+						SetCollection(collection);
+						return true;
+					}
 					case ValueType::Guid:
 					{
 						Guid guid;
@@ -12839,7 +13019,7 @@ namespace Jinx
 			}
 			case ValueType::String:
 			{
-				if (!right.IsNumericType())
+				if (!right.IsString())
 					break;
 				return left.GetString() < right.GetString();
 			}

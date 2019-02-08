@@ -346,6 +346,18 @@ namespace Jinx
 						SetBoolean(boolean);
 						return true;
 					}
+					case ValueType::Collection:
+					{
+						auto collection = CreateCollection();
+						if (!Impl::StringToCollection(m_string, &collection))
+						{
+							Impl::LogWriteLine("Error converting string to collection type", m_string.c_str());
+							SetNull();
+							return false;
+						}
+						SetCollection(collection);
+						return true;
+					}
 					case ValueType::Guid:
 					{
 						Guid guid;
@@ -1026,7 +1038,7 @@ namespace Jinx
 			}
 			case ValueType::String:
 			{
-				if (!right.IsNumericType())
+				if (!right.IsString())
 					break;
 				return left.GetString() < right.GetString();
 			}
