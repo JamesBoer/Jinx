@@ -54,14 +54,12 @@ namespace Jinx::Impl
 		Property,
 		PushColl,
 		PushItr,
+		PushKeyVal,
 		PushList,
 		PushProp,
-		PushPropKeyVal,
 		PushTop,
 		PushVar,
-		PushVarKey,
 		PushVal,
-		PushValKey,
 		Return,
 		ScopeBegin,
 		ScopeEnd,
@@ -69,7 +67,7 @@ namespace Jinx::Impl
 		SetProp,
 		SetPropKeyVal,
 		SetVar,
-		SetVarKey,
+		SetVarKeyVal,
 		Subtract,
 		Type,
 		Wait,
@@ -176,7 +174,7 @@ namespace Jinx::Impl
 	}
 
 	const uint32_t BytecodeSignature = MakeFourCC('J', 'I', 'N', 'X');
-	const uint32_t BytecodeVersion = 0;
+	const uint32_t BytecodeVersion = 1;
 
 	struct BytecodeHeader
 	{

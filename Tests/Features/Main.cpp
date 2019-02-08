@@ -58,22 +58,45 @@ int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
 
-	Initialize(GlobalParams());
+	GlobalParams params;
+	params.logBytecode = true;
+	params.logSymbols = true;
+	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
-		const char * scriptText =
+		static const char * tableText =
+			u8R"(
+Name Field,Integer Field,Float Field,Text Field
+Test Name A,1,4.5,This is a simple test.
+Test Name B,2,123.456,More to test…
+Test Name C,3,22.3345,Even more tests of text
+Still Another Test Name,4,1.5,Still more text
+Yet Another Test Name,5,99.99,Yet more text to test
+)";
+
+		static const char * scriptText =
 			u8R"(
 
-				function calculate volume from width: {w} height: {h} depth: {d}
-					return w * h * d
-				end
+				external text
+				
+				set table to text as collection
 
-				set x to calculate volume from width: 3 height: 4 depth: 5
-
+				set a to table["Test Name A"]["Name Field"]
+				set b to table["Test Name B"]["Integer Field"]
+				set c to table["Test Name C"]["Float Field"]
+				set d to table["Still Another Test Name"]["Text Field"]
+				set e to table["Yet Another Test Name"]["Text Field"]
 			)";
 
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script->GetVariable("x") == 60);
+		auto script = TestCreateScript(scriptText);
+		script->SetVariable("text", tableText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a") == "Test Name A");
+		REQUIRE(script->GetVariable("b") == 2);
+		REQUIRE(script->GetVariable("c") == 22.3345);
+		REQUIRE(script->GetVariable("d") == "Still more text");
+		REQUIRE(script->GetVariable("e") == "Yet more text to test");
 	}
 	ShutDown();
     return 0;

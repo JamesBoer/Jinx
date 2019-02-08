@@ -674,6 +674,32 @@ namespace Jinx::Impl
 				Push(itr);
 			}
 			break;
+			case Opcode::PushKeyVal:
+			{
+				auto key = Pop();
+				if (!key.IsKeyType())
+				{
+					Error("Invalid key type");
+					return false;
+				}
+				auto coll = Pop();
+				if (!coll.IsCollection())
+				{
+					Error("Expected collection type");
+					return false;
+				}
+				auto itr = coll.GetCollection()->find(key);
+				if (itr == coll.GetCollection()->end())
+				{
+					Error("Specified key does not exist in collection");
+					return false;
+				}
+				else
+				{
+					Push(itr->second);
+				}
+			}
+			break;
 			case Opcode::PushList:
 			{
 				uint32_t count;
@@ -704,15 +730,6 @@ namespace Jinx::Impl
 				Push(val);
 			}
 			break;
-			case Opcode::PushPropKeyVal:
-			{
-				uint64_t id;
-				m_execution.back().reader.Read(&id);
-				auto key = Pop();
-				auto var = m_runtime->GetPropertyKeyValue(id, key);
-				Push(var);
-			}
-			break;
 			case Opcode::PushTop:
 			{
 				assert(m_stack.size() >= 1);
@@ -728,63 +745,11 @@ namespace Jinx::Impl
 				Push(var);
 			}
 			break;
-			case Opcode::PushVarKey:
-			{
-				RuntimeID id;
-				m_execution.back().reader.Read(&id);
-				auto var = GetVariable(id);
-				auto key = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-						return false;
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
-			}
-			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(m_execution.back().reader);
 				Push(val);
-			}
-			break;
-			case Opcode::PushValKey:
-			{
-				auto key = Pop();
-				auto var = Pop();
-				if (!var.IsCollection())
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
-				else
-				{
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr == coll->end())
-					{
-						Error("Specified key does not exist in collection");
-						return false;
-					}
-					else
-					{
-						Push(itr->second);
-					}
-				}
 			}
 			break;
 			case Opcode::Return:
@@ -846,20 +811,56 @@ namespace Jinx::Impl
 			break;
 			case Opcode::SetPropKeyVal:
 			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				Variant val = Pop();
-				Variant key = Pop();
-				if (!key.IsKeyType())
-				{
-					Error("Invalid key type");
-					return false;
-				}
-				if (!m_runtime->SetPropertyKeyValue(id, key, val))
-				{
-					Error("Expected collection when accessing by key");
-					return false;
-				}
+                m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
+                {
+                    if (!coll.IsCollection())
+                    {
+                        this->Error("Expected collection when accessing by key");
+                        return;
+                    }
+                    auto collection = coll.GetCollection();
+                    Variant val = Pop();
+                    Variant key;
+            
+                    for (uint32_t i = 0; i < subscripts; ++i)
+                    {
+                        size_t index = m_stack.size() - (subscripts - i);
+                        key = m_stack[index];
+                        if (!key.IsKeyType())
+                        {
+                            Error("Invalid key type");
+                            return;
+                        }
+                        if (i < (subscripts - 1))
+                        {
+                            auto itr = collection->find(key);
+                            if (itr == collection->end())
+                            {
+                                Variant newColl = CreateCollection();
+                                collection->insert(std::make_pair(key, newColl));
+                                collection = newColl.GetCollection();
+                            }
+                            else if (itr->second.IsCollection())
+                            {
+                                collection = itr->second.GetCollection();
+                                Variant newColl = CreateCollection();
+                                collection->insert(std::make_pair(key, newColl));
+                            }
+                            else
+                            {
+                                Error("Expected collection when accessing by key");
+                                return;
+                            }
+                        }
+                    }
+                    (*collection)[key] = val;
+                    for (uint32_t i = 0; i < subscripts; ++i)
+                        Pop();                 
+                });
 			}
 			break;
 			case Opcode::SetVar:
@@ -870,25 +871,55 @@ namespace Jinx::Impl
 				SetVariable(id, val);
 			}
 			break;
-			case Opcode::SetVarKey:
+			case Opcode::SetVarKeyVal:
 			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				Variant val = Pop();
-				Variant key = Pop();
-				if (!key.IsKeyType())
-				{
-					Error("Invalid key type");
-					return false;
-				}
-				Variant prop = GetVariable(id);
-				if (!prop.IsCollection())
+				Variant coll = GetVariable(id);
+				if (!coll.IsCollection())
 				{
 					Error("Expected collection when accessing by key");
 					return false;
 				}
-				auto collection = prop.GetCollection();
+                auto collection = coll.GetCollection();
+				Variant val = Pop();
+				Variant key;
+				for (uint32_t i = 0; i < subscripts; ++i)
+				{
+					size_t index = m_stack.size() - (subscripts - i);
+					key = m_stack[index];
+					if (!key.IsKeyType())
+					{
+						Error("Invalid key type");
+						return false;
+					}
+                    if (i < (subscripts - 1))
+                    {
+					    auto itr = collection->find(key);
+					    if (itr == collection->end())
+					    {
+						    Variant newColl = CreateCollection();
+                            collection->insert(std::make_pair(key, newColl));
+                            collection = newColl.GetCollection();
+					    }
+					    else if (itr->second.IsCollection())
+					    {
+                            collection = itr->second.GetCollection();
+						    Variant newColl = CreateCollection();
+                            collection->insert(std::make_pair(key, newColl));
+					    }
+					    else
+					    {
+						    Error("Expected collection when accessing by key");
+						    return false;
+					    }
+                    }
+				}
 				(*collection)[key] = val;
+				for (uint32_t i = 0; i < subscripts; ++i)
+					Pop();
 			}
 			break;
 			case Opcode::Subtract:

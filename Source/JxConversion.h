@@ -54,6 +54,7 @@ namespace Jinx::Impl
 	bool StringToInteger(const String & value, int64_t * outValue);
 	bool StringToValueType(const String & value, ValueType * outValue);
 	bool StringToGuid(const String & value, Guid * outValue);
+	bool StringToCollection(const String & value, CollectionPtr * outValue);
 
 	// GUID conversions
 	String GuidToString(const Guid & value);
