@@ -84,5 +84,5 @@ int main(int argc, char ** argv)
 		REQUIRE(collection->size() == 0);
 	}
 	ShutDown();
-    return 0;
+	return 0;
 }

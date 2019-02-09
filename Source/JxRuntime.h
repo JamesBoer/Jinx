@@ -38,8 +38,8 @@ namespace Jinx::Impl
 		Variant GetProperty(RuntimeID id) const;
 		bool PropertyExists(RuntimeID id) const;
 		void SetProperty(RuntimeID id, std::function<void(Variant &)> fn);
-        void SetProperty(RuntimeID id, const Variant & value);
-        void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		void SetProperty(RuntimeID id, const Variant & value);
+		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
