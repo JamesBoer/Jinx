@@ -1222,6 +1222,7 @@ namespace Jinx::Impl
 				}
 			}
 		}
+		m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 		return propertyName;
 	}
 
@@ -1853,37 +1854,36 @@ namespace Jinx::Impl
 				Error("Can't erase a readonly property");
 				return;
 			}
-			if (Accept(SymbolType::SquareOpen))
+			uint32_t subscripts = ParseSubscriptSet();
+			Expect(SymbolType::NewLine);
+			if (subscripts)
 			{
-				ParseSubexpression();
-				Expect(SymbolType::SquareClose);
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseVarElem);
+				EmitOpcode(Opcode::ErasePropKeyVal);
+				EmitCount(subscripts);
+				EmitId(propName.GetId());
 			}
 			else
 			{
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseProp);
+				Error("Expected index operator after erase keyword");
+				return;
 			}
-			EmitId(propName.GetId());
-			m_idNameMap[propName.GetId()] = propName.GetName();
 		}
 		else if (CheckVariable())
 		{
 			auto varName = ParseVariable();
-			if (Accept(SymbolType::SquareOpen))
+			uint32_t subscripts = ParseSubscriptSet();
+			Expect(SymbolType::NewLine);
+			if (subscripts)
 			{
-				ParseSubexpression();
-				Expect(SymbolType::SquareClose);
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseVarElem);
+				EmitOpcode(Opcode::EraseVarKeyVal);
+				EmitCount(subscripts);
+				EmitId(VariableNameToRuntimeID(varName));
 			}
 			else
 			{
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseVar);
+				EmitOpcode(Opcode::EraseItr);
+				EmitId(VariableNameToRuntimeID(varName));
 			}
-			EmitId(VariableNameToRuntimeID(varName));
 		}
 		else
 		{

@@ -43,6 +43,8 @@ namespace Jinx::Impl
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
+		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
+
 		Variant CallFunction(RuntimeID id);
 
 	private:

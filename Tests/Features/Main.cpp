@@ -1,4 +1,4 @@
-﻿/*
+/*
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
@@ -61,43 +61,36 @@ int main(int argc, char ** argv)
 	GlobalParams params;
 	params.logBytecode = true;
 	params.logSymbols = true;
+	params.errorOnMaxInstrunctions = false;
+	params.maxInstructions = std::numeric_limits<uint32_t>::max();
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
-		static const char * tableText =
-			u8R"(
-Name Field,Integer Field,Float Field,Text Field
-Test Name A,1,4.5,This is a simple test.
-Test Name B,2,123.456,More to test…
-Test Name C,3,22.3345,Even more tests of text
-Still Another Test Name,4,1.5,Still more text
-Yet Another Test Name,5,99.99,Yet more text to test
-)";
-
 		static const char * scriptText =
 			u8R"(
+			import core
 
-				external text
-				
-				set table to text as collection
+			function fibR {integer n}
+				if n < 2
+					return n
+				end
+				return (fibR(n - 2) + fibR(n - 1))
+			end
 
-				set a to table["Test Name A"]["Name Field"]
-				set b to table["Test Name B"]["Integer Field"]
-				set c to table["Test Name C"]["Float Field"]
-				set d to table["Still Another Test Name"]["Text Field"]
-				set e to table["Yet Another Test Name"]["Text Field"]
+			set N to 34
+			write line "fib: ", fibR(N)
+
 			)";
-
-		auto script = TestCreateScript(scriptText);
-		script->SetVariable("text", tableText);
-		REQUIRE(script->Execute());
-		REQUIRE(script->GetVariable("table").IsCollection());
-		REQUIRE(script->GetVariable("a") == "Test Name A");
-		REQUIRE(script->GetVariable("b") == 2);
-		REQUIRE(script->GetVariable("c") == 22.3345);
-		REQUIRE(script->GetVariable("d") == "Still more text");
-		REQUIRE(script->GetVariable("e") == "Yet more text to test");
+		auto runtime = TestCreateRuntime();
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("N") == 433494437);
+		auto perfStats = runtime->GetScriptPerformanceStats();
+		printf("Execution time: %f\n", static_cast<float>(perfStats.executionTimeNs) / 1000000000.0f);
+		auto memStats = Jinx::GetMemoryStats();
+		memStats.externalAllocCount;
+		printf("External alloc count: %i\n", static_cast<int>(memStats.externalAllocCount));
 	}
 	ShutDown();
-    return 0;
+	return 0;
 }

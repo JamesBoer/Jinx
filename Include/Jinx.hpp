@@ -692,7 +692,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 0;
+	const uint32_t PatchNumber = 1;
 
 	// Forward declaration
 	class IScript;
@@ -1185,10 +1185,9 @@ namespace Jinx::Impl
 		Decrement,
 		Divide,
 		Equals,
-		EraseProp,
-		ErasePropElem,
-		EraseVar,
-		EraseVarElem,
+		EraseItr,
+		ErasePropKeyVal,
+		EraseVarKeyVal,
 		Exit,
 		Function,
 		Greater,
@@ -2508,6 +2507,8 @@ namespace Jinx::Impl
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
+		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
+
 		Variant CallFunction(RuntimeID id);
 
 	private:
@@ -2631,8 +2632,8 @@ namespace Jinx::Impl
 		Variant GetProperty(RuntimeID id) const;
 		bool PropertyExists(RuntimeID id) const;
 		void SetProperty(RuntimeID id, std::function<void(Variant &)> fn);
-        void SetProperty(RuntimeID id, const Variant & value);
-        void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		void SetProperty(RuntimeID id, const Variant & value);
+		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
@@ -2861,10 +2862,9 @@ namespace Jinx
 				"decrement",
 				"divide",
 				"equals",
-				"eraseprop",
-				"erasepropelem",
-				"erasevar",
-				"erasevarelem",
+				"eraseitr",
+				"erasepropkeyval",
+				"erasevarkeyval",
 				"exit",
 				"function",
 				"greater",
@@ -3401,12 +3401,18 @@ namespace Jinx::Impl
 			if (begin == nullptr)
 				begin = *current;
 			const char c = **current;
-			if (c == breakToken || c == '\n')
+			if (c == breakToken || c == '\n' || c == '\r')
 			{
 				variants.push_back(ParseVariant(begin, *current));
 				begin = nullptr;
-				if (c == '\n')
+				if (c == '\n' || c == '\r')
 				{
+                    if (**current != *end)
+                    {
+                        const char nc = *((*current) + 1);
+                        if (nc == '\n' || nc == '\r')
+                            ++(*current);
+                    }
 					++(*current);
 					break;
 				}
@@ -4334,14 +4340,14 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline void DebugWriteInternal(const Variant & var, bool writeNewLine)
+	inline void DebugWriteInternal(const Variant & var)
 	{
 		if (var.IsCollection())
 		{
 			const auto & coll = *var.GetCollection();
 			for (const auto & v : coll)
 			{
-				DebugWriteInternal(v.second, writeNewLine);
+				DebugWriteInternal(v.second);
 			}
 		}
 		else
@@ -4350,8 +4356,6 @@ namespace Jinx::Impl
 			auto cstr = str.c_str();
 			if (cstr)
 				LogWrite(cstr);
-			if (writeNewLine)
-				LogWrite("\n");
 		}
 	}
 
@@ -4359,18 +4363,15 @@ namespace Jinx::Impl
 	{
 		if (params.empty())
 			return nullptr;
-		DebugWriteInternal(params[0], false);
+		DebugWriteInternal(params[0]);
 		return nullptr;
 	}
 
 	inline Variant WriteLine(ScriptPtr, Parameters params)
 	{
-		if (params.empty())
-		{
-			LogWrite("\n");
-			return nullptr;
-		}
-		DebugWriteInternal(params[0], true);
+		if (!params.empty())
+			DebugWriteInternal(params[0]);
+		LogWrite("\n");
 		return nullptr;
 	}
 
@@ -6844,6 +6845,7 @@ namespace Jinx::Impl
 				}
 			}
 		}
+		m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 		return propertyName;
 	}
 
@@ -7475,37 +7477,36 @@ namespace Jinx::Impl
 				Error("Can't erase a readonly property");
 				return;
 			}
-			if (Accept(SymbolType::SquareOpen))
+			uint32_t subscripts = ParseSubscriptSet();
+			Expect(SymbolType::NewLine);
+			if (subscripts)
 			{
-				ParseSubexpression();
-				Expect(SymbolType::SquareClose);
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseVarElem);
+				EmitOpcode(Opcode::ErasePropKeyVal);
+				EmitCount(subscripts);
+				EmitId(propName.GetId());
 			}
 			else
 			{
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseProp);
+				Error("Expected index operator after erase keyword");
+				return;
 			}
-			EmitId(propName.GetId());
-			m_idNameMap[propName.GetId()] = propName.GetName();
 		}
 		else if (CheckVariable())
 		{
 			auto varName = ParseVariable();
-			if (Accept(SymbolType::SquareOpen))
+			uint32_t subscripts = ParseSubscriptSet();
+			Expect(SymbolType::NewLine);
+			if (subscripts)
 			{
-				ParseSubexpression();
-				Expect(SymbolType::SquareClose);
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseVarElem);
+				EmitOpcode(Opcode::EraseVarKeyVal);
+				EmitCount(subscripts);
+				EmitId(VariableNameToRuntimeID(varName));
 			}
 			else
 			{
-				Expect(SymbolType::NewLine);
-				EmitOpcode(Opcode::EraseVar);
+				EmitOpcode(Opcode::EraseItr);
+				EmitId(VariableNameToRuntimeID(varName));
 			}
-			EmitId(VariableNameToRuntimeID(varName));
 		}
 		else
 		{
@@ -8449,10 +8450,7 @@ namespace Jinx::Impl
 			switch (opcode)
 			{
 			case Opcode::CallFunc:
-			case Opcode::EraseProp:
-			case Opcode::ErasePropElem:
-			case Opcode::EraseVar:
-			case Opcode::EraseVarElem:
+			case Opcode::EraseItr:
 			case Opcode::PushProp:
 			case Opcode::PushVar:
 			case Opcode::SetProp:
@@ -8463,6 +8461,8 @@ namespace Jinx::Impl
 				LogWrite("%s", parser.GetNameFromID(id).c_str());
 			}
 			break;
+			case Opcode::ErasePropKeyVal:
+			case Opcode::EraseVarKeyVal:
 			case Opcode::SetPropKeyVal:
 			case Opcode::SetVarKeyVal:
 			{
@@ -8628,12 +8628,12 @@ namespace Jinx::Impl
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
-    inline void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
-    {
-        std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-        auto& prop = m_propertyMap[id];
-        fn(prop);
-    }
+	inline void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
+	{
+		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		auto& prop = m_propertyMap[id];
+		fn(prop);
+	}
 
 	inline void Runtime::SetProperty(RuntimeID id, const Variant & value)
 	{
@@ -8707,8 +8707,8 @@ namespace Jinx::Impl
 		m_runtime(runtime),
 		m_userContext(userContext),
 		m_bytecodeStart(0),
-        m_finished(false),
-        m_error(false)
+		m_finished(false),
+		m_error(false)
 	{
 		m_execution.reserve(6);
 		m_execution.push_back(ExecutionFrame(bytecode, "root"));
@@ -8830,15 +8830,7 @@ namespace Jinx::Impl
 		Opcode opcode;
 		do
 		{
-			// Read opcode instruction
-			uint8_t opByte;
-			m_execution.back().reader.Read(&opByte);
-			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
-			{
-				Error("Invalid operation in bytecode");
-				return false;
-			}
-			opcode = static_cast<Opcode>(opByte);
+			// Check instruction count before altering the script state
 			++tickInstCount;
 			if (tickInstCount >= maxInstCount)
 			{
@@ -8849,6 +8841,16 @@ namespace Jinx::Impl
 				}
 				return true;
 			}
+
+			// Read opcode instruction
+			uint8_t opByte;
+			m_execution.back().reader.Read(&opByte);
+			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
+			{
+				Error("Invalid operation in bytecode");
+				return false;
+			}
+			opcode = static_cast<Opcode>(opByte);
 
 			// Execute the current opcode
 			switch (opcode)
@@ -8967,69 +8969,78 @@ namespace Jinx::Impl
 				Push(result);
 			}
 			break;
-			case Opcode::EraseProp:
-			{
-				RuntimeID propId;
-				m_execution.back().reader.Read(&propId);
-				auto var = m_runtime->GetProperty(propId);
-				if (var.IsCollectionItr())
-				{
-					auto itr = var.GetCollectionItr().first;
-					auto coll = var.GetCollectionItr().second;
-					if (itr != coll->end())
-						itr = coll->erase(itr);
-					m_runtime->SetProperty(propId, std::make_pair(itr, coll));
-				}
-			}
-			break;
-			case Opcode::ErasePropElem:
-			{
-				RuntimeID propId;
-				m_execution.back().reader.Read(&propId);
-				auto var = m_runtime->GetProperty(propId);
-				if (var.IsCollectionItr())
-				{
-					auto itr = var.GetCollectionItr().first;
-					auto coll = var.GetCollectionItr().second;
-					if (itr != coll->end())
-						itr = coll->erase(itr);
-					m_runtime->SetProperty(propId, std::make_pair(itr, coll));
-				}
-			}
-			break;
-			case Opcode::EraseVar:
+			case Opcode::EraseItr:
 			{
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				auto var = GetVariable(id);
-				if (var.IsCollectionItr())
+				if (!var.IsCollectionItr())
 				{
-					auto itr = var.GetCollectionItr().first;
-					auto coll = var.GetCollectionItr().second;
-					if (itr != coll->end())
-						itr = coll->erase(itr);
-					SetVariable(id, std::make_pair(itr, coll));
+					Error("Expected collection iterator for this form of erase");
+					return false;
 				}
+				auto itr = var.GetCollectionItr().first;
+				auto coll = var.GetCollectionItr().second;
+				if (itr != coll->end())
+					itr = coll->erase(itr);
+				SetVariable(id, std::make_pair(itr, coll));
 			}
 			break;
-			case Opcode::EraseVarElem:
+			case Opcode::ErasePropKeyVal:
 			{
-				RuntimeID id;
-				m_execution.back().reader.Read(&id);
-				auto var = GetVariable(id);
-				auto key = Pop();
-				if (var.IsCollection())
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
+				RuntimeID propId;
+				m_execution.back().reader.Read(&propId);
+
+				m_runtime->SetProperty(propId, [this, subscripts](Variant& coll)
 				{
-					if (!key.IsKeyType())
+					if (!coll.IsCollection())
 					{
-						Error("Invalid key");
-						return false;
+						this->Error("Expected collection when accessing by key");
+						return;
 					}
-					auto coll = var.GetCollection();
-					auto itr = coll->find(key);
-					if (itr != coll->end())
-						coll->erase(itr);
+					auto collection = coll.GetCollection();
+
+					// Find the appropriate collection-key pair
+					auto pair = WalkSubscripts(subscripts, collection);
+					if (pair.first == nullptr)
+						return;
+					collection = pair.first;
+					Variant key = pair.second;
+
+					// Erase the value based on the key if it exists
+					auto itr = collection->find(key);
+					if (itr != collection->end())
+						collection->erase(itr);
+				});
+			}
+			break;
+			case Opcode::EraseVarKeyVal:
+			{
+				uint32_t subscripts;
+				m_execution.back().reader.Read(&subscripts);
+				RuntimeID id;
+				m_execution.back().reader.Read(&id);
+				Variant coll = GetVariable(id);
+				if (!coll.IsCollection())
+				{
+					Error("Expected collection when accessing by key");
+					return false;
 				}
+				auto collection = coll.GetCollection();
+
+				// Find the appropriate collection-key pair
+				auto pair = WalkSubscripts(subscripts, collection);
+				if (pair.first == nullptr)
+					return false;
+				collection = pair.first;
+				Variant key = pair.second;
+
+				// Erase the value based on the key if it exists
+				auto itr = collection->find(key);
+				if (itr != collection->end())
+					collection->erase(itr);
 			}
 			break;
 			case Opcode::Exit:
@@ -9217,7 +9228,7 @@ namespace Jinx::Impl
 			break;
 			case Opcode::LoopOver:
 			{
-				assert(m_stack.size() >= 3);
+				assert(m_stack.size() >= 2);
 				auto top = m_stack.size() - 1;
 				auto itr = m_stack[top];
 				assert(itr.IsCollectionItr());
@@ -9508,52 +9519,22 @@ namespace Jinx::Impl
 				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-                m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
-                {
-                    if (!coll.IsCollection())
-                    {
-                        this->Error("Expected collection when accessing by key");
-                        return;
-                    }
-                    auto collection = coll.GetCollection();
-                    Variant val = Pop();
-                    Variant key;
-            
-                    for (uint32_t i = 0; i < subscripts; ++i)
-                    {
-                        size_t index = m_stack.size() - (subscripts - i);
-                        key = m_stack[index];
-                        if (!key.IsKeyType())
-                        {
-                            Error("Invalid key type");
-                            return;
-                        }
-                        if (i < (subscripts - 1))
-                        {
-                            auto itr = collection->find(key);
-                            if (itr == collection->end())
-                            {
-                                Variant newColl = CreateCollection();
-                                collection->insert(std::make_pair(key, newColl));
-                                collection = newColl.GetCollection();
-                            }
-                            else if (itr->second.IsCollection())
-                            {
-                                collection = itr->second.GetCollection();
-                                Variant newColl = CreateCollection();
-                                collection->insert(std::make_pair(key, newColl));
-                            }
-                            else
-                            {
-                                Error("Expected collection when accessing by key");
-                                return;
-                            }
-                        }
-                    }
-                    (*collection)[key] = val;
-                    for (uint32_t i = 0; i < subscripts; ++i)
-                        Pop();                 
-                });
+				m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
+				{
+					if (!coll.IsCollection())
+					{
+						this->Error("Expected collection when accessing by key");
+						return;
+					}
+					auto collection = coll.GetCollection();
+					Variant val = Pop();
+					auto pair = WalkSubscripts(subscripts, collection);
+					if (pair.first == nullptr)
+						return;
+					collection = pair.first;
+					Variant key = pair.second;
+					(*collection)[key] = val;
+				});
 			}
 			break;
 			case Opcode::SetVar:
@@ -9576,43 +9557,14 @@ namespace Jinx::Impl
 					Error("Expected collection when accessing by key");
 					return false;
 				}
-                auto collection = coll.GetCollection();
+				auto collection = coll.GetCollection();
 				Variant val = Pop();
-				Variant key;
-				for (uint32_t i = 0; i < subscripts; ++i)
-				{
-					size_t index = m_stack.size() - (subscripts - i);
-					key = m_stack[index];
-					if (!key.IsKeyType())
-					{
-						Error("Invalid key type");
-						return false;
-					}
-                    if (i < (subscripts - 1))
-                    {
-					    auto itr = collection->find(key);
-					    if (itr == collection->end())
-					    {
-						    Variant newColl = CreateCollection();
-                            collection->insert(std::make_pair(key, newColl));
-                            collection = newColl.GetCollection();
-					    }
-					    else if (itr->second.IsCollection())
-					    {
-                            collection = itr->second.GetCollection();
-						    Variant newColl = CreateCollection();
-                            collection->insert(std::make_pair(key, newColl));
-					    }
-					    else
-					    {
-						    Error("Expected collection when accessing by key");
-						    return false;
-					    }
-                    }
-				}
+				auto pair = WalkSubscripts(subscripts, collection);
+				if (pair.first == nullptr )
+					return false;
+				collection = pair.first;
+				Variant key = pair.second;
 				(*collection)[key] = val;
-				for (uint32_t i = 0; i < subscripts; ++i)
-					Pop();
 			}
 			break;
 			case Opcode::Subtract:
@@ -9807,6 +9759,56 @@ namespace Jinx::Impl
 		assert(index < m_stack.size());
 		m_execution.back().ids.insert(std::make_pair(id, index));
 	}
+
+	inline std::pair<CollectionPtr, Variant> Script::WalkSubscripts(uint32_t subscripts, CollectionPtr collection)
+	{
+		// Walk up through subsequent subscript operators, then pops the keys off the stack and 
+		// returns the final collection and key pair,
+		Variant key;
+
+		// Loop through the number of subscript operations used
+		for (uint32_t i = 0; i < subscripts; ++i)
+		{
+			// Grab the appropriate key in the stack for this subscript 
+			size_t index = m_stack.size() - (subscripts - i);
+			key = m_stack[index];
+			if (!key.IsKeyType())
+			{
+				Error("Invalid key type");
+				return {};
+			}
+
+			// We only need to retrieve a new collection and key set if
+			// this isn't the last operation.
+			if (i < (subscripts - 1))
+			{
+				auto itr = collection->find(key);
+				if (itr == collection->end())
+				{
+					Variant newColl = CreateCollection();
+					collection->insert(std::make_pair(key, newColl));
+					collection = newColl.GetCollection();
+				}
+				else if (itr->second.IsCollection())
+				{
+					collection = itr->second.GetCollection();
+				}
+				else
+				{
+					Error("Expected collection when accessing by key");
+					return {};
+				}
+			}
+		}
+
+		// Pop keys off the stack
+		for (uint32_t i = 0; i < subscripts; ++i)
+			Pop();
+
+		// Return the final collection and key pair
+		return std::make_pair(collection, key);
+	}
+
 
 } // namespace Jinx::Impl
 
