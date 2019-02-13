@@ -137,15 +137,7 @@ namespace Jinx::Impl
 		Opcode opcode;
 		do
 		{
-			// Read opcode instruction
-			uint8_t opByte;
-			m_execution.back().reader.Read(&opByte);
-			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
-			{
-				Error("Invalid operation in bytecode");
-				return false;
-			}
-			opcode = static_cast<Opcode>(opByte);
+			// Check instruction count before altering the script state
 			++tickInstCount;
 			if (tickInstCount >= maxInstCount)
 			{
@@ -157,6 +149,15 @@ namespace Jinx::Impl
 				return true;
 			}
 
+			// Read opcode instruction
+			uint8_t opByte;
+			m_execution.back().reader.Read(&opByte);
+			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
+			{
+				Error("Invalid operation in bytecode");
+				return false;
+			}
+			opcode = static_cast<Opcode>(opByte);
 			// Execute the current opcode
 			switch (opcode)
 			{

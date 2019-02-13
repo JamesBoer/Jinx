@@ -61,6 +61,8 @@ int main(int argc, char ** argv)
 	GlobalParams params;
 	params.logBytecode = true;
 	params.logSymbols = true;
+	params.errorOnMaxInstrunctions = false;
+	params.maxInstructions = std::numeric_limits<uint32_t>::max();
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
@@ -68,20 +70,26 @@ int main(int argc, char ** argv)
 			u8R"(
 			import core
 
-			-- Create collection using a nested initialization list of key-value pairs		
-			set private a to ["one", ["two", ["three", 3]]]
+			function fibR {integer n}
+				if n < 2
+					return n
+				end
+				return (fibR(n - 2) + fibR(n - 1))
+			end
 
-			erase a ["one"]["two"]
+			set N to 34
+			write line "fib: ", fibR(N)
 
 			)";
-
-		auto script = TestExecuteScript(scriptText);
+		auto runtime = TestCreateRuntime();
+		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
-		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
-		auto collection = script->GetLibrary()->GetProperty("a").GetCollection();
-		REQUIRE(collection);
-		collection = collection->at("one").GetCollection();
-		REQUIRE(collection->size() == 0);
+		REQUIRE(script->GetVariable("N") == 433494437);
+		auto perfStats = runtime->GetScriptPerformanceStats();
+		printf("Execution time: %f\n", static_cast<float>(perfStats.executionTimeNs) / 1000000000.0f);
+		auto memStats = Jinx::GetMemoryStats();
+		memStats.externalAllocCount;
+		printf("External alloc count: %i\n", static_cast<int>(memStats.externalAllocCount));
 	}
 	ShutDown();
 	return 0;
