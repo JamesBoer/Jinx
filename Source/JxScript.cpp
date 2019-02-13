@@ -158,6 +158,7 @@ namespace Jinx::Impl
 				return false;
 			}
 			opcode = static_cast<Opcode>(opByte);
+
 			// Execute the current opcode
 			switch (opcode)
 			{

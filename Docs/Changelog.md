@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2019-02-12
+
+- Fix bug when max instruction count is reached
+
 ## [1.1.0] - 2019-02-08
 
 - Fix index operator to allow arbitrary nesting depth
