@@ -4340,14 +4340,14 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline void DebugWriteInternal(const Variant & var, bool writeNewLine)
+	inline void DebugWriteInternal(const Variant & var)
 	{
 		if (var.IsCollection())
 		{
 			const auto & coll = *var.GetCollection();
 			for (const auto & v : coll)
 			{
-				DebugWriteInternal(v.second, writeNewLine);
+				DebugWriteInternal(v.second);
 			}
 		}
 		else
@@ -4356,8 +4356,6 @@ namespace Jinx::Impl
 			auto cstr = str.c_str();
 			if (cstr)
 				LogWrite(cstr);
-			if (writeNewLine)
-				LogWrite("\n");
 		}
 	}
 
@@ -4365,18 +4363,15 @@ namespace Jinx::Impl
 	{
 		if (params.empty())
 			return nullptr;
-		DebugWriteInternal(params[0], false);
+		DebugWriteInternal(params[0]);
 		return nullptr;
 	}
 
 	inline Variant WriteLine(ScriptPtr, Parameters params)
 	{
-		if (params.empty())
-		{
-			LogWrite("\n");
-			return nullptr;
-		}
-		DebugWriteInternal(params[0], true);
+		if (!params.empty())
+			DebugWriteInternal(params[0]);
+		LogWrite("\n");
 		return nullptr;
 	}
 
