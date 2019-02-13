@@ -396,12 +396,12 @@ namespace Jinx::Impl
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
-    inline_t void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
-    {
-        std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-        auto& prop = m_propertyMap[id];
-        fn(prop);
-    }
+	inline_t void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
+	{
+		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		auto& prop = m_propertyMap[id];
+		fn(prop);
+	}
 
 	inline_t void Runtime::SetProperty(RuntimeID id, const Variant & value)
 	{

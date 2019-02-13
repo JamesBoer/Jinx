@@ -551,24 +551,24 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("a") == 5);
 	}
 
-    SECTION("Test deeply nested collection access reads on properties")
-    {
-        static const char * scriptText =
-            u8R"(
+	SECTION("Test deeply nested collection access reads on properties")
+	{
+		static const char * scriptText =
+			u8R"(
 
 				set private t to ["one", ["two", ["three", ["four", ["five", 5]]]]]
 				set private a to t["one"]["two"]["three"]["four"]["five"]
 			)";
 
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script->Execute());
-        REQUIRE(script->GetLibrary()->GetProperty("a") == 5);
-    }
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetLibrary()->GetProperty("a") == 5);
+	}
 
-    SECTION("Test mixed nested collection var assignment with existing and non-existing keys")
-    {
-        static const char * scriptText =
-            u8R"(
+	SECTION("Test mixed nested collection var assignment with existing and non-existing keys")
+	{
+		static const char * scriptText =
+			u8R"(
 
 				set a to []
 				set a["one"] to 2
@@ -581,20 +581,20 @@ TEST_CASE("Test Collections", "[Collections]")
 
 			)";
 
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
-        REQUIRE(script->GetVariable("a").IsCollection());
-        REQUIRE(script->GetVariable("a").GetCollection()->at("one") == 2);
-        REQUIRE(script->GetVariable("b").IsCollection());
-        REQUIRE(script->GetVariable("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
-        REQUIRE(script->GetVariable("c").IsCollection());
-        REQUIRE(script->GetVariable("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
-    }
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at("one") == 2);
+		REQUIRE(script->GetVariable("b").IsCollection());
+		REQUIRE(script->GetVariable("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
+		REQUIRE(script->GetVariable("c").IsCollection());
+		REQUIRE(script->GetVariable("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
+	}
 
-    SECTION("Test mixed nested collection property assignment with existing and non-existing keys")
-    {
-        static const char * scriptText =
-            u8R"(
+	SECTION("Test mixed nested collection property assignment with existing and non-existing keys")
+	{
+		static const char * scriptText =
+			u8R"(
 
 				set private a to []
 				set a["one"] to 2
@@ -607,26 +607,26 @@ TEST_CASE("Test Collections", "[Collections]")
 
 			)";
 
-        auto script = TestExecuteScript(scriptText);
-        REQUIRE(script);
-        REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
-        REQUIRE(script->GetLibrary()->GetProperty("a").GetCollection()->at("one") == 2);
-        REQUIRE(script->GetLibrary()->GetProperty("b").IsCollection());
-        REQUIRE(script->GetLibrary()->GetProperty("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
-        REQUIRE(script->GetLibrary()->GetProperty("c").IsCollection());
-        REQUIRE(script->GetLibrary()->GetProperty("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
-    }
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetLibrary()->GetProperty("a").IsCollection());
+		REQUIRE(script->GetLibrary()->GetProperty("a").GetCollection()->at("one") == 2);
+		REQUIRE(script->GetLibrary()->GetProperty("b").IsCollection());
+		REQUIRE(script->GetLibrary()->GetProperty("b").GetCollection()->at("one").GetCollection()->at("two") == 3);
+		REQUIRE(script->GetLibrary()->GetProperty("c").IsCollection());
+		REQUIRE(script->GetLibrary()->GetProperty("c").GetCollection()->at("one").GetCollection()->at("two").GetCollection()->at("three") == 4);
+	}
 
 	SECTION("Test comma-delimited table string conversion to collection")
 	{
-        static const char * tableText =
-            "Name Field,Integer Field,Float Field,Text Field\n"
-            "Test Name A,1,4.5,This is a simple test.\n"
-            "Test Name B,2,123.456,More to test...\n"
-            "Test Name C,3,22.3345,Even more tests of text\n"
-            "Still Another Test Name,4,1.5,Still more text\n"
-            "Yet Another Test Name,5,99.99,Yet more text to test\n"
-            ;
+		static const char * tableText =
+			"Name Field,Integer Field,Float Field,Text Field\n"
+			"Test Name A,1,4.5,This is a simple test.\n"
+			"Test Name B,2,123.456,More to test...\n"
+			"Test Name C,3,22.3345,Even more tests of text\n"
+			"Still Another Test Name,4,1.5,Still more text\n"
+			"Yet Another Test Name,5,99.99,Yet more text to test\n"
+			;
 
 		static const char * scriptText =
 			u8R"(
@@ -655,14 +655,14 @@ TEST_CASE("Test Collections", "[Collections]")
 
 	SECTION("Test tab-delimited table string conversion to collection")
 	{
-        static const char * tableText =
-            "Name Field\tInteger Field\tFloat Field\tText Field\n"
-            "Test Name A\t1\t4.5\tThis is a simple test.\n"
-            "Test Name B\t2\t123.456\tMore to test...\n"
-            "Test Name C\t3\t22.3345\tEven more tests of text\n"
-            "Still Another Test Name\t4\t1.5\tStill more text\n"
-            "Yet Another Test Name\t5\t99.99\tYet more text to test\n"
-            ;
+		static const char * tableText =
+			"Name Field\tInteger Field\tFloat Field\tText Field\n"
+			"Test Name A\t1\t4.5\tThis is a simple test.\n"
+			"Test Name B\t2\t123.456\tMore to test...\n"
+			"Test Name C\t3\t22.3345\tEven more tests of text\n"
+			"Still Another Test Name\t4\t1.5\tStill more text\n"
+			"Yet Another Test Name\t5\t99.99\tYet more text to test\n"
+			;
 
 		static const char * scriptText =
 			u8R"(
@@ -689,40 +689,40 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("e") == "Yet more text to test");
 	}
 
-    SECTION("Test table conversion with varied line endings")
-    {
-        static const char * tableText =
-            "Name Field\tInteger Field\tFloat Field\tText Field\n"
-            "Test Name A\t1\t4.5\tThis is a simple test.\r\n"
-            "Test Name B\t2\t123.456\tMore to test...\r"
-            "Test Name C\t3\t22.3345\tEven more tests of text\n"
-            "Still Another Test Name\t4\t1.5\tStill more text\n"
-            "Yet Another Test Name\t5\t99.99\tYet more text to test\r"
-            ;
-        
-        static const char * scriptText =
-        u8R"(
-        
-        external table
-        
-        set a to table["Test Name A"]["Name Field"]
-        set b to table["Test Name B"]["Integer Field"]
-        set c to table["Test Name C"]["Float Field"]
-        set d to table["Still Another Test Name"]["Text Field"]
-        set e to table["Yet Another Test Name"]["Text Field"]
-        )";
-        
-        auto script = TestCreateScript(scriptText);
-        Variant table = tableText;
-        REQUIRE(table.ConvertTo(ValueType::Collection));
-        script->SetVariable("table", table);
-        REQUIRE(script->Execute());
-        REQUIRE(script->GetVariable("table").IsCollection());
-        REQUIRE(script->GetVariable("a") == "Test Name A");
-        REQUIRE(script->GetVariable("b") == 2);
-        REQUIRE(script->GetVariable("c").GetNumber() == Approx(22.3345));
-        REQUIRE(script->GetVariable("d") == "Still more text");
-        REQUIRE(script->GetVariable("e") == "Yet more text to test");
-    }
-    
+	SECTION("Test table conversion with varied line endings")
+	{
+		static const char * tableText =
+			"Name Field\tInteger Field\tFloat Field\tText Field\n"
+			"Test Name A\t1\t4.5\tThis is a simple test.\r\n"
+			"Test Name B\t2\t123.456\tMore to test...\r"
+			"Test Name C\t3\t22.3345\tEven more tests of text\n"
+			"Still Another Test Name\t4\t1.5\tStill more text\n"
+			"Yet Another Test Name\t5\t99.99\tYet more text to test\r"
+			;
+		
+		static const char * scriptText =
+		u8R"(
+		
+		external table
+		
+		set a to table["Test Name A"]["Name Field"]
+		set b to table["Test Name B"]["Integer Field"]
+		set c to table["Test Name C"]["Float Field"]
+		set d to table["Still Another Test Name"]["Text Field"]
+		set e to table["Yet Another Test Name"]["Text Field"]
+		)";
+		
+		auto script = TestCreateScript(scriptText);
+		Variant table = tableText;
+		REQUIRE(table.ConvertTo(ValueType::Collection));
+		script->SetVariable("table", table);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a") == "Test Name A");
+		REQUIRE(script->GetVariable("b") == 2);
+		REQUIRE(script->GetVariable("c").GetNumber() == Approx(22.3345));
+		REQUIRE(script->GetVariable("d") == "Still more text");
+		REQUIRE(script->GetVariable("e") == "Yet more text to test");
+	}
+	
 }

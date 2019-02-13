@@ -692,7 +692,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 0;
+	const uint32_t PatchNumber = 1;
 
 	// Forward declaration
 	class IScript;
@@ -2632,8 +2632,8 @@ namespace Jinx::Impl
 		Variant GetProperty(RuntimeID id) const;
 		bool PropertyExists(RuntimeID id) const;
 		void SetProperty(RuntimeID id, std::function<void(Variant &)> fn);
-        void SetProperty(RuntimeID id, const Variant & value);
-        void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
+		void SetProperty(RuntimeID id, const Variant & value);
+		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
@@ -4340,14 +4340,14 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline void DebugWriteInternal(const Variant & var, bool writeNewLine)
+	inline void DebugWriteInternal(const Variant & var)
 	{
 		if (var.IsCollection())
 		{
 			const auto & coll = *var.GetCollection();
 			for (const auto & v : coll)
 			{
-				DebugWriteInternal(v.second, writeNewLine);
+				DebugWriteInternal(v.second);
 			}
 		}
 		else
@@ -4356,8 +4356,6 @@ namespace Jinx::Impl
 			auto cstr = str.c_str();
 			if (cstr)
 				LogWrite(cstr);
-			if (writeNewLine)
-				LogWrite("\n");
 		}
 	}
 
@@ -4365,18 +4363,15 @@ namespace Jinx::Impl
 	{
 		if (params.empty())
 			return nullptr;
-		DebugWriteInternal(params[0], false);
+		DebugWriteInternal(params[0]);
 		return nullptr;
 	}
 
 	inline Variant WriteLine(ScriptPtr, Parameters params)
 	{
-		if (params.empty())
-		{
-			LogWrite("\n");
-			return nullptr;
-		}
-		DebugWriteInternal(params[0], true);
+		if (!params.empty())
+			DebugWriteInternal(params[0]);
+		LogWrite("\n");
 		return nullptr;
 	}
 
@@ -8633,12 +8628,12 @@ namespace Jinx::Impl
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
-    inline void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
-    {
-        std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
-        auto& prop = m_propertyMap[id];
-        fn(prop);
-    }
+	inline void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
+	{
+		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		auto& prop = m_propertyMap[id];
+		fn(prop);
+	}
 
 	inline void Runtime::SetProperty(RuntimeID id, const Variant & value)
 	{
@@ -8712,8 +8707,8 @@ namespace Jinx::Impl
 		m_runtime(runtime),
 		m_userContext(userContext),
 		m_bytecodeStart(0),
-        m_finished(false),
-        m_error(false)
+		m_finished(false),
+		m_error(false)
 	{
 		m_execution.reserve(6);
 		m_execution.push_back(ExecutionFrame(bytecode, "root"));
@@ -8835,15 +8830,7 @@ namespace Jinx::Impl
 		Opcode opcode;
 		do
 		{
-			// Read opcode instruction
-			uint8_t opByte;
-			m_execution.back().reader.Read(&opByte);
-			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
-			{
-				Error("Invalid operation in bytecode");
-				return false;
-			}
-			opcode = static_cast<Opcode>(opByte);
+			// Check instruction count before altering the script state
 			++tickInstCount;
 			if (tickInstCount >= maxInstCount)
 			{
@@ -8854,6 +8841,16 @@ namespace Jinx::Impl
 				}
 				return true;
 			}
+
+			// Read opcode instruction
+			uint8_t opByte;
+			m_execution.back().reader.Read(&opByte);
+			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
+			{
+				Error("Invalid operation in bytecode");
+				return false;
+			}
+			opcode = static_cast<Opcode>(opByte);
 
 			// Execute the current opcode
 			switch (opcode)
@@ -9522,22 +9519,22 @@ namespace Jinx::Impl
 				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-                m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
-                {
-                    if (!coll.IsCollection())
-                    {
-                        this->Error("Expected collection when accessing by key");
-                        return;
-                    }
-                    auto collection = coll.GetCollection();
-                    Variant val = Pop();
+				m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
+				{
+					if (!coll.IsCollection())
+					{
+						this->Error("Expected collection when accessing by key");
+						return;
+					}
+					auto collection = coll.GetCollection();
+					Variant val = Pop();
 					auto pair = WalkSubscripts(subscripts, collection);
 					if (pair.first == nullptr)
 						return;
 					collection = pair.first;
 					Variant key = pair.second;
 					(*collection)[key] = val;
-                });
+				});
 			}
 			break;
 			case Opcode::SetVar:
@@ -9560,7 +9557,7 @@ namespace Jinx::Impl
 					Error("Expected collection when accessing by key");
 					return false;
 				}
-                auto collection = coll.GetCollection();
+				auto collection = coll.GetCollection();
 				Variant val = Pop();
 				auto pair = WalkSubscripts(subscripts, collection);
 				if (pair.first == nullptr )
