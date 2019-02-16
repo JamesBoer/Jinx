@@ -229,8 +229,8 @@ namespace Jinx
 		Allocator(const Allocator<U>&) throw() { }
 
 		template<typename U>
-        Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
-        Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
+		Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
+		Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
 		~Allocator() {}
 
 #ifndef JINX_ALLOC_REBIND_NOT_USED
@@ -3407,12 +3407,12 @@ namespace Jinx::Impl
 				begin = nullptr;
 				if (c == '\n' || c == '\r')
 				{
-                    if (**current != *end)
-                    {
-                        const char nc = *((*current) + 1);
-                        if (nc == '\n' || nc == '\r')
-                            ++(*current);
-                    }
+					if (**current != *end)
+					{
+						const char nc = *((*current) + 1);
+						if (nc == '\n' || nc == '\r')
+							++(*current);
+					}
 					++(*current);
 					break;
 				}
@@ -3819,12 +3819,12 @@ namespace Jinx::Impl
 		m_name(name),
 		m_start(start),
 		m_end(end),
-        m_current(nullptr),
+		m_current(nullptr),
 		m_columnNumber(1),
 		m_columnMarker(1),
 		m_lineNumber(1),
-        m_error(false),
-        m_symbolTypeMap(symbolTypeMap)
+		m_error(false),
+		m_symbolTypeMap(symbolTypeMap)
 	{
 	}
 
@@ -4982,7 +4982,7 @@ namespace Jinx
 #ifndef JINX_DISABLE_POOL_ALLOCATOR
 
 		inline BlockHeap::BlockHeap() :
-            m_next(nullptr),
+			m_next(nullptr),
 			m_allocHead(nullptr),
 			m_allocTail(nullptr),
 			m_spareHead(nullptr),
@@ -8184,8 +8184,8 @@ namespace Jinx::Impl
 {
 
 	inline PropertyName::PropertyName() :
-        m_id(0),
-        m_visibility(VisibilityType::Local),
+		m_id(0),
+		m_visibility(VisibilityType::Local),
 		m_readOnly(false),
 		m_partCount(0)
 	{
