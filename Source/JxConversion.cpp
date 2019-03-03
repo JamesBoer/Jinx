@@ -290,12 +290,12 @@ namespace Jinx::Impl
 				begin = nullptr;
 				if (c == '\n' || c == '\r')
 				{
-                    if (**current != *end)
-                    {
-                        const char nc = *((*current) + 1);
-                        if (nc == '\n' || nc == '\r')
-                            ++(*current);
-                    }
+					if (**current != *end)
+					{
+						const char nc = *((*current) + 1);
+						if (nc == '\n' || nc == '\r')
+							++(*current);
+					}
 					++(*current);
 					break;
 				}

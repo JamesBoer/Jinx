@@ -11,8 +11,8 @@ namespace Jinx::Impl
 {
 
 	inline_t PropertyName::PropertyName() :
-        m_id(0),
-        m_visibility(VisibilityType::Local),
+		m_id(0),
+		m_visibility(VisibilityType::Local),
 		m_readOnly(false),
 		m_partCount(0)
 	{

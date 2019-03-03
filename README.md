@@ -18,26 +18,28 @@ Using the header-only version is even simple.  Include the header file ```Includ
 
 Jinx is incredibly simple to use, requiring only a few lines of C++ code to compile and execute your first script.  Here's a Hello, World that not only demonstrates the Jinx script, but all the C++ code required as well.
 
-    #include "Jinx.h"
+``` c++
+#include "Jinx.h"
     
-    // Create the Jinx runtime object
-    auto runtime = Jinx::CreateRuntime();
+// Create the Jinx runtime object
+auto runtime = Jinx::CreateRuntime();
     
-    // Text containing our Jinx script
-    const char * scriptText =
-    u8R"(
+// Text containing our Jinx script
+const char * scriptText =
+u8R"(
     
-    -- Use the core library
-    import core
+-- Use the core library
+import core
     
-    -- Write to the debug output
-    write line "Hello, world!"
+-- Write to the debug output
+write line "Hello, world!"
     
-    )";
+)";
     
-    // Create and execute a script object
-    auto script = runtime->ExecuteScript(scriptText);
-    
+// Create and execute a script object
+auto script = runtime->ExecuteScript(scriptText);
+```
+
 There is a [more comprehensive tutorial](https://www.jinx-lang.org/Tutorial.pdf) on the Jinx website for anyone who wants to dive a bit deeper into the language.
 
 ## Jinx Status

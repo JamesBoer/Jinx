@@ -14,12 +14,12 @@ namespace Jinx::Impl
 		m_name(name),
 		m_start(start),
 		m_end(end),
-        m_current(nullptr),
+		m_current(nullptr),
 		m_columnNumber(1),
 		m_columnMarker(1),
 		m_lineNumber(1),
-        m_error(false),
-        m_symbolTypeMap(symbolTypeMap)
+		m_error(false),
+		m_symbolTypeMap(symbolTypeMap)
 	{
 	}
 
