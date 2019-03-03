@@ -115,8 +115,8 @@ namespace Jinx
 		Allocator(const Allocator<U>&) throw() { }
 
 		template<typename U>
-        Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
-        Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
+		Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
+		Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
 		~Allocator() {}
 
 #ifndef JINX_ALLOC_REBIND_NOT_USED
