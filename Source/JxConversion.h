@@ -48,9 +48,15 @@ namespace Jinx::Impl
 	inline int64_t BooleanToInteger(bool value) { return value ? 1ll : 0ll; }
 	inline String BooleanToString(bool value) { return value ? String("true") : String("false"); }
 
+	enum class NumericFormat
+	{
+		International, // Uses dot as decimal indicator
+		Continental    // Uses comma as decimal indicator
+	};
+
 	// String conversions
 	bool StringToBoolean(const String & inValue, bool * outValue);
-	bool StringToNumber(const String & value, double * outValue);
+	bool StringToNumber(const String & value, double * outValue, NumericFormat format = NumericFormat::International);
 	bool StringToInteger(const String & value, int64_t * outValue);
 	bool StringToValueType(const String & value, ValueType * outValue);
 	bool StringToGuid(const String & value, Guid * outValue);

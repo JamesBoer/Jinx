@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2019-04-07
+
+- Improved CSV parsing to include quoted values and continental format
+- Floating-point and integer parsing can optionally use faster std::from_chars() method
+- Floating-point parsing is no longer affected by locale
+
 ## [1.1.1] - 2019-02-12
 
 - Fix bug when max instruction count is reached

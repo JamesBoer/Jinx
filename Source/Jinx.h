@@ -46,6 +46,7 @@ by James Boer, and distributed under the MIT license.
 // Platform definitions
 #if defined(_WIN32) || defined(_WIN64)
 #define JINX_WINDOWS
+#define JINX_USE_FROM_CHARS
 #pragma warning(push)
 #pragma warning(disable : 4530) // Silence warnings if exceptions are disabled
 #endif
@@ -104,7 +105,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 2;
 
 	// Forward declaration
 	class IScript;

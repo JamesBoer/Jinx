@@ -66,30 +66,26 @@ int main(int argc, char ** argv)
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
+		static const char * tableText =
+			"Name Field;Number Field\n"
+			"Test Name A;123,456\n"
+			;
+
 		static const char * scriptText =
 			u8R"(
-			import core
 
-			function fibR {integer n}
-				if n < 2
-					return n
-				end
-				return (fibR(n - 2) + fibR(n - 1))
-			end
+				external text
+				
+				set table to text as collection
 
-			set N to 34
-			write line "fib: ", fibR(N)
-
+				set a to table["Test Name A"]["Number Field"]
 			)";
-		auto runtime = TestCreateRuntime();
-		auto script = TestExecuteScript(scriptText, runtime);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("N") == 433494437);
-		auto perfStats = runtime->GetScriptPerformanceStats();
-		printf("Execution time: %f\n", static_cast<float>(perfStats.executionTimeNs) / 1000000000.0f);
-		auto memStats = Jinx::GetMemoryStats();
-		memStats.externalAllocCount;
-		printf("External alloc count: %i\n", static_cast<int>(memStats.externalAllocCount));
+
+		auto script = TestCreateScript(scriptText);
+		script->SetVariable("text", tableText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a").GetNumber() == 123.456);
 	}
 	ShutDown();
 	return 0;

@@ -701,16 +701,16 @@ TEST_CASE("Test Collections", "[Collections]")
 			;
 		
 		static const char * scriptText =
-		u8R"(
+			u8R"(
 		
-		external table
+				external table
 		
-		set a to table["Test Name A"]["Name Field"]
-		set b to table["Test Name B"]["Integer Field"]
-		set c to table["Test Name C"]["Float Field"]
-		set d to table["Still Another Test Name"]["Text Field"]
-		set e to table["Yet Another Test Name"]["Text Field"]
-		)";
+				set a to table["Test Name A"]["Name Field"]
+				set b to table["Test Name B"]["Integer Field"]
+				set c to table["Test Name C"]["Float Field"]
+				set d to table["Still Another Test Name"]["Text Field"]
+				set e to table["Yet Another Test Name"]["Text Field"]
+			)";
 		
 		auto script = TestCreateScript(scriptText);
 		Variant table = tableText;
@@ -724,5 +724,80 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("d") == "Still more text");
 		REQUIRE(script->GetVariable("e") == "Yet more text to test");
 	}
-	
+
+	SECTION("Test comma-delimited table with commas string conversion to collection")
+	{
+		static const char * tableText =
+			"Name Field,Text Field\n"
+			"Test Name A,\"Test 1, 2, 3\"\n"
+			"Test Name B,Test 4\n"
+			;
+
+		static const char * scriptText =
+			u8R"(
+
+				external text
+				
+				set table to text as collection
+
+				set a to table["Test Name A"]["Text Field"]
+				set b to table["Test Name B"]["Text Field"]
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		script->SetVariable("text", tableText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a") == "Test 1, 2, 3");
+		REQUIRE(script->GetVariable("b") == "Test 4");
+	}
+
+	SECTION("Test comma-delimited table with quotes string conversion to collection")
+	{
+		static const char * tableText =
+			"Name Field,Text Field\n"
+			"Test Name A,\"\"\"Quoted text\"\"\"\n"
+			;
+
+		static const char * scriptText =
+			u8R"(
+
+				external text
+				
+				set table to text as collection
+
+				set a to table["Test Name A"]["Text Field"]
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		script->SetVariable("text", tableText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a") == "\"Quoted text\"");
+	}
+
+	SECTION("Test semicolon-delimited continental table with numbers")
+	{
+		static const char * tableText =
+			"Name Field;Number Field\n"
+			"Test Name A;123,456\n"
+			;
+
+		static const char * scriptText =
+			u8R"(
+
+				external text
+				
+				set table to text as collection
+
+				set a to table["Test Name A"]["Number Field"]
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		script->SetVariable("text", tableText);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("table").IsCollection());
+		REQUIRE(script->GetVariable("a").GetNumber() == Approx(123.456));
+	}
+
 }
