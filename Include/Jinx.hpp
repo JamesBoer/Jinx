@@ -72,6 +72,7 @@ by James Boer, and distributed under the MIT license.
 // Platform definitions
 #if defined(_WIN32) || defined(_WIN64)
 #define JINX_WINDOWS
+#define JINX_USE_FROM_CHARS
 #pragma warning(push)
 #pragma warning(disable : 4530) // Silence warnings if exceptions are disabled
 #endif
@@ -692,7 +693,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 2;
 
 	// Forward declaration
 	class IScript;
@@ -1118,6 +1119,11 @@ namespace Jinx
 #include <locale>
 #include <codecvt>
 #include <climits>
+#ifdef JINX_USE_FROM_CHARS
+#include <charconv>
+#else
+#include <sstream>
+#endif
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
@@ -1550,9 +1556,15 @@ namespace Jinx::Impl
 	inline int64_t BooleanToInteger(bool value) { return value ? 1ll : 0ll; }
 	inline String BooleanToString(bool value) { return value ? String("true") : String("false"); }
 
+	enum class NumericFormat
+	{
+		International, // Uses dot as decimal indicator
+		Continental    // Uses comma as decimal indicator
+	};
+
 	// String conversions
 	bool StringToBoolean(const String & inValue, bool * outValue);
-	bool StringToNumber(const String & value, double * outValue);
+	bool StringToNumber(const String & value, double * outValue, NumericFormat format = NumericFormat::International);
 	bool StringToInteger(const String & value, int64_t * outValue);
 	bool StringToValueType(const String & value, ValueType * outValue);
 	bool StringToGuid(const String & value, Guid * outValue);
@@ -3194,63 +3206,65 @@ namespace Jinx::Impl
 		return false;
 	}
 
-	inline bool StringToNumber(const String & value, double * outValue)
+	inline bool StringToNumber(const String & value, double * outValue, NumericFormat format)
 	{
 		assert(outValue);
-		const char * s = value.c_str();
-		const char * p = s;
-		bool decimal = false;
-		int count = 0;
-		if (*p == '-' || *p == '+')
-			++p;
-		while (*p != '\0')
+#ifdef JINX_USE_FROM_CHARS
+		// In case contintental format is used, replace commas with decimal point
+		if (format == NumericFormat::Continental)
 		{
-			if (*p < 0)
-				return false;
-			if (std::isdigit(*p))
-			{
-				++count;
-				if (count > 16)
-					return false;
-			}
-			else if (*p == '.')
-			{
-				if (decimal)
-					return false;
-				decimal = true;
-			}
-			else
-				return false;
-			++p;
+			String s = value;
+			std::replace(s.begin(), s.end(), ',', '.');
+			auto result = std::from_chars(s.data(), s.data() + s.size(), *outValue);
+			if (result.ptr == s.data() + s.size())
+				return true;
 		}
-		*outValue = std::atof(s);
-		return count > 0;
+		else
+		{
+			auto result = std::from_chars(value.data(), value.data() + value.size(), *outValue);
+			if (result.ptr == value.data() + value.size())
+				return true;
+		}
+		return false;
+#else
+		// In case contintental format is used, replace commas with decimal point
+		if (format == NumericFormat::Continental)
+		{
+			String s = value;
+			std::replace(s.begin(), s.end(), ',', '.');
+			std::istringstream istr(s.c_str());
+			istr.imbue(std::locale::classic());
+			istr >> *outValue;
+			if (istr.fail())
+				return false;
+		}
+		else
+		{
+			std::istringstream istr(value.c_str());
+			istr.imbue(std::locale::classic());
+			istr >> *outValue;
+			if (istr.fail())
+				return false;
+		}
+		return true;
+#endif
 	}
 
 	inline bool StringToInteger(const String & value, int64_t * outValue)
 	{
 		assert(outValue);
-		const char * s = value.c_str();
-		const char * p = s;
-		int count = 0;
-		if (*p == '-' || *p == '+')
-			++p;
-		while (*p != '\0')
-		{
-			if (*p < 0)
-				return false;
-			if (std::isdigit(*p))
-			{
-				++count;
-				if (count > 18)
-					return false;
-			}
-			else
-				return false;
-			++p;
-		}
-		*outValue = std::strtoull(s, nullptr, 10);
-		return count > 0;
+#ifdef JINX_USE_FROM_CHARS
+		auto result = std::from_chars(value.data(), value.data() + value.size(), *outValue);
+		if (result.ptr == value.data() + value.size())
+			return true;
+		return false;
+#else
+		char * endPtr;
+		*outValue = strtoll(value.data(), &endPtr, 10);
+		if (endPtr != (value.data() + value.size()))
+			return false;
+		return true;
+#endif
 	}
 
 	inline bool StringToValueType(const String & value, ValueType * outValue)
@@ -3338,10 +3352,11 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline char GetBreakToken(const String & value)
+	inline bool GetDelimiterAndFormat(const String & value, char & delimiter, NumericFormat & format)
 	{
 		size_t tabCount = 0;
 		size_t commaCount = 0;
+		size_t semicolonCount = 0;
 		for (size_t i = 0; i < value.size(); ++i)
 		{
 			char c = value[i];
@@ -3349,12 +3364,21 @@ namespace Jinx::Impl
 				++tabCount;
 			else if (c == ',')
 				++commaCount;
+			else if (c == ';')
+				++semicolonCount;
 			else if (c == '\n' && i != 0)
 				break;
 		}
-		if (tabCount == 0 && commaCount == 0)
-			return 0;
-		return (tabCount > commaCount) ? '\t' : ',';
+		if (tabCount == 0 && commaCount == 0 && semicolonCount == 0)
+			return false;
+		delimiter = (commaCount >= tabCount) ? ((commaCount > semicolonCount) ? ',' : ';') : '\t';
+		format = delimiter == ';' ? NumericFormat::Continental : NumericFormat::International;
+		return true;
+	}
+
+	inline bool IsLineEnd(const char current)
+	{
+		return current == '\n' || current == '\r';
 	}
 
 	inline void ParseWhitespace(const char ** current, const char * end)
@@ -3368,14 +3392,8 @@ namespace Jinx::Impl
 		}
 	}
 
-	inline Variant ParseVariant(const char * begin, const char * end)
+	inline Variant ParseValue(const String & value, NumericFormat format)
 	{
-		String value;
-		while (begin != end)
-		{
-			value += *begin;
-			++begin;
-		}
 		Guid guid;
 		if (StringToGuid(value, &guid))
 			return guid;
@@ -3383,7 +3401,7 @@ namespace Jinx::Impl
 		if (StringToInteger(value, &integer))
 			return integer;
 		double number;
-		if (StringToNumber(value, &number))
+		if (StringToNumber(value, &number, format))
 			return number;
 		bool boolean;
 		if (StringToBoolean(value, &boolean))
@@ -3391,37 +3409,77 @@ namespace Jinx::Impl
 		return value;
 	}
 
-	inline std::vector<Variant, Jinx::Allocator<Variant>> ParseRow(char breakToken, const char ** current, const char * end)
+	inline String ParseCell(char delimiter, const char ** current, const char * end)
+	{
+		if (*current == end)
+			return String();
+		bool isQuoted = false;
+		if (**current == '"')
+		{
+			isQuoted = true;
+			++(*current);
+		}
+		String value;
+		while (*current != end)
+		{
+			const char c = **current;
+			if (isQuoted)
+			{
+				// Since this cell is double-quote delimited, proceed without checking delimiters until
+				// we see another double quote character.
+				if (c == '"')
+				{
+					// Advance the iterator and check to see if it's followed by the end of file or
+					// delimiters.  If so, we're done parsing.  If not, a second double-quote should
+					// follow.
+					++(*current);
+					if (*current == end || **current == delimiter || IsLineEnd(**current))
+						break;
+					// If this assert hits, your data is malformed, since an interior double-quote was not
+					// followed by a second quote
+					assert(**current == '"');
+				}
+			}
+			else
+			{
+				// This isn't a quote-escaped cell, so check for normal delimiters
+				if (c == delimiter || IsLineEnd(c))
+					break;
+			}
+			value += c;
+			++(*current);
+		}
+		return value;
+	}
+
+	inline std::vector<Variant, Jinx::Allocator<Variant>> ParseRow(char delimiter, NumericFormat format, const char ** current, const char * end)
 	{
 		std::vector<Variant, Jinx::Allocator<Variant>> variants;
 
-		const char * begin = *current;
-		while (**current != *end)
+		while (*current != end)
 		{
-			if (begin == nullptr)
-				begin = *current;
-			const char c = **current;
-			if (c == breakToken || c == '\n' || c == '\r')
+			auto str = ParseCell(delimiter, current, end);
+			auto val = ParseValue(str, format);
+			variants.push_back(val);
+			if (*current != end)
 			{
-				variants.push_back(ParseVariant(begin, *current));
-				begin = nullptr;
-				if (c == '\n' || c == '\r')
+				if (**current == delimiter)
 				{
-					if (**current != *end)
+					++(*current);
+				}
+				else if (IsLineEnd(**current))
+				{
+					if (*current != end)
 					{
 						const char nc = *((*current) + 1);
-						if (nc == '\n' || nc == '\r')
+						if (IsLineEnd(nc))
 							++(*current);
 					}
 					++(*current);
 					break;
 				}
 			}
-			++(*current);
 		}
-
-		if (begin && begin != end)
-			variants.push_back(ParseVariant(begin, end));
 
 		return variants;
 	}
@@ -3430,15 +3488,16 @@ namespace Jinx::Impl
 	{
 
 		// First check what type of delimiter is used, tabs or semicolons
-		char breakToken = GetBreakToken(value);
-		if (breakToken == 0)
+		char delimiter;
+		NumericFormat format;
+		if (!GetDelimiterAndFormat(value, delimiter, format))
 			return false;
 		
 		// Parse first row, which we'll uses as index values into each subsequent row
 		const char * current = value.data();
 		const char * end = current + value.size();
 		ParseWhitespace(&current, end);
-		auto header = ParseRow(breakToken, &current, end);
+		auto header = ParseRow(delimiter, format, &current, end);
 		if (header.empty())
 			return false;
 
@@ -3448,7 +3507,7 @@ namespace Jinx::Impl
 		// Parse and create a collection for each row, and assign column ids from header
 		while (true)
 		{
-			const auto & row = ParseRow(breakToken, &current, end);
+			const auto & row = ParseRow(delimiter, format, &current, end);
 			if (row.empty())
 				break;
 			if (row.size() != header.size())
