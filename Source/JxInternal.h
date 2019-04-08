@@ -36,6 +36,11 @@ Copyright (c) 2016 James Boer
 #include <locale>
 #include <codecvt>
 #include <climits>
+#ifdef JINX_USE_FROM_CHARS
+#include <charconv>
+#else
+#include <sstream>
+#endif
 
 #ifdef JINX_WINDOWS
 #pragma warning(pop)
