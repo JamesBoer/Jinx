@@ -166,21 +166,29 @@ using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_ji
 using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a466c508de040a6f6ef5873b2793e92eb">Jinx::FreeFn</a> = std::function&lt; void(void *)&gt;</td></tr>
 <tr class="memdesc:a466c508de040a6f6ef5873b2793e92eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory free function callback. <br /></td></tr>
 <tr class="separator:a466c508de040a6f6ef5873b2793e92eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a733fa1eb68d1f8200bc0e827d1955f"><td class="memItemLeft" align="right" valign="top"><a id="a6a733fa1eb68d1f8200bc0e827d1955f"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a6a733fa1eb68d1f8200bc0e827d1955f">Jinx::LogFn</a> = std::function&lt; void(const char *)&gt;</td></tr>
-<tr class="memdesc:a6a733fa1eb68d1f8200bc0e827d1955f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global logging function callback. <br /></td></tr>
-<tr class="separator:a6a733fa1eb68d1f8200bc0e827d1955f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84b1d42a01a0d4930d4a09d334aa0219"><td class="memItemLeft" align="right" valign="top"><a id="a84b1d42a01a0d4930d4a09d334aa0219"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a84b1d42a01a0d4930d4a09d334aa0219">Jinx::LogFn</a> = std::function&lt; void(LogLevel level, const char *)&gt;</td></tr>
+<tr class="memdesc:a84b1d42a01a0d4930d4a09d334aa0219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global logging function callback. <br /></td></tr>
+<tr class="separator:a84b1d42a01a0d4930d4a09d334aa0219"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ace25cfda5f173f74baaf91cec0f7f95b"><td class="memItemLeft" align="right" valign="top"><a id="ace25cfda5f173f74baaf91cec0f7f95b"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>Visibility</b> { <b>Public</b>, 
-<b>Private</b>
+<tr class="memitem:ace25cfda5f173f74baaf91cec0f7f95b"><td class="memItemLeft" align="right" valign="top"><a id="ace25cfda5f173f74baaf91cec0f7f95b"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#ace25cfda5f173f74baaf91cec0f7f95b">Jinx::Visibility</a> { <b>Jinx::Visibility::Public</b>, 
+<b>Jinx::Visibility::Private</b>
  }</td></tr>
+<tr class="memdesc:ace25cfda5f173f74baaf91cec0f7f95b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines visibility when registering a function. <br /></td></tr>
 <tr class="separator:ace25cfda5f173f74baaf91cec0f7f95b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa375c9c285c2ba5c61b1efcf104330d9"><td class="memItemLeft" align="right" valign="top"><a id="aa375c9c285c2ba5c61b1efcf104330d9"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>Access</b> { <b>ReadWrite</b>, 
-<b>ReadOnly</b>
+<tr class="memitem:aa375c9c285c2ba5c61b1efcf104330d9"><td class="memItemLeft" align="right" valign="top"><a id="aa375c9c285c2ba5c61b1efcf104330d9"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#aa375c9c285c2ba5c61b1efcf104330d9">Jinx::Access</a> { <b>Jinx::Access::ReadWrite</b>, 
+<b>Jinx::Access::ReadOnly</b>
  }</td></tr>
+<tr class="memdesc:aa375c9c285c2ba5c61b1efcf104330d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the access type of a registered property. <br /></td></tr>
 <tr class="separator:aa375c9c285c2ba5c61b1efcf104330d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fed9410c5a78b303fd1ae48fe7e9853"><td class="memItemLeft" align="right" valign="top"><a id="a5fed9410c5a78b303fd1ae48fe7e9853"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a5fed9410c5a78b303fd1ae48fe7e9853">Jinx::LogLevel</a> { <b>Jinx::LogLevel::Info</b>, 
+<b>Jinx::LogLevel::Warning</b>, 
+<b>Jinx::LogLevel::Error</b>
+ }</td></tr>
+<tr class="memdesc:a5fed9410c5a78b303fd1ae48fe7e9853"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates the logging level of Jinx output logs. <br /></td></tr>
+<tr class="separator:a5fed9410c5a78b303fd1ae48fe7e9853"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -209,7 +217,7 @@ const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 <tr class="memdesc:a1c7318012adc2d64540cd28ed5f78b01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minor version number. <br /></td></tr>
 <tr class="separator:a1c7318012adc2d64540cd28ed5f78b01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0e5e517609d07abbe8c6aa37e974d3a"><td class="memItemLeft" align="right" valign="top"><a id="ae0e5e517609d07abbe8c6aa37e974d3a"></a>
-const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#ae0e5e517609d07abbe8c6aa37e974d3a">Jinx::PatchNumber</a> = 0</td></tr>
+const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#ae0e5e517609d07abbe8c6aa37e974d3a">Jinx::PatchNumber</a> = 3</td></tr>
 <tr class="memdesc:ae0e5e517609d07abbe8c6aa37e974d3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Patch number. <br /></td></tr>
 <tr class="separator:ae0e5e517609d07abbe8c6aa37e974d3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55c3f6a8c0da63c0eb9cc453e2b09d1b"><td class="memItemLeft" align="right" valign="top"><a id="a55c3f6a8c0da63c0eb9cc453e2b09d1b"></a>

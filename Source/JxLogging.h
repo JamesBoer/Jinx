@@ -18,8 +18,8 @@ namespace Jinx::Impl
 	bool IsLogSymbolsEnabled();
 	bool IsLogBytecodeEnabled();
 
-	void LogWrite(const char * format, ...);
-	void LogWriteLine(const char * format, ...);
+	void LogWrite(LogLevel level, const char * format, ...);
+	void LogWriteLine(LogLevel level, const char * format, ...);
 
 } // namespace Jinx::Impl
 

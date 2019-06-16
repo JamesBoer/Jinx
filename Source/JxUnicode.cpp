@@ -41,7 +41,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf8In || inBufferCount == 0 || !utf32CodePoint || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf8ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf8ToUtf32()");
 			return;
 		}
 
@@ -60,13 +60,13 @@ namespace Jinx::Impl
 		{
 			if (inBufferCount < 2 || (utf8[1] & 0xC0) != 0x80)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = char32_t(utf8[0] & 0x1F);
 			if (*utf32CodePoint < 2)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = (*utf32CodePoint << 6) + char32_t(utf8[1] & 0x3F);
@@ -76,7 +76,7 @@ namespace Jinx::Impl
 		{
 			if (inBufferCount < 3 || (utf8[1] & 0xC0) != 0x80 || (utf8[2] & 0xC0) != 0x80)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = char32_t(utf8[0] & 0x0F);
@@ -88,7 +88,7 @@ namespace Jinx::Impl
 		{
 			if (inBufferCount < 4 || (utf8[1] & 0xC0) != 0x80 || (utf8[2] & 0xC0) != 0x80 || (utf8[3] & 0xC0) != 0x80)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = char32_t(utf8[0] & 0x07);
@@ -100,7 +100,7 @@ namespace Jinx::Impl
 		else
 		{
 			// Invalid data
-			LogWriteLine("Invalid character data passed to function ConvertUtf32ToUtf8()");
+			LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf32ToUtf8()");
 		}
 	}
 
@@ -109,7 +109,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf8Out || outBufferCount == 0 || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 			return;
 		}
 
@@ -126,7 +126,7 @@ namespace Jinx::Impl
 		{
 			if (outBufferCount < 2)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
 			utf8Out[0] = uint8_t(utf32CodePoint >> 6) | 0xC0;
@@ -137,7 +137,7 @@ namespace Jinx::Impl
 		{
 			if (outBufferCount < 3)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
 			utf8Out[0] = (uint8_t(utf32CodePoint >> 12) & 0x0F) | 0xE0;
@@ -149,7 +149,7 @@ namespace Jinx::Impl
 		{
 			if (outBufferCount < 4)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
 			utf8Out[0] = (uint8_t(utf32CodePoint >> 18) & 0x07) | 0xF0;
@@ -161,7 +161,7 @@ namespace Jinx::Impl
 		else
 		{
 			// Invalid data
-			LogWriteLine("Invalid character data passed to function ConvertUtf32ToUtf8()");
+			LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf32ToUtf8()");
 		}
 	}
 
@@ -170,7 +170,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf16In || inBufferCount == 0 || !utf32CodePoint || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf16ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf16ToUtf32()");
 			return;
 		}
 
@@ -185,14 +185,14 @@ namespace Jinx::Impl
 		// Make sure we have a second word
 		if (inBufferCount < 2)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf16ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf16ToUtf32()");
 			return;
 		}
 
 		// Check for invalid range of second word
 		if (utf16In[1] < 0xDC00 || utf16In[1] > 0xDFFF)
 		{
-			LogWriteLine("Invalid data passed to ConvertUtf16ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid data passed to ConvertUtf16ToUtf32()");
 			return;
 		}
 
@@ -208,7 +208,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf16Out || outBufferCount == 0 || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf16()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf16()");
 			return;
 		}
 
@@ -223,7 +223,7 @@ namespace Jinx::Impl
 			// Check to make sure we have two buffers to read
 			if (outBufferCount < 2)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf16()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf16()");
 				return;
 			}
 
@@ -242,7 +242,7 @@ namespace Jinx::Impl
 		// Validate parameter
 		if (!(utf8Str && utf8Str[0] != 0))
 		{
-			LogWriteLine("Invalid character value passed to GetUtf8CharSize()");
+			LogWriteLine(LogLevel::Error, "Invalid character value passed to GetUtf8CharSize()");
 			return 1;
 		}
 
@@ -253,7 +253,7 @@ namespace Jinx::Impl
 		// While values of 5 or 6 bytes are technically possible, it is not a valid UTF-8 sequence
 		if (s > 4)
 		{
-			LogWriteLine("Invalid character size calculated in GetUtf8CharSize()");
+			LogWriteLine(LogLevel::Error, "Invalid character size calculated in GetUtf8CharSize()");
 			return 4;
 		}
 

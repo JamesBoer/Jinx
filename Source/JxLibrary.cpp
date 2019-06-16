@@ -84,12 +84,12 @@ namespace Jinx::Impl
 	{
 		if (name.empty())
 		{
-			LogWriteLine("Registered function requires a valid name");
+			LogWriteLine(LogLevel::Error, "Registered function requires a valid name");
 			return false;
 		}
 		if (!function)
 		{
-			LogWriteLine("Registered function requires a valid callback");
+			LogWriteLine(LogLevel::Error, "Registered function requires a valid callback");
 			return false;
 		}
 

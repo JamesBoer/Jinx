@@ -60,10 +60,10 @@ namespace Jinx::Impl
 			if (m_error)
 				return;
 			if (m_name.empty())
-				LogWrite("Error at line %i, column %i:", m_lineNumber, m_columnNumber);
+				LogWrite(LogLevel::Error, "Error at line %i, column %i:", m_lineNumber, m_columnNumber);
 			else
-				LogWrite("Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
-			LogWriteLine(format, std::forward<Args>(args)...);
+				LogWrite(LogLevel::Error, "Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
+			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
 			m_error = true;
 		}
 

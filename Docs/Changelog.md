@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.3] - 2019-06-15
+
+- Logging callback function now passes log level: Info, Warning, or Error
+
 ## [1.1.2] - 2019-04-07
 
 - Improved CSV parsing to include quoted values and continental format

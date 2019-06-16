@@ -658,7 +658,7 @@ namespace Jinx::Impl
 							// Make sure the library exists
 							if (!m_runtime->LibraryExists(libName))
 							{
-								LogWriteLine("Unable to find library '%s'", libName.c_str());
+								LogWriteLine(LogLevel::Warning, "Unable to find library '%s'", libName.c_str());
 								return FunctionMatch();
 							}
 
@@ -669,7 +669,7 @@ namespace Jinx::Impl
 							{
 								if (match.signature)
 								{
-									LogWriteLine("Ambiguous function name detected.  Use library name to disambiguate.");
+									LogWriteLine(LogLevel::Warning, "Ambiguous function name detected.  Use library name to disambiguate.");
 									return FunctionMatch();
 								}
 								else
@@ -677,7 +677,7 @@ namespace Jinx::Impl
 									match = newMatch;
 									if (match.signature->GetVisibility() == VisibilityType::Private && library != m_library)
 									{
-										LogWriteLine("Unable to call library function with private scope.");
+										LogWriteLine(LogLevel::Error, "Unable to call library function with private scope.");
 										return FunctionMatch();
 									}
 								}
