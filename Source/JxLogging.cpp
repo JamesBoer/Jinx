@@ -17,11 +17,11 @@ namespace Jinx::Impl
 		static inline bool enableLogging = true;
 		static inline bool logSymbols = false;
 		static inline bool logBytecode = false;
-		static inline LogFn logFn = [](const char * logText) { printf("%s", logText); };
+		static inline LogFn logFn = [](LogLevel, const char * logText) { printf("%s", logText); };
 		static inline std::mutex logMutex;
 	};
 
-	inline_t void LogWrite(const char * format, ...)
+	inline_t void LogWrite(LogLevel level, const char * format, ...)
 	{
 		std::unique_lock<std::mutex> lock(Log::logMutex);
 		if (!Log::enableLogging)
@@ -34,11 +34,11 @@ namespace Jinx::Impl
 #else
 		vsnprintf(buffer, BufferSize, format, argptr);
 #endif
-		Log::logFn(buffer);
+		Log::logFn(level, buffer);
 		va_end(argptr);
 	}
 
-	inline_t void LogWriteLine(const char * format, ...)
+	inline_t void LogWriteLine(LogLevel level, const char * format, ...)
 	{
 		std::unique_lock<std::mutex> lock(Log::logMutex);
 		if (!Log::enableLogging)
@@ -57,7 +57,7 @@ namespace Jinx::Impl
 			buffer[len] = '\n';
 			buffer[len + 1] = 0;
 		}
-		Log::logFn(buffer);
+		Log::logFn(level, buffer);
 		va_end(argptr);
 	}
 

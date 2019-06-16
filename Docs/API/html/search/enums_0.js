@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['valuetype',['ValueType',['../_jx_variant_8h.html#a538a4d035f2d23781bef9e13f5bbb21e',1,'Jinx']]]
+  ['access',['Access',['../_jinx_8h.html#aa375c9c285c2ba5c61b1efcf104330d9',1,'Jinx']]]
 ];

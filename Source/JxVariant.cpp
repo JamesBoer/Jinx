@@ -315,7 +315,7 @@ namespace Jinx
 						double number;
 						if (!Impl::StringToNumber(m_string, &number))
 						{
-							Impl::LogWriteLine("Error converting string %s to number", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to number", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -327,7 +327,7 @@ namespace Jinx
 						int64_t integer;
 						if (!Impl::StringToInteger(m_string, &integer))
 						{
-							Impl::LogWriteLine("Error converting string %s to integer", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to integer", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -339,7 +339,7 @@ namespace Jinx
 						bool boolean;
 						if (!Impl::StringToBoolean(m_string, &boolean))
 						{
-							Impl::LogWriteLine("Error converting string %s to boolean", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to boolean", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -351,7 +351,7 @@ namespace Jinx
 						auto collection = CreateCollection();
 						if (!Impl::StringToCollection(m_string, &collection))
 						{
-							Impl::LogWriteLine("Error converting string to collection type", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string to collection type", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -363,7 +363,7 @@ namespace Jinx
 						Guid guid;
 						if (!Impl::StringToGuid(m_string, &guid))
 						{
-							Impl::LogWriteLine("Error converting string %s to Guid", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to Guid", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -375,7 +375,7 @@ namespace Jinx
 						ValueType valType;
 						if (!Impl::StringToValueType(m_string, &valType))
 						{
-							Impl::LogWriteLine("Error converting string %s to value type", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to value type", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -420,7 +420,7 @@ namespace Jinx
 			default:
 				break;
 		};
-		Impl::LogWriteLine("Error converting %s to %s", Impl::GetValueTypeName(m_type), Impl::GetValueTypeName(type));
+		Impl::LogWriteLine(LogLevel::Error, "Error converting %s to %s", Impl::GetValueTypeName(m_type), Impl::GetValueTypeName(type));
 		SetNull();
 		return false;
 	}
@@ -795,12 +795,12 @@ namespace Jinx
 		}
 		if (left.GetType() != ValueType::Number && left.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid left operand for addition");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for addition");
 			return Variant();
 		}
 		if (right.GetType() != ValueType::Number && right.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid right operand for addition");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for addition");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -821,12 +821,12 @@ namespace Jinx
 	{
 		if (!left.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid left operand for subtraction");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for subtraction");
 			return Variant();
 		}
 		if (!right.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid right operand for subtraction");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for subtraction");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -847,12 +847,12 @@ namespace Jinx
 	{
 		if (!left.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid left operand for multiplication");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for multiplication");
 			return Variant();
 		}
 		if (!right.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid right operand for multiplication");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for multiplication");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -873,12 +873,12 @@ namespace Jinx
 	{
 		if (!left.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid left operand for division");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for division");
 			return Variant();
 		}
 		if (!right.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid right operand for division");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for division");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -913,12 +913,12 @@ namespace Jinx
 		// Check for non-integer types, especially since co-erced right values will be zero
 		if (left.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid left operand for mod");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for mod");
 			return Variant();
 		}
 		if (right.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid right operand for mod");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for mod");
 			return Variant();
 		}
 
@@ -1012,7 +1012,7 @@ namespace Jinx
 		{
 			case ValueType::Null:
 			{
-				Impl::LogWriteLine("Error comparing null type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing null type with < operator");
 				return false;
 			}
 			case ValueType::Number:
@@ -1044,12 +1044,12 @@ namespace Jinx
 			}
 			case ValueType::Collection:
 			{
-				Impl::LogWriteLine("Error comparing collection type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with < operator");
 				return false;
 			}
 			case ValueType::CollectionItr:
 			{
-				Impl::LogWriteLine("Error comparing collectionitr type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
 				return false;
 			}
 			case ValueType::UserObject:
@@ -1060,7 +1060,7 @@ namespace Jinx
 			}
 			case ValueType::Buffer:
 			{
-				Impl::LogWriteLine("Error comparing buffer type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing buffer type with < operator");
 				return false;
 			}
 			case ValueType::Guid:
@@ -1081,7 +1081,7 @@ namespace Jinx
 			}
 		};
 
-		Impl::LogWriteLine("Type error in right operand when using < operator");
+		Impl::LogWriteLine(LogLevel::Error, "Type error in right operand when using < operator");
 		return false;
 	}
 
@@ -1091,7 +1091,7 @@ namespace Jinx
 		{
 			case ValueType::Null:
 			{
-				Impl::LogWriteLine("Error comparing null type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing null type with < operator");
 				return false;
 			}
 			case ValueType::Number:
@@ -1123,12 +1123,12 @@ namespace Jinx
 			}
 			case ValueType::Collection:
 			{
-				Impl::LogWriteLine("Error comparing collection type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with < operator");
 				return false;
 			}
 			case ValueType::CollectionItr:
 			{
-				Impl::LogWriteLine("Error comparing collectionitr type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
 				return false;
 			}
 			case ValueType::UserObject:
@@ -1139,7 +1139,7 @@ namespace Jinx
 			}
 			case ValueType::Buffer:
 			{
-				Impl::LogWriteLine("Error comparing buffer type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing buffer type with < operator");
 				return false;
 			}
 			case ValueType::Guid:
@@ -1160,7 +1160,7 @@ namespace Jinx
 			}
 		};
 
-		Impl::LogWriteLine("Type error in right operand when using < operator");
+		Impl::LogWriteLine(LogLevel::Error, "Type error in right operand when using < operator");
 		return false;
 	}
 

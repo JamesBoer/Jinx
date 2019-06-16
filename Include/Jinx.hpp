@@ -693,7 +693,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 2;
+	const uint32_t PatchNumber = 3;
 
 	// Forward declaration
 	class IScript;
@@ -720,16 +720,33 @@ namespace Jinx
 #define JinxAnyCast reinterpret_cast
 #endif
 
+	/// Determines visibility when registering a function
 	enum class Visibility
 	{
+		/// The registered function will be visible outside the library
 		Public,
+		/// The registered function will only be visible to library functions
 		Private
 	};
 
+	/// Determines the access type of a registered property
 	enum class Access
 	{
+		/// The registered property can both be read and written to
 		ReadWrite,
+		/// The registered property can only be read from
 		ReadOnly,
+	};
+
+	/// Indicates the logging level of Jinx output logs
+	enum class LogLevel
+	{
+		/// This message is purely for informational or debugging purposes
+		Info,
+		/// This is a warning message which indicates a potential issue
+		Warning,
+		/// This message is a compile-time or run-time error condition
+		Error,
 	};
 
 	/// ILibrary represents a single module of script code.
@@ -1017,7 +1034,7 @@ namespace Jinx
 	using FreeFn = std::function<void(void *)>;
 
 	/// Prototype for global logging function callback
-	using LogFn = std::function<void(const char *)>;
+	using LogFn = std::function<void(LogLevel level, const char *)>;
 
 
 	/// Initializes global Jinx parameters
@@ -1151,8 +1168,8 @@ namespace Jinx::Impl
 	bool IsLogSymbolsEnabled();
 	bool IsLogBytecodeEnabled();
 
-	void LogWrite(const char * format, ...);
-	void LogWriteLine(const char * format, ...);
+	void LogWrite(LogLevel level, const char * format, ...);
+	void LogWriteLine(LogLevel level, const char * format, ...);
 
 } // namespace Jinx::Impl
 
@@ -1821,10 +1838,10 @@ namespace Jinx::Impl
 			if (m_error)
 				return;
 			if (m_name.empty())
-				LogWrite("Error at line %i, column %i:", m_lineNumber, m_columnNumber);
+				LogWrite(LogLevel::Error, "Error at line %i, column %i:", m_lineNumber, m_columnNumber);
 			else
-				LogWrite("Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
-			LogWriteLine(format, std::forward<Args>(args)...);
+				LogWrite(LogLevel::Error, "Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
+			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
 			m_error = true;
 		}
 
@@ -2293,14 +2310,14 @@ namespace Jinx::Impl
 				return;
 			m_error = true;
 			if (m_name.empty())
-				LogWrite("Error at ");
+				LogWrite(LogLevel::Error, "Error at ");
 			else
-				LogWrite("Error in %s at ", m_name.c_str());
+				LogWrite(LogLevel::Error, "Error in %s at ", m_name.c_str());
 			if (m_currentSymbol == m_symbolList.end())
-				LogWrite("end of script: ");
+				LogWrite(LogLevel::Error, "end of script: ");
 			else
-				LogWrite("line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
-			LogWriteLine(format, std::forward<Args>(args)...);
+				LogWrite(LogLevel::Error, "line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
 		}
 
 		// Hash and register variable or property name and ID mapping
@@ -4399,14 +4416,14 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline void DebugWriteInternal(const Variant & var)
+	inline void DebugWriteInternal(LogLevel level, const Variant & var)
 	{
 		if (var.IsCollection())
 		{
 			const auto & coll = *var.GetCollection();
 			for (const auto & v : coll)
 			{
-				DebugWriteInternal(v.second);
+				DebugWriteInternal(level, v.second);
 			}
 		}
 		else
@@ -4414,7 +4431,7 @@ namespace Jinx::Impl
 			auto str = var.GetString();
 			auto cstr = str.c_str();
 			if (cstr)
-				LogWrite(cstr);
+				LogWrite(level, cstr);
 		}
 	}
 
@@ -4422,15 +4439,15 @@ namespace Jinx::Impl
 	{
 		if (params.empty())
 			return nullptr;
-		DebugWriteInternal(params[0]);
+		DebugWriteInternal(LogLevel::Info, params[0]);
 		return nullptr;
 	}
 
 	inline Variant WriteLine(ScriptPtr, Parameters params)
 	{
 		if (!params.empty())
-			DebugWriteInternal(params[0]);
-		LogWrite("\n");
+			DebugWriteInternal(LogLevel::Info, params[0]);
+		LogWrite(LogLevel::Info, "\n");
 		return nullptr;
 	}
 
@@ -4470,7 +4487,7 @@ namespace Jinx::Impl
 	{
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine("'get key' called with non-iterator param");
+			LogWriteLine(LogLevel::Error, "'get key' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->first;
@@ -4480,7 +4497,7 @@ namespace Jinx::Impl
 	{
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine("'get value' called with non-iterator param");
+			LogWriteLine(LogLevel::Error, "'get value' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->second;
@@ -4608,12 +4625,12 @@ namespace Jinx::Impl
 	{
 		if (name.empty())
 		{
-			LogWriteLine("Registered function requires a valid name");
+			LogWriteLine(LogLevel::Error, "Registered function requires a valid name");
 			return false;
 		}
 		if (!function)
 		{
-			LogWriteLine("Registered function requires a valid callback");
+			LogWriteLine(LogLevel::Error, "Registered function requires a valid callback");
 			return false;
 		}
 
@@ -4717,11 +4734,11 @@ namespace Jinx::Impl
 		static inline bool enableLogging = true;
 		static inline bool logSymbols = false;
 		static inline bool logBytecode = false;
-		static inline LogFn logFn = [](const char * logText) { printf("%s", logText); };
+		static inline LogFn logFn = [](LogLevel, const char * logText) { printf("%s", logText); };
 		static inline std::mutex logMutex;
 	};
 
-	inline void LogWrite(const char * format, ...)
+	inline void LogWrite(LogLevel level, const char * format, ...)
 	{
 		std::unique_lock<std::mutex> lock(Log::logMutex);
 		if (!Log::enableLogging)
@@ -4734,11 +4751,11 @@ namespace Jinx::Impl
 #else
 		vsnprintf(buffer, BufferSize, format, argptr);
 #endif
-		Log::logFn(buffer);
+		Log::logFn(level, buffer);
 		va_end(argptr);
 	}
 
-	inline void LogWriteLine(const char * format, ...)
+	inline void LogWriteLine(LogLevel level, const char * format, ...)
 	{
 		std::unique_lock<std::mutex> lock(Log::logMutex);
 		if (!Log::enableLogging)
@@ -4757,7 +4774,7 @@ namespace Jinx::Impl
 			buffer[len] = '\n';
 			buffer[len + 1] = 0;
 		}
-		Log::logFn(buffer);
+		Log::logFn(level, buffer);
 		va_end(argptr);
 	}
 
@@ -5337,50 +5354,50 @@ namespace Jinx
 
 		inline void BlockHeap::LogAllocations()
 		{
-			LogWriteLine("=== Memory Log Begin ===");
+			LogWriteLine(LogLevel::Info, "=== Memory Log Begin ===");
 
 			// Log all memory blocks
 			auto memBlock = m_allocHead;
 			while (memBlock)
 			{
-				LogWriteLine("");
-				LogWriteLine("--- Memory Block ---");
+				LogWriteLine(LogLevel::Info, "");
+				LogWriteLine(LogLevel::Info, "--- Memory Block ---");
 #ifdef JINX_USE_MEMORY_GUARDS
 				bool memGuardsIntact = (memcmp(memBlock->memGuardHead, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) &&
 					(memcmp(memBlock->memGuardTail, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) ? true : false;
-				LogWriteLine("Memory guards intact: %s", memGuardsIntact ? "true" : "false");
+				LogWriteLine(LogLevel::Info, "Memory guards intact: %s", memGuardsIntact ? "true" : "false");
 #endif 		
-				LogWriteLine("Data = %p", memBlock->data);
-				LogWriteLine("Used bytes = %" PRIuPTR, memBlock->usedBytes);
-				LogWriteLine("Allocated bytes = %" PRIuPTR, memBlock->allocatedBytes);
-				LogWriteLine("Capacity = %" PRIuPTR, memBlock->capacity);
-				LogWriteLine("Count = %" PRIuPTR, memBlock->count);
+				LogWriteLine(LogLevel::Info, "Data = %p", memBlock->data);
+				LogWriteLine(LogLevel::Info, "Used bytes = %" PRIuPTR, memBlock->usedBytes);
+				LogWriteLine(LogLevel::Info, "Allocated bytes = %" PRIuPTR, memBlock->allocatedBytes);
+				LogWriteLine(LogLevel::Info, "Capacity = %" PRIuPTR, memBlock->capacity);
+				LogWriteLine(LogLevel::Info, "Count = %" PRIuPTR, memBlock->count);
 #ifdef JINX_DEBUG_ALLOCATION
-				LogWriteLine("Memory allocations:");
+				LogWriteLine(LogLevel::Info, "Memory allocations:");
 				auto memHeader = memBlock->head;
 				while (memHeader)
 				{
-					LogWriteLine("Allocation %p, size: %"  PRIuPTR ", File: %s, Function: %s",
+					LogWriteLine(LogLevel::Info, "Allocation %p, size: %"  PRIuPTR ", File: %s, Function: %s",
 						memHeader->memBlock, memHeader->bytes, memHeader->file ? memHeader->file : "", memHeader->function ? memHeader->function : "");
 					memHeader = memHeader->next;
 				}
 #endif
 				memBlock = memBlock->next;
 			}
-			LogWriteLine("");
+			LogWriteLine(LogLevel::Info, "");
 
 			// Log memory stats
 			auto memStats = GetMemoryStats();
-			LogWriteLine("--- Memory Stats ---");
-			LogWriteLine("External alloc count:     %i", memStats.externalAllocCount);
-			LogWriteLine("External free count:      %i", memStats.externalFreeCount);
-			LogWriteLine("Internal alloc count:     %i", memStats.internalAllocCount);
-			LogWriteLine("Internal free count:      %i", memStats.internalFreeCount);
-			LogWriteLine("Current block count:      %i", memStats.currentBlockCount);
-			LogWriteLine("Current allocated memory: %lli", memStats.currentAllocatedMemory);
-			LogWriteLine("Current used memory:      %lli", memStats.currentAllocatedMemory);
-			LogWriteLine("");
-			LogWriteLine("=== Memory Log End ===");
+			LogWriteLine(LogLevel::Info, "--- Memory Stats ---");
+			LogWriteLine(LogLevel::Info, "External alloc count:     %i", memStats.externalAllocCount);
+			LogWriteLine(LogLevel::Info, "External free count:      %i", memStats.externalFreeCount);
+			LogWriteLine(LogLevel::Info, "Internal alloc count:     %i", memStats.internalAllocCount);
+			LogWriteLine(LogLevel::Info, "Internal free count:      %i", memStats.internalFreeCount);
+			LogWriteLine(LogLevel::Info, "Current block count:      %i", memStats.currentBlockCount);
+			LogWriteLine(LogLevel::Info, "Current allocated memory: %lli", memStats.currentAllocatedMemory);
+			LogWriteLine(LogLevel::Info, "Current used memory:      %lli", memStats.currentAllocatedMemory);
+			LogWriteLine(LogLevel::Info, "");
+			LogWriteLine(LogLevel::Info, "=== Memory Log End ===");
 
 		}
 
@@ -5437,7 +5454,7 @@ namespace Jinx
 				}
 				else
 				{
-					LogWriteLine("Could not free block at shutdown.  Memory still in use.");
+					LogWriteLine(LogLevel::Warning, "Could not free block at shutdown.  Memory still in use.");
 				}
 				curr = next;
 			}
@@ -5457,7 +5474,7 @@ namespace Jinx
 				}
 				else
 				{
-					LogWriteLine("Could not free block at shutdown.  Memory still in use.");
+					LogWriteLine(LogLevel::Warning, "Could not free block at shutdown.  Memory still in use.");
 				}
 				curr = next;
 			}
@@ -6340,7 +6357,7 @@ namespace Jinx::Impl
 							// Make sure the library exists
 							if (!m_runtime->LibraryExists(libName))
 							{
-								LogWriteLine("Unable to find library '%s'", libName.c_str());
+								LogWriteLine(LogLevel::Warning, "Unable to find library '%s'", libName.c_str());
 								return FunctionMatch();
 							}
 
@@ -6351,7 +6368,7 @@ namespace Jinx::Impl
 							{
 								if (match.signature)
 								{
-									LogWriteLine("Ambiguous function name detected.  Use library name to disambiguate.");
+									LogWriteLine(LogLevel::Warning, "Ambiguous function name detected.  Use library name to disambiguate.");
 									return FunctionMatch();
 								}
 								else
@@ -6359,7 +6376,7 @@ namespace Jinx::Impl
 									match = newMatch;
 									if (match.signature->GetVisibility() == VisibilityType::Private && library != m_library)
 									{
-										LogWriteLine("Unable to call library function with private scope.");
+										LogWriteLine(LogLevel::Error, "Unable to call library function with private scope.");
 										return FunctionMatch();
 									}
 								}
@@ -8473,7 +8490,7 @@ namespace Jinx::Impl
 
 	inline void Runtime::LogBytecode(const Parser & parser) const
 	{
-		LogWriteLine("\nBytecode:\n====================");
+		LogWriteLine(LogLevel::Info, "\nBytecode:\n====================");
 		const size_t columnWidth = 16;
 		auto buffer = parser.GetBytecode();
 		BinaryReader reader(buffer);
@@ -8489,7 +8506,7 @@ namespace Jinx::Impl
 			reader.Read(&opByte);
 			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
 			{
-				LogWriteLine("LogBytecode(): Invalid operation in bytecode");
+				LogWriteLine(LogLevel::Error, "LogBytecode(): Invalid operation in bytecode");
 				return;
 			}
 			Opcode opcode = static_cast<Opcode>(opByte);
@@ -8498,12 +8515,12 @@ namespace Jinx::Impl
 
 			const char * opcodeName = GetOpcodeText(opcode);
 			size_t opcodeNameLength = strlen(opcodeName);
-			LogWrite(opcodeName);
+			LogWrite(LogLevel::Info, opcodeName);
 
 			// Advance to column offset
 			assert(opcodeNameLength < columnWidth);
 			for (size_t i = 0; i < (columnWidth - opcodeNameLength); ++i)
-				LogWrite(" ");
+				LogWrite(LogLevel::Info, " ");
 
 			// Read and log opcode arguments
 			switch (opcode)
@@ -8517,7 +8534,7 @@ namespace Jinx::Impl
 			{
 				RuntimeID id;
 				reader.Read(&id);
-				LogWrite("%s", parser.GetNameFromID(id).c_str());
+				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::ErasePropKeyVal:
@@ -8529,7 +8546,7 @@ namespace Jinx::Impl
 				reader.Read(&subscripts);
 				RuntimeID id;
 				reader.Read(&id);
-				LogWrite("%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
+				LogWrite(LogLevel::Info, "%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::Cast:
@@ -8537,21 +8554,21 @@ namespace Jinx::Impl
 				uint8_t b;
 				reader.Read(&b);
 				auto type = ByteToValueType(b);
-				LogWrite("%s", GetValueTypeName(type));
+				LogWrite(LogLevel::Info, "%s", GetValueTypeName(type));
 			}
 			break;
 			case Opcode::Function:
 			{
 				FunctionSignature signature;
 				signature.Read(reader);
-				LogWrite("%s", parser.GetNameFromID(signature.GetId()).c_str());
+				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(signature.GetId()).c_str());
 			}
 			break;
 			case Opcode::Library:
 			{
 				String name;
 				reader.Read(&name);
-				LogWrite("%s", name.c_str());
+				LogWrite(LogLevel::Info, "%s", name.c_str());
 			}
 			break;
 			case Opcode::Property:
@@ -8571,14 +8588,14 @@ namespace Jinx::Impl
 			{
 				uint32_t count;
 				reader.Read(&count);
-				LogWrite("%i", count);
+				LogWrite(LogLevel::Info, "%i", count);
 			}
 			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(reader);
-				LogWrite("%s", val.GetString().c_str());
+				LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
 			}
 			break;
 			case Opcode::SetIndex:
@@ -8589,7 +8606,7 @@ namespace Jinx::Impl
 				reader.Read(&stackIndex);
 				ValueType type;
 				reader.Read<ValueType, uint8_t>(&type);
-				LogWrite("%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
+				LogWrite(LogLevel::Info, "%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
 			}
 			break;
 			default:
@@ -8597,14 +8614,14 @@ namespace Jinx::Impl
 			}
 			break;
 			}
-			LogWrite("\n");
+			LogWrite(LogLevel::Info, "\n");
 		}
-		LogWrite("\nInstruction Count: %i\n\n", instructionCount);
+		LogWrite(LogLevel::Info, "\nInstruction Count: %i\n\n", instructionCount);
 	}
 
 	inline void Runtime::LogSymbols(const SymbolList & symbolList) const
 	{
-		LogWriteLine("\nSymbols:\n====================");
+		LogWriteLine(LogLevel::Info, "\nSymbols:\n====================");
 		bool newLine = true;
 
 		// Store offset of first symbol
@@ -8621,7 +8638,7 @@ namespace Jinx::Impl
 			if (newLine)
 			{
 				for (uint32_t i = 1; i < symbol->columnNumber - offset; ++i)
-					LogWrite(" ");
+					LogWrite(LogLevel::Info, " ");
 				newLine = false;
 			}
 
@@ -8629,13 +8646,13 @@ namespace Jinx::Impl
 			switch (symbol->type)
 			{
 			case SymbolType::None:
-				LogWrite("(None) ");
+				LogWrite(LogLevel::Info, "(None) ");
 				break;
 			case SymbolType::Invalid:
-				LogWrite("(Invalid) ");
+				LogWrite(LogLevel::Info, "(Invalid) ");
 				break;
 			case SymbolType::NewLine:
-				LogWrite("\n");
+				LogWrite(LogLevel::Info, "\n");
 				newLine = true;
 				++lineCount;
 				break;
@@ -8643,28 +8660,28 @@ namespace Jinx::Impl
 				// Display names with spaces as surrounded by single quotes to help delineate them
 				// from surrounding symbols.
 				if (strstr(symbol->text.c_str(), " "))
-					LogWrite("'%s' ", symbol->text.c_str());
+					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
 				else
-					LogWrite("%s ", symbol->text.c_str());
+					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());
 				break;
 			case SymbolType::StringValue:
-				LogWrite("\"%s\" ", symbol->text.c_str());
+				LogWrite(LogLevel::Info, "\"%s\" ", symbol->text.c_str());
 				break;
 			case SymbolType::NumberValue:
-				LogWrite("%f ", symbol->numVal);
+				LogWrite(LogLevel::Info, "%f ", symbol->numVal);
 				break;
 			case SymbolType::IntegerValue:
-				LogWrite("%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
+				LogWrite(LogLevel::Info, "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
 				break;
 			case SymbolType::BooleanValue:
-				LogWrite("%s ", symbol->boolVal ? "true" : "false");
+				LogWrite(LogLevel::Info, "%s ", symbol->boolVal ? "true" : "false");
 				break;
 			default:
-				LogWrite("%s ", GetSymbolTypeText(symbol->type));
+				LogWrite(LogLevel::Info, "%s ", GetSymbolTypeText(symbol->type));
 				break;
 			};
 		}
-		LogWrite("\nLine Count: %i\n\n", lineCount);
+		LogWrite(LogLevel::Info, "\nLine Count: %i\n\n", lineCount);
 	}
 
 	inline bool Runtime::PropertyExists(RuntimeID id) const
@@ -8829,7 +8846,7 @@ namespace Jinx::Impl
 			reader.Seek(sizeof(bytecodeHeader) + bytecodeHeader.dataSize);
 			if (reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(DebugHeader))
 			{
-				LogWriteLine("Potentially corrupt bytecode debug data");
+				LogWriteLine(LogLevel::Error, "Potentially corrupt bytecode debug data");
 				return;
 			}
 			DebugHeader debugHeader;
@@ -8837,7 +8854,7 @@ namespace Jinx::Impl
 			if (debugHeader.signature != DebugSignature ||
 				reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(debugHeader) + debugHeader.dataSize)
 			{
-				LogWriteLine("Potentially corrupt bytecode debug data");
+				LogWriteLine(LogLevel::Error, "Potentially corrupt bytecode debug data");
 				return;
 			}
 
@@ -8854,9 +8871,9 @@ namespace Jinx::Impl
 
 		// If we have a line number, use it.  Otherwise, just report what we know.
 		if (lineNumber)
-			LogWriteLine("Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
+			LogWriteLine(LogLevel::Error, "Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
 		else
-			LogWriteLine("Runtime error in script '%s': %s", m_name.c_str(), message);
+			LogWriteLine(LogLevel::Error, "Runtime error in script '%s': %s", m_name.c_str(), message);
 	}
 
 	inline bool Script::Execute()
@@ -9750,7 +9767,7 @@ namespace Jinx::Impl
 			auto index = itr->second;
 			if (index >= m_stack.size())
 			{
-				LogWriteLine("Attempted to access stack at invalid index");
+				LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
 				return Variant();
 			}
 			return m_stack[itr->second];
@@ -9987,7 +10004,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf8In || inBufferCount == 0 || !utf32CodePoint || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf8ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf8ToUtf32()");
 			return;
 		}
 
@@ -10006,13 +10023,13 @@ namespace Jinx::Impl
 		{
 			if (inBufferCount < 2 || (utf8[1] & 0xC0) != 0x80)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = char32_t(utf8[0] & 0x1F);
 			if (*utf32CodePoint < 2)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = (*utf32CodePoint << 6) + char32_t(utf8[1] & 0x3F);
@@ -10022,7 +10039,7 @@ namespace Jinx::Impl
 		{
 			if (inBufferCount < 3 || (utf8[1] & 0xC0) != 0x80 || (utf8[2] & 0xC0) != 0x80)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = char32_t(utf8[0] & 0x0F);
@@ -10034,7 +10051,7 @@ namespace Jinx::Impl
 		{
 			if (inBufferCount < 4 || (utf8[1] & 0xC0) != 0x80 || (utf8[2] & 0xC0) != 0x80 || (utf8[3] & 0xC0) != 0x80)
 			{
-				LogWriteLine("Invalid character data passed to function ConvertUtf8ToUtf32()");
+				LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf8ToUtf32()");
 				return;
 			}
 			*utf32CodePoint = char32_t(utf8[0] & 0x07);
@@ -10046,7 +10063,7 @@ namespace Jinx::Impl
 		else
 		{
 			// Invalid data
-			LogWriteLine("Invalid character data passed to function ConvertUtf32ToUtf8()");
+			LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf32ToUtf8()");
 		}
 	}
 
@@ -10055,7 +10072,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf8Out || outBufferCount == 0 || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 			return;
 		}
 
@@ -10072,7 +10089,7 @@ namespace Jinx::Impl
 		{
 			if (outBufferCount < 2)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
 			utf8Out[0] = uint8_t(utf32CodePoint >> 6) | 0xC0;
@@ -10083,7 +10100,7 @@ namespace Jinx::Impl
 		{
 			if (outBufferCount < 3)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
 			utf8Out[0] = (uint8_t(utf32CodePoint >> 12) & 0x0F) | 0xE0;
@@ -10095,7 +10112,7 @@ namespace Jinx::Impl
 		{
 			if (outBufferCount < 4)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf8()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf8()");
 				return;
 			}
 			utf8Out[0] = (uint8_t(utf32CodePoint >> 18) & 0x07) | 0xF0;
@@ -10107,7 +10124,7 @@ namespace Jinx::Impl
 		else
 		{
 			// Invalid data
-			LogWriteLine("Invalid character data passed to function ConvertUtf32ToUtf8()");
+			LogWriteLine(LogLevel::Error, "Invalid character data passed to function ConvertUtf32ToUtf8()");
 		}
 	}
 
@@ -10116,7 +10133,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf16In || inBufferCount == 0 || !utf32CodePoint || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf16ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf16ToUtf32()");
 			return;
 		}
 
@@ -10131,14 +10148,14 @@ namespace Jinx::Impl
 		// Make sure we have a second word
 		if (inBufferCount < 2)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf16ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf16ToUtf32()");
 			return;
 		}
 
 		// Check for invalid range of second word
 		if (utf16In[1] < 0xDC00 || utf16In[1] > 0xDFFF)
 		{
-			LogWriteLine("Invalid data passed to ConvertUtf16ToUtf32()");
+			LogWriteLine(LogLevel::Error, "Invalid data passed to ConvertUtf16ToUtf32()");
 			return;
 		}
 
@@ -10154,7 +10171,7 @@ namespace Jinx::Impl
 		// Validate parameters
 		if (!utf16Out || outBufferCount == 0 || !numCharsOut)
 		{
-			LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf16()");
+			LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf16()");
 			return;
 		}
 
@@ -10169,7 +10186,7 @@ namespace Jinx::Impl
 			// Check to make sure we have two buffers to read
 			if (outBufferCount < 2)
 			{
-				LogWriteLine("Invalid arguments passed to ConvertUtf32ToUtf16()");
+				LogWriteLine(LogLevel::Error, "Invalid arguments passed to ConvertUtf32ToUtf16()");
 				return;
 			}
 
@@ -10188,7 +10205,7 @@ namespace Jinx::Impl
 		// Validate parameter
 		if (!(utf8Str && utf8Str[0] != 0))
 		{
-			LogWriteLine("Invalid character value passed to GetUtf8CharSize()");
+			LogWriteLine(LogLevel::Error, "Invalid character value passed to GetUtf8CharSize()");
 			return 1;
 		}
 
@@ -10199,7 +10216,7 @@ namespace Jinx::Impl
 		// While values of 5 or 6 bytes are technically possible, it is not a valid UTF-8 sequence
 		if (s > 4)
 		{
-			LogWriteLine("Invalid character size calculated in GetUtf8CharSize()");
+			LogWriteLine(LogLevel::Error, "Invalid character size calculated in GetUtf8CharSize()");
 			return 4;
 		}
 
@@ -12351,7 +12368,7 @@ namespace Jinx
 						double number;
 						if (!Impl::StringToNumber(m_string, &number))
 						{
-							Impl::LogWriteLine("Error converting string %s to number", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to number", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -12363,7 +12380,7 @@ namespace Jinx
 						int64_t integer;
 						if (!Impl::StringToInteger(m_string, &integer))
 						{
-							Impl::LogWriteLine("Error converting string %s to integer", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to integer", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -12375,7 +12392,7 @@ namespace Jinx
 						bool boolean;
 						if (!Impl::StringToBoolean(m_string, &boolean))
 						{
-							Impl::LogWriteLine("Error converting string %s to boolean", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to boolean", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -12387,7 +12404,7 @@ namespace Jinx
 						auto collection = CreateCollection();
 						if (!Impl::StringToCollection(m_string, &collection))
 						{
-							Impl::LogWriteLine("Error converting string to collection type", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string to collection type", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -12399,7 +12416,7 @@ namespace Jinx
 						Guid guid;
 						if (!Impl::StringToGuid(m_string, &guid))
 						{
-							Impl::LogWriteLine("Error converting string %s to Guid", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to Guid", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -12411,7 +12428,7 @@ namespace Jinx
 						ValueType valType;
 						if (!Impl::StringToValueType(m_string, &valType))
 						{
-							Impl::LogWriteLine("Error converting string %s to value type", m_string.c_str());
+							Impl::LogWriteLine(LogLevel::Error, "Error converting string %s to value type", m_string.c_str());
 							SetNull();
 							return false;
 						}
@@ -12456,7 +12473,7 @@ namespace Jinx
 			default:
 				break;
 		};
-		Impl::LogWriteLine("Error converting %s to %s", Impl::GetValueTypeName(m_type), Impl::GetValueTypeName(type));
+		Impl::LogWriteLine(LogLevel::Error, "Error converting %s to %s", Impl::GetValueTypeName(m_type), Impl::GetValueTypeName(type));
 		SetNull();
 		return false;
 	}
@@ -12831,12 +12848,12 @@ namespace Jinx
 		}
 		if (left.GetType() != ValueType::Number && left.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid left operand for addition");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for addition");
 			return Variant();
 		}
 		if (right.GetType() != ValueType::Number && right.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid right operand for addition");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for addition");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -12857,12 +12874,12 @@ namespace Jinx
 	{
 		if (!left.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid left operand for subtraction");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for subtraction");
 			return Variant();
 		}
 		if (!right.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid right operand for subtraction");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for subtraction");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -12883,12 +12900,12 @@ namespace Jinx
 	{
 		if (!left.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid left operand for multiplication");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for multiplication");
 			return Variant();
 		}
 		if (!right.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid right operand for multiplication");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for multiplication");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -12909,12 +12926,12 @@ namespace Jinx
 	{
 		if (!left.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid left operand for division");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for division");
 			return Variant();
 		}
 		if (!right.IsNumericType())
 		{
-			Impl::LogWriteLine("Invalid right operand for division");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for division");
 			return Variant();
 		}
 		if (left.GetType() == ValueType::Integer && right.GetType() == ValueType::Integer)
@@ -12949,12 +12966,12 @@ namespace Jinx
 		// Check for non-integer types, especially since co-erced right values will be zero
 		if (left.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid left operand for mod");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid left operand for mod");
 			return Variant();
 		}
 		if (right.GetType() != ValueType::Integer)
 		{
-			Impl::LogWriteLine("Invalid right operand for mod");
+			Impl::LogWriteLine(LogLevel::Error, "Invalid right operand for mod");
 			return Variant();
 		}
 
@@ -13048,7 +13065,7 @@ namespace Jinx
 		{
 			case ValueType::Null:
 			{
-				Impl::LogWriteLine("Error comparing null type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing null type with < operator");
 				return false;
 			}
 			case ValueType::Number:
@@ -13080,12 +13097,12 @@ namespace Jinx
 			}
 			case ValueType::Collection:
 			{
-				Impl::LogWriteLine("Error comparing collection type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with < operator");
 				return false;
 			}
 			case ValueType::CollectionItr:
 			{
-				Impl::LogWriteLine("Error comparing collectionitr type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
 				return false;
 			}
 			case ValueType::UserObject:
@@ -13096,7 +13113,7 @@ namespace Jinx
 			}
 			case ValueType::Buffer:
 			{
-				Impl::LogWriteLine("Error comparing buffer type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing buffer type with < operator");
 				return false;
 			}
 			case ValueType::Guid:
@@ -13117,7 +13134,7 @@ namespace Jinx
 			}
 		};
 
-		Impl::LogWriteLine("Type error in right operand when using < operator");
+		Impl::LogWriteLine(LogLevel::Error, "Type error in right operand when using < operator");
 		return false;
 	}
 
@@ -13127,7 +13144,7 @@ namespace Jinx
 		{
 			case ValueType::Null:
 			{
-				Impl::LogWriteLine("Error comparing null type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing null type with < operator");
 				return false;
 			}
 			case ValueType::Number:
@@ -13159,12 +13176,12 @@ namespace Jinx
 			}
 			case ValueType::Collection:
 			{
-				Impl::LogWriteLine("Error comparing collection type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with < operator");
 				return false;
 			}
 			case ValueType::CollectionItr:
 			{
-				Impl::LogWriteLine("Error comparing collectionitr type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
 				return false;
 			}
 			case ValueType::UserObject:
@@ -13175,7 +13192,7 @@ namespace Jinx
 			}
 			case ValueType::Buffer:
 			{
-				Impl::LogWriteLine("Error comparing buffer type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing buffer type with < operator");
 				return false;
 			}
 			case ValueType::Guid:
@@ -13196,7 +13213,7 @@ namespace Jinx
 			}
 		};
 
-		Impl::LogWriteLine("Type error in right operand when using < operator");
+		Impl::LogWriteLine(LogLevel::Error, "Type error in right operand when using < operator");
 		return false;
 	}
 

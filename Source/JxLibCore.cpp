@@ -10,14 +10,14 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t void DebugWriteInternal(const Variant & var)
+	inline_t void DebugWriteInternal(LogLevel level, const Variant & var)
 	{
 		if (var.IsCollection())
 		{
 			const auto & coll = *var.GetCollection();
 			for (const auto & v : coll)
 			{
-				DebugWriteInternal(v.second);
+				DebugWriteInternal(level, v.second);
 			}
 		}
 		else
@@ -25,7 +25,7 @@ namespace Jinx::Impl
 			auto str = var.GetString();
 			auto cstr = str.c_str();
 			if (cstr)
-				LogWrite(cstr);
+				LogWrite(level, cstr);
 		}
 	}
 
@@ -33,15 +33,15 @@ namespace Jinx::Impl
 	{
 		if (params.empty())
 			return nullptr;
-		DebugWriteInternal(params[0]);
+		DebugWriteInternal(LogLevel::Info, params[0]);
 		return nullptr;
 	}
 
 	inline_t Variant WriteLine(ScriptPtr, Parameters params)
 	{
 		if (!params.empty())
-			DebugWriteInternal(params[0]);
-		LogWrite("\n");
+			DebugWriteInternal(LogLevel::Info, params[0]);
+		LogWrite(LogLevel::Info, "\n");
 		return nullptr;
 	}
 
@@ -81,7 +81,7 @@ namespace Jinx::Impl
 	{
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine("'get key' called with non-iterator param");
+			LogWriteLine(LogLevel::Error, "'get key' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->first;
@@ -91,7 +91,7 @@ namespace Jinx::Impl
 	{
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine("'get value' called with non-iterator param");
+			LogWriteLine(LogLevel::Error, "'get value' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->second;

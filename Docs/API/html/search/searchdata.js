@@ -6,7 +6,7 @@ var indexSectionsWithContent =
   3: "cefgirs",
   4: "acefilmprs",
   5: "aflr",
-  6: "v",
+  6: "alv",
   7: "j"
 };
 

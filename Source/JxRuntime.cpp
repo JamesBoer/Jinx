@@ -182,7 +182,7 @@ namespace Jinx::Impl
 
 	inline_t void Runtime::LogBytecode(const Parser & parser) const
 	{
-		LogWriteLine("\nBytecode:\n====================");
+		LogWriteLine(LogLevel::Info, "\nBytecode:\n====================");
 		const size_t columnWidth = 16;
 		auto buffer = parser.GetBytecode();
 		BinaryReader reader(buffer);
@@ -198,7 +198,7 @@ namespace Jinx::Impl
 			reader.Read(&opByte);
 			if (opByte >= static_cast<uint32_t>(Opcode::NumOpcodes))
 			{
-				LogWriteLine("LogBytecode(): Invalid operation in bytecode");
+				LogWriteLine(LogLevel::Error, "LogBytecode(): Invalid operation in bytecode");
 				return;
 			}
 			Opcode opcode = static_cast<Opcode>(opByte);
@@ -207,12 +207,12 @@ namespace Jinx::Impl
 
 			const char * opcodeName = GetOpcodeText(opcode);
 			size_t opcodeNameLength = strlen(opcodeName);
-			LogWrite(opcodeName);
+			LogWrite(LogLevel::Info, opcodeName);
 
 			// Advance to column offset
 			assert(opcodeNameLength < columnWidth);
 			for (size_t i = 0; i < (columnWidth - opcodeNameLength); ++i)
-				LogWrite(" ");
+				LogWrite(LogLevel::Info, " ");
 
 			// Read and log opcode arguments
 			switch (opcode)
@@ -226,7 +226,7 @@ namespace Jinx::Impl
 			{
 				RuntimeID id;
 				reader.Read(&id);
-				LogWrite("%s", parser.GetNameFromID(id).c_str());
+				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::ErasePropKeyVal:
@@ -238,7 +238,7 @@ namespace Jinx::Impl
 				reader.Read(&subscripts);
 				RuntimeID id;
 				reader.Read(&id);
-				LogWrite("%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
+				LogWrite(LogLevel::Info, "%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
 			}
 			break;
 			case Opcode::Cast:
@@ -246,21 +246,21 @@ namespace Jinx::Impl
 				uint8_t b;
 				reader.Read(&b);
 				auto type = ByteToValueType(b);
-				LogWrite("%s", GetValueTypeName(type));
+				LogWrite(LogLevel::Info, "%s", GetValueTypeName(type));
 			}
 			break;
 			case Opcode::Function:
 			{
 				FunctionSignature signature;
 				signature.Read(reader);
-				LogWrite("%s", parser.GetNameFromID(signature.GetId()).c_str());
+				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(signature.GetId()).c_str());
 			}
 			break;
 			case Opcode::Library:
 			{
 				String name;
 				reader.Read(&name);
-				LogWrite("%s", name.c_str());
+				LogWrite(LogLevel::Info, "%s", name.c_str());
 			}
 			break;
 			case Opcode::Property:
@@ -280,14 +280,14 @@ namespace Jinx::Impl
 			{
 				uint32_t count;
 				reader.Read(&count);
-				LogWrite("%i", count);
+				LogWrite(LogLevel::Info, "%i", count);
 			}
 			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(reader);
-				LogWrite("%s", val.GetString().c_str());
+				LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
 			}
 			break;
 			case Opcode::SetIndex:
@@ -298,7 +298,7 @@ namespace Jinx::Impl
 				reader.Read(&stackIndex);
 				ValueType type;
 				reader.Read<ValueType, uint8_t>(&type);
-				LogWrite("%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
+				LogWrite(LogLevel::Info, "%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
 			}
 			break;
 			default:
@@ -306,14 +306,14 @@ namespace Jinx::Impl
 			}
 			break;
 			}
-			LogWrite("\n");
+			LogWrite(LogLevel::Info, "\n");
 		}
-		LogWrite("\nInstruction Count: %i\n\n", instructionCount);
+		LogWrite(LogLevel::Info, "\nInstruction Count: %i\n\n", instructionCount);
 	}
 
 	inline_t void Runtime::LogSymbols(const SymbolList & symbolList) const
 	{
-		LogWriteLine("\nSymbols:\n====================");
+		LogWriteLine(LogLevel::Info, "\nSymbols:\n====================");
 		bool newLine = true;
 
 		// Store offset of first symbol
@@ -330,7 +330,7 @@ namespace Jinx::Impl
 			if (newLine)
 			{
 				for (uint32_t i = 1; i < symbol->columnNumber - offset; ++i)
-					LogWrite(" ");
+					LogWrite(LogLevel::Info, " ");
 				newLine = false;
 			}
 
@@ -338,13 +338,13 @@ namespace Jinx::Impl
 			switch (symbol->type)
 			{
 			case SymbolType::None:
-				LogWrite("(None) ");
+				LogWrite(LogLevel::Info, "(None) ");
 				break;
 			case SymbolType::Invalid:
-				LogWrite("(Invalid) ");
+				LogWrite(LogLevel::Info, "(Invalid) ");
 				break;
 			case SymbolType::NewLine:
-				LogWrite("\n");
+				LogWrite(LogLevel::Info, "\n");
 				newLine = true;
 				++lineCount;
 				break;
@@ -352,28 +352,28 @@ namespace Jinx::Impl
 				// Display names with spaces as surrounded by single quotes to help delineate them
 				// from surrounding symbols.
 				if (strstr(symbol->text.c_str(), " "))
-					LogWrite("'%s' ", symbol->text.c_str());
+					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
 				else
-					LogWrite("%s ", symbol->text.c_str());
+					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());
 				break;
 			case SymbolType::StringValue:
-				LogWrite("\"%s\" ", symbol->text.c_str());
+				LogWrite(LogLevel::Info, "\"%s\" ", symbol->text.c_str());
 				break;
 			case SymbolType::NumberValue:
-				LogWrite("%f ", symbol->numVal);
+				LogWrite(LogLevel::Info, "%f ", symbol->numVal);
 				break;
 			case SymbolType::IntegerValue:
-				LogWrite("%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
+				LogWrite(LogLevel::Info, "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
 				break;
 			case SymbolType::BooleanValue:
-				LogWrite("%s ", symbol->boolVal ? "true" : "false");
+				LogWrite(LogLevel::Info, "%s ", symbol->boolVal ? "true" : "false");
 				break;
 			default:
-				LogWrite("%s ", GetSymbolTypeText(symbol->type));
+				LogWrite(LogLevel::Info, "%s ", GetSymbolTypeText(symbol->type));
 				break;
 			};
 		}
-		LogWrite("\nLine Count: %i\n\n", lineCount);
+		LogWrite(LogLevel::Info, "\nLine Count: %i\n\n", lineCount);
 	}
 
 	inline_t bool Runtime::PropertyExists(RuntimeID id) const

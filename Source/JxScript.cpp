@@ -77,7 +77,7 @@ namespace Jinx::Impl
 			reader.Seek(sizeof(bytecodeHeader) + bytecodeHeader.dataSize);
 			if (reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(DebugHeader))
 			{
-				LogWriteLine("Potentially corrupt bytecode debug data");
+				LogWriteLine(LogLevel::Error, "Potentially corrupt bytecode debug data");
 				return;
 			}
 			DebugHeader debugHeader;
@@ -85,7 +85,7 @@ namespace Jinx::Impl
 			if (debugHeader.signature != DebugSignature ||
 				reader.Size() < sizeof(bytecodeHeader) + bytecodeHeader.dataSize + sizeof(debugHeader) + debugHeader.dataSize)
 			{
-				LogWriteLine("Potentially corrupt bytecode debug data");
+				LogWriteLine(LogLevel::Error, "Potentially corrupt bytecode debug data");
 				return;
 			}
 
@@ -102,9 +102,9 @@ namespace Jinx::Impl
 
 		// If we have a line number, use it.  Otherwise, just report what we know.
 		if (lineNumber)
-			LogWriteLine("Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
+			LogWriteLine(LogLevel::Error, "Runtime error in script '%s' at line %i: %s", m_name.c_str(), lineNumber, message);
 		else
-			LogWriteLine("Runtime error in script '%s': %s", m_name.c_str(), message);
+			LogWriteLine(LogLevel::Error, "Runtime error in script '%s': %s", m_name.c_str(), message);
 	}
 
 	inline_t bool Script::Execute()
@@ -998,7 +998,7 @@ namespace Jinx::Impl
 			auto index = itr->second;
 			if (index >= m_stack.size())
 			{
-				LogWriteLine("Attempted to access stack at invalid index");
+				LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
 				return Variant();
 			}
 			return m_stack[itr->second];

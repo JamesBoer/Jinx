@@ -544,50 +544,50 @@ namespace Jinx
 
 		inline_t void BlockHeap::LogAllocations()
 		{
-			LogWriteLine("=== Memory Log Begin ===");
+			LogWriteLine(LogLevel::Info, "=== Memory Log Begin ===");
 
 			// Log all memory blocks
 			auto memBlock = m_allocHead;
 			while (memBlock)
 			{
-				LogWriteLine("");
-				LogWriteLine("--- Memory Block ---");
+				LogWriteLine(LogLevel::Info, "");
+				LogWriteLine(LogLevel::Info, "--- Memory Block ---");
 #ifdef JINX_USE_MEMORY_GUARDS
 				bool memGuardsIntact = (memcmp(memBlock->memGuardHead, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) &&
 					(memcmp(memBlock->memGuardTail, Mem::memoryGuardCheck, MEMORY_GUARD_SIZE) == 0) ? true : false;
-				LogWriteLine("Memory guards intact: %s", memGuardsIntact ? "true" : "false");
+				LogWriteLine(LogLevel::Info, "Memory guards intact: %s", memGuardsIntact ? "true" : "false");
 #endif 		
-				LogWriteLine("Data = %p", memBlock->data);
-				LogWriteLine("Used bytes = %" PRIuPTR, memBlock->usedBytes);
-				LogWriteLine("Allocated bytes = %" PRIuPTR, memBlock->allocatedBytes);
-				LogWriteLine("Capacity = %" PRIuPTR, memBlock->capacity);
-				LogWriteLine("Count = %" PRIuPTR, memBlock->count);
+				LogWriteLine(LogLevel::Info, "Data = %p", memBlock->data);
+				LogWriteLine(LogLevel::Info, "Used bytes = %" PRIuPTR, memBlock->usedBytes);
+				LogWriteLine(LogLevel::Info, "Allocated bytes = %" PRIuPTR, memBlock->allocatedBytes);
+				LogWriteLine(LogLevel::Info, "Capacity = %" PRIuPTR, memBlock->capacity);
+				LogWriteLine(LogLevel::Info, "Count = %" PRIuPTR, memBlock->count);
 #ifdef JINX_DEBUG_ALLOCATION
-				LogWriteLine("Memory allocations:");
+				LogWriteLine(LogLevel::Info, "Memory allocations:");
 				auto memHeader = memBlock->head;
 				while (memHeader)
 				{
-					LogWriteLine("Allocation %p, size: %"  PRIuPTR ", File: %s, Function: %s",
+					LogWriteLine(LogLevel::Info, "Allocation %p, size: %"  PRIuPTR ", File: %s, Function: %s",
 						memHeader->memBlock, memHeader->bytes, memHeader->file ? memHeader->file : "", memHeader->function ? memHeader->function : "");
 					memHeader = memHeader->next;
 				}
 #endif
 				memBlock = memBlock->next;
 			}
-			LogWriteLine("");
+			LogWriteLine(LogLevel::Info, "");
 
 			// Log memory stats
 			auto memStats = GetMemoryStats();
-			LogWriteLine("--- Memory Stats ---");
-			LogWriteLine("External alloc count:     %i", memStats.externalAllocCount);
-			LogWriteLine("External free count:      %i", memStats.externalFreeCount);
-			LogWriteLine("Internal alloc count:     %i", memStats.internalAllocCount);
-			LogWriteLine("Internal free count:      %i", memStats.internalFreeCount);
-			LogWriteLine("Current block count:      %i", memStats.currentBlockCount);
-			LogWriteLine("Current allocated memory: %lli", memStats.currentAllocatedMemory);
-			LogWriteLine("Current used memory:      %lli", memStats.currentAllocatedMemory);
-			LogWriteLine("");
-			LogWriteLine("=== Memory Log End ===");
+			LogWriteLine(LogLevel::Info, "--- Memory Stats ---");
+			LogWriteLine(LogLevel::Info, "External alloc count:     %i", memStats.externalAllocCount);
+			LogWriteLine(LogLevel::Info, "External free count:      %i", memStats.externalFreeCount);
+			LogWriteLine(LogLevel::Info, "Internal alloc count:     %i", memStats.internalAllocCount);
+			LogWriteLine(LogLevel::Info, "Internal free count:      %i", memStats.internalFreeCount);
+			LogWriteLine(LogLevel::Info, "Current block count:      %i", memStats.currentBlockCount);
+			LogWriteLine(LogLevel::Info, "Current allocated memory: %lli", memStats.currentAllocatedMemory);
+			LogWriteLine(LogLevel::Info, "Current used memory:      %lli", memStats.currentAllocatedMemory);
+			LogWriteLine(LogLevel::Info, "");
+			LogWriteLine(LogLevel::Info, "=== Memory Log End ===");
 
 		}
 
@@ -644,7 +644,7 @@ namespace Jinx
 				}
 				else
 				{
-					LogWriteLine("Could not free block at shutdown.  Memory still in use.");
+					LogWriteLine(LogLevel::Warning, "Could not free block at shutdown.  Memory still in use.");
 				}
 				curr = next;
 			}
@@ -664,7 +664,7 @@ namespace Jinx
 				}
 				else
 				{
-					LogWriteLine("Could not free block at shutdown.  Memory still in use.");
+					LogWriteLine(LogLevel::Warning, "Could not free block at shutdown.  Memory still in use.");
 				}
 				curr = next;
 			}

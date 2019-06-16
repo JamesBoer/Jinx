@@ -51,14 +51,14 @@ namespace Jinx::Impl
 				return;
 			m_error = true;
 			if (m_name.empty())
-				LogWrite("Error at ");
+				LogWrite(LogLevel::Error, "Error at ");
 			else
-				LogWrite("Error in %s at ", m_name.c_str());
+				LogWrite(LogLevel::Error, "Error in %s at ", m_name.c_str());
 			if (m_currentSymbol == m_symbolList.end())
-				LogWrite("end of script: ");
+				LogWrite(LogLevel::Error, "end of script: ");
 			else
-				LogWrite("line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
-			LogWriteLine(format, std::forward<Args>(args)...);
+				LogWrite(LogLevel::Error, "line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
+			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
 		}
 
 		// Hash and register variable or property name and ID mapping

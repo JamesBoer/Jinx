@@ -105,7 +105,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 2;
+	const uint32_t PatchNumber = 3;
 
 	// Forward declaration
 	class IScript;
@@ -132,16 +132,33 @@ namespace Jinx
 #define JinxAnyCast reinterpret_cast
 #endif
 
+	/// Determines visibility when registering a function
 	enum class Visibility
 	{
+		/// The registered function will be visible outside the library
 		Public,
+		/// The registered function will only be visible to library functions
 		Private
 	};
 
+	/// Determines the access type of a registered property
 	enum class Access
 	{
+		/// The registered property can both be read and written to
 		ReadWrite,
+		/// The registered property can only be read from
 		ReadOnly,
+	};
+
+	/// Indicates the logging level of Jinx output logs
+	enum class LogLevel
+	{
+		/// This message is purely for informational or debugging purposes
+		Info,
+		/// This is a warning message which indicates a potential issue
+		Warning,
+		/// This message is a compile-time or run-time error condition
+		Error,
 	};
 
 	/// ILibrary represents a single module of script code.
@@ -429,7 +446,7 @@ namespace Jinx
 	using FreeFn = std::function<void(void *)>;
 
 	/// Prototype for global logging function callback
-	using LogFn = std::function<void(const char *)>;
+	using LogFn = std::function<void(LogLevel level, const char *)>;
 
 
 	/// Initializes global Jinx parameters
