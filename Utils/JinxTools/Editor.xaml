@@ -14,6 +14,7 @@
     SizeChanged="OnSizeChanged"
     LayoutUpdated="OnLayoutUpdated"
     PreviewKeyDown="OnPreviewKeyDown"
+    Loaded="OnLoaded"
     HorizontalScrollBarVisibility="Auto"
     VerticalScrollBarVisibility="Auto"
     d:DesignHeight="300" 

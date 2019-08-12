@@ -148,6 +148,11 @@ namespace JinxTools
             InvalidateVisual();
         }
 
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            InvalidateVisual();
+        }
+
         private void OnLayoutUpdated(object sender, EventArgs e)
         {
             // Line count is only valid after layout has been updated
