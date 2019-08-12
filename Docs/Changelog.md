@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.4] - 2019-08-12
+
+- Fixed an issue with C# editor not displaying text on initial load
+
 ## [1.1.3] - 2019-06-15
 
 - Logging callback function now passes log level: Info, Warning, or Error
