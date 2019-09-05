@@ -58,7 +58,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n), waitOnReturn(false)
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
 			{
 				scopeStack.reserve(32);
 			}
@@ -84,10 +84,10 @@ namespace Jinx::Impl
 			ScopeStack scopeStack;
 
 			// Top of the stack to clear to when this frame is popped
-			size_t stackTop;
+			size_t stackTop = 0;
 
 			// Stop execution at the end of this frame
-			bool waitOnReturn;
+			bool waitOnReturn = false;
 		};
 
 		// Execution frame stack

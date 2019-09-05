@@ -66,26 +66,33 @@ int main(int argc, char ** argv)
 	Initialize(params);
 	// Scope block to ensure all objects are destroyed for shutdown test
 	{
-		static const char * tableText =
-			"Name Field;Number Field\n"
-			"Test Name A;123,456\n"
-			;
-
-		static const char * scriptText =
+		const char * scriptText =
 			u8R"(
 
-				external text
-				
-				set table to text as collection
+				private function {a} minus {b}
+					return a - b
+				end
 
-				set a to table["Test Name A"]["Number Field"]
+				set x to 0
+				loop from 1 to 3
+					increment x
+					wait
+				end
+
 			)";
 
 		auto script = TestCreateScript(scriptText);
-		script->SetVariable("text", tableText);
+		REQUIRE(script);
 		REQUIRE(script->Execute());
-		REQUIRE(script->GetVariable("table").IsCollection());
-		REQUIRE(script->GetVariable("a").GetNumber() == 123.456);
+		auto id = script->FindFunction(nullptr, { "{} minus {}" });
+		REQUIRE(id != InvalidID);
+		while (!script->IsFinished())
+		{
+			auto val = script->CallFunction(id, { 5, 2 });
+			REQUIRE(val == 3);
+			REQUIRE(script->Execute());
+		}
+		REQUIRE(script->GetVariable("x") == 3);
 	}
 	ShutDown();
 	return 0;

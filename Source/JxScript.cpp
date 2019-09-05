@@ -198,6 +198,8 @@ namespace Jinx::Impl
 				{
 					m_execution.push_back(ExecutionFrame(functionDef));
 					m_execution.back().reader.Seek(functionDef->GetOffset());
+					assert(m_stack.size() >= functionDef->GetParameterCount());
+					m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
@@ -220,7 +222,6 @@ namespace Jinx::Impl
 					Error("Error in function definition");
 					return false;
 				}
-				m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 			}
 			break;
 			case Opcode::Cast:
@@ -944,12 +945,12 @@ namespace Jinx::Impl
 			m_execution.push_back(ExecutionFrame(functionDef));
 			m_execution.back().waitOnReturn = true;
 			m_execution.back().reader.Seek(functionDef->GetOffset());
+			m_execution.back().stackTop = m_stack.size() == 0 ? 0 : m_stack.size() - 1;
 			bool finished = m_finished;
 			m_finished = false;
 			if (!Execute())
 				return nullptr;
 			m_finished = finished;
-			m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 			return Pop();
 		}
 		// Otherwise, call a native function callback

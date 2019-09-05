@@ -2347,19 +2347,34 @@ namespace Jinx::Impl
 				}
 				else if (Accept(SymbolType::Return))
 				{
-					// We've hit a return value
-					if (!Check(SymbolType::NewLine))
+					// We've hit a return value.  There are different behaviors depending whether or
+					// not we're at the base scope or not.
+					if (m_variableStackFrame.IsRootFrame())
 					{
-						ParseExpression();
+						if (!Check(SymbolType::NewLine))
+						{
+							LogWriteLine(LogLevel::Warning, "Return values at root scope do nothing");
+							ParseExpression();
+						}
+						EmitOpcode(Opcode::Exit);
+						Accept(SymbolType::NewLine);
+						returnedValue = true;
 					}
 					else
 					{
-						EmitOpcode(Opcode::PushVal);
-						EmitValue(nullptr);
+						if (!Check(SymbolType::NewLine))
+						{
+							ParseExpression();
+						}
+						else
+						{
+							EmitOpcode(Opcode::PushVal);
+							EmitValue(nullptr);
+						}
+						EmitOpcode(Opcode::Return);
+						Accept(SymbolType::NewLine);
+						returnedValue = true;
 					}
-					EmitOpcode(Opcode::Return);
-					Accept(SymbolType::NewLine);
-					returnedValue = true;
 				}
 				else if (Accept(SymbolType::Break))
 				{
