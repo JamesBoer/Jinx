@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.6] - 2019-09-18
+
+- Slightly more efficient numeric conversions of continental-style tables
+- Fix syntax coloring error in single-line commands in JinxPad
+
 ## [1.1.5] - 2019-09-05
 
 - Explicitly allow return statements outside of functions

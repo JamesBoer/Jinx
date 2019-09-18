@@ -312,11 +312,6 @@ namespace JinxTools
                     fmtTxt.SetForegroundBrush(ValueTextBrush, match.Index, match.Length);
             }
 
-            // Line Comments
-            Regex lineCommentRegex = new Regex(@"--.*");
-            foreach (Match match in lineCommentRegex.Matches(text))
-                fmtTxt.SetForegroundBrush(CommentTextBrush, match.Index, match.Length);
-
             // Numbers
             Regex numberRegex = new Regex(@"\w*(?<![\w])[-]?[0-9]*\.?[0-9]+");
             foreach (Match match in numberRegex.Matches(text))
@@ -327,6 +322,11 @@ namespace JinxTools
             foreach (Match match in stringRegex.Matches(text))
                 fmtTxt.SetForegroundBrush(ValueTextBrush, match.Index, match.Length);
             
+            // Line Comments
+            Regex lineCommentRegex = new Regex(@"--.*");
+            foreach (Match match in lineCommentRegex.Matches(text))
+                fmtTxt.SetForegroundBrush(CommentTextBrush, match.Index, match.Length);
+
             // Block Comments
             Regex blockCommentRegex = new Regex(@"(?s)-{3,}(.*?)-{3,}");
             foreach (Match match in blockCommentRegex.Matches(text))
