@@ -1,6 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.6] - 2019-09-18
+
+- Slightly more efficient numeric conversions of continental-style tables
+- Fix syntax coloring error in single-line commands in JinxPad
+
+## [1.1.5] - 2019-09-05
+
+- Explicitly allow return statements outside of functions
+- Added documentation to clarify return statements
+- Added unit tests for new return functionality
+- Fixed issue with function calls calculation of stack return values
+- Minor fixes to JinxPad project
+
 ## [1.1.4] - 2019-08-12
 
 - Fixed an issue with C# editor not displaying text on initial load

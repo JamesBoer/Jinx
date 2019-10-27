@@ -330,4 +330,74 @@ multiline comment
 		REQUIRE(script->GetVariable("another var") == 123);
 	}
 
+	SECTION("Test return in root scope")
+	{
+		const char * scriptText =
+			u8R"(
+
+			-- Does nothing, but is legal
+			return
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+	}
+
+	SECTION("Test return in root scope with non-executing code")
+	{
+		const char * scriptText =
+			u8R"(
+	
+			return
+
+			-- This code will never be reached
+			set x to 123
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == nullptr);
+	}
+
+	SECTION("Test return in if statement")
+	{
+		const char * scriptText =
+			u8R"(
+
+			if (true)
+				return
+			end
+
+			-- This code will never be reached
+			set x to 123
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == nullptr);
+	}
+
+	SECTION("Test return in loop statement")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set x to 0
+			loop i from 1 to 1000000
+				if (i = 100)
+					return
+				end
+				increment x
+			end
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") < 100);
+	}
+
 }

@@ -693,7 +693,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 4;
+	const uint32_t PatchNumber = 6;
 
 	// Forward declaration
 	class IScript;
@@ -2551,7 +2551,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n), waitOnReturn(false)
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
 			{
 				scopeStack.reserve(32);
 			}
@@ -2577,10 +2577,10 @@ namespace Jinx::Impl
 			ScopeStack scopeStack;
 
 			// Top of the stack to clear to when this frame is popped
-			size_t stackTop;
+			size_t stackTop = 0;
 
 			// Stop execution at the end of this frame
-			bool waitOnReturn;
+			bool waitOnReturn = false;
 		};
 
 		// Execution frame stack
@@ -3247,10 +3247,10 @@ namespace Jinx::Impl
 		// In case contintental format is used, replace commas with decimal point
 		if (format == NumericFormat::Continental)
 		{
-			String s = value;
-			std::replace(s.begin(), s.end(), ',', '.');
-			std::istringstream istr(s.c_str());
-			istr.imbue(std::locale::classic());
+			std::istringstream istr(value.c_str());
+			// We arbitrarily pick German locale since it is known to use commas
+			// as numeric decimal points.
+			istr.imbue(std::locale("de_DE.UTF-8"));
 			istr >> *outValue;
 			if (istr.fail())
 				return false;
@@ -8046,19 +8046,34 @@ namespace Jinx::Impl
 				}
 				else if (Accept(SymbolType::Return))
 				{
-					// We've hit a return value
-					if (!Check(SymbolType::NewLine))
+					// We've hit a return value.  There are different behaviors depending whether or
+					// not we're at the base scope or not.
+					if (m_variableStackFrame.IsRootFrame())
 					{
-						ParseExpression();
+						if (!Check(SymbolType::NewLine))
+						{
+							LogWriteLine(LogLevel::Warning, "Return values at root scope do nothing");
+							ParseExpression();
+						}
+						EmitOpcode(Opcode::Exit);
+						Accept(SymbolType::NewLine);
+						returnedValue = true;
 					}
 					else
 					{
-						EmitOpcode(Opcode::PushVal);
-						EmitValue(nullptr);
+						if (!Check(SymbolType::NewLine))
+						{
+							ParseExpression();
+						}
+						else
+						{
+							EmitOpcode(Opcode::PushVal);
+							EmitValue(nullptr);
+						}
+						EmitOpcode(Opcode::Return);
+						Accept(SymbolType::NewLine);
+						returnedValue = true;
 					}
-					EmitOpcode(Opcode::Return);
-					Accept(SymbolType::NewLine);
-					returnedValue = true;
 				}
 				else if (Accept(SymbolType::Break))
 				{
@@ -8967,6 +8982,8 @@ namespace Jinx::Impl
 				{
 					m_execution.push_back(ExecutionFrame(functionDef));
 					m_execution.back().reader.Seek(functionDef->GetOffset());
+					assert(m_stack.size() >= functionDef->GetParameterCount());
+					m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
@@ -8989,7 +9006,6 @@ namespace Jinx::Impl
 					Error("Error in function definition");
 					return false;
 				}
-				m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 			}
 			break;
 			case Opcode::Cast:
@@ -9713,12 +9729,12 @@ namespace Jinx::Impl
 			m_execution.push_back(ExecutionFrame(functionDef));
 			m_execution.back().waitOnReturn = true;
 			m_execution.back().reader.Seek(functionDef->GetOffset());
+			m_execution.back().stackTop = m_stack.size() == 0 ? 0 : m_stack.size() - 1;
 			bool finished = m_finished;
 			m_finished = false;
 			if (!Execute())
 				return nullptr;
 			m_finished = finished;
-			m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
 			return Pop();
 		}
 		// Otherwise, call a native function callback
