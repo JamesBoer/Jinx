@@ -26,6 +26,8 @@ namespace Jinx::Impl
 		FunctionDefinition(const FunctionSignature & signature, FunctionCallback callback) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
+			m_bytecode(nullptr),
+			m_offset(0),
 			m_name(signature.GetName()),
 			m_callback(callback)
 		{}

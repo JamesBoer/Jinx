@@ -384,14 +384,16 @@ namespace Jinx::Impl
 
 	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
 	{
-		std::lock_guard<std::mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
+		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
+		std::lock_guard<std::mutex> lock(mutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, bytecode, offset);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
 	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, FunctionCallback function)
 	{
-		std::lock_guard<std::mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
+		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
+		std::lock_guard<std::mutex> lock(mutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
