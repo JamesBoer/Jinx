@@ -8,22 +8,6 @@ include(CSharpUtilities)
 # Set project name
 project(Jinx)
 
-# Set folders based on file structure
-function(jinx_auto_set_folders source_list)
-	foreach(source IN LISTS ${source_list})
-		get_filename_component(source_path "${source}" PATH)
-		string(REPLACE "/" "\\" source_path_folder "${source_path}")
-		source_group("${source_path_folder}" FILES "${source}")
-	endforeach()
-endfunction()
-
-# Set folders manuallly
-function(jinx_set_folders source_list folder_name)
-	foreach(source IN LISTS source_list)
-		source_group("\\${folder_name}" FILES "${source}")
-	endforeach()
-endfunction()
-
 # Build a test or utility executable
 function(jinx_build_executable project_name source_list is_linked is_startup requires_pthreads)
 
@@ -53,7 +37,8 @@ function(jinx_build_executable project_name source_list is_linked is_startup req
 	endif()
 
 	# Create IDE folder structure
-	jinx_set_folders("${source_list}" Source)
+	source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Source" FILES ${source_list})
+
 
 endfunction()
 
@@ -124,7 +109,7 @@ else()
 endif()
 
 # Create IDE folder structure
-jinx_auto_set_folders(jinx_source_list)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${jinx_source_list})
 
 # Check if Jinx is included via add_subdirectory.
 get_directory_property(jinx_is_subproject PARENT_DIRECTORY)
