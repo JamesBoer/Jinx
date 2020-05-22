@@ -37,7 +37,7 @@ function(jinx_build_executable project_name source_list is_linked is_startup req
 	endif()
 
 	# Create IDE folder structure
-	source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Source" FILES ${source_list})
+	source_group("Source" FILES ${source_list})
 
 
 endfunction()
