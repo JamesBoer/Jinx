@@ -29,7 +29,7 @@ namespace Jinx::Impl
 		}
 	}
 
-	inline_t Variant Write(ScriptPtr, Parameters params)
+	inline_t Variant Write(ScriptPtr, const Parameters & params)
 	{
 		if (params.empty())
 			return nullptr;
@@ -37,7 +37,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline_t Variant WriteLine(ScriptPtr, Parameters params)
+	inline_t Variant WriteLine(ScriptPtr, const Parameters & params)
 	{
 		if (!params.empty())
 			DebugWriteInternal(LogLevel::Info, params[0]);
@@ -45,7 +45,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline_t Variant GetSize(ScriptPtr, Parameters params)
+	inline_t Variant GetSize(ScriptPtr, const Parameters & params)
 	{
 		switch (params[0].GetType())
 		{
@@ -61,7 +61,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline_t Variant IsEmpty(ScriptPtr, Parameters params)
+	inline_t Variant IsEmpty(ScriptPtr, const Parameters & params)
 	{
 		switch (params[0].GetType())
 		{
@@ -77,7 +77,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline_t Variant GetKey(ScriptPtr, Parameters params)
+	inline_t Variant GetKey(ScriptPtr, const Parameters & params)
 	{
 		if (!params[0].IsCollectionItr())
 		{
@@ -87,7 +87,7 @@ namespace Jinx::Impl
 		return params[0].GetCollectionItr().first->first;
 	}
 
-	inline_t Variant GetValue(ScriptPtr, Parameters params)
+	inline_t Variant GetValue(ScriptPtr, const Parameters & params)
 	{
 		if (!params[0].IsCollectionItr())
 		{
@@ -97,7 +97,7 @@ namespace Jinx::Impl
 		return params[0].GetCollectionItr().first->second;
 	}
 
-	inline_t Variant GetCallStack(ScriptPtr script, [[maybe_unused]] Parameters params)
+	inline_t Variant GetCallStack(ScriptPtr script, [[maybe_unused]] const Parameters & params)
 	{
 		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto functions = s->GetCallStack();

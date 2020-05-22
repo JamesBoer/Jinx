@@ -76,10 +76,10 @@ namespace Jinx::Impl
 	private:
 
 		// Unique id
-		RuntimeID m_id;
+		RuntimeID m_id = 0;
 
 		// Visibility level
-		VisibilityType m_visibility;
+		VisibilityType m_visibility = VisibilityType::Local;
 
 		// Library name
 		String m_libraryName;

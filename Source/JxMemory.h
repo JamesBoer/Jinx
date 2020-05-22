@@ -112,7 +112,7 @@ namespace Jinx
 		Allocator(const Allocator &) throw() { }
 
 		template<typename U>
-		Allocator(const Allocator<U>&) throw() { }
+		explicit Allocator(const Allocator<U>&) throw() { }
 
 		template<typename U>
 		Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }

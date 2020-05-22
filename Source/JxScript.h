@@ -62,7 +62,7 @@ namespace Jinx::Impl
 			{
 				scopeStack.reserve(32);
 			}
-			ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
+			explicit ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
 
 			// Buffer containing script bytecode
 			BufferPtr bytecode;
