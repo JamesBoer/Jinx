@@ -17,7 +17,7 @@ namespace Jinx::Impl
 	{
 	public:
 		PropertyName();
-		PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, Variant defaultValue = nullptr);
+		PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, const Variant & defaultValue = nullptr);
 
 		bool IsValid() const { return m_visibility != VisibilityType::Local; }
 		bool IsReadOnly() const { return m_readOnly; }
@@ -33,12 +33,12 @@ namespace Jinx::Impl
 
 	private:
 
-		RuntimeID m_id;
-		VisibilityType m_visibility;
-		bool m_readOnly;
+		RuntimeID m_id = 0;
+		VisibilityType m_visibility = VisibilityType::Local;
+		bool m_readOnly = false;
 		String m_name;
 		Variant m_defaultValue;
-		size_t m_partCount;
+		size_t m_partCount = 0;
 	};
 
 } // namespace Jinx::Impl

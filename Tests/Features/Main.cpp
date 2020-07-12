@@ -15,7 +15,11 @@ Copyright (c) 2016 James Boer
 
 using namespace Jinx;
 
+#ifndef NDEBUG
 #define REQUIRE assert
+#else
+#define REQUIRE(x) { if (!(x)) throw new std::exception("Failure for condition: " #x); }
+#endif
 
 Jinx::RuntimePtr TestCreateRuntime()
 {
@@ -92,7 +96,7 @@ int main(int argc, char ** argv)
 			REQUIRE(val == 3);
 			REQUIRE(script->Execute());
 		}
-		REQUIRE(script->GetVariable("x") == 3);
+		REQUIRE(script->GetVariable("x") == 4);
 	}
 	ShutDown();
 	return 0;

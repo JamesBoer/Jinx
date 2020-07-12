@@ -16,7 +16,7 @@ namespace Jinx
 	class BinaryReader
 	{
 	public:
-		BinaryReader(BufferPtr buffer) :
+		explicit BinaryReader(BufferPtr buffer) :
 			m_buffer(buffer),
 			m_pos(0)
 		{}

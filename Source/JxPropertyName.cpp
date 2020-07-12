@@ -10,15 +10,11 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t PropertyName::PropertyName() :
-		m_id(0),
-		m_visibility(VisibilityType::Local),
-		m_readOnly(false),
-		m_partCount(0)
+	inline_t PropertyName::PropertyName()
 	{
 	}
 
-	inline_t PropertyName::PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, Variant defaultValue) :
+	inline_t PropertyName::PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, const Variant & defaultValue) :
 		m_visibility(visibility),
 		m_readOnly(readOnly),
 		m_name(propertyName),

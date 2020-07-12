@@ -10,8 +10,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t FunctionSignature::FunctionSignature() :
-		m_id(0)
+	inline_t FunctionSignature::FunctionSignature()
 	{
 	}
 
