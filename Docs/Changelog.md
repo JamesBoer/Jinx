@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.7] - 2020-07-12
+
+- Fix locale-based error on Linux
+- Minor code cleanup
+
 ## [1.1.6] - 2019-09-18
 
 - Slightly more efficient numeric conversions of continental-style tables

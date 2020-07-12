@@ -227,7 +227,7 @@ namespace Jinx
 		Allocator(const Allocator &) throw() { }
 
 		template<typename U>
-		Allocator(const Allocator<U>&) throw() { }
+		explicit Allocator(const Allocator<U>&) throw() { }
 
 		template<typename U>
 		Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
@@ -693,7 +693,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 6;
+	const uint32_t PatchNumber = 7;
 
 	// Forward declaration
 	class IScript;
@@ -1620,7 +1620,7 @@ namespace Jinx
 	class BinaryReader
 	{
 	public:
-		BinaryReader(BufferPtr buffer) :
+		explicit BinaryReader(BufferPtr buffer) :
 			m_buffer(buffer),
 			m_pos(0)
 		{}
@@ -1740,7 +1740,7 @@ namespace Jinx::Impl
 	{
 	public:
 		PropertyName();
-		PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, Variant defaultValue = nullptr);
+		PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, const Variant & defaultValue = nullptr);
 
 		bool IsValid() const { return m_visibility != VisibilityType::Local; }
 		bool IsReadOnly() const { return m_readOnly; }
@@ -1756,12 +1756,12 @@ namespace Jinx::Impl
 
 	private:
 
-		RuntimeID m_id;
-		VisibilityType m_visibility;
-		bool m_readOnly;
+		RuntimeID m_id = 0;
+		VisibilityType m_visibility = VisibilityType::Local;
+		bool m_readOnly = false;
 		String m_name;
 		Variant m_defaultValue;
-		size_t m_partCount;
+		size_t m_partCount = 0;
 	};
 
 } // namespace Jinx::Impl
@@ -2006,10 +2006,10 @@ namespace Jinx::Impl
 	private:
 
 		// Unique id
-		RuntimeID m_id;
+		RuntimeID m_id = 0;
 
 		// Visibility level
-		VisibilityType m_visibility;
+		VisibilityType m_visibility = VisibilityType::Local;
 
 		// Library name
 		String m_libraryName;
@@ -2066,6 +2066,8 @@ namespace Jinx::Impl
 		FunctionDefinition(const FunctionSignature & signature, FunctionCallback callback) :
 			m_id(signature.GetId()),
 			m_parameterCount(signature.GetParameterCount()),
+			m_bytecode(nullptr),
+			m_offset(0),
 			m_name(signature.GetName()),
 			m_callback(callback)
 		{}
@@ -2555,7 +2557,7 @@ namespace Jinx::Impl
 			{
 				scopeStack.reserve(32);
 			}
-			ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
+			explicit ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
 
 			// Buffer containing script bytecode
 			BufferPtr bytecode;
@@ -3247,10 +3249,10 @@ namespace Jinx::Impl
 		// In case contintental format is used, replace commas with decimal point
 		if (format == NumericFormat::Continental)
 		{
-			std::istringstream istr(value.c_str());
-			// We arbitrarily pick German locale since it is known to use commas
-			// as numeric decimal points.
-			istr.imbue(std::locale("de_DE.UTF-8"));
+			String s = value;
+			std::replace(s.begin(), s.end(), ',', '.');
+			std::istringstream istr(s.c_str());
+			istr.imbue(std::locale::classic());
 			istr >> *outValue;
 			if (istr.fail())
 				return false;
@@ -3509,7 +3511,7 @@ namespace Jinx::Impl
 		NumericFormat format;
 		if (!GetDelimiterAndFormat(value, delimiter, format))
 			return false;
-		
+
 		// Parse first row, which we'll uses as index values into each subsequent row
 		const char * current = value.data();
 		const char * end = current + value.size();
@@ -3591,8 +3593,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline FunctionSignature::FunctionSignature() :
-		m_id(0)
+	inline FunctionSignature::FunctionSignature()
 	{
 	}
 
@@ -4435,7 +4436,7 @@ namespace Jinx::Impl
 		}
 	}
 
-	inline Variant Write(ScriptPtr, Parameters params)
+	inline Variant Write(ScriptPtr, const Parameters & params)
 	{
 		if (params.empty())
 			return nullptr;
@@ -4443,7 +4444,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline Variant WriteLine(ScriptPtr, Parameters params)
+	inline Variant WriteLine(ScriptPtr, const Parameters & params)
 	{
 		if (!params.empty())
 			DebugWriteInternal(LogLevel::Info, params[0]);
@@ -4451,7 +4452,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline Variant GetSize(ScriptPtr, Parameters params)
+	inline Variant GetSize(ScriptPtr, const Parameters & params)
 	{
 		switch (params[0].GetType())
 		{
@@ -4467,7 +4468,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline Variant IsEmpty(ScriptPtr, Parameters params)
+	inline Variant IsEmpty(ScriptPtr, const Parameters & params)
 	{
 		switch (params[0].GetType())
 		{
@@ -4483,7 +4484,7 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline Variant GetKey(ScriptPtr, Parameters params)
+	inline Variant GetKey(ScriptPtr, const Parameters & params)
 	{
 		if (!params[0].IsCollectionItr())
 		{
@@ -4493,7 +4494,7 @@ namespace Jinx::Impl
 		return params[0].GetCollectionItr().first->first;
 	}
 
-	inline Variant GetValue(ScriptPtr, Parameters params)
+	inline Variant GetValue(ScriptPtr, const Parameters & params)
 	{
 		if (!params[0].IsCollectionItr())
 		{
@@ -4503,7 +4504,7 @@ namespace Jinx::Impl
 		return params[0].GetCollectionItr().first->second;
 	}
 
-	inline Variant GetCallStack(ScriptPtr script, [[maybe_unused]] Parameters params)
+	inline Variant GetCallStack(ScriptPtr script, [[maybe_unused]] const Parameters & params)
 	{
 		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto functions = s->GetCallStack();
@@ -8274,15 +8275,11 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline PropertyName::PropertyName() :
-		m_id(0),
-		m_visibility(VisibilityType::Local),
-		m_readOnly(false),
-		m_partCount(0)
+	inline PropertyName::PropertyName()
 	{
 	}
 
-	inline PropertyName::PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, Variant defaultValue) :
+	inline PropertyName::PropertyName(VisibilityType visibility, bool readOnly, const String & moduleName, const String & propertyName, const Variant & defaultValue) :
 		m_visibility(visibility),
 		m_readOnly(readOnly),
 		m_name(propertyName),
@@ -8707,14 +8704,16 @@ namespace Jinx::Impl
 
 	inline void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
 	{
-		std::lock_guard<std::mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
+		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
+		std::lock_guard<std::mutex> lock(mutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, bytecode, offset);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
 	inline void Runtime::RegisterFunction(const FunctionSignature & signature, FunctionCallback function)
 	{
-		std::lock_guard<std::mutex> lock(m_functionMutex[signature.GetId() % NumMutexes]);
+		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
+		std::lock_guard<std::mutex> lock(mutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
