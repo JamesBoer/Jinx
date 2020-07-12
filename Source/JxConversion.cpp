@@ -101,10 +101,10 @@ namespace Jinx::Impl
 		// In case contintental format is used, replace commas with decimal point
 		if (format == NumericFormat::Continental)
 		{
-			std::istringstream istr(value.c_str());
-			// We arbitrarily pick German locale since it is known to use commas
-			// as numeric decimal points.
-			istr.imbue(std::locale("de_DE.UTF-8"));
+			String s = value;
+			std::replace(s.begin(), s.end(), ',', '.');
+			std::istringstream istr(s.c_str());
+			istr.imbue(std::locale::classic());
 			istr >> *outValue;
 			if (istr.fail())
 				return false;
@@ -363,7 +363,7 @@ namespace Jinx::Impl
 		NumericFormat format;
 		if (!GetDelimiterAndFormat(value, delimiter, format))
 			return false;
-		
+
 		// Parse first row, which we'll uses as index values into each subsequent row
 		const char * current = value.data();
 		const char * end = current + value.size();
