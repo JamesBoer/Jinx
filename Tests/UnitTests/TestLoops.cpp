@@ -197,4 +197,49 @@ TEST_CASE("Test Loops", "[Loops]")
 		REQUIRE(script->GetVariable("b") == 3);
 		REQUIRE(script->GetVariable("c") == 6);
 	}
+
+
+	SECTION("Test multiple loop single count and assignments")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set x to 0
+			loop i from 1 to 1
+				set x to 123
+			end
+
+			set y to 0
+			loop i from 1 to 1
+				set y to 456
+			end
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 123);
+		REQUIRE(script->GetVariable("y") == 456);
+	}
+
+	SECTION("Test multiple loop multiple count and assignments")
+	{
+		const char * scriptText =
+			u8R"(
+			set x to 0
+			loop i from 1 to 5
+				set x to i
+			end
+
+			set y to 0
+			loop i from 1 to 10
+				set y to i
+			end
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 5);
+		REQUIRE(script->GetVariable("y") == 10);
+	}
+
 }
