@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.8] - 2020-07-24
+
+- Fix local scope bug, manifesting in named-counter loop errors on subsequent loops
+- Improved loopcount op variable names
+
 ## [1.1.7] - 2020-07-12
 
 - Fix locale-based error on Linux

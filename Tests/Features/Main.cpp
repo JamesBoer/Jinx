@@ -72,31 +72,21 @@ int main(int argc, char ** argv)
 	{
 		const char * scriptText =
 			u8R"(
+			set x to 0
+			loop i from 1 to 5
+				set x to i
+			end
 
-				private function {a} minus {b}
-					return a - b
-				end
-
-				set x to 0
-				loop from 1 to 3
-					increment x
-					wait
-				end
-
+			set y to 0
+			loop i from 1 to 10
+				set y to i
+			end
 			)";
 
-		auto script = TestCreateScript(scriptText);
+		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->Execute());
-		auto id = script->FindFunction(nullptr, { "{} minus {}" });
-		REQUIRE(id != InvalidID);
-		while (!script->IsFinished())
-		{
-			auto val = script->CallFunction(id, { 5, 2 });
-			REQUIRE(val == 3);
-			REQUIRE(script->Execute());
-		}
-		REQUIRE(script->GetVariable("x") == 4);
+		REQUIRE(script->GetVariable("x") == 5);
+		REQUIRE(script->GetVariable("y") == 10);
 	}
 	ShutDown();
 	return 0;

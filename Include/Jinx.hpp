@@ -693,7 +693,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 7;
+	const uint32_t PatchNumber = 8;
 
 	// Forward declaration
 	class IScript;
@@ -9293,23 +9293,23 @@ namespace Jinx::Impl
 			{
 				assert(m_stack.size() >= 3);
 				auto top = m_stack.size() - 1;
-				auto op1 = m_stack[top - 2];
-				auto op2 = m_stack[top - 1];
-				auto op3 = m_stack[top];
-				if (op3.IsNull())
+				auto loopVal = m_stack[top - 2];
+				auto loopDest = m_stack[top - 1];
+				auto incBy = m_stack[top];
+				if (incBy.IsNull())
 				{
-					if (op1 > op2)
-						op3 = -1;
+					if (loopVal > loopDest)
+						incBy = -1;
 					else
-						op3 = 1;
+						incBy = 1;
 				}
-				op1 += op3;
-				m_stack[top - 2] = op1;
-				auto incVal = op3.GetNumber();
+				loopVal += incBy;
+				m_stack[top - 2] = loopVal;
+				auto incVal = incBy.GetNumber();
 				if (incVal > 0)
-					Push(op1 <= op2);
+					Push(loopVal <= loopDest);
 				else if (incVal < 0)
-					Push(op1 >= op2);
+					Push(loopVal >= loopDest);
 				else
 				{
 					Error("Incremented loop counter by zero");
@@ -9573,6 +9573,14 @@ namespace Jinx::Impl
 				m_execution.back().scopeStack.pop_back();
 				while (m_stack.size() > stackTop)
 					m_stack.pop_back();
+				auto & ids = m_execution.back().ids;
+				for (auto itr = ids.begin(); itr != ids.end();)
+				{
+					if (itr->second >= stackTop)
+						itr = ids.erase(itr);
+					else
+						++itr;
+				}
 			}
 			break;
 			case Opcode::SetIndex:
