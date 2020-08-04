@@ -221,4 +221,42 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 		REQUIRE(script2->GetVariable("a") == 6);
 	}
 
+	SECTION("Test property access with multiple libraries")
+	{
+		const char * scriptText =
+			u8R"(
+			import liba
+			import libb
+
+			set x to test prop a
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libA = runtime->GetLibrary("liba");
+		libA->RegisterProperty(Visibility::Public, Access::ReadOnly, "test prop a", "test val");
+		auto libB = runtime->GetLibrary("libb");
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == "test val");
+	}
+
+	SECTION("Test function access with multiple libraries")
+	{
+		const char * scriptText =
+			u8R"(
+			import liba
+			import libb
+
+			set x to test func a
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libA = runtime->GetLibrary("liba");
+		libA->RegisterFunction(Visibility::Public, "test func a", [] (ScriptPtr, Parameters) { return "test val"; });
+		auto libB = runtime->GetLibrary("libb");
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == "test val");
+	}
+
 }

@@ -1196,12 +1196,12 @@ namespace Jinx::Impl
 						continue;
 
 					// Attempt to find valid import library name
-					propertyName = ParsePropertyNameParts(library);
-					if (propertyName.IsValid())
+					auto newPropertyName = ParsePropertyNameParts(library);
+					if (newPropertyName.IsValid())
 					{
 						// If we haven't specified the library name explicitly, we can assume we're looking
 						// for a different library.
-						if (m_library->GetName() != libraryName && propertyName.GetVisibility() != VisibilityType::Public)
+						if (m_library->GetName() != libraryName && newPropertyName.GetVisibility() != VisibilityType::Public)
 							continue;
 
 						// Check for multiple found property names, which indicates this name is ambiguous
@@ -1211,6 +1211,7 @@ namespace Jinx::Impl
 							return PropertyName();
 						}
 						foundProperty = true;
+						propertyName = newPropertyName;
 					}
 				}
 
