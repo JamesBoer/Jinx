@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.1.9] - 2020-08-04
+
+- Fix property name lookup when using multiple libraries
+
 ## [1.1.8] - 2020-07-24
 
 - Fix local scope bug, manifesting in named-counter loop errors on subsequent loops

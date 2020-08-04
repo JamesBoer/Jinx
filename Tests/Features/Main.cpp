@@ -72,21 +72,19 @@ int main(int argc, char ** argv)
 	{
 		const char * scriptText =
 			u8R"(
-			set x to 0
-			loop i from 1 to 5
-				set x to i
-			end
+			import liba
+			import libb
 
-			set y to 0
-			loop i from 1 to 10
-				set y to i
-			end
+			set x to test prop a
 			)";
 
-		auto script = TestExecuteScript(scriptText);
+		auto runtime = TestCreateRuntime();
+		auto libA = runtime->GetLibrary("liba");
+		libA->RegisterProperty(Visibility::Public, Access::ReadOnly, "test prop a", "test val");
+		auto libB = runtime->GetLibrary("libb");
+		auto script = TestExecuteScript(scriptText, runtime);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("x") == 5);
-		REQUIRE(script->GetVariable("y") == 10);
+		REQUIRE(script->GetVariable("x") == "test val");
 	}
 	ShutDown();
 	return 0;
