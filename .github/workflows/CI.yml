@@ -12,7 +12,6 @@ on:
 
 defaults:
   run:
-    shell: cmd
     working-directory: Bin
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -34,3 +33,17 @@ jobs:
     # Generate and build MSVC project using batch file
     - name: Build using MSVC
       run: BuildMSVC.cmd
+
+  build_linux:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+  
+    # Generate and build MSVC project using batch file
+    - name: Build using make
+      run: BuildMakefiles.sh
+

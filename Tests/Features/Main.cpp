@@ -10,6 +10,7 @@ Copyright (c) 2016 James Boer
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <exception>
 
 #include "../../Source/Jinx.h"
 
@@ -18,7 +19,7 @@ using namespace Jinx;
 #ifndef NDEBUG
 #define REQUIRE assert
 #else
-#define REQUIRE(x) { if (!(x)) throw new std::exception("Failure for condition: " #x); }
+#define REQUIRE(x) { if (!(x)) throw new std::runtime_error("Failure for condition: " #x); }
 #endif
 
 Jinx::RuntimePtr TestCreateRuntime()
@@ -42,7 +43,7 @@ Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runti
 
 Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
 {
-	// Create a runtime script 
+	// Create a runtime script
 	auto script = TestCreateScript(scriptText, runtime);
 	if (!script)
 		return nullptr;
@@ -52,7 +53,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	{
 		if (!script->Execute())
 			return nullptr;
-	} 
+	}
 	while (!script->IsFinished());
 
 	return script;
