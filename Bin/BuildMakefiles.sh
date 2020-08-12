@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Generate makefiles
-./GenerateMakefiles.sh
+./GenerateMakefiles.sh || exit 1
 
 # Navigate to build folder
 cd ..
@@ -9,10 +9,10 @@ cd Build/
 
 # Build Debug and Release configurations
 cd Debug/
-make
+make || exit 1
 cd ..
 cd Release
-make
+make || exit 1
 
 cd ..
 cd ..

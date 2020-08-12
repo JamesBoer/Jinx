@@ -14,7 +14,7 @@ fi
 cd Build/
 
 # Generate Xcode project using CMake
-cmake ../ -G Xcode
+cmake ../ -G Xcode || exit 1
 
 cd ..
 cd Bin/
