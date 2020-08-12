@@ -49,5 +49,5 @@ jobs:
   
     # Generate and build MSVC project using batch file
     - name: Build using make
-      run: BuildMakefiles.sh
+      run: ./BuildMakefiles.sh
 
