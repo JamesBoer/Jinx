@@ -1,13 +1,17 @@
-#!/bin/bash
+#!/bin/zsh
 
 # Set to current working dir
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+DIR=$( cd "$( dirname "${(%):-%x}" )" && pwd )
 cd "${DIR}"
+
+./GenerateXcode.command
 
 cd ..
 if ! [ -e Build ]; then
     mkdir Build
 fi
 cd Build/
-cmake ../ -G Xcode
+xcodebuild -project Jinx.xcodeproj -target ALL_BUILD -configuration Debug
+xcodebuild -project Jinx.xcodeproj -target ALL_BUILD -configuration Release
 cd ..
+cd Bin/
