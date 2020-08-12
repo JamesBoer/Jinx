@@ -19,7 +19,7 @@ jobs:
     defaults:
       run:
         working-directory: Bin
-        shell: cmd
+        shell: pwsh
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
