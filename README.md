@@ -1,4 +1,5 @@
-# Jinx
+# Jinx ![CI](https://github.com/JamesBoer/Jinx/workflows/CI/badge.svg)
+
 
 Jinx is a lightweight embeddable scripting language, written in modern C++, intended to be compiled and used from within a host application.  The Jinx language is clean and simple, looking like a cross between pseudo-code and natural language phrases, thanks to its highly flexible function syntax and identifiers that can incorporate whitespace. 
 
