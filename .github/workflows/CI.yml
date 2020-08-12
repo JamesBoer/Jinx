@@ -10,10 +10,6 @@ on:
   pull_request: 
     branches: [ '*' ]
 
-defaults:
-  run:
-    working-directory: Bin
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains build jobs
@@ -22,6 +18,7 @@ jobs:
     runs-on: windows-latest
     defaults:
       run:
+        working-directory: Bin
         shell: cmd
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -42,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
+        working-directory: Bin
         shell: bash
 
     # Steps represent a sequence of tasks that will be executed as part of the job
