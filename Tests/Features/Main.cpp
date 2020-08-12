@@ -10,6 +10,7 @@ Copyright (c) 2016 James Boer
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdexcept>
 
 #include "../../Source/Jinx.h"
 
@@ -18,7 +19,7 @@ using namespace Jinx;
 #ifndef NDEBUG
 #define REQUIRE assert
 #else
-#define REQUIRE(x) { if (!(x)) throw new std::exception("Failure for condition: " #x); }
+#define REQUIRE(x) { if (!(x)) throw new std::runtime_error("Failure for condition: " #x); }
 #endif
 
 Jinx::RuntimePtr TestCreateRuntime()
@@ -42,7 +43,7 @@ Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runti
 
 Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr)
 {
-	// Create a runtime script 
+	// Create a runtime script
 	auto script = TestCreateScript(scriptText, runtime);
 	if (!script)
 		return nullptr;
@@ -52,7 +53,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	{
 		if (!script->Execute())
 			return nullptr;
-	} 
+	}
 	while (!script->IsFinished());
 
 	return script;
@@ -72,19 +73,12 @@ int main(int argc, char ** argv)
 	{
 		const char * scriptText =
 			u8R"(
-			import liba
-			import libb
-
-			set x to test prop a
+			set x to "hi"
 			)";
 
-		auto runtime = TestCreateRuntime();
-		auto libA = runtime->GetLibrary("liba");
-		libA->RegisterProperty(Visibility::Public, Access::ReadOnly, "test prop a", "test val");
-		auto libB = runtime->GetLibrary("libb");
-		auto script = TestExecuteScript(scriptText, runtime);
+		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("x") == "test val");
+		REQUIRE(script->GetVariable("x") == "hi");
 	}
 	ShutDown();
 	return 0;
