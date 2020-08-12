@@ -6,17 +6,20 @@ MSBuild Jinx.sln /p:Configuration=Debug && (
   echo Debug build succeeded
 ) || (
   echo Debug build failed
-  goto FINAL
+  cd ..
+  cd Bin
+  EXIT /B 1
 )
 
 MSBuild Jinx.sln /p:Configuration=Release && (
   echo Release build succeeded
 ) || (
   echo Release build failed
-  goto FINAL
+  cd ..
+  cd Bin
+  EXIT /B 1
 )
 
-:FINAL
 cd ..
 cd Bin
-EXIT /B %ERRORLEVEL%
+EXIT /B 0
