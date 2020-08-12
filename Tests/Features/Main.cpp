@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <exception>
+#include <stdexcept>
 
 #include "../../Source/Jinx.h"
 
