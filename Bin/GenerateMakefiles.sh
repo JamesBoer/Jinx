@@ -1,9 +1,13 @@
+#!/bin/bash
+
+# Generate Build folder if it doesn't exist and navigate there
 cd ..
 if ! [ -e Build ]; then
     mkdir Build
 fi
 cd Build/
 
+# Build Debug makefiles
 if ! [ -e Debug ]; then
     mkdir Debug
 fi
@@ -11,6 +15,7 @@ cd Debug/
 cmake ../../ -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" 
 cd ..
 
+# Build Release makefiles
 if ! [ -e Release ]; then
     mkdir Release
 fi
@@ -18,6 +23,7 @@ cd Release/
 cmake ../../ -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" 
 cd ..
 
+# Build RelWithDebInfo makefiles
 if ! [ -e RelWithDebInfo ]; then
     mkdir RelWithDebInfo
 fi
@@ -25,6 +31,7 @@ cd RelWithDebInfo/
 cmake ../../ -DCMAKE_BUILD_TYPE=RelWithDebInfo -G "Unix Makefiles" 
 cd ..
 
+# Build MinSizeRel makefiles
 if ! [ -e MinSizeRel ]; then
     mkdir MinSizeRel
 fi

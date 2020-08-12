@@ -1,5 +1,12 @@
+@echo off
 call GenerateMSVC.cmd
 cd ..
+
+IF NOT EXIST Build (
+echo Build folder does not exist.
+goto ERROR
+)
+
 cd Build
 
 MSBuild Jinx.sln /p:Configuration=Debug && (

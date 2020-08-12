@@ -4,14 +4,15 @@
 DIR=$( cd "$( dirname "${(%):-%x}" )" && pwd )
 cd "${DIR}"
 
+# Generate Xcode project
 ./GenerateXcode.command
 
 cd ..
-if ! [ -e Build ]; then
-    mkdir Build
-fi
 cd Build/
+
+# Build Debug and Release configurations of the project
 xcodebuild -project Jinx.xcodeproj -target ALL_BUILD -configuration Debug
 xcodebuild -project Jinx.xcodeproj -target ALL_BUILD -configuration Release
+
 cd ..
 cd Bin/
