@@ -309,8 +309,8 @@ namespace Jinx::Impl
 			const char * cInStrEnd = cInStr + utf8Str.size();
 			WString outString;
 			outString.reserve(utf8Str.size());
-			char32_t utf32CodePoint;
-			size_t numOut;
+			char32_t utf32CodePoint = 0;
+			size_t numOut = 0;
 			while (*cInStr != 0)
 			{
 				Impl::ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
@@ -333,8 +333,8 @@ namespace Jinx::Impl
 			auto cInStr = reinterpret_cast<const char32_t *>(wStr.c_str());
 			String outString;
 			outString.reserve(wStr.size());
-			char outBuffer[5];
-			size_t numOut;
+			char outBuffer[5] = { 0, 0, 0, 0, 0 };
+			size_t numOut = 0;
 			while (*cInStr != 0)
 			{
 				Impl::ConvertUtf32ToUtf8(*cInStr, outBuffer, countof(outBuffer), &numOut);
@@ -367,8 +367,8 @@ namespace Jinx::Impl
 			// Non-ASCII characters have to perform a folding map lookup
 			else
 			{
-				char32_t codepoint;
-				size_t charsOut;
+				char32_t codepoint = 0;
+				size_t charsOut = 0;
 				Impl::ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
 				if (FindCaseFoldingData(codepoint, nullptr, nullptr))
 					return false;
@@ -400,12 +400,12 @@ namespace Jinx::Impl
 			// Non-ASCII codepoints require lookups via the global folding map
 			else
 			{
-				char32_t codepoint;
-				size_t charsOut;
+				char32_t codepoint = 0;
+				size_t charsOut = 0;
 				Impl::ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
 
-				char32_t cp1;
-				char32_t cp2;
+				char32_t cp1 = 0;
+				char32_t cp2 = 0;
 				if (FindCaseFoldingData(codepoint, &cp1, &cp2))
 				{
 					char buffer[5] = { 0, 0, 0, 0, 0 };
@@ -413,7 +413,7 @@ namespace Jinx::Impl
 					s.append(buffer);
 					if (cp2)
 					{
-						size_t charsOut2;
+						size_t charsOut2 = 0;
 						char buffer2[5] = { 0, 0, 0, 0, 0 };
 						Impl::ConvertUtf32ToUtf8(cp2, buffer2, countof(buffer2), &charsOut2);
 						s.append(buffer);
