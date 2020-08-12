@@ -63,8 +63,6 @@ int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
 
-	won't compile
-
 	GlobalParams params;
 	params.logBytecode = true;
 	params.logSymbols = true;
