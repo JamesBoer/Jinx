@@ -72,19 +72,12 @@ int main(int argc, char ** argv)
 	{
 		const char * scriptText =
 			u8R"(
-			import liba
-			import libb
-
-			set x to test prop a
+			set x to "hi"
 			)";
 
-		auto runtime = TestCreateRuntime();
-		auto libA = runtime->GetLibrary("liba");
-		libA->RegisterProperty(Visibility::Public, Access::ReadOnly, "test prop a", "test val");
-		auto libB = runtime->GetLibrary("libb");
-		auto script = TestExecuteScript(scriptText, runtime);
+		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("x") == "test val");
+		REQUIRE(script->GetVariable("x") == "hi");
 	}
 	ShutDown();
 	return 0;
