@@ -101,9 +101,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Create library as project name
 add_library(${PROJECT_NAME} ${jinx_source_list})
 
-# Set warning level
+# Set compiler options
 if(MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+	target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /W4 /w45038 /WX)
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
