@@ -20,59 +20,12 @@ namespace Jinx
 	// will fall back to the standard library allocators malloc/realloc/free.
 	//#define JINX_DISABLE_POOL_ALLOCATOR
 
-	// Overload new and delete with allocation to default pool.  Useful for tests to
-	// check if anything is using new/delete under the hood.
-	//#define JINX_OVERRIDE_NEW_AND_DELETE
-
 	// Whenever we are using debug allocation mode, also use memory guards.  However,
 	// we can also enable it independently if desired.  The memory guards put a protective
 	// band around each allocation in an attempt to detect memory overwrites.
 #ifdef JINX_DEBUG_ALLOCATION
 #define JINX_USE_MEMORY_GUARDS
 #endif
-
-// Global new and delete overloads
-#ifdef JINX_OVERRIDE_NEW_AND_DELETE
-
-	void * operator new (size_t n)
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		return malloc(n);
-#else
-		return Jinx::JinxAlloc(n);
-#endif
-	}
-
-	void * operator new [](size_t n)
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		return malloc(n);
-#else
-		return Jinx::JinxAlloc(n);
-#endif	
-	}
-
-		void operator delete(void * p) throw()
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		free(p);
-#else
-		Jinx::JinxFree(p);
-#endif
-	}
-
-	void operator delete[](void * p) throw()
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		free(p);
-#else
-		Jinx::JinxFree(p);
-#endif	
-	}
-
-#endif // JINX_OVERRIDE_NEW_AND_DELETE
-		// End new and delete overloads
-
 
 	// External allocation functions
 	namespace Impl
@@ -502,11 +455,11 @@ namespace Jinx
 			// Remove the block from the double linked-list.
 			if (block == m_allocHead)
 				m_allocHead = block->next;
-			else
+			else if (block->prev)
 				block->prev->next = block->next;
 			if (block == m_allocTail)
 				m_allocTail = block->prev;
-			else
+			else if (block->next)
 				block->next->prev = block->prev;
 
 			// Check first to see if we can put this on the spare list
@@ -697,18 +650,12 @@ namespace Jinx
 
 #ifdef JINX_DEBUG_ALLOCATION
 
-	inline_t void * MemPoolAllocate(const char * file, const char * function, uint32_t line, size_t bytes)
+	inline_t void * MemPoolAllocate([[maybe_unused]] const char * file, [[maybe_unused]] const char * function, [[maybe_unused]] uint32_t line, size_t bytes)
 	{
 		void * p;
 #if defined(JINX_DEBUG_USE_STD_ALLOC)
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		p = malloc(bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		p = Impl::Mem::heap.Alloc(bytes);
 #else
 		p = Impl::Mem::heap.Alloc(bytes);
@@ -720,13 +667,10 @@ namespace Jinx
 		return p;
 	}
 
-	inline_t void * MemPoolReallocate(const char * file, const char * function, uint32_t line, void * ptr, size_t bytes)
+	inline_t void * MemPoolReallocate([[maybe_unused]] const char * file, [[maybe_unused]] const char * function, [[maybe_unused]] uint32_t line, void * ptr, size_t bytes)
 	{
 		void * p;
 #ifdef JINX_DEBUG_USE_STD_ALLOC
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		// The CRT debug library has a bug that prevents it from propertly detecting
 		// memory freed with realloc.
 #ifdef LAIR_DEBUG_ENABLE_STD_REALLOC_LEAK_FIX
@@ -738,9 +682,6 @@ namespace Jinx
 #endif
 		p = realloc(ptr, bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		p = Impl::Mem::heap.Realloc(ptr, bytes);
 #else
 		if (ptr)

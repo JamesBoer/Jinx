@@ -693,7 +693,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 1;
 
 	/// Patch number
-	const uint32_t PatchNumber = 9;
+	const uint32_t PatchNumber = 10;
 
 	// Forward declaration
 	class IScript;
@@ -4831,59 +4831,12 @@ namespace Jinx
 	// will fall back to the standard library allocators malloc/realloc/free.
 	//#define JINX_DISABLE_POOL_ALLOCATOR
 
-	// Overload new and delete with allocation to default pool.  Useful for tests to
-	// check if anything is using new/delete under the hood.
-	//#define JINX_OVERRIDE_NEW_AND_DELETE
-
 	// Whenever we are using debug allocation mode, also use memory guards.  However,
 	// we can also enable it independently if desired.  The memory guards put a protective
 	// band around each allocation in an attempt to detect memory overwrites.
 #ifdef JINX_DEBUG_ALLOCATION
 #define JINX_USE_MEMORY_GUARDS
 #endif
-
-// Global new and delete overloads
-#ifdef JINX_OVERRIDE_NEW_AND_DELETE
-
-	void * operator new (size_t n)
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		return malloc(n);
-#else
-		return Jinx::JinxAlloc(n);
-#endif
-	}
-
-	void * operator new [](size_t n)
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		return malloc(n);
-#else
-		return Jinx::JinxAlloc(n);
-#endif	
-	}
-
-		void operator delete(void * p) throw()
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		free(p);
-#else
-		Jinx::JinxFree(p);
-#endif
-	}
-
-	void operator delete[](void * p) throw()
-	{
-#ifdef JINX_DEBUG_USE_STD_ALLOC
-		free(p);
-#else
-		Jinx::JinxFree(p);
-#endif	
-	}
-
-#endif // JINX_OVERRIDE_NEW_AND_DELETE
-		// End new and delete overloads
-
 
 	// External allocation functions
 	namespace Impl
@@ -5313,11 +5266,11 @@ namespace Jinx
 			// Remove the block from the double linked-list.
 			if (block == m_allocHead)
 				m_allocHead = block->next;
-			else
+			else if (block->prev)
 				block->prev->next = block->next;
 			if (block == m_allocTail)
 				m_allocTail = block->prev;
-			else
+			else if (block->next)
 				block->next->prev = block->prev;
 
 			// Check first to see if we can put this on the spare list
@@ -5508,18 +5461,12 @@ namespace Jinx
 
 #ifdef JINX_DEBUG_ALLOCATION
 
-	inline void * MemPoolAllocate(const char * file, const char * function, uint32_t line, size_t bytes)
+	inline void * MemPoolAllocate([[maybe_unused]] const char * file, [[maybe_unused]] const char * function, [[maybe_unused]] uint32_t line, size_t bytes)
 	{
 		void * p;
 #if defined(JINX_DEBUG_USE_STD_ALLOC)
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		p = malloc(bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		p = Impl::Mem::heap.Alloc(bytes);
 #else
 		p = Impl::Mem::heap.Alloc(bytes);
@@ -5531,13 +5478,10 @@ namespace Jinx
 		return p;
 	}
 
-	inline void * MemPoolReallocate(const char * file, const char * function, uint32_t line, void * ptr, size_t bytes)
+	inline void * MemPoolReallocate([[maybe_unused]] const char * file, [[maybe_unused]] const char * function, [[maybe_unused]] uint32_t line, void * ptr, size_t bytes)
 	{
 		void * p;
 #ifdef JINX_DEBUG_USE_STD_ALLOC
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		// The CRT debug library has a bug that prevents it from propertly detecting
 		// memory freed with realloc.
 #ifdef LAIR_DEBUG_ENABLE_STD_REALLOC_LEAK_FIX
@@ -5549,9 +5493,6 @@ namespace Jinx
 #endif
 		p = realloc(ptr, bytes);
 #elif defined(JINX_DISABLE_POOL_ALLOCATOR)
-		Jinx::unused(file);
-		Jinx::unused(function);
-		Jinx::unused(line);
 		p = Impl::Mem::heap.Realloc(ptr, bytes);
 #else
 		if (ptr)
@@ -10296,8 +10237,8 @@ namespace Jinx::Impl
 			const char * cInStrEnd = cInStr + utf8Str.size();
 			WString outString;
 			outString.reserve(utf8Str.size());
-			char32_t utf32CodePoint;
-			size_t numOut;
+			char32_t utf32CodePoint = 0;
+			size_t numOut = 0;
 			while (*cInStr != 0)
 			{
 				Impl::ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
@@ -10320,8 +10261,8 @@ namespace Jinx::Impl
 			auto cInStr = reinterpret_cast<const char32_t *>(wStr.c_str());
 			String outString;
 			outString.reserve(wStr.size());
-			char outBuffer[5];
-			size_t numOut;
+			char outBuffer[5] = { 0, 0, 0, 0, 0 };
+			size_t numOut = 0;
 			while (*cInStr != 0)
 			{
 				Impl::ConvertUtf32ToUtf8(*cInStr, outBuffer, countof(outBuffer), &numOut);
@@ -10354,8 +10295,8 @@ namespace Jinx::Impl
 			// Non-ASCII characters have to perform a folding map lookup
 			else
 			{
-				char32_t codepoint;
-				size_t charsOut;
+				char32_t codepoint = 0;
+				size_t charsOut = 0;
 				Impl::ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
 				if (FindCaseFoldingData(codepoint, nullptr, nullptr))
 					return false;
@@ -10387,12 +10328,12 @@ namespace Jinx::Impl
 			// Non-ASCII codepoints require lookups via the global folding map
 			else
 			{
-				char32_t codepoint;
-				size_t charsOut;
+				char32_t codepoint = 0;
+				size_t charsOut = 0;
 				Impl::ConvertUtf8ToUtf32(curr, end - curr, &codepoint, &charsOut);
 
-				char32_t cp1;
-				char32_t cp2;
+				char32_t cp1 = 0;
+				char32_t cp2 = 0;
 				if (FindCaseFoldingData(codepoint, &cp1, &cp2))
 				{
 					char buffer[5] = { 0, 0, 0, 0, 0 };
@@ -10400,7 +10341,7 @@ namespace Jinx::Impl
 					s.append(buffer);
 					if (cp2)
 					{
-						size_t charsOut2;
+						size_t charsOut2 = 0;
 						char buffer2[5] = { 0, 0, 0, 0, 0 };
 						Impl::ConvertUtf32ToUtf8(cp2, buffer2, countof(buffer2), &charsOut2);
 						s.append(buffer);

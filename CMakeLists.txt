@@ -101,6 +101,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Create library as project name
 add_library(${PROJECT_NAME} ${jinx_source_list})
 
+# Jinx compile-time options
+OPTION(JINX_DISABLE_POOL_ALLOCATOR "Disable Jinx pool allocator" OFF)
+
+if(JINX_DISABLE_POOL_ALLOCATOR)
+    ADD_DEFINITIONS(-DJINX_DISABLE_POOL_ALLOCATOR)
+endif()
+
 # Set compiler options
 if(MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /W4 /w45038 /WX)
