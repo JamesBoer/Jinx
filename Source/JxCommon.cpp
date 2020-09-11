@@ -271,11 +271,6 @@ namespace Jinx
 		Impl::InitializeLogging(params);
 	}
 
-	inline_t void ShutDown()
-	{
-		ShutDownMemory();
-	}
-
 
 } // namespace Jinx
 

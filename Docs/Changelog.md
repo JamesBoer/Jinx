@@ -1,11 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.1.10] - 2020-09-10
+## [1.2.0] - 2020-09-11
 
-- Fix crash on exit in allocator when objects aren't yet freed
-- #define options JINX_DEBUG_USE_STD_ALLOC and JINX_DISABLE_POOL_ALLOCATOR compile cleanly again
-- Documented how to enable JINX_DISABLE_POOL_ALLOCATOR using CMake
+- Removed pool allocator due to lack of measurable performance benefits
+- Changed memory stats API appropriately for a more generic allocator
+- Removed obsolete Jinx::Shutdown() function
+- Updated documentation
 
 ## [1.1.9] - 2020-08-04
 

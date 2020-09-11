@@ -102,10 +102,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 1;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 1;
+	const uint32_t MinorVersion = 2;
 
 	/// Patch number
-	const uint32_t PatchNumber = 10;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -311,29 +311,20 @@ namespace Jinx
 	*/
 	struct PerformanceStats
 	{
-		PerformanceStats() :
-			compilationTimeNs(0),
-			executionTimeNs(0),
-			perfTimeNs(0),
-			scriptCompilationCount(0),
-			scriptExecutionCount(0),
-			scriptCompletionCount(0),
-			instructionCount(0)
-		{}
 		/// Total compilation time of all scripts in nanoseconds
-		uint64_t compilationTimeNs;
+		uint64_t compilationTimeNs = 0;
 		/// Total execution time of all scripts in nanoseconds
-		uint64_t executionTimeNs;
+		uint64_t executionTimeNs = 0;
 		/// Performance sample time in nanoseconds
-		uint64_t perfTimeNs;
+		uint64_t perfTimeNs = 0;
 		/// Number of scripts compiled
-		uint64_t scriptCompilationCount;
+		uint64_t scriptCompilationCount = 0;
 		/// Number of scripts executed
-		uint64_t scriptExecutionCount;
+		uint64_t scriptExecutionCount = 0;
 		/// Number of scripts completed
-		uint64_t scriptCompletionCount;
+		uint64_t scriptCompletionCount = 0;
 		/// Number of instructions executed
-		uint64_t instructionCount;
+		uint64_t instructionCount = 0;
 	};
 
 	/// Jinx runtime interface
@@ -457,40 +448,26 @@ namespace Jinx
 	*/
 	struct GlobalParams
 	{
-		GlobalParams() :
-			enableLogging(true), 
-			logSymbols(false),
-			logBytecode(false),
-			enableDebugInfo(true),
-			allocBlockSize(8192),
-			allocSpareBlocks(4),
-			maxInstructions(2000),
-			errorOnMaxInstrunctions(true)
-		{}
 		/// Logging function 
 		LogFn logFn;
 		/// Enable logging
-		bool enableLogging;
+		bool enableLogging = true;
 		/// Log a detailed list of symbols after initial lexing phase
-		bool logSymbols;
+		bool logSymbols = false;
 		/// Log a detailed list of bytecode after compilation
-		bool logBytecode;
+		bool logBytecode = false;
 		/// Embed debug info in bytecode
-		bool enableDebugInfo;
+		bool enableDebugInfo = true;
 		/// Alloc memory function
 		AllocFn allocFn;
 		/// Realloc memory function
 		ReallocFn reallocFn;
 		/// Free memory function
 		FreeFn freeFn;
-		/// Size of each individual block allocation in bytes
-		size_t allocBlockSize;
-		/// Number of spare allocation blocks to retain
-		size_t allocSpareBlocks;
 		/// Maximum number of instructions per script per Execute() function
-		uint32_t maxInstructions;
+		uint32_t maxInstructions = 2000;
 		/// Maximum total script instrunctions
-		bool errorOnMaxInstrunctions;
+		bool errorOnMaxInstrunctions = true;
 	};
 
 	/// Get Jinx version in string form for easier display
@@ -505,14 +482,6 @@ namespace Jinx
 	\sa GlobalParams
 	*/
 	void Initialize(const GlobalParams & params);
-
-	/// Shut down global Jinx systems
-	/**
-	This optional-use function shuts down the memory system, allowing leak-checking to validate 
-	all memory has been freed.
-	\sa Initialize
-	*/
-	void ShutDown();
 
 }
 

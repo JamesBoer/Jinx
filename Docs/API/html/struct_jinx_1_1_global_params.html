@@ -85,19 +85,19 @@ Public Attributes</h2></td></tr>
 <tr class="memdesc:a0c10ba9b5cfe1252d2d1e9be1a2b8b01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Logging function. <br /></td></tr>
 <tr class="separator:a0c10ba9b5cfe1252d2d1e9be1a2b8b01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad23e565d0be06e2a9e948dfb1188050b"><td class="memItemLeft" align="right" valign="top"><a id="ad23e565d0be06e2a9e948dfb1188050b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#ad23e565d0be06e2a9e948dfb1188050b">enableLogging</a></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#ad23e565d0be06e2a9e948dfb1188050b">enableLogging</a> = true</td></tr>
 <tr class="memdesc:ad23e565d0be06e2a9e948dfb1188050b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable logging. <br /></td></tr>
 <tr class="separator:ad23e565d0be06e2a9e948dfb1188050b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53385b4ecd52fc991cff7bbc01b100c8"><td class="memItemLeft" align="right" valign="top"><a id="a53385b4ecd52fc991cff7bbc01b100c8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a53385b4ecd52fc991cff7bbc01b100c8">logSymbols</a></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a53385b4ecd52fc991cff7bbc01b100c8">logSymbols</a> = false</td></tr>
 <tr class="memdesc:a53385b4ecd52fc991cff7bbc01b100c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log a detailed list of symbols after initial lexing phase. <br /></td></tr>
 <tr class="separator:a53385b4ecd52fc991cff7bbc01b100c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0476d70f1f4882b4473833f2b2c8043f"><td class="memItemLeft" align="right" valign="top"><a id="a0476d70f1f4882b4473833f2b2c8043f"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a0476d70f1f4882b4473833f2b2c8043f">logBytecode</a></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a0476d70f1f4882b4473833f2b2c8043f">logBytecode</a> = false</td></tr>
 <tr class="memdesc:a0476d70f1f4882b4473833f2b2c8043f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log a detailed list of bytecode after compilation. <br /></td></tr>
 <tr class="separator:a0476d70f1f4882b4473833f2b2c8043f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25139c92bfdf85ce475f81e9d43e8ea1"><td class="memItemLeft" align="right" valign="top"><a id="a25139c92bfdf85ce475f81e9d43e8ea1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a25139c92bfdf85ce475f81e9d43e8ea1">enableDebugInfo</a></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a25139c92bfdf85ce475f81e9d43e8ea1">enableDebugInfo</a> = true</td></tr>
 <tr class="memdesc:a25139c92bfdf85ce475f81e9d43e8ea1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Embed debug info in bytecode. <br /></td></tr>
 <tr class="separator:a25139c92bfdf85ce475f81e9d43e8ea1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab3f56daccf8ee50fe81df959dfc0fec"><td class="memItemLeft" align="right" valign="top"><a id="aab3f56daccf8ee50fe81df959dfc0fec"></a>
@@ -112,20 +112,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 <a class="el" href="_jinx_8h.html#a466c508de040a6f6ef5873b2793e92eb">FreeFn</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a82b02db5c24487a99d0c0ee83cb66c53">freeFn</a></td></tr>
 <tr class="memdesc:a82b02db5c24487a99d0c0ee83cb66c53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free memory function. <br /></td></tr>
 <tr class="separator:a82b02db5c24487a99d0c0ee83cb66c53"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94fda3fb37c817db2745cf39f755cead"><td class="memItemLeft" align="right" valign="top"><a id="a94fda3fb37c817db2745cf39f755cead"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a94fda3fb37c817db2745cf39f755cead">allocBlockSize</a></td></tr>
-<tr class="memdesc:a94fda3fb37c817db2745cf39f755cead"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of each individual block allocation in bytes. <br /></td></tr>
-<tr class="separator:a94fda3fb37c817db2745cf39f755cead"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82b15a1e12c9acc0a82fbd1a270df003"><td class="memItemLeft" align="right" valign="top"><a id="a82b15a1e12c9acc0a82fbd1a270df003"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a82b15a1e12c9acc0a82fbd1a270df003">allocSpareBlocks</a></td></tr>
-<tr class="memdesc:a82b15a1e12c9acc0a82fbd1a270df003"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of spare allocation blocks to retain. <br /></td></tr>
-<tr class="separator:a82b15a1e12c9acc0a82fbd1a270df003"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45765b6551a42767ddf6f335495d9e95"><td class="memItemLeft" align="right" valign="top"><a id="a45765b6551a42767ddf6f335495d9e95"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a45765b6551a42767ddf6f335495d9e95">maxInstructions</a></td></tr>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a45765b6551a42767ddf6f335495d9e95">maxInstructions</a> = 2000</td></tr>
 <tr class="memdesc:a45765b6551a42767ddf6f335495d9e95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of instructions per script per Execute() function. <br /></td></tr>
 <tr class="separator:a45765b6551a42767ddf6f335495d9e95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a67ff80a1b3eeef389c81884eeb4bf4"><td class="memItemLeft" align="right" valign="top"><a id="a3a67ff80a1b3eeef389c81884eeb4bf4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a3a67ff80a1b3eeef389c81884eeb4bf4">errorOnMaxInstrunctions</a></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_jinx_1_1_global_params.html#a3a67ff80a1b3eeef389c81884eeb4bf4">errorOnMaxInstrunctions</a> = true</td></tr>
 <tr class="memdesc:a3a67ff80a1b3eeef389c81884eeb4bf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum total script instrunctions. <br /></td></tr>
 <tr class="separator:a3a67ff80a1b3eeef389c81884eeb4bf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>

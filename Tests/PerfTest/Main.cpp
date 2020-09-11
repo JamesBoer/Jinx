@@ -1,4 +1,4 @@
-﻿/*
+/*
 The Jinx library is distributed under the MIT License (MIT)
 https://opensource.org/licenses/MIT
 See LICENSE.TXT or Jinx.h for license details.
@@ -237,13 +237,9 @@ int main(int argc, char * argv[])
 
 	auto memoryStats = Jinx::GetMemoryStats();
 	printf("\n--- Memory ---\n");
-	printf("External alloc count: %" PRIu64 "\n", memoryStats.externalAllocCount);
-	printf("External free count: %" PRIu64 "\n", memoryStats.externalFreeCount);
-	printf("Internal alloc count: %" PRIu64 "\n", memoryStats.internalAllocCount);
-	printf("Internal free count: %" PRIu64 "\n", memoryStats.internalFreeCount);
-	printf("Current block count: %" PRIu64 "\n", memoryStats.currentBlockCount);
-	printf("Current allocated memory: %" PRIu64 " bytes\n", memoryStats.currentAllocatedMemory);
-	printf("Current used memory: %" PRIu64 " bytes\n", memoryStats.currentUsedMemory);
+	printf("Allocation count: %" PRIu64 "\n", memoryStats.allocationCount);
+	printf("Free count: %" PRIu64 "\n", memoryStats.freeCount);
+	printf("Current allocated memory: %" PRIu64 " bytes\n", memoryStats.allocatedMemory);
 	printf("\n");
 
 	return 0;
