@@ -69,17 +69,15 @@ int main(int argc, char ** argv)
 	params.errorOnMaxInstrunctions = false;
 	params.maxInstructions = std::numeric_limits<uint32_t>::max();
 	Initialize(params);
-	// Scope block to ensure all objects are destroyed for shutdown test
-	{
-		const char * scriptText =
-			u8R"(
-			set x to "hi"
-			)";
 
-		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script);
-		REQUIRE(script->GetVariable("x") == "hi");
-	}
-	ShutDown();
+	const char * scriptText =
+		u8R"(
+		set x to "hi"
+		)";
+
+	auto script = TestExecuteScript(scriptText);
+	REQUIRE(script);
+	REQUIRE(script->GetVariable("x") == "hi");
+	
 	return 0;
 }

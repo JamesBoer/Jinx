@@ -22,10 +22,10 @@ namespace Jinx
 		}
 		else
 		{
-			char * buffer = (char *)JinxAlloc(length + 2);
+			char * buffer = (char *)MemAllocate(length + 2);
 			m_buffer->Read(&m_pos, buffer, length + 1);
 			*val = buffer;
-			JinxFree(buffer);
+			MemFree(buffer);
 		}
 	}
 

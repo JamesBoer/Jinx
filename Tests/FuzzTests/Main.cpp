@@ -553,7 +553,7 @@ int main(int argc, char * argv[])
 						continue;
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.currentAllocatedMemory);
+				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
 			}
 		}));
 	}
@@ -586,7 +586,7 @@ int main(int argc, char * argv[])
 					script->Execute();
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Bytecode permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.currentAllocatedMemory);
+				printf("Bytecode permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
 			}
 		}));
 	}

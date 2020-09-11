@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2020-09-11
+
+- Removed pool allocator due to lack of measurable performance benefits
+- Changed memory stats API appropriately for a more generic allocator
+- Removed obsolete Jinx::Shutdown() function
+- Updated documentation
+
 ## [1.1.9] - 2020-08-04
 
 - Fix property name lookup when using multiple libraries

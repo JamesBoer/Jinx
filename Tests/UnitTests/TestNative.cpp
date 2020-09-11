@@ -216,13 +216,6 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(script->GetVariable("a") == 123);
 	}
 
-	SECTION("Test jinx object allocator with parameter passing")
-	{
-		auto c = JinxNew(TestClass2, 123, 345.678f, "test");
-		REQUIRE(c);
-		JinxDelete(c);
-	}
-
 	SECTION("Test Jinx function execution from C++")
 	{
 		const char * scriptText =
@@ -288,6 +281,26 @@ TEST_CASE("Test Native", "[Native]")
 			REQUIRE(script->Execute());
 		}
 		REQUIRE(script->GetVariable("x") == 3);
+	}
+
+	SECTION("Test native allocation / deallocation")
+	{
+		void * p = Jinx::MemAllocate(64);
+		memset(p, 7, 64);
+		Jinx::MemFree(p);
+	}
+
+	SECTION("Test native realloc")
+	{
+		void * p1 = Jinx::MemAllocate(64);
+		memset(p1, 7, 64);
+		void * p2 = Jinx::MemAllocate(64);
+		memset(p2, 7, 64);
+		REQUIRE(memcmp(p1, p2, 64) == 0);
+		p2 = Jinx::MemReallocate(p2, 128);
+		REQUIRE(memcmp(p1, p2, 64) == 0);
+		Jinx::MemFree(p1);
+		Jinx::MemFree(p2);
 	}
 
 }
