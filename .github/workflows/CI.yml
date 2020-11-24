@@ -28,7 +28,7 @@ jobs:
 
     # Ensure MSVC tools are available
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.0.1
+      uses: microsoft/setup-msbuild@v1.0.2
   
     # Generate and build MSVC project using batch file
     - name: Build using MSVC
