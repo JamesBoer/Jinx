@@ -152,22 +152,6 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(obj.GetTestValue() == 9999);
 	}
 
-	SECTION("Test native function execution")
-	{
-		static const char * scriptText =
-			u8R"(
-	
-			public function getvalue
-				return 123
-			end			
-			
-			)";
-
-		auto runtime = TestCreateRuntime();
-		auto script = TestExecuteScript(scriptText, runtime);
-		REQUIRE(script);
-	}
-
 	SECTION("Test native properties")
 	{
 		static const char * scriptText =

@@ -45,7 +45,9 @@ namespace Jinx::Impl
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
+		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn = false);
 		Variant CallFunction(RuntimeID id);
+		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
 	private:
 		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;

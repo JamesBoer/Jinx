@@ -196,26 +196,12 @@ namespace Jinx::Impl
 				// Check to see if this is a bytecode function
 				if (functionDef->GetBytecode())
 				{
-					m_execution.push_back(ExecutionFrame(functionDef));
-					m_execution.back().reader.Seek(functionDef->GetOffset());
-					assert(m_stack.size() >= functionDef->GetParameterCount());
-					m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
+					CallBytecodeFunction(functionDef, true);
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
 				{
-					Parameters params;
-					size_t numParams = functionDef->GetParameterCount();
-					for (size_t i = 0; i < numParams; ++i)
-					{
-						size_t index = m_stack.size() - (numParams - i);
-						auto param = m_stack[index];
-						params.push_back(param);
-					}
-					for (size_t i = 0; i < numParams; ++i)
-						m_stack.pop_back();
-					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
-					Push(retVal);
+					Push(CallNativeFunction(functionDef));
 				}
 				else
 				{
@@ -239,12 +225,12 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				if (!op1.IsNumericType())
 				{
-					Error("Can't increment non-numeric type");
+					Error("Can't decrement non-numeric type");
 					return false;
 				}
 				if (!op2.IsNumericType())
 				{
-					Error("Can't increment value by a non-numeric type");
+					Error("Can't decrement value by a non-numeric type");
 					return false;
 				}
 				op2 -= op1;
@@ -932,6 +918,15 @@ namespace Jinx::Impl
 		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
 	}
 
+	void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn)
+	{
+		m_execution.push_back(ExecutionFrame(fnDef));
+		m_execution.back().waitOnReturn = waitOnReturn;
+		m_execution.back().reader.Seek(fnDef->GetOffset());
+		assert(m_stack.size() >= fnDef->GetParameterCount());
+		m_execution.back().stackTop = m_stack.size() - fnDef->GetParameterCount();
+	}
+
 	inline_t Variant Script::CallFunction(RuntimeID id, Parameters params)
 	{
 		for (const auto & param : params)
@@ -950,10 +945,7 @@ namespace Jinx::Impl
 		// Check to see if this is a bytecode function
 		if (functionDef->GetBytecode())
 		{
-			m_execution.push_back(ExecutionFrame(functionDef));
-			m_execution.back().waitOnReturn = true;
-			m_execution.back().reader.Seek(functionDef->GetOffset());
-			m_execution.back().stackTop = m_stack.size() == 0 ? 0 : m_stack.size() - 1;
+			CallBytecodeFunction(functionDef, true);
 			bool finished = m_finished;
 			m_finished = false;
 			if (!Execute())
@@ -964,23 +956,28 @@ namespace Jinx::Impl
 		// Otherwise, call a native function callback
 		else if (functionDef->GetCallback())
 		{
-			Parameters params;
-			size_t numParams = functionDef->GetParameterCount();
-			for (size_t i = 0; i < numParams; ++i)
-			{
-				size_t index = m_stack.size() - (numParams - i);
-				auto param = m_stack[index];
-				params.push_back(param);
-			}
-			for (size_t i = 0; i < numParams; ++i)
-				m_stack.pop_back();
-			return functionDef->GetCallback()(shared_from_this(), params);
+			return CallNativeFunction(functionDef);
 		}
 		else
 		{
 			Error("Error in function definition");
 		}
 		return nullptr;
+	}
+
+	inline_t Variant Script::CallNativeFunction(const FunctionDefinitionPtr & fnDef)
+	{
+		Parameters params;
+		size_t numParams = fnDef->GetParameterCount();
+		for (size_t i = 0; i < numParams; ++i)
+		{
+			size_t index = m_stack.size() - (numParams - i);
+			const auto & param = m_stack[index];
+			params.push_back(param);
+		}
+		for (size_t i = 0; i < numParams; ++i)
+			m_stack.pop_back();
+		return fnDef->GetCallback()(shared_from_this(), params);
 	}
 
 	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const
