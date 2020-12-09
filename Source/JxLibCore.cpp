@@ -14,8 +14,8 @@ namespace Jinx::Impl
 	{
 		if (var.IsCollection())
 		{
-			const auto & coll = *var.GetCollection();
-			for (const auto & v : coll)
+			auto coll = var.GetCollection();
+			for (const auto & v : *coll)
 			{
 				DebugWriteInternal(level, v.second);
 			}
