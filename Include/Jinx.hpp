@@ -581,7 +581,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 2;
 
 	/// Patch number
-	const uint32_t PatchNumber = 0;
+	const uint32_t PatchNumber = 1;
 
 	// Forward declaration
 	class IScript;
@@ -2397,7 +2397,9 @@ namespace Jinx::Impl
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
+		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn = false);
 		Variant CallFunction(RuntimeID id);
+		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
 	private:
 		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
@@ -2519,7 +2521,7 @@ namespace Jinx::Impl
 		void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
 		Variant GetProperty(RuntimeID id) const;
 		bool PropertyExists(RuntimeID id) const;
-		void SetProperty(RuntimeID id, std::function<void(Variant &)> fn);
+		bool SetProperty(RuntimeID id, std::function<bool(Variant &)> fn);
 		void SetProperty(RuntimeID id, const Variant & value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
@@ -4270,8 +4272,8 @@ namespace Jinx::Impl
 	{
 		if (var.IsCollection())
 		{
-			const auto & coll = *var.GetCollection();
-			for (const auto & v : coll)
+			auto coll = var.GetCollection();
+			for (const auto & v : *coll)
 			{
 				DebugWriteInternal(level, v.second);
 			}
@@ -7772,11 +7774,11 @@ namespace Jinx::Impl
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
-	inline void Runtime::SetProperty(RuntimeID id, std::function<void(Variant &)> fn)
+	inline bool Runtime::SetProperty(RuntimeID id, std::function<bool(Variant &)> fn)
 	{
 		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 		auto& prop = m_propertyMap[id];
-		fn(prop);
+		return fn(prop);
 	}
 
 	inline void Runtime::SetProperty(RuntimeID id, const Variant & value)
@@ -8033,26 +8035,12 @@ namespace Jinx::Impl
 				// Check to see if this is a bytecode function
 				if (functionDef->GetBytecode())
 				{
-					m_execution.push_back(ExecutionFrame(functionDef));
-					m_execution.back().reader.Seek(functionDef->GetOffset());
-					assert(m_stack.size() >= functionDef->GetParameterCount());
-					m_execution.back().stackTop = m_stack.size() - functionDef->GetParameterCount();
+					CallBytecodeFunction(functionDef, true);
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
 				{
-					Parameters params;
-					size_t numParams = functionDef->GetParameterCount();
-					for (size_t i = 0; i < numParams; ++i)
-					{
-						size_t index = m_stack.size() - (numParams - i);
-						auto param = m_stack[index];
-						params.push_back(param);
-					}
-					for (size_t i = 0; i < numParams; ++i)
-						m_stack.pop_back();
-					Variant retVal = functionDef->GetCallback()(shared_from_this(), params);
-					Push(retVal);
+					Push(CallNativeFunction(functionDef));
 				}
 				else
 				{
@@ -8076,12 +8064,12 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				if (!op1.IsNumericType())
 				{
-					Error("Can't increment non-numeric type");
+					Error("Can't decrement non-numeric type");
 					return false;
 				}
 				if (!op2.IsNumericType())
 				{
-					Error("Can't increment value by a non-numeric type");
+					Error("Can't decrement value by a non-numeric type");
 					return false;
 				}
 				op2 -= op1;
@@ -8138,19 +8126,22 @@ namespace Jinx::Impl
 				RuntimeID propId;
 				m_execution.back().reader.Read(&propId);
 
-				m_runtime->SetProperty(propId, [this, subscripts](Variant& coll)
+				bool success = m_runtime->SetProperty(propId, [this, subscripts](Variant& coll)->bool
 				{
 					if (!coll.IsCollection())
 					{
 						this->Error("Expected collection when accessing by key");
-						return;
+						return false;
 					}
 					auto collection = coll.GetCollection();
 
 					// Find the appropriate collection-key pair
 					auto pair = WalkSubscripts(subscripts, collection);
 					if (pair.first == nullptr)
-						return;
+					{
+						this->Error("Could not find collection to erase");
+						return false;
+					}
 					collection = pair.first;
 					Variant key = pair.second;
 
@@ -8158,7 +8149,10 @@ namespace Jinx::Impl
 					auto itr = collection->find(key);
 					if (itr != collection->end())
 						collection->erase(itr);
+					return true;
 				});
+				if (!success)
+					return false;
 			}
 			break;
 			case Opcode::EraseVarKeyVal:
@@ -8526,26 +8520,44 @@ namespace Jinx::Impl
 			case Opcode::PushKeyVal:
 			{
 				auto key = Pop();
-				if (!key.IsKeyType())
+				auto var = Pop();
+				if (var.IsCollection())
 				{
-					Error("Invalid key type");
-					return false;
+					if (!key.IsKeyType())
+					{
+						Error("Invalid key type");
+						return false;
+					}
+					auto itr = var.GetCollection()->find(key);
+					if (itr == var.GetCollection()->end())
+					{
+						Error("Specified key does not exist in collection");
+						return false;
+					}
+					else
+					{
+						Push(itr->second);
+					}
 				}
-				auto coll = Pop();
-				if (!coll.IsCollection())
+				else if (var.IsString())
 				{
-					Error("Expected collection type");
-					return false;
-				}
-				auto itr = coll.GetCollection()->find(key);
-				if (itr == coll.GetCollection()->end())
-				{
-					Error("Specified key does not exist in collection");
-					return false;
+					if (!key.IsInteger())
+					{
+						Error("Invalid index type for string");
+						return false;
+					}
+					auto idx = key.GetInteger();
+					if (static_cast<size_t>(idx) > var.GetString().size() || idx < 1)
+					{
+						Error("Index is out of bounds");
+						return false;
+					}
+					Push(String(1, var.GetString().c_str()[idx - 1]));
 				}
 				else
 				{
-					Push(itr->second);
+					Error("Expected collection or string type when using brackets");
+					return false;
 				}
 			}
 			break;
@@ -8672,22 +8684,56 @@ namespace Jinx::Impl
 				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				m_runtime->SetProperty(id, [this, subscripts](Variant& coll)
+				bool success = m_runtime->SetProperty(id, [&](Variant& var)->bool
 				{
-					if (!coll.IsCollection())
+					if (var.IsCollection())
 					{
-						this->Error("Expected collection when accessing by key");
-						return;
+						auto collection = var.GetCollection();
+						Variant val = Pop();
+						auto pair = WalkSubscripts(subscripts, collection);
+						if (pair.first == nullptr)
+						{
+							Error("Could not find property collection");
+							return false;
+						}
+						collection = pair.first;
+						Variant key = pair.second;
+						(*collection)[key] = val;
 					}
-					auto collection = coll.GetCollection();
-					Variant val = Pop();
-					auto pair = WalkSubscripts(subscripts, collection);
-					if (pair.first == nullptr)
-						return;
-					collection = pair.first;
-					Variant key = pair.second;
-					(*collection)[key] = val;
+					else if (var.IsString())
+					{
+						Variant val = Pop();
+						if (!val.IsString())
+						{
+							Error("String index operation must be assigned a string");
+							return false;
+						}
+						Variant index = Pop();
+						if (!index.IsInteger())
+						{
+							Error("String index must be an integer");
+							return false;
+						}
+						auto idx = index.GetInteger();
+						if (static_cast<size_t>(idx) > val.GetString().size() || idx < 1)
+						{
+							Error("Index is out of bounds");
+							return false;
+						}
+						String s = var.GetString();
+						String v = val.GetString();
+						s[idx - 1] = v[0];
+						var = s;
+					}
+					else
+					{
+						this->Error("Expected collection or string when accessing property using brackets");
+						return false;
+					}
+					return true;
 				});
+				if (!success)
+					return false;
 			}
 			break;
 			case Opcode::SetVar:
@@ -8704,20 +8750,48 @@ namespace Jinx::Impl
 				m_execution.back().reader.Read(&subscripts);
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
-				Variant coll = GetVariable(id);
-				if (!coll.IsCollection())
+				Variant var = GetVariable(id);
+				if (var.IsCollection())
 				{
-					Error("Expected collection when accessing by key");
+					auto collection = var.GetCollection();
+					Variant val = Pop();
+					auto pair = WalkSubscripts(subscripts, collection);
+					if (pair.first == nullptr )
+						return false;
+					collection = pair.first;
+					Variant key = pair.second;
+					(*collection)[key] = val;
+				}
+				else if (var.IsString())
+				{
+					Variant val = Pop();
+					if (!val.IsString())
+					{
+						Error("String index operation must be assigned a string");
+						return false;
+					}
+					Variant index = Pop();
+					if (!index.IsInteger())
+					{
+						Error("String index must be an integer");
+						return false;
+					}
+					auto idx = index.GetInteger();
+					if (static_cast<size_t>(idx) > val.GetString().size() || idx < 1)
+					{
+						Error("Index is out of bounds");
+						return false;
+					}
+					String s = var.GetString();
+					String v = val.GetString();
+					s[idx - 1] = v[0];
+					SetVariable(id, s);
+				}
+				else
+				{
+					Error("Expected collection or string when accessing variable with brackets");
 					return false;
 				}
-				auto collection = coll.GetCollection();
-				Variant val = Pop();
-				auto pair = WalkSubscripts(subscripts, collection);
-				if (pair.first == nullptr )
-					return false;
-				collection = pair.first;
-				Variant key = pair.second;
-				(*collection)[key] = val;
 			}
 			break;
 			case Opcode::Subtract:
@@ -8769,6 +8843,15 @@ namespace Jinx::Impl
 		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
 	}
 
+	inline void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn)
+	{
+		m_execution.push_back(ExecutionFrame(fnDef));
+		m_execution.back().waitOnReturn = waitOnReturn;
+		m_execution.back().reader.Seek(fnDef->GetOffset());
+		assert(m_stack.size() >= fnDef->GetParameterCount());
+		m_execution.back().stackTop = m_stack.size() - fnDef->GetParameterCount();
+	}
+
 	inline Variant Script::CallFunction(RuntimeID id, Parameters params)
 	{
 		for (const auto & param : params)
@@ -8787,10 +8870,7 @@ namespace Jinx::Impl
 		// Check to see if this is a bytecode function
 		if (functionDef->GetBytecode())
 		{
-			m_execution.push_back(ExecutionFrame(functionDef));
-			m_execution.back().waitOnReturn = true;
-			m_execution.back().reader.Seek(functionDef->GetOffset());
-			m_execution.back().stackTop = m_stack.size() == 0 ? 0 : m_stack.size() - 1;
+			CallBytecodeFunction(functionDef, true);
 			bool finished = m_finished;
 			m_finished = false;
 			if (!Execute())
@@ -8801,23 +8881,28 @@ namespace Jinx::Impl
 		// Otherwise, call a native function callback
 		else if (functionDef->GetCallback())
 		{
-			Parameters params;
-			size_t numParams = functionDef->GetParameterCount();
-			for (size_t i = 0; i < numParams; ++i)
-			{
-				size_t index = m_stack.size() - (numParams - i);
-				auto param = m_stack[index];
-				params.push_back(param);
-			}
-			for (size_t i = 0; i < numParams; ++i)
-				m_stack.pop_back();
-			return functionDef->GetCallback()(shared_from_this(), params);
+			return CallNativeFunction(functionDef);
 		}
 		else
 		{
 			Error("Error in function definition");
 		}
 		return nullptr;
+	}
+
+	inline Variant Script::CallNativeFunction(const FunctionDefinitionPtr & fnDef)
+	{
+		Parameters params;
+		size_t numParams = fnDef->GetParameterCount();
+		for (size_t i = 0; i < numParams; ++i)
+		{
+			size_t index = m_stack.size() - (numParams - i);
+			const auto & param = m_stack[index];
+			params.push_back(param);
+		}
+		for (size_t i = 0; i < numParams; ++i)
+			m_stack.pop_back();
+		return fnDef->GetCallback()(shared_from_this(), params);
 	}
 
 	inline std::vector<String, Allocator<String>> Script::GetCallStack() const

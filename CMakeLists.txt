@@ -138,6 +138,7 @@ if(NOT jinx_is_subproject)
 		"Tests/UnitTests/TestLoops.cpp"
 		"Tests/UnitTests/TestNative.cpp"
 		"Tests/UnitTests/TestStatements.cpp"
+		"Tests/UnitTests/TestStrings.cpp"
 		"Tests/UnitTests/TestUnicode.cpp"
 		"Tests/UnitTests/UnitTest.cpp"
 		"Tests/UnitTests/UnitTest.h"

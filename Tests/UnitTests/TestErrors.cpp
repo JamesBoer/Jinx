@@ -1247,4 +1247,125 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(!script);
 	}
+
+	SECTION("Test out of bounds string index var set low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "Hello world!"
+			set b to a[0]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index var set high")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "Hello world!"
+			set b to a[13]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index prop set low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set public a to "Hello world!"
+			set b to a[0]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index prop set high")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set public a to "Hello world!"
+			set b to a[13]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index var get low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "hello world!"
+			set a[0] to "H"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index var get high")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "hello world!"
+			set a[13] to "!"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index prop get low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set public a to "hello world!"
+			set a[0] to "H"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index prop get high")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set public a to "hello world!"
+			set a[13] to "!"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
 }

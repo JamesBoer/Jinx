@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2020-12-09
+
+- Allow character-based access to strings using [] operators
+- Updated documentation
+- 
 ## [1.2.0] - 2020-09-11
 
 - Removed pool allocator due to lack of measurable performance benefits
