@@ -509,7 +509,19 @@ namespace Jinx::Impl
 					}
 					else
 					{
-						return false;
+						exprMatch = CheckFunctionCall(true, currSym, endSym);
+						if (exprMatch.signature)
+						{
+							for (size_t i = 1; i < exprMatch.partData.size(); ++i)
+							{
+								++currSym;
+								++symCount;
+							}
+						}
+						else
+						{
+							return false;
+						}
 					}
 				}
 				else

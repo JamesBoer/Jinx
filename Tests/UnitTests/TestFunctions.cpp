@@ -424,7 +424,7 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("a") == 3);
 		REQUIRE(script->GetVariable("b") == 1);
 		REQUIRE(script->GetVariable("c") == 3);
 	}
@@ -474,7 +474,7 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("a") == 3);
 		REQUIRE(script->GetVariable("b") == 1);
 		REQUIRE(script->GetVariable("c") == 3);
 	}
@@ -709,6 +709,50 @@ TEST_CASE("Test Functions", "[Functions]")
 			end
 
 			set x to test a test b 42
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 42);
+	}
+
+	SECTION("Test chained functions with trailing and preceding arguments")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {x} bar
+				return x
+			end
+
+			function foo {x}
+				return x
+			end
+
+			set x to foo 42 bar
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 42);
+	}
+
+	SECTION("Test chained functions with trailing and preceding arguments with compound expression")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {x} bar
+				return x
+			end
+
+			function foo {x}
+				return x
+			end
+
+			set x to foo 40 + 3 - 1 bar
 
 			)";
 
