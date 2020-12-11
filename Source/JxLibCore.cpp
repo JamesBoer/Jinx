@@ -52,7 +52,7 @@ namespace Jinx::Impl
 		case ValueType::Collection:
 			return static_cast<int64_t>(params[0].GetCollection()->size());
 		case ValueType::String:
-			return static_cast<int64_t>(params[0].GetString().length());
+			return static_cast<int64_t>(GetStringCount(params[0].GetString()));
 		case ValueType::Buffer:
 			return static_cast<int64_t>(params[0].GetBuffer()->Size());
 		default:

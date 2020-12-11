@@ -707,13 +707,13 @@ namespace Jinx::Impl
 						Error("Invalid index type for string");
 						return false;
 					}
-					auto idx = key.GetInteger();
-					if (static_cast<size_t>(idx) > var.GetString().size() || idx < 1)
+					auto optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					if (!optStr)
 					{
-						Error("Index is out of bounds");
+						Error("Unable to get string character via index");
 						return false;
 					}
-					Push(String(1, var.GetString().c_str()[idx - 1]));
+					Push(optStr.value());
 				}
 				else
 				{
@@ -875,20 +875,17 @@ namespace Jinx::Impl
 							Error("String index must be an integer");
 							return false;
 						}
-						auto idx = index.GetInteger();
-						if (static_cast<size_t>(idx) > val.GetString().size() || idx < 1)
+						auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						if (!s)
 						{
-							Error("Index is out of bounds");
+							Error("Unable to set string via index");
 							return false;
 						}
-						String s = var.GetString();
-						String v = val.GetString();
-						s[idx - 1] = v[0];
-						var = s;
+						var = s.value();
 					}
 					else
 					{
-						this->Error("Expected collection or string when accessing property using brackets");
+						Error("Expected collection or string when accessing property using brackets");
 						return false;
 					}
 					return true;
@@ -937,16 +934,13 @@ namespace Jinx::Impl
 						Error("String index must be an integer");
 						return false;
 					}
-					auto idx = index.GetInteger();
-					if (static_cast<size_t>(idx) > val.GetString().size() || idx < 1)
+					auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					if (!s)
 					{
-						Error("Index is out of bounds");
+						Error("Unable to set string via index");
 						return false;
 					}
-					String s = var.GetString();
-					String v = val.GetString();
-					s[idx - 1] = v[0];
-					SetVariable(id, s);
+					SetVariable(id, s.value());
 				}
 				else
 				{

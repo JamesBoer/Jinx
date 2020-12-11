@@ -977,6 +977,7 @@ namespace Jinx
 #include <cstdarg>
 #include <mutex>
 #include <algorithm>
+#include <optional>
 #include <memory>
 #include <string>
 #include <list>
@@ -1333,6 +1334,10 @@ namespace Jinx::Impl
 
 	bool IsCaseFolded(const String & source);
 	String FoldCase(const String & source);
+
+	size_t GetStringCount(const String & source);
+	std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index);
+	std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index);
 
 } // namespace Jinx::Impl
 
@@ -4310,7 +4315,7 @@ namespace Jinx::Impl
 		case ValueType::Collection:
 			return static_cast<int64_t>(params[0].GetCollection()->size());
 		case ValueType::String:
-			return static_cast<int64_t>(params[0].GetString().length());
+			return static_cast<int64_t>(GetStringCount(params[0].GetString()));
 		case ValueType::Buffer:
 			return static_cast<int64_t>(params[0].GetBuffer()->Size());
 		default:
@@ -5264,7 +5269,19 @@ namespace Jinx::Impl
 					}
 					else
 					{
-						return false;
+						exprMatch = CheckFunctionCall(true, currSym, endSym);
+						if (exprMatch.signature)
+						{
+							for (size_t i = 1; i < exprMatch.partData.size(); ++i)
+							{
+								++currSym;
+								++symCount;
+							}
+						}
+						else
+						{
+							return false;
+						}
 					}
 				}
 				else
@@ -6296,7 +6313,7 @@ namespace Jinx::Impl
 				{
 					auto expressionSize = std::get<1>(match.partData[i]);
 					auto endSymbol = m_currentSymbol;
-					for (size_t j = 0; j < expressionSize; ++j)
+					for (size_t j = 0; j < expressionSize && endSymbol != m_symbolList.end(); ++j)
 						++endSymbol;
 					ParseExpression(endSymbol);
 				}
@@ -8546,13 +8563,13 @@ namespace Jinx::Impl
 						Error("Invalid index type for string");
 						return false;
 					}
-					auto idx = key.GetInteger();
-					if (static_cast<size_t>(idx) > var.GetString().size() || idx < 1)
+					auto optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					if (!optStr)
 					{
-						Error("Index is out of bounds");
+						Error("Unable to get string character via index");
 						return false;
 					}
-					Push(String(1, var.GetString().c_str()[idx - 1]));
+					Push(optStr.value());
 				}
 				else
 				{
@@ -8714,20 +8731,17 @@ namespace Jinx::Impl
 							Error("String index must be an integer");
 							return false;
 						}
-						auto idx = index.GetInteger();
-						if (static_cast<size_t>(idx) > val.GetString().size() || idx < 1)
+						auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						if (!s)
 						{
-							Error("Index is out of bounds");
+							Error("Unable to set string via index");
 							return false;
 						}
-						String s = var.GetString();
-						String v = val.GetString();
-						s[idx - 1] = v[0];
-						var = s;
+						var = s.value();
 					}
 					else
 					{
-						this->Error("Expected collection or string when accessing property using brackets");
+						Error("Expected collection or string when accessing property using brackets");
 						return false;
 					}
 					return true;
@@ -8776,16 +8790,13 @@ namespace Jinx::Impl
 						Error("String index must be an integer");
 						return false;
 					}
-					auto idx = index.GetInteger();
-					if (static_cast<size_t>(idx) > val.GetString().size() || idx < 1)
+					auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					if (!s)
 					{
-						Error("Index is out of bounds");
+						Error("Unable to set string via index");
 						return false;
 					}
-					String s = var.GetString();
-					String v = val.GetString();
-					s[idx - 1] = v[0];
-					SetVariable(id, s);
+					SetVariable(id, s.value());
 				}
 				else
 				{
@@ -9555,6 +9566,87 @@ namespace Jinx::Impl
 
 		return s;
 	}
+
+	inline const char * GetUtf8CstrByIndex(const String & source, int64_t index)
+	{
+		size_t idx = static_cast<size_t>(index);
+		if (idx > GetStringCount(source) || idx < 1)
+		{
+			LogWriteLine(LogLevel::Error, "Attempted to access string %s with out of bounds index %zu", source.c_str(), idx);
+			return nullptr;
+		}
+		const char * cstr = source.c_str();
+		const char * end = cstr + source.size();
+		size_t i = 1;
+		while (cstr < end && i < idx)
+		{
+			cstr += GetUtf8CharSize(cstr);
+			++i;
+		}
+		return cstr;
+	}
+
+	inline size_t GetStringCount(const String & source)
+	{
+		const char * cstr = source.c_str();
+		const char * end = cstr + source.size();
+		size_t count = 0;
+		while (cstr < end)
+		{
+			cstr += GetUtf8CharSize(cstr);
+			++count;
+		}
+		return count;
+	}
+
+	inline std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index)
+	{
+		const char * srcCurr = GetUtf8CstrByIndex(source, index);
+		if (srcCurr == nullptr)
+			return std::optional<String>();
+		size_t charCount = GetUtf8CharSize(srcCurr);
+		String out;
+		for (size_t i = 0; i < charCount; ++i)
+			out += srcCurr[i];
+		return out;
+	}
+
+	inline std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index)
+	{
+		const char * destStart = dest.c_str();
+		const char * destEnd = destStart + dest.size();
+		const char * destTarget = GetUtf8CstrByIndex(dest, index);
+		if (destTarget == nullptr)
+			return std::optional<String>();
+		String out;
+		const char * destCurr = destStart;
+		while (destCurr < destEnd)
+		{
+			if (destCurr == destTarget)
+			{
+				const char * srcCurr = source.c_str();
+				const char * srcEnd = srcCurr + source.size();
+				while (srcCurr < srcEnd)
+				{
+					size_t charCount = GetUtf8CharSize(srcCurr);
+					for (size_t i = 0; i < charCount; ++i)
+					{
+						out += *srcCurr;
+						++srcCurr;
+					}
+				}
+				size_t size = GetUtf8CharSize(destCurr);
+				destCurr += size;
+			}
+			else
+			{
+				out += *destCurr;
+				++destCurr;
+			}
+		}
+		return out;
+	}
+
 
 } // namespace Jinx::Impl
 
