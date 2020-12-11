@@ -1553,7 +1553,7 @@ namespace Jinx::Impl
 				{
 					auto expressionSize = std::get<1>(match.partData[i]);
 					auto endSymbol = m_currentSymbol;
-					for (size_t j = 0; j < expressionSize; ++j)
+					for (size_t j = 0; j < expressionSize && endSymbol != m_symbolList.end(); ++j)
 						++endSymbol;
 					ParseExpression(endSymbol);
 				}
