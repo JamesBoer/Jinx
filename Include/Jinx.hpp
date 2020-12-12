@@ -6455,11 +6455,11 @@ namespace Jinx::Impl
 			requiredOperand = false;
 
 			// Check for casts
-			if (Accept(SymbolType::As))
+			if (Accept(SymbolType::As) && m_currentSymbol != endSymbol)
 				ParseCast();
 
 			// Parse binary operator
-			if (CheckBinaryOperator())
+			if (CheckBinaryOperator() && m_currentSymbol != endSymbol)
 			{
 				requiredOperand = true;
 				auto opcode = ParseBinaryOperator();
