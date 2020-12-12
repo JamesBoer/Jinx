@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [1.2.1] - 2020-12-11
 
 - Allow character-based access to strings using [] operators
+- {} size function now returns number of Unicode characters for strings instead of byte count
 - Changed parsing precedence to fix some problematic compound function calls
 - Fix bug when parsing and/or/not as part of function name
 - Updated documentation
