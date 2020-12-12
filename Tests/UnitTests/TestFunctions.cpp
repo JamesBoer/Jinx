@@ -761,4 +761,34 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("x") == 42);
 	}
 
+	SECTION("Test functions with and/or/not operators separating parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {a} and {b}
+				return a and b
+			end
+
+			function test {a} or {b}
+				return a or b
+			end
+
+			function test {a} and not {b} 
+				return a and not b
+			end
+
+			set a to test true and true
+			set b to test true or false
+			set c to true and not false
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == true);
+		REQUIRE(script->GetVariable("c") == true);
+	}
+
 }

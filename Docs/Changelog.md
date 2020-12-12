@@ -1,10 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.2.1] - 2020-12-09
+## [1.2.1] - 2020-12-11
 
 - Allow character-based access to strings using [] operators
 - Changed parsing precedence to fix some problematic compound function calls
+- Fix bug when parsing and/or/not as part of function name
 - Updated documentation
 
 ## [1.2.0] - 2020-09-11
