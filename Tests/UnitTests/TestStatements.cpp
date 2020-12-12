@@ -400,4 +400,55 @@ multiline comment
 		REQUIRE(script->GetVariable("x") < 100);
 	}
 
+	SECTION("Test apostrophe #1")
+	{
+		const char * scriptText =
+			u8R"(
+
+			import core
+
+			set a to "Hello"
+			set b to a's size
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("b") == 5);
+	}
+
+	SECTION("Test apostrophe #2")
+	{
+		const char * scriptText =
+			u8R"(
+
+			import core
+
+			set guess to "Hello"
+			set b to guess' size
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("b") == 5);
+	}
+
+	SECTION("Test apostrophe #3")
+	{
+		const char * scriptText =
+			u8R"(
+
+			import core
+
+			set 'some val' to "Hello"
+			set b to 'some val's size
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("b") == 5);
+	}
+
 }

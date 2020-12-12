@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 
 - Allow character-based access to strings using [] operators
 - {} size function now returns number of Unicode characters for strings instead of byte count
+- Added support for decorative possessive of variables using apostrophe-s
 - Changed parsing precedence to fix some problematic compound function calls
 - Fix bug when parsing and/or/not as part of function name
 - Updated documentation

@@ -246,7 +246,7 @@ namespace Jinx::Impl
 			return false;
 		if (static_cast<unsigned char>(c) <= 32)
 			return false;
-		if (c == ',' || c == '.' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '/')
+		if (c == ',' || c == '.' || c == '[' || c == ']' || c == '(' || c == ')' || c == '{' || c == '}' || c == '/' || c == '\'')
 			return false;
 		return true;
 	}
@@ -417,6 +417,19 @@ namespace Jinx::Impl
 			AdvanceCurrent();
 		auto name = String(startName, count);
 		CreateSymbol(name);
+
+		// Check for apostrophe-s.  If the name is quoted, no additional quote is needed
+		if (!quotedName)
+		{
+			if (*m_current == '\'')
+			{
+				AdvanceCurrent();
+				if (IsEndOfText())
+					return;
+			}
+		}
+		if (std::tolower(*m_current) == 's')
+			AdvanceCurrent();
 	}
 
 	inline_t void Lexer::ParseNumber()
