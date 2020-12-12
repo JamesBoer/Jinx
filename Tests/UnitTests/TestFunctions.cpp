@@ -424,7 +424,7 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("a") == 3);
 		REQUIRE(script->GetVariable("b") == 1);
 		REQUIRE(script->GetVariable("c") == 3);
 	}
@@ -474,7 +474,7 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->GetVariable("a") == 1);
+		REQUIRE(script->GetVariable("a") == 3);
 		REQUIRE(script->GetVariable("b") == 1);
 		REQUIRE(script->GetVariable("c") == 3);
 	}
@@ -715,6 +715,80 @@ TEST_CASE("Test Functions", "[Functions]")
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("x") == 42);
+	}
+
+	SECTION("Test chained functions with trailing and preceding arguments")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {x} bar
+				return x
+			end
+
+			function foo {x}
+				return x
+			end
+
+			set x to foo 42 bar
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 42);
+	}
+
+	SECTION("Test chained functions with trailing and preceding arguments with compound expression")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {x} bar
+				return x
+			end
+
+			function foo {x}
+				return x
+			end
+
+			set x to foo 40 + 3 - 1 bar
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 42);
+	}
+
+	SECTION("Test functions with and/or/not operators separating parameters")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {a} and {b}
+				return a and b
+			end
+
+			function test {a} or {b}
+				return a or b
+			end
+
+			function test {a} and not {b} 
+				return a and not b
+			end
+
+			set a to test true and true
+			set b to test true or false
+			set c to true and not false
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == true);
+		REQUIRE(script->GetVariable("c") == true);
 	}
 
 }

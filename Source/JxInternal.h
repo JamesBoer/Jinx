@@ -20,6 +20,7 @@ Copyright (c) 2016 James Boer
 #include <cstdarg>
 #include <mutex>
 #include <algorithm>
+#include <optional>
 #include <memory>
 #include <string>
 #include <list>

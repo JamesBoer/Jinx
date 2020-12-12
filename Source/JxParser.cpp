@@ -509,7 +509,19 @@ namespace Jinx::Impl
 					}
 					else
 					{
-						return false;
+						exprMatch = CheckFunctionCall(true, currSym, endSym);
+						if (exprMatch.signature)
+						{
+							for (size_t i = 1; i < exprMatch.partData.size(); ++i)
+							{
+								++currSym;
+								++symCount;
+							}
+						}
+						else
+						{
+							return false;
+						}
 					}
 				}
 				else
@@ -1541,7 +1553,7 @@ namespace Jinx::Impl
 				{
 					auto expressionSize = std::get<1>(match.partData[i]);
 					auto endSymbol = m_currentSymbol;
-					for (size_t j = 0; j < expressionSize; ++j)
+					for (size_t j = 0; j < expressionSize && endSymbol != m_symbolList.end(); ++j)
 						++endSymbol;
 					ParseExpression(endSymbol);
 				}
@@ -1683,11 +1695,11 @@ namespace Jinx::Impl
 			requiredOperand = false;
 
 			// Check for casts
-			if (Accept(SymbolType::As))
+			if (Accept(SymbolType::As) && m_currentSymbol != endSymbol)
 				ParseCast();
 
 			// Parse binary operator
-			if (CheckBinaryOperator())
+			if (CheckBinaryOperator() && m_currentSymbol != endSymbol)
 			{
 				requiredOperand = true;
 				auto opcode = ParseBinaryOperator();

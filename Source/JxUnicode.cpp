@@ -431,5 +431,86 @@ namespace Jinx::Impl
 		return s;
 	}
 
+	inline_t const char * GetUtf8CstrByIndex(const String & source, int64_t index)
+	{
+		size_t idx = static_cast<size_t>(index);
+		if (idx > GetStringCount(source) || idx < 1)
+		{
+			LogWriteLine(LogLevel::Error, "Attempted to access string %s with out of bounds index %zu", source.c_str(), idx);
+			return nullptr;
+		}
+		const char * cstr = source.c_str();
+		const char * end = cstr + source.size();
+		size_t i = 1;
+		while (cstr < end && i < idx)
+		{
+			cstr += GetUtf8CharSize(cstr);
+			++i;
+		}
+		return cstr;
+	}
+
+	inline_t size_t GetStringCount(const String & source)
+	{
+		const char * cstr = source.c_str();
+		const char * end = cstr + source.size();
+		size_t count = 0;
+		while (cstr < end)
+		{
+			cstr += GetUtf8CharSize(cstr);
+			++count;
+		}
+		return count;
+	}
+
+	inline_t std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index)
+	{
+		const char * srcCurr = GetUtf8CstrByIndex(source, index);
+		if (srcCurr == nullptr)
+			return std::optional<String>();
+		size_t charCount = GetUtf8CharSize(srcCurr);
+		String out;
+		for (size_t i = 0; i < charCount; ++i)
+			out += srcCurr[i];
+		return out;
+	}
+
+	inline_t std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index)
+	{
+		const char * destStart = dest.c_str();
+		const char * destEnd = destStart + dest.size();
+		const char * destTarget = GetUtf8CstrByIndex(dest, index);
+		if (destTarget == nullptr)
+			return std::optional<String>();
+		String out;
+		const char * destCurr = destStart;
+		while (destCurr < destEnd)
+		{
+			if (destCurr == destTarget)
+			{
+				const char * srcCurr = source.c_str();
+				const char * srcEnd = srcCurr + source.size();
+				while (srcCurr < srcEnd)
+				{
+					size_t charCount = GetUtf8CharSize(srcCurr);
+					for (size_t i = 0; i < charCount; ++i)
+					{
+						out += *srcCurr;
+						++srcCurr;
+					}
+				}
+				size_t size = GetUtf8CharSize(destCurr);
+				destCurr += size;
+			}
+			else
+			{
+				out += *destCurr;
+				++destCurr;
+			}
+		}
+		return out;
+	}
+
+
 } // namespace Jinx::Impl
 

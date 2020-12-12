@@ -18,7 +18,10 @@ function(jinx_build_executable project_name source_list is_linked is_startup req
 	set(CMAKE_CXX_STANDARD 17)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	set(CMAKE_CXX_EXTENSIONS OFF)
-	
+if(MSVC)
+	target_compile_options(${project_name} PRIVATE /permissive- /utf-8)
+endif()
+
 	# Set the executable as the default startup project
 	if(is_startup)
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${project_name})
@@ -103,7 +106,7 @@ add_library(${PROJECT_NAME} ${jinx_source_list})
 
 # Set compiler options
 if(MSVC)
-	target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /W4 /w45038 /WX)
+	target_compile_options(${PROJECT_NAME} PRIVATE /permissive- /W4 /w45038 /WX /utf-8)
 else()
 	target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
@@ -138,6 +141,7 @@ if(NOT jinx_is_subproject)
 		"Tests/UnitTests/TestLoops.cpp"
 		"Tests/UnitTests/TestNative.cpp"
 		"Tests/UnitTests/TestStatements.cpp"
+		"Tests/UnitTests/TestStrings.cpp"
 		"Tests/UnitTests/TestUnicode.cpp"
 		"Tests/UnitTests/UnitTest.cpp"
 		"Tests/UnitTests/UnitTest.h"

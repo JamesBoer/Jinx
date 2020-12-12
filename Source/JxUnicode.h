@@ -24,6 +24,10 @@ namespace Jinx::Impl
 	bool IsCaseFolded(const String & source);
 	String FoldCase(const String & source);
 
+	size_t GetStringCount(const String & source);
+	std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index);
+	std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index);
+
 } // namespace Jinx::Impl
 
 #endif // JX_UNICODE_H__

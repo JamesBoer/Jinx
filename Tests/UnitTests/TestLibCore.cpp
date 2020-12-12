@@ -53,6 +53,24 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("d") == 4);
 	}
 
+	SECTION("Test UTF-8 string size")
+	{
+		const char * scriptText =
+			u8R"(
+
+			import core
+
+			set a to "いろは"
+			set b to a size
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == u8"いろは");
+		REQUIRE(script->GetVariable("b") == 3);
+	}
+
 	SECTION("Test to empty functions")
 	{
 		const char * scriptText =

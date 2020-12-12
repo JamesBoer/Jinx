@@ -72,12 +72,15 @@ int main(int argc, char ** argv)
 
 	const char * scriptText =
 		u8R"(
-		set x to "hi"
-		)";
+
+			set my and to "Hello"
+			set b to my and's size
+
+			)";
 
 	auto script = TestExecuteScript(scriptText);
 	REQUIRE(script);
-	REQUIRE(script->GetVariable("x") == "hi");
-	
+	REQUIRE(script->GetVariable("b") == 5);
+
 	return 0;
 }
