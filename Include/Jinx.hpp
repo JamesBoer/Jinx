@@ -581,7 +581,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 2;
 
 	/// Patch number
-	const uint32_t PatchNumber = 1;
+	const uint32_t PatchNumber = 2;
 
 	// Forward declaration
 	class IScript;
@@ -2402,7 +2402,13 @@ namespace Jinx::Impl
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
-		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn = false);
+		enum class OnReturn
+		{
+			Continue,
+			Wait
+		};
+
+		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
@@ -2445,8 +2451,8 @@ namespace Jinx::Impl
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop = 0;
 
-			// Stop execution at the end of this frame
-			bool waitOnReturn = false;
+			// Continue or pause execution at the end of this frame
+			OnReturn onReturn = OnReturn::Continue;
 		};
 
 		// Execution frame stack
@@ -8065,7 +8071,7 @@ namespace Jinx::Impl
 				// Check to see if this is a bytecode function
 				if (functionDef->GetBytecode())
 				{
-					CallBytecodeFunction(functionDef, true);
+					CallBytecodeFunction(functionDef, OnReturn::Continue);
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
@@ -8648,7 +8654,7 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
-				bool exit = m_execution.back().waitOnReturn;
+				bool exit = m_execution.back().onReturn == OnReturn::Wait ? true : false;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
@@ -8867,10 +8873,10 @@ namespace Jinx::Impl
 		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
 	}
 
-	inline void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn)
+	inline void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn)
 	{
 		m_execution.push_back(ExecutionFrame(fnDef));
-		m_execution.back().waitOnReturn = waitOnReturn;
+		m_execution.back().onReturn = onReturn;
 		m_execution.back().reader.Seek(fnDef->GetOffset());
 		assert(m_stack.size() >= fnDef->GetParameterCount());
 		m_execution.back().stackTop = m_stack.size() - fnDef->GetParameterCount();
@@ -8894,7 +8900,7 @@ namespace Jinx::Impl
 		// Check to see if this is a bytecode function
 		if (functionDef->GetBytecode())
 		{
-			CallBytecodeFunction(functionDef, true);
+			CallBytecodeFunction(functionDef, OnReturn::Wait);
 			bool finished = m_finished;
 			m_finished = false;
 			if (!Execute())

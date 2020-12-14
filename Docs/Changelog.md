@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.2] - 2020-12-14
+
+- Fixed issue introduced in 1.2.1 causing functions to always wait on exit
+
 ## [1.2.1] - 2020-12-11
 
 - Allow character-based access to strings using [] operators

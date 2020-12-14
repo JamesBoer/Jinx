@@ -791,4 +791,24 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("c") == true);
 	}
 
+
+	SECTION("Test script finishes execution in one call")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+				return "finished"
+			end
+
+			set a to test
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		REQUIRE(script->GetVariable("a") == "finished");
+	}
+
 }
