@@ -196,7 +196,7 @@ namespace Jinx::Impl
 				// Check to see if this is a bytecode function
 				if (functionDef->GetBytecode())
 				{
-					CallBytecodeFunction(functionDef, true);
+					CallBytecodeFunction(functionDef, OnReturn::Continue);
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
@@ -779,7 +779,7 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
-				bool exit = m_execution.back().waitOnReturn;
+				bool exit = m_execution.back().onReturn == OnReturn::Wait ? true : false;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
@@ -998,10 +998,10 @@ namespace Jinx::Impl
 		return libraryInt->FindFunctionSignature(Visibility::Public, name).GetId();
 	}
 
-	inline_t void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn)
+	inline_t void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn)
 	{
 		m_execution.push_back(ExecutionFrame(fnDef));
-		m_execution.back().waitOnReturn = waitOnReturn;
+		m_execution.back().onReturn = onReturn;
 		m_execution.back().reader.Seek(fnDef->GetOffset());
 		assert(m_stack.size() >= fnDef->GetParameterCount());
 		m_execution.back().stackTop = m_stack.size() - fnDef->GetParameterCount();
@@ -1025,7 +1025,7 @@ namespace Jinx::Impl
 		// Check to see if this is a bytecode function
 		if (functionDef->GetBytecode())
 		{
-			CallBytecodeFunction(functionDef, true);
+			CallBytecodeFunction(functionDef, OnReturn::Wait);
 			bool finished = m_finished;
 			m_finished = false;
 			if (!Execute())

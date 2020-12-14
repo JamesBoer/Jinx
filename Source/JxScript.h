@@ -45,7 +45,13 @@ namespace Jinx::Impl
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
-		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, bool waitOnReturn = false);
+		enum class OnReturn
+		{
+			Continue,
+			Wait
+		};
+
+		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
@@ -88,8 +94,8 @@ namespace Jinx::Impl
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop = 0;
 
-			// Stop execution at the end of this frame
-			bool waitOnReturn = false;
+			// Continue or pause execution at the end of this frame
+			OnReturn onReturn = OnReturn::Continue;
 		};
 
 		// Execution frame stack
