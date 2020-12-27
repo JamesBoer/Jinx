@@ -287,7 +287,10 @@ namespace Jinx::Impl
 			{
 				Variant val;
 				val.Read(reader);
-				LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
+				if (val.IsString())
+					LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
+				else
+					LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
 			}
 			break;
 			case Opcode::SetIndex:
