@@ -800,4 +800,38 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("a").GetNumber() == Approx(123.456));
 	}
 
+	SECTION("Test parsing of collection parsing as function parameter inside loop")
+	{
+		const char * scriptText =
+			u8R"(
+
+			import core
+
+			function stringify {v}
+				set s to ""
+				if v type = collection
+					loop x over v
+						set s to s + (x value) as string
+					end
+				else
+					set s to v as string
+				end
+				return s
+			end
+
+			set 'my list' to 3, 2, 1
+			set s to ""
+			loop x over 'my list'
+				set s to s + stringify "key = ", x key, ", value = ", x value, " "
+			end
+
+		)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("s").GetString() == "key = 1, value = 3 key = 2, value = 2 key = 3, value = 1 ");
+	}
+
+
+
 }
