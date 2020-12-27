@@ -79,6 +79,9 @@ namespace Jinx::Impl
 		// Retrieve a precedence value for the specified operator
 		uint32_t GetOperatorPrecedence(Opcode opcode) const;
 
+		// Get the next symbol of a specified type
+		SymbolListCItr GetNextSymbolOfType(SymbolType type, SymbolListCItr endSymbol) const;
+
 		// Check to see if the symbol is a newline or at the end of the list
 		bool IsSymbolValid(SymbolListCItr symbol) const;
 
