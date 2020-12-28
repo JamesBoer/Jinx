@@ -581,7 +581,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 2;
 
 	/// Patch number
-	const uint32_t PatchNumber = 2;
+	const uint32_t PatchNumber = 3;
 
 	// Forward declaration
 	class IScript;
@@ -2201,6 +2201,9 @@ namespace Jinx::Impl
 
 		// Retrieve a precedence value for the specified operator
 		uint32_t GetOperatorPrecedence(Opcode opcode) const;
+
+		// Get the next symbol of a specified type
+		SymbolListCItr GetNextSymbolOfType(SymbolType type, SymbolListCItr endSymbol) const;
 
 		// Check to see if the symbol is a newline or at the end of the list
 		bool IsSymbolValid(SymbolListCItr symbol) const;
@@ -4917,6 +4920,21 @@ namespace Jinx::Impl
 		};
 	}
 
+	inline SymbolListCItr Parser::GetNextSymbolOfType(SymbolType type, SymbolListCItr endSymbol) const
+	{
+		auto curr = m_currentSymbol;
+		while (curr != endSymbol && curr != m_symbolList.end())
+		{
+			if (curr->type == type)
+			{
+				endSymbol = curr;
+				break;
+			}
+			++curr;
+		}
+		return endSymbol;
+	}
+
 	inline bool Parser::IsSymbolValid(SymbolListCItr symbol) const
 	{
 		if (m_error)
@@ -6607,9 +6625,12 @@ namespace Jinx::Impl
 		}
 		else
 		{
+			// Advance only to first comma
+			auto localEndSymbol = GetNextSymbolOfType(SymbolType::Comma, endSymbol);
+
 			// Parse the first subexpression, defined as any normal expression excluding index operators or lists, 
 			// which are handled in this function
-			ParseSubexpression(endSymbol);
+			ParseSubexpression(localEndSymbol);
 
 			// If we finish the first subexpression with a common, then we're parsing an indexed list
 			if (Accept(SymbolType::Comma))
@@ -6619,7 +6640,8 @@ namespace Jinx::Impl
 				do
 				{
 					Accept(SymbolType::NewLine);
-					ParseSubexpression(endSymbol);
+					localEndSymbol = GetNextSymbolOfType(SymbolType::Comma, endSymbol);
+					ParseSubexpression(localEndSymbol);
 					++count;
 				} 
 				while (Accept(SymbolType::Comma));
@@ -7699,7 +7721,10 @@ namespace Jinx::Impl
 			{
 				Variant val;
 				val.Read(reader);
-				LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
+				if (val.IsString())
+					LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
+				else
+					LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
 			}
 			break;
 			case Opcode::SetIndex:

@@ -138,6 +138,21 @@ namespace Jinx::Impl
 		};
 	}
 
+	inline_t SymbolListCItr Parser::GetNextSymbolOfType(SymbolType type, SymbolListCItr endSymbol) const
+	{
+		auto curr = m_currentSymbol;
+		while (curr != endSymbol && curr != m_symbolList.end())
+		{
+			if (curr->type == type)
+			{
+				endSymbol = curr;
+				break;
+			}
+			++curr;
+		}
+		return endSymbol;
+	}
+
 	inline_t bool Parser::IsSymbolValid(SymbolListCItr symbol) const
 	{
 		if (m_error)
@@ -1828,9 +1843,12 @@ namespace Jinx::Impl
 		}
 		else
 		{
+			// Advance only to first comma
+			auto localEndSymbol = GetNextSymbolOfType(SymbolType::Comma, endSymbol);
+
 			// Parse the first subexpression, defined as any normal expression excluding index operators or lists, 
 			// which are handled in this function
-			ParseSubexpression(endSymbol);
+			ParseSubexpression(localEndSymbol);
 
 			// If we finish the first subexpression with a common, then we're parsing an indexed list
 			if (Accept(SymbolType::Comma))
@@ -1840,7 +1858,8 @@ namespace Jinx::Impl
 				do
 				{
 					Accept(SymbolType::NewLine);
-					ParseSubexpression(endSymbol);
+					localEndSymbol = GetNextSymbolOfType(SymbolType::Comma, endSymbol);
+					ParseSubexpression(localEndSymbol);
 					++count;
 				} 
 				while (Accept(SymbolType::Comma));

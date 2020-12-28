@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.3] - 2020-12-27
+
+- Fixed issue with initialization lists parsing as function parameters
+
 ## [1.2.2] - 2020-12-14
 
 - Fixed issue introduced in 1.2.1 causing functions to always wait on exit
