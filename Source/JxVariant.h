@@ -77,6 +77,7 @@ namespace Jinx
 		Variant(const WString & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
 		Variant(const CollectionItrPair & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
+		Variant(RuntimeID value) : m_type(ValueType::Null) { SetFunction(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
 		Variant(const BufferPtr & value) : m_type(ValueType::Null) { SetBuffer(value); }
 		Variant(const Guid & value) : m_type(ValueType::Null) { SetGuid(value); }

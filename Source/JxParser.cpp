@@ -1166,7 +1166,7 @@ namespace Jinx::Impl
 
 		if (Accept(SymbolType::To))
 		{
-			ParseExpression();
+			ParseAssignment();
 			EmitOpcode(Opcode::SetProp);
 			EmitId(propertyName.GetId());
 			m_idNameMap[propertyName.GetId()] = propertyName.GetName();
@@ -1177,7 +1177,10 @@ namespace Jinx::Impl
 			Error("Must assign property an initial value");
 			return;
 		}
-		Expect(SymbolType::NewLine);
+		else
+		{
+			Expect(SymbolType::NewLine);
+		}
 	}
 
 	inline_t PropertyName Parser::ParsePropertyName()
@@ -1540,6 +1543,21 @@ namespace Jinx::Impl
 		FrameEnd();
 	}
 
+	inline_t void Parser::ParseFunctionDeclaration()
+	{
+		// Parse function signature
+		FunctionSignature signature = Parser::ParseFunctionSignature(VisibilityType::Local);
+		if (!signature.IsValid())
+		{
+			Error("Invalid function definition");
+			return;
+		}
+
+		// Push the function ID on the stack
+		EmitOpcode(Opcode::PushVal);
+		EmitValue(signature.GetId());
+	}
+
 	inline_t void Parser::ParseFunctionCall(const FunctionMatch & match)
 	{
 		assert(match.signature);
@@ -1874,6 +1892,20 @@ namespace Jinx::Impl
 	inline_t void Parser::ParseExpression()
 	{
 		ParseExpression(m_symbolList.end());
+	}
+
+	inline_t void Parser::ParseAssignment()
+	{
+		// Parse either function declaration or expression
+		if (Accept(SymbolType::Function))
+		{
+			ParseFunctionDeclaration();
+		}
+		else
+		{
+			ParseExpression();
+			Expect(SymbolType::NewLine);
+		}
 	}
 
 	inline_t void Parser::ParseErase()
@@ -2301,9 +2333,8 @@ namespace Jinx::Impl
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
 
-						// Parse assignment expression
-						ParseExpression();
-						Expect(SymbolType::NewLine);
+						// Parse either function declaration or expression
+						ParseAssignment();
 
 						// Assign property
 						if (subscripts)
@@ -2313,6 +2344,7 @@ namespace Jinx::Impl
 						}
 						else
 							EmitOpcode(Opcode::SetProp);
+
 						EmitId(propertyName.GetId());
 						m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 					}
@@ -2328,9 +2360,8 @@ namespace Jinx::Impl
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
 
-						// Parse assignment expression
-						ParseExpression();
-						Expect(SymbolType::NewLine);
+						// Parse either function declaration or expression
+						ParseAssignment();
 
 						// Add to variable table
 						VariableAssign(name);

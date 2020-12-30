@@ -158,6 +158,7 @@ namespace Jinx::Impl
 		String ParseFunctionNamePart();
 		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
 		void ParseFunctionDefinition(VisibilityType scope);
+		void ParseFunctionDeclaration();
 		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
 		void ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol);
@@ -165,6 +166,7 @@ namespace Jinx::Impl
 		void ParseSubexpression();
 		void ParseExpression(SymbolListCItr endSymbol);
 		void ParseExpression();
+		void ParseAssignment();
 		void ParseErase();
 		void ParseIncDec();
 		void ParseIfElse();

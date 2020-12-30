@@ -791,7 +791,6 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("c") == true);
 	}
 
-
 	SECTION("Test script finishes execution in one call")
 	{
 		static const char * scriptText =
@@ -809,6 +808,118 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 		REQUIRE(script->Execute());
 		REQUIRE(script->GetVariable("a") == "finished");
+	}
+
+	SECTION("Test function assignment to local variable #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+			end
+
+			set a to function test
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to local variable #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {integer i} test {string s}
+				return i, s
+			end
+
+			set a to function {int i} test {string s}
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to new property #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+			end
+
+			set public a to function test
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+
+	SECTION("Test function assignment to new property #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {integer i} test {string s}
+				return i, s
+			end
+
+			set private a to function {integer i} test {string s}
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to existing property #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+			end
+
+			set public a to null
+			set a to function test
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to existing property #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {integer i} test {string s}
+				return i, s
+			end
+
+			set private a to null
+			set a to function {integer i} test {string s}
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
 	}
 
 }

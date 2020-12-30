@@ -394,6 +394,16 @@ namespace Jinx
 				};
 			}
 			break;
+			case ValueType::Function:
+				switch (type)
+				{
+					case ValueType::String:
+						SetString(Impl::UnsignedIntegerToString(m_function));
+						return true;
+					default:
+						break;
+				};
+				break;
 			case ValueType::Collection:
 				switch (type)
 				{
