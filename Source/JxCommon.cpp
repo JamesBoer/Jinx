@@ -164,6 +164,7 @@ namespace Jinx
 				"string",
 				"collection",
 				"collectionitr",
+				"function",
 				"userobject",
 				"buffer",
 				"guid",

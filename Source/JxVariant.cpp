@@ -23,6 +23,7 @@ namespace Jinx
 				true,	// String
 				false,	// Collection
 				false,	// CollectionItr
+				true,   // Function
 				false,	// UserObject
 				false,	// Buffer
 				true,	// Guid
@@ -67,6 +68,9 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				new(&m_collectionItrPair) CollectionItrPair();
 				m_collectionItrPair = copy.m_collectionItrPair;
+				break;
+			case ValueType::Function:
+				m_function = copy.m_function;
 				break;
 			case ValueType::UserObject:
 				new(&m_userObject) UserObjectPtr();
@@ -120,6 +124,9 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				new(&m_collectionItrPair) CollectionItrPair();
 				m_collectionItrPair = copy.m_collectionItrPair;
+				break;
+			case ValueType::Function:
+				m_function = copy.m_function;
 				break;
 			case ValueType::UserObject:
 				new(&m_userObject) UserObjectPtr();
@@ -486,6 +493,16 @@ namespace Jinx
 		return v.GetCollectionItr();
 	}
 
+	inline_t RuntimeID Variant::GetFunction() const
+	{
+		if (IsFunction())
+			return m_function;
+		Variant v = *this;
+		if (!v.ConvertTo(ValueType::Function))
+			return false;
+		return v.GetFunction();
+	}
+
 	inline_t UserObjectPtr Variant::GetUserObject() const
 	{
 		if (IsUserObject())
@@ -631,6 +648,13 @@ namespace Jinx
 		m_collectionItrPair = value;
 	}
 
+	inline_t void Variant::SetFunction(RuntimeID value)
+	{
+		Destroy();
+		m_type = ValueType::Function;
+		m_function = value;
+	}
+
 	inline_t void Variant::SetGuid(const Guid & value)
 	{
 		Destroy();
@@ -718,6 +742,9 @@ namespace Jinx
 				break;
 			case ValueType::CollectionItr:
 				break;
+			case ValueType::Function:
+				writer.Write(m_function);
+				break;
 			case ValueType::UserObject:
 				break;
 			case ValueType::Buffer:
@@ -762,6 +789,9 @@ namespace Jinx
 			case ValueType::Collection:
 				break;
 			case ValueType::CollectionItr:
+				break;
+			case ValueType::Function:
+				reader.Read(&m_function);
 				break;
 			case ValueType::UserObject:
 				break;
@@ -973,6 +1003,12 @@ namespace Jinx
 					return false;
 				return left.GetCollectionItr() == right.GetCollectionItr();
 			}
+			case ValueType::Function:
+			{
+				if (!right.IsFunction())
+					return false;
+				return left.GetFunction() == right.GetFunction();
+			}
 			case ValueType::UserObject:
 			{
 				if (!right.IsUserObject())
@@ -1052,6 +1088,11 @@ namespace Jinx
 				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
 				return false;
 			}
+			case ValueType::Function:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing function type with < operator");
+				return false;
+			}
 			case ValueType::UserObject:
 			{
 				if (!right.IsUserObject())
@@ -1123,12 +1164,17 @@ namespace Jinx
 			}
 			case ValueType::Collection:
 			{
-				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with <= operator");
 				return false;
 			}
 			case ValueType::CollectionItr:
 			{
-				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with <= operator");
+				return false;
+			}
+			case ValueType::Function:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing function type with <= operator");
 				return false;
 			}
 			case ValueType::UserObject:

@@ -18,6 +18,9 @@ namespace Jinx
 	class BinaryReader;
 	class BinaryWriter;
 
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
 	/// Interface for user objects in scripts
 	class IUserObject
 	{
@@ -37,6 +40,7 @@ namespace Jinx
 		String,
 		Collection,
 		CollectionItr,
+		Function,
 		UserObject,
 		Buffer,
 		Guid,
@@ -111,6 +115,7 @@ namespace Jinx
 		WString GetWString() const;
 		CollectionPtr GetCollection() const;
 		CollectionItrPair GetCollectionItr() const;
+		RuntimeID GetFunction() const;
 		UserObjectPtr GetUserObject() const;
 		BufferPtr GetBuffer() const;
 		Guid GetGuid() const;
@@ -134,6 +139,7 @@ namespace Jinx
 		bool IsString() const { return m_type == ValueType::String ? true : false; }
 		bool IsCollection() const { return m_type == ValueType::Collection ? true : false; }
 		bool IsCollectionItr() const { return m_type == ValueType::CollectionItr ? true : false; }
+		bool IsFunction() const { return m_type == ValueType::Function ? true : false; }
 		bool IsUserObject() const { return m_type == ValueType::UserObject ? true : false; }
 		bool IsBuffer() const { return m_type == ValueType::Buffer ? true : false; }
 		bool IsGuid() const { return m_type == ValueType::Guid ? true : false; }
@@ -149,6 +155,7 @@ namespace Jinx
 		void SetString(const WString & value);
 		void SetCollection(const CollectionPtr & value);
 		void SetCollectionItr(const CollectionItrPair & value);
+		void SetFunction(RuntimeID value);
 		void SetUserObject(const UserObjectPtr & value);
 		void SetBuffer(const BufferPtr & value);
 		void SetGuid(const Guid & value);
@@ -178,6 +185,7 @@ namespace Jinx
 			String m_string;
 			CollectionPtr m_collection;
 			CollectionItrPair m_collectionItrPair;
+			RuntimeID m_function;
 			UserObjectPtr m_userObject;
 			BufferPtr m_buffer;
 			Guid m_guid;

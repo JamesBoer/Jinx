@@ -119,9 +119,6 @@ namespace Jinx
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
 
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
-
 #ifdef JINX_USE_ANY
 	using Any = std::any;
 #define JinxAny std::any
