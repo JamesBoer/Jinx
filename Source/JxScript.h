@@ -34,8 +34,9 @@ namespace Jinx::Impl
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
 
-	private:
 		void Error(const char * message);
+
+	private:
 
 		Variant GetVariable(RuntimeID id) const;
 		Variant Pop();

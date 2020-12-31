@@ -2181,6 +2181,12 @@ namespace Jinx::Impl
 			FunctionPartData partData;
 		};
 
+		enum SignatureParseMode
+		{
+			FunctionDefinition,
+			SignatureOnly,
+		};
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -2294,7 +2300,7 @@ namespace Jinx::Impl
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 		String ParseFunctionNamePart();
-		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
+		FunctionSignature ParseFunctionSignature(VisibilityType access, SignatureParseMode mode);
 		void ParseFunctionDefinition(VisibilityType scope);
 		void ParseFunctionDeclaration();
 		void ParseFunctionCall(const FunctionMatch & match);
@@ -2411,8 +2417,9 @@ namespace Jinx::Impl
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
 
-	private:
 		void Error(const char * message);
+
+	private:
 
 		Variant GetVariable(RuntimeID id) const;
 		Variant Pop();
@@ -4387,21 +4394,23 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline Variant GetKey(ScriptPtr, const Parameters & params)
+	inline Variant GetKey(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine(LogLevel::Error, "'get key' called with non-iterator param");
+			s->Error("'get key' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->first;
 	}
 
-	inline Variant GetValue(ScriptPtr, const Parameters & params)
+	inline Variant GetValue(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine(LogLevel::Error, "'get value' called with non-iterator param");
+			s->Error("'get value' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->second;
@@ -4420,30 +4429,31 @@ namespace Jinx::Impl
 
 	inline Variant Call(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (params.empty())
 		{
-			LogWriteLine(LogLevel::Error, "'call' function invoked with no parameters");
+			s->Error("'call' function invoked with no parameters");
 			return nullptr;
 		}
 		if (!params[0].IsFunction())
 		{
-			LogWriteLine(LogLevel::Error, "'call' function requires valid function variable as parameter");
+			s->Error("'call' function requires valid function variable as parameter");
 			return nullptr;
 		}
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		return s->CallFunction(params[0].GetFunction(), Parameters());
 	}
 
 	inline Variant CallWith(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (params.empty())
 		{
-			LogWriteLine(LogLevel::Error, "'call' function invoked with no parameters");
+			s->Error("'call' function invoked with no parameters");
 			return nullptr;
 		}
 		if (!params[0].IsFunction())
 		{
-			LogWriteLine(LogLevel::Error, "Invalid parameters to 'call with' function");
+			s->Error("Invalid parameters to 'call with' function");
 			return nullptr;
 		}
 		Parameters fnParams;
@@ -4458,7 +4468,6 @@ namespace Jinx::Impl
 		{
 			fnParams.push_back(params[1]);
 		}
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		return s->CallFunction(params[0].GetFunction(), fnParams);
 	}
 
@@ -4529,7 +4538,7 @@ namespace Jinx::Impl
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
-		return signature;
+		return *itr;
 	}
 
 	inline const FunctionPtrList Library::Functions() const
@@ -4919,7 +4928,7 @@ namespace Jinx::Impl
 	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
 	{
 		m_library = m_runtime->GetLibraryInternal(libraryName);
-		return ParseFunctionSignature(access, false);
+		return ParseFunctionSignature(access, SignatureParseMode::SignatureOnly);
 	}
 
 	inline String Parser::GetNameFromID(RuntimeID id) const
@@ -6169,7 +6178,7 @@ namespace Jinx::Impl
 		return s;
 	}
 
-	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, bool signatureOnly)
+	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, SignatureParseMode mode)
 	{
 		if (Check(SymbolType::NewLine))
 		{
@@ -6213,9 +6222,9 @@ namespace Jinx::Impl
 					}
 					part.names.push_back(paramName);
 				}
-				else if (signatureOnly)
+				else if (mode == SignatureParseMode::FunctionDefinition)
 				{
-					Error("No variable name or class identifier found in function signature");
+					Error("No variable name found in function signature");
 					return FunctionSignature();
 				}
 				Expect(SymbolType::CurlyClose);
@@ -6295,13 +6304,13 @@ namespace Jinx::Impl
 		// Create the function signature
 		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
 
-		// This flag indicates that we're not generating bytecode, so no need to output that data.
-		if (signatureOnly)
-		{
-			// Emit function definition opcode
-			EmitOpcode(Opcode::Function);
-			signature.Write(m_writer);
-		}
+		// This indicates that we're not generating bytecode, so no need to output that data.
+		//if (mode == SignatureParseMode::SignatureOnly)
+		//{
+		//	// Emit function definition opcode
+		//	EmitOpcode(Opcode::Function);
+		//	signature.Write(m_writer);
+		//}
 
 		return signature;
 	}
@@ -6323,13 +6332,17 @@ namespace Jinx::Impl
 		}
 
 		// Parse function signature
-		FunctionSignature signature = ParseFunctionSignature(scope);
+		FunctionSignature signature = ParseFunctionSignature(scope, SignatureParseMode::FunctionDefinition);
 		if (!signature.IsValid())
 		{
 			Error("Invalid function definition");
 			return;
 		}
 		m_idNameMap[signature.GetId()] = signature.GetName();
+
+		// Write function call opcode followed by signature data
+		EmitOpcode(Opcode::Function);
+		signature.Write(m_writer);
 
 		// Check function scope type
 		if (signature.GetVisibility() == VisibilityType::Local)
@@ -6408,7 +6421,7 @@ namespace Jinx::Impl
 	inline void Parser::ParseFunctionDeclaration()
 	{
 		// Parse function signature to match against
-		FunctionSignature match = Parser::ParseFunctionSignature(VisibilityType::Local);
+		FunctionSignature match = Parser::ParseFunctionSignature(VisibilityType::Local, SignatureParseMode::SignatureOnly);
 		if (!match.IsValid())
 		{
 			Error("Invalid function definition");
@@ -6444,13 +6457,14 @@ namespace Jinx::Impl
 		// Check to see if we found a valid local or library function
 		if (!signature.IsValid())
 		{
-			Error("Unable to find matching function definition");
+			Error("Unable to find matching function definition for '%s'", match.GetName().c_str());
 			return;
 		}
 
 		// Push the function ID on the stack
 		EmitOpcode(Opcode::PushVal);
 		EmitValue(signature.GetId());
+		m_idNameMap[signature.GetId()] = signature.GetName();
 	}
 
 	inline void Parser::ParseFunctionCall(const FunctionMatch & match)
@@ -8243,11 +8257,15 @@ namespace Jinx::Impl
 				if (functionDef->GetBytecode())
 				{
 					CallBytecodeFunction(functionDef, OnReturn::Continue);
+					if (m_error)
+						return false;
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
 				{
 					Push(CallNativeFunction(functionDef));
+					if (m_error)
+						return false;
 				}
 				else
 				{

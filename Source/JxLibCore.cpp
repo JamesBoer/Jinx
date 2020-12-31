@@ -77,21 +77,23 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline_t Variant GetKey(ScriptPtr, const Parameters & params)
+	inline_t Variant GetKey(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine(LogLevel::Error, "'get key' called with non-iterator param");
+			s->Error("'get key' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->first;
 	}
 
-	inline_t Variant GetValue(ScriptPtr, const Parameters & params)
+	inline_t Variant GetValue(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine(LogLevel::Error, "'get value' called with non-iterator param");
+			s->Error("'get value' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->second;
@@ -110,30 +112,31 @@ namespace Jinx::Impl
 
 	inline_t Variant Call(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (params.empty())
 		{
-			LogWriteLine(LogLevel::Error, "'call' function invoked with no parameters");
+			s->Error("'call' function invoked with no parameters");
 			return nullptr;
 		}
 		if (!params[0].IsFunction())
 		{
-			LogWriteLine(LogLevel::Error, "'call' function requires valid function variable as parameter");
+			s->Error("'call' function requires valid function variable as parameter");
 			return nullptr;
 		}
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		return s->CallFunction(params[0].GetFunction(), Parameters());
 	}
 
 	inline_t Variant CallWith(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (params.empty())
 		{
-			LogWriteLine(LogLevel::Error, "'call' function invoked with no parameters");
+			s->Error("'call' function invoked with no parameters");
 			return nullptr;
 		}
 		if (!params[0].IsFunction())
 		{
-			LogWriteLine(LogLevel::Error, "Invalid parameters to 'call with' function");
+			s->Error("Invalid parameters to 'call with' function");
 			return nullptr;
 		}
 		Parameters fnParams;
@@ -148,7 +151,6 @@ namespace Jinx::Impl
 		{
 			fnParams.push_back(params[1]);
 		}
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		return s->CallFunction(params[0].GetFunction(), fnParams);
 	}
 

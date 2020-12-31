@@ -1590,7 +1590,7 @@ namespace Jinx::Impl
 		// Check to see if we found a valid local or library function
 		if (!signature.IsValid())
 		{
-			Error("Unable to find matching function definition");
+			Error("Unable to find matching function definition for '%s'", match.GetName().c_str());
 			return;
 		}
 

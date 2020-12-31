@@ -313,4 +313,37 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("a") == "Hello world!");
 	}
 
+	SECTION("Test 'call with' function with wait")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x}
+				set z to 0
+				loop i from 1 to x
+					increment z by i
+					wait
+				end
+				return z
+			end
+
+			set f to function test {}
+			set a to call f with 4
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		REQUIRE(!script->IsFinished());
+		while (!script->IsFinished())
+		{
+			REQUIRE(script->Execute());
+		}
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 10);
+	}
+
 }

@@ -197,11 +197,15 @@ namespace Jinx::Impl
 				if (functionDef->GetBytecode())
 				{
 					CallBytecodeFunction(functionDef, OnReturn::Continue);
+					if (m_error)
+						return false;
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
 				{
 					Push(CallNativeFunction(functionDef));
+					if (m_error)
+						return false;
 				}
 				else
 				{
