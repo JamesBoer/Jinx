@@ -70,26 +70,35 @@ int main(int argc, char ** argv)
 	params.maxInstructions = std::numeric_limits<uint32_t>::max();
 	Initialize(params);
 
-	const char * scriptText =
+	static const char * libText =
 		u8R"(
 
-			-- Function declaration
-			function multiply {x} by {y}
-				return x * y
-			end
+			library lib
 
-			-- Assign a specific function to a variable 'f'
-			set f to function multiply {x} by {y}
+			public function some {x} test {y}
+				return x + y
+			end 
 
-			-- Execute specified function by variable
-			set x to call f with 3, 4
+			)";
 
-		)";
+	static const char * scriptText =
+		u8R"(
 
-	auto script = TestExecuteScript(scriptText);
+			import core
+			import lib
+
+			set f to function some {} test {}
+			set a to call f with "Hello ", "world!"
+
+			)";
+
+	auto runtime = TestCreateRuntime();
+	auto libScript = TestExecuteScript(libText, runtime);
+	auto script = TestExecuteScript(scriptText, runtime);
+	REQUIRE(libScript);
 	REQUIRE(script);
 	REQUIRE(script->GetVariable("f").IsFunction());
-	REQUIRE(script->GetVariable("x") == 12);
+	REQUIRE(script->GetVariable("a") == "Hello world!");
 
 	return 0;
 }

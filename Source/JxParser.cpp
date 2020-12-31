@@ -61,7 +61,7 @@ namespace Jinx::Impl
 	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
 	{
 		m_library = m_runtime->GetLibraryInternal(libraryName);
-		return ParseFunctionSignature(access, false);
+		return ParseFunctionSignature(access, SignatureParseMode::SignatureOnly);
 	}
 
 	inline_t String Parser::GetNameFromID(RuntimeID id) const
@@ -1311,7 +1311,7 @@ namespace Jinx::Impl
 		return s;
 	}
 
-	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, bool signatureOnly)
+	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, SignatureParseMode mode)
 	{
 		if (Check(SymbolType::NewLine))
 		{
@@ -1355,9 +1355,9 @@ namespace Jinx::Impl
 					}
 					part.names.push_back(paramName);
 				}
-				else if (signatureOnly)
+				else if (mode == SignatureParseMode::FunctionDefinition)
 				{
-					Error("No variable name or class identifier found in function signature");
+					Error("No variable name found in function signature");
 					return FunctionSignature();
 				}
 				Expect(SymbolType::CurlyClose);
@@ -1437,13 +1437,13 @@ namespace Jinx::Impl
 		// Create the function signature
 		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
 
-		// This flag indicates that we're not generating bytecode, so no need to output that data.
-		if (signatureOnly)
-		{
-			// Emit function definition opcode
-			EmitOpcode(Opcode::Function);
-			signature.Write(m_writer);
-		}
+		// This indicates that we're not generating bytecode, so no need to output that data.
+		//if (mode == SignatureParseMode::SignatureOnly)
+		//{
+		//	// Emit function definition opcode
+		//	EmitOpcode(Opcode::Function);
+		//	signature.Write(m_writer);
+		//}
 
 		return signature;
 	}
@@ -1465,13 +1465,17 @@ namespace Jinx::Impl
 		}
 
 		// Parse function signature
-		FunctionSignature signature = ParseFunctionSignature(scope);
+		FunctionSignature signature = ParseFunctionSignature(scope, SignatureParseMode::FunctionDefinition);
 		if (!signature.IsValid())
 		{
 			Error("Invalid function definition");
 			return;
 		}
 		m_idNameMap[signature.GetId()] = signature.GetName();
+
+		// Write function call opcode followed by signature data
+		EmitOpcode(Opcode::Function);
+		signature.Write(m_writer);
 
 		// Check function scope type
 		if (signature.GetVisibility() == VisibilityType::Local)
@@ -1550,7 +1554,7 @@ namespace Jinx::Impl
 	inline_t void Parser::ParseFunctionDeclaration()
 	{
 		// Parse function signature to match against
-		FunctionSignature match = Parser::ParseFunctionSignature(VisibilityType::Local);
+		FunctionSignature match = Parser::ParseFunctionSignature(VisibilityType::Local, SignatureParseMode::SignatureOnly);
 		if (!match.IsValid())
 		{
 			Error("Invalid function definition");
@@ -1593,6 +1597,7 @@ namespace Jinx::Impl
 		// Push the function ID on the stack
 		EmitOpcode(Opcode::PushVal);
 		EmitValue(signature.GetId());
+		m_idNameMap[signature.GetId()] = signature.GetName();
 	}
 
 	inline_t void Parser::ParseFunctionCall(const FunctionMatch & match)

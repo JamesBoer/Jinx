@@ -43,6 +43,12 @@ namespace Jinx::Impl
 			FunctionPartData partData;
 		};
 
+		enum SignatureParseMode
+		{
+			FunctionDefinition,
+			SignatureOnly,
+		};
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -156,7 +162,7 @@ namespace Jinx::Impl
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 		String ParseFunctionNamePart();
-		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
+		FunctionSignature ParseFunctionSignature(VisibilityType access, SignatureParseMode mode);
 		void ParseFunctionDefinition(VisibilityType scope);
 		void ParseFunctionDeclaration();
 		void ParseFunctionCall(const FunctionMatch & match);

@@ -38,7 +38,7 @@ namespace Jinx::Impl
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
-		return signature;
+		return *itr;
 	}
 
 	inline_t const FunctionPtrList Library::Functions() const

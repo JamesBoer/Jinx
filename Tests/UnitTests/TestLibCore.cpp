@@ -61,7 +61,7 @@ TEST_CASE("Test Core Library", "[Core]")
 			import core
 
 			set a to "いろは"
-			set b to a size
+			set b to a's size
 
 			)";
 
@@ -71,7 +71,7 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("b") == 3);
 	}
 
-	SECTION("Test to empty functions")
+	SECTION("Test empty function")
 	{
 		const char * scriptText =
 			u8R"(
@@ -210,7 +210,7 @@ TEST_CASE("Test Core Library", "[Core]")
 				return x
 			end
 
-			set f to function test {x}
+			set f to function test {}
 			set a to call f with 123
 
 			)";
@@ -232,7 +232,7 @@ TEST_CASE("Test Core Library", "[Core]")
 				return x, y
 			end
 
-			set f to function test {x} and {y}
+			set f to function test {} and {}
 			set a to call f with 12, 34
 
 			)";
@@ -243,6 +243,74 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("a").IsCollection());
 		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == 12);
 		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == 34);
+	}
+
+	SECTION("Test 'call' function from library")
+	{
+		static const char * libText =
+			u8R"(
+
+			library lib
+
+			public function test
+				return 123
+			end
+
+
+			)";
+
+		static const char * scriptText =
+			u8R"(
+
+			import core
+			import lib
+
+			set f to function test
+			set a to call f
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libScript = TestExecuteScript(libText, runtime);
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(libScript);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+	SECTION("Test 'call with' function from library")
+	{
+		static const char * libText =
+			u8R"(
+
+			library lib
+
+			public function {x} test {y}
+				return x + y
+			end
+
+
+			)";
+
+		static const char * scriptText =
+			u8R"(
+
+			import core
+			import lib
+
+			set f to function {} test {}
+			set a to call f with "Hello ", "world!"
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libScript = TestExecuteScript(libText, runtime);
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(libScript);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == "Hello world!");
 	}
 
 }

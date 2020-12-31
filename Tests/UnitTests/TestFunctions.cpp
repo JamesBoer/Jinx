@@ -836,7 +836,7 @@ TEST_CASE("Test Functions", "[Functions]")
 				return i, s
 			end
 
-			set a to function {int i} test {string s}
+			set a to function {int} test {string}
 			
 			)";
 
@@ -873,7 +873,7 @@ TEST_CASE("Test Functions", "[Functions]")
 				return i, s
 			end
 
-			set private a to function {integer i} test {string s}
+			set private a to function {integer} test {string}
 			
 			)";
 
