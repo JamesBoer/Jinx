@@ -381,6 +381,7 @@ namespace Jinx::Impl
 			type == SymbolType::Boolean ||
 			type == SymbolType::String ||
 			type == SymbolType::Collection ||
+			type == SymbolType::Function ||
 			type == SymbolType::Guid ||
 			type == SymbolType::Null;
 	}
@@ -979,6 +980,8 @@ namespace Jinx::Impl
 			return ValueType::Null;
 		case SymbolType::Collection:
 			return ValueType::Collection;
+		case SymbolType::Function:
+			return ValueType::Function;
 		case SymbolType::Guid:
 			return ValueType::Guid;
 		default:
@@ -1468,6 +1471,7 @@ namespace Jinx::Impl
 			Error("Invalid function definition");
 			return;
 		}
+		m_idNameMap[signature.GetId()] = signature.GetName();
 
 		// Check function scope type
 		if (signature.GetVisibility() == VisibilityType::Local)
@@ -1545,11 +1549,44 @@ namespace Jinx::Impl
 
 	inline_t void Parser::ParseFunctionDeclaration()
 	{
-		// Parse function signature
-		FunctionSignature signature = Parser::ParseFunctionSignature(VisibilityType::Local);
-		if (!signature.IsValid())
+		// Parse function signature to match against
+		FunctionSignature match = Parser::ParseFunctionSignature(VisibilityType::Local);
+		if (!match.IsValid())
 		{
 			Error("Invalid function definition");
+			return;
+		}
+
+		// Find any matching function signature.
+		FunctionSignature signature;
+
+		// First check local functions
+		auto itr = std::find_if(m_localFunctions.begin(), m_localFunctions.end(), [&] (const auto & e)
+		{ return e == match; });
+		if (itr != m_localFunctions.end())
+			signature = *itr;
+		else
+		{
+			// If no local function matches, check against all libraries,
+			// starting with local library.
+			signature = m_library->FindFunctionSignature(match);
+			if (!signature.IsValid())
+			{
+				for (const auto & import : m_importList)
+				{
+					// Get import library by name
+					auto library = m_runtime->GetLibraryInternal(import);
+					signature = library->FindFunctionSignature(match);
+					if (signature.IsValid())
+						break;
+				}
+			}
+		}
+
+		// Check to see if we found a valid local or library function
+		if (!signature.IsValid())
+		{
+			Error("Unable to find matching function definition");
 			return;
 		}
 

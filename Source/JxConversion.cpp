@@ -177,6 +177,11 @@ namespace Jinx::Impl
 			*outValue = ValueType::CollectionItr;
 			return true;
 		}
+		else if (value == "function")
+		{
+			*outValue = ValueType::Function;
+			return true;
+		}
 		else if (value == "buffer")
 		{
 			*outValue = ValueType::Buffer;

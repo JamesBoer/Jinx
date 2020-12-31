@@ -289,6 +289,8 @@ namespace Jinx::Impl
 				val.Read(reader);
 				if (val.IsString())
 					LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
+				else if (val.IsFunction())
+					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(val.GetFunction()).c_str());
 				else
 					LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
 			}

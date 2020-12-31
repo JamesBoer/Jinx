@@ -153,4 +153,96 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == "test func one");
 	}
 
+	SECTION("Test 'call' no-arg no-return function with local function variable")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			set public a to 0
+			function test
+				set a to 123
+			end
+
+			set f to function test
+			call f
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a") == 123);
+	}
+
+	SECTION("Test 'call' no-arg function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test
+				return 123
+			end
+
+			set f to function test
+			set a to call f
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+	SECTION("Test 'call with' one-arg function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x}
+				return x
+			end
+
+			set f to function test {x}
+			set a to call f with 123
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+	SECTION("Test 'call with' two-arg function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x} and {y}
+				return x, y
+			end
+
+			set f to function test {x} and {y}
+			set a to call f with 12, 34
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == 12);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == 34);
+	}
+
 }

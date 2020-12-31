@@ -108,6 +108,50 @@ namespace Jinx::Impl
 		return var;
 	}
 
+	inline_t Variant Call(ScriptPtr script, const Parameters & params)
+	{
+		if (params.empty())
+		{
+			LogWriteLine(LogLevel::Error, "'call' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			LogWriteLine(LogLevel::Error, "'call' function requires valid function variable as parameter");
+			return nullptr;
+		}
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		return s->CallFunction(params[0].GetFunction(), Parameters());
+	}
+
+	inline_t Variant CallWith(ScriptPtr script, const Parameters & params)
+	{
+		if (params.empty())
+		{
+			LogWriteLine(LogLevel::Error, "'call' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			LogWriteLine(LogLevel::Error, "Invalid parameters to 'call with' function");
+			return nullptr;
+		}
+		Parameters fnParams;
+		if (params[1].IsCollection())
+		{
+			auto collPtr = params[1].GetCollection();
+			auto & coll = *collPtr;
+			for (const auto & pair : coll)
+				fnParams.push_back(pair.second);
+		}
+		else
+		{
+			fnParams.push_back(params[1]);
+		}
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		return s->CallFunction(params[0].GetFunction(), fnParams);
+	}
+
 	inline_t void RegisterLibCore(RuntimePtr runtime)
 	{
 		auto library = runtime->GetLibrary("core");
@@ -120,6 +164,8 @@ namespace Jinx::Impl
 		library->RegisterFunction(Visibility::Public, { "{} (get) key" }, GetKey);
 		library->RegisterFunction(Visibility::Public, { "{} (get) value" }, GetValue);
 		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
+		library->RegisterFunction(Visibility::Public, { "call {function}" }, Call);
+		library->RegisterFunction(Visibility::Public, { "call {function} with {}" }, CallWith);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
