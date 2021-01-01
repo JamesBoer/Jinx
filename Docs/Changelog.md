@@ -1,9 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2020-12-30
+## [1.3.0] - 2020-12-31
 
 - Add support for first-class functions
+- Improve error handling for library functions
 
 ## [1.2.3] - 2020-12-27
 
