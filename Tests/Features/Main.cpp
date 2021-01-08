@@ -33,7 +33,7 @@ Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runti
 		runtime = CreateRuntime();
 
 	// Compile the text to bytecode
-	auto bytecode = runtime->Compile(scriptText, "Test Script", { "core" });
+	auto bytecode = runtime->Compile(scriptText, "Test Script"/*, { "core" }*/);
 	if (!bytecode)
 		return nullptr;
 
@@ -73,31 +73,23 @@ int main(int argc, char ** argv)
 	const char * scriptText =
 		u8R"(
 
-			import core
-
-			function stringify {v}
-				set s to ""
-				if v type = collection
-					loop x over v
-						set s to s + (x value) as string
-					end
-				else
-					set s to v as string
-				end
-				return s
+			function {x} (is) alpha
+				return true
 			end
 
-			set 'my list' to 3, 2, 1
-			set s to ""
-			loop x over 'my list'
-				set s to s + stringify "key = ", x key, ", value = ", x value, " "
+			function {x} is beta
+				return false
 			end
+
+			set a to 123 is alpha
+			set b to 456 is beta
 
 		)";
 
 	auto script = TestExecuteScript(scriptText);
 	REQUIRE(script);
-	REQUIRE(script->GetVariable("s").GetString() == "key = 1, value = 3 key = 2, value = 2 key = 3, value = 1 ");
+	REQUIRE(script->GetVariable("a") == true);
+	REQUIRE(script->GetVariable("b") == false);
 
 	return 0;
 }
