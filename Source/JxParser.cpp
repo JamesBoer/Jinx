@@ -382,6 +382,7 @@ namespace Jinx::Impl
 			type == SymbolType::String ||
 			type == SymbolType::Collection ||
 			type == SymbolType::Function ||
+			type == SymbolType::Coroutine ||
 			type == SymbolType::Guid ||
 			type == SymbolType::Null;
 	}
@@ -982,6 +983,8 @@ namespace Jinx::Impl
 			return ValueType::Collection;
 		case SymbolType::Function:
 			return ValueType::Function;
+		case SymbolType::Coroutine:
+			return ValueType::Coroutine;
 		case SymbolType::Guid:
 			return ValueType::Guid;
 		default:

@@ -131,7 +131,7 @@ namespace Jinx::Impl
 		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (params.empty())
 		{
-			s->Error("'call' function invoked with no parameters");
+			s->Error("'call with' function invoked with no parameters");
 			return nullptr;
 		}
 		if (!params[0].IsFunction())
@@ -154,6 +154,66 @@ namespace Jinx::Impl
 		return s->CallFunction(params[0].GetFunction(), fnParams);
 	}
 
+	inline_t Variant AsyncCall(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'async call' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			s->Error("'async call' function requires valid function variable as parameter");
+			return nullptr;
+		}
+		return s->CallFunction(params[0].GetFunction(), Parameters());
+	}
+
+	inline_t Variant AsyncCallWith(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'async call with' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			s->Error("Invalid parameters to 'async call with' function");
+			return nullptr;
+		}
+		Parameters fnParams;
+		if (params[1].IsCollection())
+		{
+			auto collPtr = params[1].GetCollection();
+			auto & coll = *collPtr;
+			for (const auto & pair : coll)
+				fnParams.push_back(pair.second);
+		}
+		else
+		{
+			fnParams.push_back(params[1]);
+		}
+		return s->CallFunction(params[0].GetFunction(), fnParams);
+	}
+
+	inline_t Variant IsFinished(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'is finished' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsCoroutine())
+		{
+			s->Error("Invalid parameters to 'is finished' function");
+			return nullptr;
+		}
+		return false;
+	}
+
 	inline_t void RegisterLibCore(RuntimePtr runtime)
 	{
 		auto library = runtime->GetLibrary("core");
@@ -168,6 +228,9 @@ namespace Jinx::Impl
 		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
 		library->RegisterFunction(Visibility::Public, { "call {function}" }, Call);
 		library->RegisterFunction(Visibility::Public, { "call {function} with {}" }, CallWith);
+		library->RegisterFunction(Visibility::Public, { "async call {function}" }, AsyncCall);
+		library->RegisterFunction(Visibility::Public, { "async call {function} with {}" }, AsyncCallWith);
+		library->RegisterFunction(Visibility::Public, { "{coroutine} is finished" }, IsFinished);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
