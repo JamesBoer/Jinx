@@ -21,6 +21,9 @@ namespace Jinx
 	using RuntimeID = uint64_t;
 	const RuntimeID InvalidID = 0;
 
+	using CoroutineID = uint32_t;
+	const CoroutineID InvalidCoroutine = std::numeric_limits<CoroutineID>::max();
+
 	/// Interface for user objects in scripts
 	class IUserObject
 	{
@@ -41,6 +44,7 @@ namespace Jinx
 		Collection,
 		CollectionItr,
 		Function,
+		Coroutine,
 		UserObject,
 		Buffer,
 		Guid,
@@ -78,6 +82,7 @@ namespace Jinx
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
 		Variant(const CollectionItrPair & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
 		Variant(RuntimeID value) : m_type(ValueType::Null) { SetFunction(value); }
+		Variant(CoroutineID value) : m_type(ValueType::Null) { SetCoroutine(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
 		Variant(const BufferPtr & value) : m_type(ValueType::Null) { SetBuffer(value); }
 		Variant(const Guid & value) : m_type(ValueType::Null) { SetGuid(value); }
@@ -117,6 +122,7 @@ namespace Jinx
 		CollectionPtr GetCollection() const;
 		CollectionItrPair GetCollectionItr() const;
 		RuntimeID GetFunction() const;
+		CoroutineID GetCoroutine() const;
 		UserObjectPtr GetUserObject() const;
 		BufferPtr GetBuffer() const;
 		Guid GetGuid() const;
@@ -141,6 +147,7 @@ namespace Jinx
 		bool IsCollection() const { return m_type == ValueType::Collection ? true : false; }
 		bool IsCollectionItr() const { return m_type == ValueType::CollectionItr ? true : false; }
 		bool IsFunction() const { return m_type == ValueType::Function ? true : false; }
+		bool IsCoroutine() const { return m_type == ValueType::Coroutine ? true : false; }
 		bool IsUserObject() const { return m_type == ValueType::UserObject ? true : false; }
 		bool IsBuffer() const { return m_type == ValueType::Buffer ? true : false; }
 		bool IsGuid() const { return m_type == ValueType::Guid ? true : false; }
@@ -157,6 +164,7 @@ namespace Jinx
 		void SetCollection(const CollectionPtr & value);
 		void SetCollectionItr(const CollectionItrPair & value);
 		void SetFunction(RuntimeID value);
+		void SetCoroutine(CoroutineID value);
 		void SetUserObject(const UserObjectPtr & value);
 		void SetBuffer(const BufferPtr & value);
 		void SetGuid(const Guid & value);
@@ -187,6 +195,7 @@ namespace Jinx
 			CollectionPtr m_collection;
 			CollectionItrPair m_collectionItrPair;
 			RuntimeID m_function;
+			CoroutineID m_coroutine;
 			UserObjectPtr m_userObject;
 			BufferPtr m_buffer;
 			Guid m_guid;

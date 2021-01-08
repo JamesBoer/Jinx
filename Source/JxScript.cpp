@@ -1064,6 +1064,21 @@ namespace Jinx::Impl
 		return fnDef->GetCallback()(shared_from_this(), params);
 	}
 
+	inline_t CoroutineID Script::AsyncCallFunction([[maybe_unused]] RuntimeID id, [[maybe_unused]] Parameters params)
+	{
+		return InvalidCoroutine;
+	}
+
+	inline_t bool Script::AsyncExecute(CoroutineID id)
+	{
+
+	}
+
+	inline_t Variant Script::AsyncGetReturnValue(CoroutineID id)
+	{
+
+	}
+
 	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const
 	{
 		std::vector<String, Allocator<String>> strings;

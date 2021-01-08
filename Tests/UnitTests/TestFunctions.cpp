@@ -922,4 +922,28 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(library->GetProperty("a").IsFunction());
 	}
 
+	SECTION("Test function resolution with matching optional/non-optional name parts")
+	{
+		const char * scriptText =
+			u8R"(
+
+			function {x} (is) alpha
+				return true
+			end
+
+			function {x} is beta
+				return false
+			end
+
+			set a to 123 is alpha
+			set b to 456 is beta
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == false);
+	}
+
 }
