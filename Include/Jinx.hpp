@@ -581,7 +581,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 2;
 
 	/// Patch number
-	const uint32_t PatchNumber = 3;
+	const uint32_t PatchNumber = 4;
 
 	// Forward declaration
 	class IScript;
@@ -5201,7 +5201,7 @@ namespace Jinx::Impl
 
 	inline bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
 	{
-		// If we reach the end of the parts list, return success
+		// If we reach the end of the parts list, return failure
 		if (partsIndex >= parts.size())
 			return false;
 
@@ -5221,10 +5221,13 @@ namespace Jinx::Impl
 			if (!part.optional && currSym->type != SymbolType::NameValue && !IsKeyword(currSym->type))
 				return false;
 
+			// Attempt to find a matching part name
+			bool matchedName = false;
 			for (const auto & name : part.names)
 			{
 				if (name == currSym->text)
 				{
+					matchedName = true;
 					match.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 1, part.optional));
 					auto newCurrSym = currSym;
 					++newCurrSym;
@@ -5234,10 +5237,12 @@ namespace Jinx::Impl
 						match = newMatch;
 						return true;
 					}
+					break;
 				}
 			}
 
-			if (part.optional)
+			// Check if this is an optional part and we haven't yet found a name match
+			if (!matchedName && part.optional)
 			{
 				auto newMatch = match;
 				newMatch.partData.push_back(std::make_tuple(FunctionSignaturePartType::Name, 0, true));

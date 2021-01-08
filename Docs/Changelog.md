@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.2.4] - 2021-01-07
+
+- Fixed function lookup with matching optional/non-optional parts
+
 ## [1.2.3] - 2020-12-27
 
 - Fixed issue with initialization lists parsing as function parameters
