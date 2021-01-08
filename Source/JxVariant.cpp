@@ -24,6 +24,7 @@ namespace Jinx
 				false,	// Collection
 				false,	// CollectionItr
 				true,   // Function
+				true,   // Coroutine
 				false,	// UserObject
 				false,	// Buffer
 				true,	// Guid
@@ -71,6 +72,9 @@ namespace Jinx
 				break;
 			case ValueType::Function:
 				m_function = copy.m_function;
+				break;
+			case ValueType::Coroutine:
+				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
 				new(&m_userObject) UserObjectPtr();
@@ -127,6 +131,9 @@ namespace Jinx
 				break;
 			case ValueType::Function:
 				m_function = copy.m_function;
+				break;
+			case ValueType::Coroutine:
+				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
 				new(&m_userObject) UserObjectPtr();
@@ -513,6 +520,16 @@ namespace Jinx
 		return v.GetFunction();
 	}
 
+	inline_t CoroutineID Variant::GetCoroutine() const
+	{
+		if (IsCoroutine())
+			return m_coroutine;
+		Variant v = *this;
+		if (!v.ConvertTo(ValueType::Coroutine))
+			return false;
+		return v.GetCoroutine();
+	}
+
 	inline_t UserObjectPtr Variant::GetUserObject() const
 	{
 		if (IsUserObject())
@@ -665,6 +682,13 @@ namespace Jinx
 		m_function = value;
 	}
 
+	inline_t void Variant::SetCoroutine(CoroutineID value)
+	{
+		Destroy();
+		m_type = ValueType::Coroutine;
+		m_coroutine = value;
+	}
+
 	inline_t void Variant::SetGuid(const Guid & value)
 	{
 		Destroy();
@@ -755,6 +779,8 @@ namespace Jinx
 			case ValueType::Function:
 				writer.Write(m_function);
 				break;
+			case ValueType::Coroutine:
+				break;
 			case ValueType::UserObject:
 				break;
 			case ValueType::Buffer:
@@ -802,6 +828,8 @@ namespace Jinx
 				break;
 			case ValueType::Function:
 				reader.Read(&m_function);
+				break;
+			case ValueType::Coroutine:
 				break;
 			case ValueType::UserObject:
 				break;
@@ -1019,6 +1047,12 @@ namespace Jinx
 					return false;
 				return left.GetFunction() == right.GetFunction();
 			}
+			case ValueType::Coroutine:
+			{
+				if (!right.IsCoroutine())
+					return false;
+				return left.GetCoroutine() == right.GetCoroutine();
+			}
 			case ValueType::UserObject:
 			{
 				if (!right.IsUserObject())
@@ -1103,6 +1137,11 @@ namespace Jinx
 				Impl::LogWriteLine(LogLevel::Error, "Error comparing function type with < operator");
 				return false;
 			}
+			case ValueType::Coroutine:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing coroutine type with < operator");
+				return false;
+			}
 			case ValueType::UserObject:
 			{
 				if (!right.IsUserObject())
@@ -1185,6 +1224,11 @@ namespace Jinx
 			case ValueType::Function:
 			{
 				Impl::LogWriteLine(LogLevel::Error, "Error comparing function type with <= operator");
+				return false;
+			}
+			case ValueType::Coroutine:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing coroutine type with <= operator");
 				return false;
 			}
 			case ValueType::UserObject:

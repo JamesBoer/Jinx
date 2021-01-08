@@ -22,11 +22,12 @@ namespace Jinx::Impl
 			5,  // Collection,
 			6,  // CollectionItr,
 			7,  // Function,
-			8,  // UserData,
-			9,  // Buffer,
-			10, // Guid,
-			11, // ValType,
-			12, // Any
+			8,  // Coroutine,
+			9,  // UserData,
+			10, // Buffer,
+			11, // Guid,
+			12, // ValType,
+			13, // Any
 		};
 
 		static_assert(countof(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
@@ -41,6 +42,7 @@ namespace Jinx::Impl
 			ValueType::Collection,
 			ValueType::CollectionItr,
 			ValueType::Function,
+			ValueType::Coroutine,
 			ValueType::UserObject,
 			ValueType::Buffer,
 			ValueType::Guid,

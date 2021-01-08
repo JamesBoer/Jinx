@@ -70,35 +70,42 @@ int main(int argc, char ** argv)
 	params.maxInstructions = std::numeric_limits<uint32_t>::max();
 	Initialize(params);
 
-	static const char * libText =
-		u8R"(
-
-			library lib
-
-			public function some {x} test {y}
-				return x + y
-			end 
-
-			)";
-
 	static const char * scriptText =
 		u8R"(
 
 			import core
-			import lib
+---
+			-- Function declaration
+			function count to {integer y}
+				set x to 0
+				loop until x < y
+					increment x
+					wait
+				end
+				return x
+			end
 
-			set f to function some {} test {}
-			set a to call f with "Hello ", "world!"
+			-- Store function in f
+			set f to function count to {}
 
+			-- Execute function asynchronously and store coroutine in function
+			set c to async call f with 10
+
+			-- Loop until coroutine is finished
+			loop until c is finished
+			end
+
+			-- Retrieve return value from coroutine
+			set v to c's value
+---
+			set x to 123 is finished
 			)";
 
-	auto runtime = TestCreateRuntime();
-	auto libScript = TestExecuteScript(libText, runtime);
-	auto script = TestExecuteScript(scriptText, runtime);
-	REQUIRE(libScript);
+	auto script = TestExecuteScript(scriptText);
 	REQUIRE(script);
-	REQUIRE(script->GetVariable("f").IsFunction());
-	REQUIRE(script->GetVariable("a") == "Hello world!");
+	//REQUIRE(script->GetVariable("f").IsFunction());
+	//REQUIRE(script->GetVariable("c").IsCoroutine());
+	//REQUIRE(script->GetVariable("v") == 10);
 
 	return 0;
 }

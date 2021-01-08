@@ -1018,6 +1018,11 @@ namespace Jinx::Impl
 		return CallFunction(id);
 	}
 
+	inline_t CoroutineID Script::AsyncCallFunction([[maybe_unused]] RuntimeID id, [[maybe_unused]] Parameters params)
+	{
+		return InvalidCoroutine;
+	}
+
 	inline_t Variant Script::CallFunction(RuntimeID id)
 	{
 		FunctionDefinitionPtr functionDef = m_runtime->FindFunction(id);
