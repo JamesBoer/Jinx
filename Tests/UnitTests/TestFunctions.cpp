@@ -836,7 +836,7 @@ TEST_CASE("Test Functions", "[Functions]")
 				return i, s
 			end
 
-			set a to function {int} test {string}
+			set a to function {integer} test {string}
 			
 			)";
 
@@ -912,7 +912,7 @@ TEST_CASE("Test Functions", "[Functions]")
 			end
 
 			set private a to null
-			set a to function {integer i} test {string s}
+			set a to function {integer} test {string}
 			
 			)";
 
@@ -944,6 +944,135 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == true);
 		REQUIRE(script->GetVariable("b") == false);
+	}
+
+	SECTION("Test function declaration as expression #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+				return 123
+			end
+
+			set a to 111, function test, "test"
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x}
+				return x
+			end
+
+			set a to 111, function test {}, "test"
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #3")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {integer x}
+				return x
+			end
+
+			set a to 111, function test {integer}, "test"
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #4")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function foo {x}
+				return x
+			end
+
+			function bar {x} buzz
+				return x
+			end
+
+			set a to bar function foo {} buzz
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #5")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function {w} foo {x}
+				return x + w
+			end
+
+			function bar {x} buzz
+				return x
+			end
+
+			set a to bar function {} foo {} buzz
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #6")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function {w} foo {x}
+				return x + w
+			end
+
+			function bar {w} fizz {x} buzz
+				return x
+			end
+
+			set a to bar function {} foo {} fizz function {} foo {} buzz
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
 	}
 
 }

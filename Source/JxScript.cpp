@@ -1069,14 +1069,14 @@ namespace Jinx::Impl
 		return InvalidCoroutine;
 	}
 
-	inline_t bool Script::AsyncExecute(CoroutineID id)
+	inline_t bool Script::AsyncExecute([[maybe_unused]] CoroutineID id)
 	{
-
+		return true;
 	}
 
-	inline_t Variant Script::AsyncGetReturnValue(CoroutineID id)
+	inline_t Variant Script::AsyncGetReturnValue([[maybe_unused]] CoroutineID id)
 	{
-
+		return nullptr;
 	}
 
 	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const

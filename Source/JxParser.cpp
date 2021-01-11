@@ -370,11 +370,11 @@ namespace Jinx::Impl
 			type == SymbolType::Null;
 	}
 
-	inline_t bool Parser::CheckValueType() const
+	inline_t bool Parser::CheckValueType(SymbolListCItr currSym) const
 	{
-		if (m_error || m_currentSymbol == m_symbolList.end())
+		if (m_error || currSym == m_symbolList.end())
 			return false;
-		auto type = m_currentSymbol->type;
+		auto type = currSym->type;
 		return
 			type == SymbolType::Number ||
 			type == SymbolType::Integer ||
@@ -385,6 +385,12 @@ namespace Jinx::Impl
 			type == SymbolType::Coroutine ||
 			type == SymbolType::Guid ||
 			type == SymbolType::Null;
+
+	}
+
+	inline_t bool Parser::CheckValueType() const
+	{
+		return CheckValueType(m_currentSymbol);
 	}
 
 	inline_t bool Parser::CheckFunctionNamePart() const
@@ -480,7 +486,7 @@ namespace Jinx::Impl
 
 			// Check for valid expressions
 			size_t symCount = 0;
-			if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount))
+			if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount) || CheckFunctionDeclaration(currSym, &symCount))
 			{
 				for (size_t i = 0; i < symCount; ++i)
 					++currSym;
@@ -865,6 +871,99 @@ namespace Jinx::Impl
 		return false;
 	}
 
+	inline_t bool Parser::CheckFunctionSignature(SymbolListCItr currSym, const FunctionSignature & signature, size_t * symCount) const
+	{
+		size_t count = 0;
+		if (symCount)
+			*symCount = 0;
+		for (const auto & part : signature.GetParts())
+		{
+			if (!IsSymbolValid(currSym))
+				return false;
+			if (part.partType == FunctionSignaturePartType::Parameter)
+			{
+				if (currSym->type != SymbolType::CurlyOpen)
+					return false;
+				++currSym;
+				++count;
+				if (!IsSymbolValid(currSym))
+					return false;
+				if (CheckValueType(currSym))
+				{
+					++currSym;
+					++count;
+					if (!IsSymbolValid(currSym))
+						return false;
+				}
+				if (currSym->type != SymbolType::CurlyClose)
+					return false;
+			}
+			else
+			{
+				bool matched = false;
+				for (const auto & name : part.names)
+				{
+					if (name == currSym->text)
+					{
+						matched = true;
+						break;
+					}
+				}
+				if (!matched && !part.optional)
+					return false;
+			}
+			++currSym;
+			++count;
+		}
+		if (symCount)
+			*symCount += count;
+		return true;
+	}
+
+	inline_t bool Parser::CheckFunctionDeclaration(SymbolListCItr currSym, size_t * symCount) const
+	{
+		if (!IsSymbolValid(currSym))
+			return false;
+
+		// First check for function keyword
+		if (currSym->type != SymbolType::Function)
+			return false;
+
+		// Since we parsed the function symbol, count starts at 1
+		if (symCount)
+			*symCount = 1;
+
+		// Advance symbol and check validity
+		++currSym;
+		if (!IsSymbolValid(currSym))
+			return false;
+
+		// Check for match in local functions
+		for (const auto & signature : m_localFunctions)
+		{
+			if (CheckFunctionSignature(currSym, signature, symCount))
+				return true;
+		}
+
+		// Check for match in all import libraries
+		for (const auto & import : m_importList)
+		{
+			auto library = m_runtime->GetLibraryInternal(import);
+			auto functions = library->Functions();
+			for (const auto & signature : functions)
+			{
+				if (CheckFunctionSignature(currSym, *signature, symCount))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	inline_t bool Parser::CheckFunctionDeclaration() const
+	{
+		return CheckFunctionDeclaration(m_currentSymbol, nullptr);
+	}
+
 	inline_t VisibilityType Parser::ParseScope()
 	{
 		if (m_error || m_currentSymbol == m_symbolList.end())
@@ -1177,7 +1276,11 @@ namespace Jinx::Impl
 
 		if (Accept(SymbolType::To))
 		{
-			ParseAssignment();
+			// Parse expression
+			ParseExpression();
+			Expect(SymbolType::NewLine);
+
+			// Set property opcode
 			EmitOpcode(Opcode::SetProp);
 			EmitId(propertyName.GetId());
 			m_idNameMap[propertyName.GetId()] = propertyName.GetName();
@@ -1419,11 +1522,6 @@ namespace Jinx::Impl
 			}
 			signatureParts.push_back(part);
 		}
-		if (!Expect(SymbolType::NewLine))
-		{
-			Error("Expected new line at end of function signature");
-			return FunctionSignature();
-		}
 
 		// Check for function signature validity with matching keywords
 		if (!parsedNonKeywordName)
@@ -1442,18 +1540,8 @@ namespace Jinx::Impl
 			return FunctionSignature();
 		}
 
-		// Create the function signature
-		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
-
-		// This indicates that we're not generating bytecode, so no need to output that data.
-		//if (mode == SignatureParseMode::SignatureOnly)
-		//{
-		//	// Emit function definition opcode
-		//	EmitOpcode(Opcode::Function);
-		//	signature.Write(m_writer);
-		//}
-
-		return signature;
+		// Create and return the function signature
+		return FunctionSignature(scope, m_library->GetName(), signatureParts);
 	}
 
 	inline_t void Parser::ParseFunctionDefinition(VisibilityType scope)
@@ -1479,7 +1567,15 @@ namespace Jinx::Impl
 			Error("Invalid function definition");
 			return;
 		}
+
 		m_idNameMap[signature.GetId()] = signature.GetName();
+
+		// Check for newline
+		if (!Expect(SymbolType::NewLine))
+		{
+			Error("Expected new line at end of function signature");
+			return;
+		}
 
 		// Write function call opcode followed by signature data
 		EmitOpcode(Opcode::Function);
@@ -1561,46 +1657,44 @@ namespace Jinx::Impl
 
 	inline_t void Parser::ParseFunctionDeclaration()
 	{
-		// Parse function signature to match against
-		FunctionSignature match = Parser::ParseFunctionSignature(VisibilityType::Local, SignatureParseMode::SignatureOnly);
-		if (!match.IsValid())
-		{
-			Error("Invalid function definition");
-			return;
-		}
-
-		// Find any matching function signature.
 		FunctionSignature signature;
+		size_t symCount = 0;
 
-		// First check local functions
-		auto itr = std::find_if(m_localFunctions.begin(), m_localFunctions.end(), [&] (const auto & e)
-		{ return e == match; });
-		if (itr != m_localFunctions.end())
-			signature = *itr;
-		else
+		// Check for match in local functions
+		for (const auto & sig : m_localFunctions)
 		{
-			// If no local function matches, check against all libraries,
-			// starting with local library.
-			signature = m_library->FindFunctionSignature(match);
-			if (!signature.IsValid())
+			size_t count;
+			if (CheckFunctionSignature(m_currentSymbol, sig, &count))
 			{
-				for (const auto & import : m_importList)
+				if (sig.GetLength() > signature.GetLength())
 				{
-					// Get import library by name
-					auto library = m_runtime->GetLibraryInternal(import);
-					signature = library->FindFunctionSignature(match);
-					if (signature.IsValid())
-						break;
+					signature = sig;
+					symCount = count;
 				}
 			}
 		}
 
-		// Check to see if we found a valid local or library function
-		if (!signature.IsValid())
+		// Check for match in all import libraries
+		for (const auto & import : m_importList)
 		{
-			Error("Unable to find matching function definition for '%s'", match.GetName().c_str());
-			return;
+			auto library = m_runtime->GetLibraryInternal(import);
+			auto functions = library->Functions();
+			for (const auto & sig : functions)
+			{
+				size_t count;
+				if (CheckFunctionSignature(m_currentSymbol, *sig, &count))
+				{
+					if (sig->GetLength() > signature.GetLength())
+					{
+						signature = *sig;
+						symCount = count;
+					}
+				}
+			}
 		}
+
+		for (size_t i = 0; i < symCount; ++i)
+			NextSymbol();
 
 		// Push the function ID on the stack
 		EmitOpcode(Opcode::PushVal);
@@ -1706,6 +1800,15 @@ namespace Jinx::Impl
 				ParseSubscriptGet();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
+			}
+			else if (CheckFunctionDeclaration())
+			{
+				if (!Expect(SymbolType::Function))
+				{
+					Error("Expected function keyword");
+					return;
+				}
+				ParseFunctionDeclaration();
 			}
 			else if (CheckValue())
 			{
@@ -1942,20 +2045,6 @@ namespace Jinx::Impl
 	inline_t void Parser::ParseExpression()
 	{
 		ParseExpression(m_symbolList.end());
-	}
-
-	inline_t void Parser::ParseAssignment()
-	{
-		// Parse either function declaration or expression
-		if (Accept(SymbolType::Function))
-		{
-			ParseFunctionDeclaration();
-		}
-		else
-		{
-			ParseExpression();
-			Expect(SymbolType::NewLine);
-		}
 	}
 
 	inline_t void Parser::ParseErase()
@@ -2383,8 +2472,9 @@ namespace Jinx::Impl
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
 
-						// Parse either function declaration or expression
-						ParseAssignment();
+						// Parse expression
+						ParseExpression();
+						Expect(SymbolType::NewLine);
 
 						// Assign property
 						if (subscripts)
@@ -2410,8 +2500,9 @@ namespace Jinx::Impl
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
 
-						// Parse either function declaration or expression
-						ParseAssignment();
+						// Parse expression
+						ParseExpression();
+						Expect(SymbolType::NewLine);
 
 						// Add to variable table
 						VariableAssign(name);

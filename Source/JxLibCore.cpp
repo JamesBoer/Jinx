@@ -171,7 +171,7 @@ namespace Jinx::Impl
 			s->Error("'async call' function requires valid function variable as parameter");
 			return nullptr;
 		}
-		return s->AsyncCallFunction(params[0].GetFunction(), Parameters());
+		return s->CallFunction(params[0].GetFunction(), Parameters());
 	}
 
 	inline_t Variant AsyncCallWith(ScriptPtr script, const Parameters & params)
@@ -199,7 +199,7 @@ namespace Jinx::Impl
 		{
 			fnParams.push_back(params[1]);
 		}
-		return s->AsyncCallFunction(params[0].GetFunction(), fnParams);
+		return s->CallFunction(params[0].GetFunction(), fnParams);
 	}
 
 	inline_t Variant IsFinished(ScriptPtr script, const Parameters & params)
@@ -215,7 +215,7 @@ namespace Jinx::Impl
 			s->Error("Invalid parameters to 'is finished' function");
 			return nullptr;
 		}
-		return true;
+		return false;
 	}
 
 	inline_t void RegisterLibCore(RuntimePtr runtime)
@@ -234,7 +234,7 @@ namespace Jinx::Impl
 		library->RegisterFunction(Visibility::Public, { "call {function} with {}" }, CallWith);
 		library->RegisterFunction(Visibility::Public, { "async call {function}" }, AsyncCall);
 		library->RegisterFunction(Visibility::Public, { "async call {function} with {}" }, AsyncCallWith);
-		library->RegisterFunction(Visibility::Public, { "{coroutine} (is) finished" }, IsFinished);
+		library->RegisterFunction(Visibility::Public, { "{coroutine} is finished" }, IsFinished);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
