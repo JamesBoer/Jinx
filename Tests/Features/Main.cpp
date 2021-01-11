@@ -74,38 +74,25 @@ int main(int argc, char ** argv)
 		u8R"(
 
 			import core
----
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop until x < y
-					increment x
-					wait
-				end
+
+			function foo {x}
 				return x
 			end
 
-			-- Store function in f
-			set f to function count to {}
-
-			-- Execute function asynchronously and store coroutine in function
-			set c to async call f with 10
-
-			-- Loop until coroutine is finished
-			loop until c is finished
+			function bar {x} buzz
+				return x
 			end
 
-			-- Retrieve return value from coroutine
-			set v to c's value
----
-			set x to 123 is finished
+			set a to 111, function foo {}, "test"
+
+			bar function foo {} buzz
+			
 			)";
 
 	auto script = TestExecuteScript(scriptText);
 	REQUIRE(script);
-	//REQUIRE(script->GetVariable("f").IsFunction());
-	//REQUIRE(script->GetVariable("c").IsCoroutine());
-	//REQUIRE(script->GetVariable("v") == 10);
+	REQUIRE(script->GetVariable("a").IsCollection());
+	REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
 
 	return 0;
 }

@@ -43,7 +43,7 @@ namespace Jinx::Impl
 			FunctionPartData partData;
 		};
 
-		enum SignatureParseMode
+		enum class SignatureParseMode
 		{
 			FunctionDefinition,
 			SignatureOnly,
@@ -132,6 +132,7 @@ namespace Jinx::Impl
 		bool CheckName() const;
 		bool CheckValue() const;
 		bool CheckValueType() const;
+		bool CheckValueType(SymbolListCItr currSym) const;
 		bool CheckFunctionNamePart() const;
 		bool CheckVariable(SymbolListCItr currSym, size_t * symCount = nullptr) const;
 		bool CheckVariable() const;
@@ -139,6 +140,9 @@ namespace Jinx::Impl
 		bool CheckProperty(size_t * symCount = nullptr) const;
 		bool CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const;
 		String CheckLibraryName() const;
+		bool CheckFunctionSignature(SymbolListCItr currSym, const FunctionSignature & signature, size_t * symCount) const;
+		bool CheckFunctionDeclaration(SymbolListCItr currSym, size_t * symCount) const;
+		bool CheckFunctionDeclaration() const;
 		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const;
 		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
@@ -172,7 +176,6 @@ namespace Jinx::Impl
 		void ParseSubexpression();
 		void ParseExpression(SymbolListCItr endSymbol);
 		void ParseExpression();
-		void ParseAssignment();
 		void ParseErase();
 		void ParseIncDec();
 		void ParseIfElse();
