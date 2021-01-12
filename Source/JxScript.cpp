@@ -783,14 +783,19 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
-				bool exit = m_execution.back().onReturn == OnReturn::Wait ? true : false;
+				auto onReturn = m_execution.back().onReturn;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
 					m_stack.pop_back();
 				Push(val);
-				if (exit)
+				if (onReturn == OnReturn::Wait)
 					opcode = Opcode::Wait;
+				else if (onReturn == OnReturn::Finish)
+				{
+					opcode = Opcode::Exit;
+					m_finished = true;
+				}
 			}
 			break;
 			case Opcode::ScopeBegin:
@@ -1064,19 +1069,51 @@ namespace Jinx::Impl
 		return fnDef->GetCallback()(shared_from_this(), params);
 	}
 
-	inline_t CoroutineID Script::AsyncCallFunction([[maybe_unused]] RuntimeID id, [[maybe_unused]] Parameters params)
+	inline_t CoroutineID Script::AsyncCallFunction(RuntimeID id, Parameters params)
 	{
-		return InvalidCoroutine;
+		ScriptIPtr script = std::static_pointer_cast<Script>(m_runtime->CreateScript(m_execution.back().bytecode, m_userContext));
+		CoroutineID coroutine = static_cast<CoroutineID>(m_coroutines.size());
+		m_coroutines.emplace_back(script, nullptr, false);
+
+		for (const auto & param : params)
+			script->Push(param);
+
+		FunctionDefinitionPtr functionDef = m_runtime->FindFunction(id);
+		if (!functionDef)
+		{
+			Error("Could not find function definition");
+			return InvalidCoroutine;
+		}
+		// Check to see if this is a bytecode function
+		if (functionDef->GetBytecode())
+		{
+			script->CallBytecodeFunction(functionDef, OnReturn::Finish);
+		}
+		else
+		{
+			Error("Native function can't be called as asynchronously");
+			return InvalidCoroutine;
+		}
+		return coroutine;
 	}
 
-	inline_t bool Script::AsyncExecute([[maybe_unused]] CoroutineID id)
+	inline_t bool Script::AsyncIsFinished(CoroutineID id)
 	{
-		return true;
+		auto & coroutine = m_coroutines[static_cast<size_t>(id)];
+		if (!coroutine.finished)
+		{
+			coroutine.script->Execute();
+			coroutine.finished = coroutine.script->IsFinished();
+			if (coroutine.finished)
+				m_coroutines[static_cast<size_t>(id)].returnValue = coroutine.script->Pop();
+		}
+		return coroutine.finished;
 	}
 
-	inline_t Variant Script::AsyncGetReturnValue([[maybe_unused]] CoroutineID id)
+	inline_t Variant Script::AsyncGetReturnValue(CoroutineID id)
 	{
-		return nullptr;
+		const auto & coroutine = m_coroutines[static_cast<size_t>(id)];
+		return coroutine.returnValue;
 	}
 
 	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const

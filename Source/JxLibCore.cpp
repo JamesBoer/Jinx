@@ -97,7 +97,7 @@ namespace Jinx::Impl
 		}
 		else if (params[0].IsCoroutine())
 		{
-			return params[0].GetCoroutine();
+			return s->AsyncGetReturnValue(params[0].GetCoroutine());
 		}
 		s->Error("'get value' called with invalid param type");
 		return nullptr;
@@ -171,7 +171,7 @@ namespace Jinx::Impl
 			s->Error("'async call' function requires valid function variable as parameter");
 			return nullptr;
 		}
-		return s->CallFunction(params[0].GetFunction(), Parameters());
+		return s->AsyncCallFunction(params[0].GetFunction(), Parameters());
 	}
 
 	inline_t Variant AsyncCallWith(ScriptPtr script, const Parameters & params)
@@ -199,7 +199,7 @@ namespace Jinx::Impl
 		{
 			fnParams.push_back(params[1]);
 		}
-		return s->CallFunction(params[0].GetFunction(), fnParams);
+		return s->AsyncCallFunction(params[0].GetFunction(), fnParams);
 	}
 
 	inline_t Variant IsFinished(ScriptPtr script, const Parameters & params)
@@ -215,7 +215,46 @@ namespace Jinx::Impl
 			s->Error("Invalid parameters to 'is finished' function");
 			return nullptr;
 		}
-		return false;
+		return s->AsyncIsFinished(params[0].GetCoroutine());
+	}
+
+	inline_t Variant AllAreFinished(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		auto collPtr = params[0].GetCollection();
+		bool allFinished = true;
+		for (const auto & pair : *collPtr)
+		{
+			if (!pair.second.IsCoroutine())
+			{
+				s->Error("Invalid parameters to 'all (of) {} (are) finished' function");
+				return false;
+			}
+			if (!s->AsyncIsFinished(pair.second.GetCoroutine()))
+				allFinished = false;
+		}
+		return allFinished;
+	}
+
+	inline_t Variant AnyIsFinished(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		auto collPtr = params[0].GetCollection();
+		bool anyFinished = false;
+		for (const auto & pair : *collPtr)
+		{
+			if (!pair.second.IsCoroutine())
+			{
+				s->Error("Invalid parameters to 'any (of) {} (is) finished' function");
+				return false;
+			}
+			if (s->AsyncIsFinished(pair.second.GetCoroutine()))
+			{
+				anyFinished = true;
+				break;
+			}
+		}
+		return anyFinished;
 	}
 
 	inline_t void RegisterLibCore(RuntimePtr runtime)
@@ -227,14 +266,16 @@ namespace Jinx::Impl
 		library->RegisterFunction(Visibility::Public, { "write line {}" }, WriteLine);
 		library->RegisterFunction(Visibility::Public, { "{} (get) size" }, GetSize);
 		library->RegisterFunction(Visibility::Public, { "{} (is) empty" }, IsEmpty);
-		library->RegisterFunction(Visibility::Public, { "{} (get) key" }, GetKey);
+		library->RegisterFunction(Visibility::Public, { "{iterator} (get) key" }, GetKey);
 		library->RegisterFunction(Visibility::Public, { "{} (get) value" }, GetValue);
 		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
 		library->RegisterFunction(Visibility::Public, { "call {function}" }, Call);
 		library->RegisterFunction(Visibility::Public, { "call {function} with {}" }, CallWith);
 		library->RegisterFunction(Visibility::Public, { "async call {function}" }, AsyncCall);
 		library->RegisterFunction(Visibility::Public, { "async call {function} with {}" }, AsyncCallWith);
-		library->RegisterFunction(Visibility::Public, { "{coroutine} is finished" }, IsFinished);
+		library->RegisterFunction(Visibility::Public, { "{coroutine} (is) finished" }, IsFinished);
+		library->RegisterFunction(Visibility::Public, { "all (of) {collection} (are) finished" }, AllAreFinished);
+		library->RegisterFunction(Visibility::Public, { "any (of) {collection} (is) finished" }, AnyIsFinished);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");

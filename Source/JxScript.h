@@ -12,6 +12,8 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx::Impl
 {
+	class Script;
+	using ScriptIPtr = std::shared_ptr<Script>;
 
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
@@ -23,7 +25,7 @@ namespace Jinx::Impl
 		Variant CallFunction(RuntimeID id, Parameters params) override;
 
 		CoroutineID AsyncCallFunction(RuntimeID id, Parameters params);
-		bool AsyncExecute(CoroutineID id);
+		bool AsyncIsFinished(CoroutineID id);
 		Variant AsyncGetReturnValue(CoroutineID id);
 
 		bool Execute() override;
@@ -53,7 +55,8 @@ namespace Jinx::Impl
 		enum class OnReturn
 		{
 			Continue,
-			Wait
+			Wait,
+			Finish,
 		};
 
 		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
@@ -109,6 +112,20 @@ namespace Jinx::Impl
 		// Runtime stack
 		std::vector<Variant, Allocator<Variant>> m_stack;
 
+		// Coroutine runtime data
+		struct CoroutineData
+		{
+			CoroutineData(const ScriptIPtr & s, const Variant & rv, bool f) :
+				script(s), returnValue(rv), finished(f)
+			{}
+			ScriptIPtr script;
+			Variant returnValue;
+			bool finished = false;
+		};
+
+		// Executing coroutines
+		std::vector<CoroutineData, Allocator<CoroutineData>> m_coroutines;
+
 		// Current library
 		LibraryIPtr m_library;
 
@@ -128,7 +145,6 @@ namespace Jinx::Impl
 		String m_name;
 	};
 
-	using ScriptIPtr = std::shared_ptr<Script>;
 
 } // namespace Jinx::Impl
 

@@ -1,10 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2020-12-31
+## [1.3.0] - 2021-01-11
 
 - Add support for first-class functions
+- Add support for coroutines
 - Improve error handling for library functions
+- Update documentation
 
 ## [1.2.4] - 2021-01-07
 

@@ -132,6 +132,7 @@ if(NOT jinx_is_subproject)
 		"Tests/UnitTests/Main.cpp"
 		"Tests/UnitTests/TestCasts.cpp"
 		"Tests/UnitTests/TestCollections.cpp"
+		"Tests/UnitTests/TestCoroutines.cpp"
 		"Tests/UnitTests/TestErrors.cpp"
 		"Tests/UnitTests/TestExpressions.cpp"
 		"Tests/UnitTests/TestFunctions.cpp"
