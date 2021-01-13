@@ -1069,53 +1069,6 @@ namespace Jinx::Impl
 		return fnDef->GetCallback()(shared_from_this(), params);
 	}
 
-	inline_t CoroutineID Script::AsyncCallFunction(RuntimeID id, Parameters params)
-	{
-		ScriptIPtr script = std::static_pointer_cast<Script>(m_runtime->CreateScript(m_execution.back().bytecode, m_userContext));
-		CoroutineID coroutine = static_cast<CoroutineID>(m_coroutines.size());
-		m_coroutines.emplace_back(script, nullptr, false);
-
-		for (const auto & param : params)
-			script->Push(param);
-
-		FunctionDefinitionPtr functionDef = m_runtime->FindFunction(id);
-		if (!functionDef)
-		{
-			Error("Could not find function definition");
-			return InvalidCoroutine;
-		}
-		// Check to see if this is a bytecode function
-		if (functionDef->GetBytecode())
-		{
-			script->CallBytecodeFunction(functionDef, OnReturn::Finish);
-		}
-		else
-		{
-			Error("Native function can't be called as asynchronously");
-			return InvalidCoroutine;
-		}
-		return coroutine;
-	}
-
-	inline_t bool Script::AsyncIsFinished(CoroutineID id)
-	{
-		auto & coroutine = m_coroutines[static_cast<size_t>(id)];
-		if (!coroutine.finished)
-		{
-			coroutine.script->Execute();
-			coroutine.finished = coroutine.script->IsFinished();
-			if (coroutine.finished)
-				m_coroutines[static_cast<size_t>(id)].returnValue = coroutine.script->Pop();
-		}
-		return coroutine.finished;
-	}
-
-	inline_t Variant Script::AsyncGetReturnValue(CoroutineID id)
-	{
-		const auto & coroutine = m_coroutines[static_cast<size_t>(id)];
-		return coroutine.returnValue;
-	}
-
 	inline_t std::vector<String, Allocator<String>> Script::GetCallStack() const
 	{
 		std::vector<String, Allocator<String>> strings;

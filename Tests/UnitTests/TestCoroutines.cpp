@@ -242,4 +242,51 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 		REQUIRE(script->GetVariable("v2") == 10);
 		REQUIRE(script->GetVariable("v3") == 5);
 	}
+
+	SECTION("Test coroutine in library")
+	{
+		static const char * libraryText =
+			u8R"(
+
+			import core
+			library test
+
+			-- Function declaration
+			function count to {integer y}
+				set x to 0
+				loop while x < y
+					increment x
+					wait
+				end
+				return x
+			end
+
+			-- Execute function asynchronously and store coroutine in property c
+			set public c to async call function count to {} with 10
+
+			)";
+
+		static const char * scriptText =
+			u8R"(
+
+			import core
+			import test
+
+			-- Wait until coroutine is finished
+			wait until c is finished
+
+			-- Retrieve return value from coroutine
+			set v to c's value
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libScript = TestExecuteScript(libraryText, runtime);
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(libScript);
+		REQUIRE(script);
+		auto library = libScript->GetLibrary();
+		REQUIRE(library->GetProperty("c").IsCoroutine());
+		REQUIRE(script->GetVariable("v") == 10);
+	}
 }

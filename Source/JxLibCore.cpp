@@ -97,7 +97,7 @@ namespace Jinx::Impl
 		}
 		else if (params[0].IsCoroutine())
 		{
-			return s->AsyncGetReturnValue(params[0].GetCoroutine());
+			return params[0].GetCoroutine()->GetReturnValue();
 		}
 		s->Error("'get value' called with invalid param type");
 		return nullptr;
@@ -171,7 +171,7 @@ namespace Jinx::Impl
 			s->Error("'async call' function requires valid function variable as parameter");
 			return nullptr;
 		}
-		return s->AsyncCallFunction(params[0].GetFunction(), Parameters());
+		return CreateCoroutine(s, params[0].GetFunction(), Parameters());
 	}
 
 	inline_t Variant AsyncCallWith(ScriptPtr script, const Parameters & params)
@@ -199,7 +199,7 @@ namespace Jinx::Impl
 		{
 			fnParams.push_back(params[1]);
 		}
-		return s->AsyncCallFunction(params[0].GetFunction(), fnParams);
+		return CreateCoroutine(s, params[0].GetFunction(), fnParams);
 	}
 
 	inline_t Variant IsFinished(ScriptPtr script, const Parameters & params)
@@ -215,22 +215,22 @@ namespace Jinx::Impl
 			s->Error("Invalid parameters to 'is finished' function");
 			return nullptr;
 		}
-		return s->AsyncIsFinished(params[0].GetCoroutine());
+		return params[0].GetCoroutine()->IsFinished();
 	}
 
 	inline_t Variant AllAreFinished(ScriptPtr script, const Parameters & params)
 	{
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto collPtr = params[0].GetCollection();
 		bool allFinished = true;
 		for (const auto & pair : *collPtr)
 		{
 			if (!pair.second.IsCoroutine())
 			{
+				ScriptIPtr s = std::static_pointer_cast<Script>(script);
 				s->Error("Invalid parameters to 'all (of) {} (are) finished' function");
 				return false;
 			}
-			if (!s->AsyncIsFinished(pair.second.GetCoroutine()))
+			if (!pair.second.GetCoroutine()->IsFinished())
 				allFinished = false;
 		}
 		return allFinished;
@@ -238,17 +238,17 @@ namespace Jinx::Impl
 
 	inline_t Variant AnyIsFinished(ScriptPtr script, const Parameters & params)
 	{
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto collPtr = params[0].GetCollection();
 		bool anyFinished = false;
 		for (const auto & pair : *collPtr)
 		{
 			if (!pair.second.IsCoroutine())
 			{
+				ScriptIPtr s = std::static_pointer_cast<Script>(script);
 				s->Error("Invalid parameters to 'any (of) {} (is) finished' function");
 				return false;
 			}
-			if (s->AsyncIsFinished(pair.second.GetCoroutine()))
+			if (pair.second.GetCoroutine()->IsFinished())
 			{
 				anyFinished = true;
 				break;

@@ -24,10 +24,6 @@ namespace Jinx::Impl
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params) override;
 
-		CoroutineID AsyncCallFunction(RuntimeID id, Parameters params);
-		bool AsyncIsFinished(CoroutineID id);
-		Variant AsyncGetReturnValue(CoroutineID id);
-
 		bool Execute() override;
 		bool IsFinished() const override;
 
@@ -40,18 +36,6 @@ namespace Jinx::Impl
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
 
-		void Error(const char * message);
-
-	private:
-
-		Variant GetVariable(RuntimeID id) const;
-		Variant Pop();
-		void Push(const Variant & value);
-		void SetVariableAtIndex(RuntimeID id, size_t index);
-		void SetVariable(RuntimeID id, const Variant & value);
-
-		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
-
 		enum class OnReturn
 		{
 			Continue,
@@ -59,7 +43,21 @@ namespace Jinx::Impl
 			Finish,
 		};
 
+		std::shared_ptr<Runtime> GetRuntime() const { return std::static_pointer_cast<Runtime>(m_runtime); }
 		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
+		void Push(const Variant & value);
+		Variant Pop();
+
+		void Error(const char * message);
+
+	private:
+
+		Variant GetVariable(RuntimeID id) const;
+		void SetVariableAtIndex(RuntimeID id, size_t index);
+		void SetVariable(RuntimeID id, const Variant & value);
+
+		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
+
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 

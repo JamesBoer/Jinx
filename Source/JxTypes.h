@@ -6,8 +6,8 @@ Copyright (c) 2016 James Boer
 */
 
 #pragma once
-#ifndef JX_GUID_H__
-#define JX_GUID_H__
+#ifndef JX_TYPES_H__
+#define JX_TYPES_H__
 
 namespace Jinx
 {
@@ -37,9 +37,19 @@ namespace Jinx
 		return !(left == right);
 	}
 
+	// Define a custom UTF-8 string using internal allocator
+	using String = std::basic_string <char, std::char_traits<char>, Allocator<char>>;
+
+	// Define a custom UTF-16 string using internal allocator
+	using StringU16 = std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>>;
+
+	// Define a custom wide character string using internal allocator
+	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
+
+	// Runtime ID used for unique identifiers
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
 }
 
-
-
-
-#endif // JX_GUID_H__
+#endif // JX_MEMORY_H__

@@ -74,6 +74,7 @@ namespace Jinx
 				m_function = copy.m_function;
 				break;
 			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
 				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
@@ -133,6 +134,7 @@ namespace Jinx
 				m_function = copy.m_function;
 				break;
 			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
 				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
@@ -467,6 +469,9 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				m_collectionItrPair.~CollectionItrPair();
 				break;
+			case ValueType::Coroutine:
+				m_coroutine.~CoroutinePtr();
+				break;
 			case ValueType::UserObject:
 				m_userObject.~UserObjectPtr();
 				break;
@@ -516,17 +521,17 @@ namespace Jinx
 			return m_function;
 		Variant v = *this;
 		if (!v.ConvertTo(ValueType::Function))
-			return false;
+			return InvalidID;
 		return v.GetFunction();
 	}
 
-	inline_t CoroutineID Variant::GetCoroutine() const
+	inline_t CoroutinePtr Variant::GetCoroutine() const
 	{
 		if (IsCoroutine())
 			return m_coroutine;
 		Variant v = *this;
 		if (!v.ConvertTo(ValueType::Coroutine))
-			return false;
+			return nullptr;
 		return v.GetCoroutine();
 	}
 
@@ -682,10 +687,11 @@ namespace Jinx
 		m_function = value;
 	}
 
-	inline_t void Variant::SetCoroutine(CoroutineID value)
+	inline_t void Variant::SetCoroutine(const CoroutinePtr & value)
 	{
 		Destroy();
 		m_type = ValueType::Coroutine;
+		new(&m_coroutine) CoroutinePtr();
 		m_coroutine = value;
 	}
 

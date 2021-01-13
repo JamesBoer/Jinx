@@ -74,15 +74,6 @@ namespace Jinx
 	};
 
 	MemoryStats GetMemoryStats();
-
-	// Define a custom UTF-8 string using internal allocator
-	using String = std::basic_string <char, std::char_traits<char>, Allocator<char>>;
-
-	// Define a custom UTF-16 string using internal allocator
-	using StringU16 = std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>>;
-
-	// Define a custom wide character string using internal allocator
-	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
 }
 
 #endif // JX_MEMORY_H__

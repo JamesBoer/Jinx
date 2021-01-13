@@ -86,9 +86,10 @@ case a project wishes to target macOS clients earlier than 10.14.
 #endif
 
 #include "JxMemory.h"
+#include "JxTypes.h"
 #include "JxBuffer.h"
 #include "JxCollection.h"
-#include "JxGuid.h"
+#include "JxCoroutine.h"
 #include "JxVariant.h"
 
 #ifndef inline_t
