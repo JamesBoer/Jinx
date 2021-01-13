@@ -189,6 +189,55 @@ namespace Jinx
 	};
 
 	MemoryStats GetMemoryStats();
+}
+
+#endif // JX_MEMORY_H__
+
+
+// end --- JxMemory.h --- 
+
+
+
+// begin --- JxTypes.h --- 
+
+/*
+The Jinx library is distributed under the MIT License (MIT)
+https://opensource.org/licenses/MIT
+See LICENSE.TXT or Jinx.h for license details.
+Copyright (c) 2016 James Boer
+*/
+
+#pragma once
+#ifndef JX_TYPES_H__
+#define JX_TYPES_H__
+
+namespace Jinx
+{
+
+	struct Guid
+	{
+		uint32_t data1;
+		uint16_t  data2;
+		uint16_t  data3;
+		uint8_t  data4[8];
+	};
+
+	const Guid NullGuid = { 0, 0, 0,{ 0, 0, 0, 0, 0, 0, 0, 0 } };
+
+	inline bool operator < (const Guid & left, const Guid & right)
+	{
+		return (memcmp(&left, &right, sizeof(Guid)) < 0) ? true : false;
+	}
+
+	inline bool operator == (const Guid & left, const Guid & right)
+	{
+		return (memcmp(&left, &right, sizeof(Guid)) == 0) ? true : false;
+	}
+
+	inline bool operator != (const Guid & left, const Guid & right)
+	{
+		return !(left == right);
+	}
 
 	// Define a custom UTF-8 string using internal allocator
 	using String = std::basic_string <char, std::char_traits<char>, Allocator<char>>;
@@ -198,12 +247,17 @@ namespace Jinx
 
 	// Define a custom wide character string using internal allocator
 	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
+
+	// Runtime ID used for unique identifiers
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
 }
 
 #endif // JX_MEMORY_H__
 
 
-// end --- JxMemory.h --- 
+// end --- JxTypes.h --- 
 
 
 
@@ -294,7 +348,7 @@ namespace Jinx
 
 
 
-// begin --- JxGuid.h --- 
+// begin --- JxCoroutine.h --- 
 
 /*
 The Jinx library is distributed under the MIT License (MIT)
@@ -304,46 +358,37 @@ Copyright (c) 2016 James Boer
 */
 
 #pragma once
-#ifndef JX_GUID_H__
-#define JX_GUID_H__
+#ifndef JX_COROUTINE_H__
+#define JX_COROUTINE_H__
 
+/*! \file */
+
+/*! \namespace */
 namespace Jinx
 {
-
-	struct Guid
+	class ICoroutine
 	{
-		uint32_t data1;
-		uint16_t  data2;
-		uint16_t  data3;
-		uint8_t  data4[8];
+	public:
+		virtual bool IsFinished() = 0;
+		virtual Variant GetReturnValue() const = 0;
+
+	protected:
+		virtual ~ICoroutine() {}
 	};
 
-	const Guid NullGuid = { 0, 0, 0,{ 0, 0, 0, 0, 0, 0, 0, 0 } };
-
-	inline bool operator < (const Guid & left, const Guid & right)
+	namespace Impl
 	{
-		return (memcmp(&left, &right, sizeof(Guid)) < 0) ? true : false;
+		class Script;
 	}
-
-	inline bool operator == (const Guid & left, const Guid & right)
-	{
-		return (memcmp(&left, &right, sizeof(Guid)) == 0) ? true : false;
-	}
-
-	inline bool operator != (const Guid & left, const Guid & right)
-	{
-		return !(left == right);
-	}
-
+	using CoroutinePtr = std::shared_ptr<ICoroutine>;
+	CoroutinePtr CreateCoroutine(std::shared_ptr<Jinx::Impl::Script> script, RuntimeID functionID, const std::vector<Variant, Allocator<Variant>> & params);
 }
 
+#endif // JX_COROUTINE_H__
 
 
 
-#endif // JX_GUID_H__
-
-
-// end --- JxGuid.h --- 
+// end --- JxCoroutine.h --- 
 
 
 
@@ -368,12 +413,6 @@ namespace Jinx
 
 	class BinaryReader;
 	class BinaryWriter;
-
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
-
-	using CoroutineID = uint32_t;
-	const CoroutineID InvalidCoroutine = std::numeric_limits<CoroutineID>::max();
 
 	/// Interface for user objects in scripts
 	class IUserObject
@@ -433,7 +472,7 @@ namespace Jinx
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
 		Variant(const CollectionItrPair & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
 		Variant(RuntimeID value) : m_type(ValueType::Null) { SetFunction(value); }
-		Variant(CoroutineID value) : m_type(ValueType::Null) { SetCoroutine(value); }
+		Variant(const CoroutinePtr & value) : m_type(ValueType::Null) { SetCoroutine(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
 		Variant(const BufferPtr & value) : m_type(ValueType::Null) { SetBuffer(value); }
 		Variant(const Guid & value) : m_type(ValueType::Null) { SetGuid(value); }
@@ -473,7 +512,7 @@ namespace Jinx
 		CollectionPtr GetCollection() const;
 		CollectionItrPair GetCollectionItr() const;
 		RuntimeID GetFunction() const;
-		CoroutineID GetCoroutine() const;
+		CoroutinePtr GetCoroutine() const;
 		UserObjectPtr GetUserObject() const;
 		BufferPtr GetBuffer() const;
 		Guid GetGuid() const;
@@ -515,7 +554,7 @@ namespace Jinx
 		void SetCollection(const CollectionPtr & value);
 		void SetCollectionItr(const CollectionItrPair & value);
 		void SetFunction(RuntimeID value);
-		void SetCoroutine(CoroutineID value);
+		void SetCoroutine(const CoroutinePtr & value);
 		void SetUserObject(const UserObjectPtr & value);
 		void SetBuffer(const BufferPtr & value);
 		void SetGuid(const Guid & value);
@@ -546,7 +585,7 @@ namespace Jinx
 			CollectionPtr m_collection;
 			CollectionItrPair m_collectionItrPair;
 			RuntimeID m_function;
-			CoroutineID m_coroutine;
+			CoroutinePtr m_coroutine;
 			UserObjectPtr m_userObject;
 			BufferPtr m_buffer;
 			Guid m_guid;
@@ -2420,10 +2459,6 @@ namespace Jinx::Impl
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params) override;
 
-		CoroutineID AsyncCallFunction(RuntimeID id, Parameters params);
-		bool AsyncIsFinished(CoroutineID id);
-		Variant AsyncGetReturnValue(CoroutineID id);
-
 		bool Execute() override;
 		bool IsFinished() const override;
 
@@ -2436,18 +2471,6 @@ namespace Jinx::Impl
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
 
-		void Error(const char * message);
-
-	private:
-
-		Variant GetVariable(RuntimeID id) const;
-		Variant Pop();
-		void Push(const Variant & value);
-		void SetVariableAtIndex(RuntimeID id, size_t index);
-		void SetVariable(RuntimeID id, const Variant & value);
-
-		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
-
 		enum class OnReturn
 		{
 			Continue,
@@ -2455,7 +2478,21 @@ namespace Jinx::Impl
 			Finish,
 		};
 
+		std::shared_ptr<Runtime> GetRuntime() const { return std::static_pointer_cast<Runtime>(m_runtime); }
 		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
+		void Push(const Variant & value);
+		Variant Pop();
+
+		void Error(const char * message);
+
+	private:
+
+		Variant GetVariable(RuntimeID id) const;
+		void SetVariableAtIndex(RuntimeID id, size_t index);
+		void SetVariable(RuntimeID id, const Variant & value);
+
+		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
+
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
@@ -3515,6 +3552,99 @@ namespace Jinx::Impl
 
 
 
+// begin --- JxCoroutine.cpp --- 
+
+/*
+The Jinx library is distributed under the MIT License (MIT)
+https://opensource.org/licenses/MIT
+See LICENSE.TXT or Jinx.h for license details.
+Copyright (c) 2016 James Boer
+*/
+
+
+namespace Jinx::Impl
+{
+
+	class Coroutine : public ICoroutine
+	{
+	public:
+		Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params);
+
+		bool IsFinished() override;
+		Variant GetReturnValue() const override;
+
+	private:
+
+		ScriptIPtr m_script;
+		Variant m_returnValue;
+	};
+
+	inline Coroutine::Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params)
+	{
+		auto runtime = script->GetRuntime();
+		FunctionDefinitionPtr functionDef = runtime->FindFunction(functionID);
+		if (!functionDef)
+		{
+			script->Error("Could not find function definition for coroutine");
+			return;
+		}
+		if (!functionDef->GetBytecode())
+		{
+			script->Error("Native function can't be called as asynchronously as a coroutine");
+			return;
+		}
+
+		// Create a script to act as a coroutine.
+		m_script = std::static_pointer_cast<Script>(runtime->CreateScript(functionDef->GetBytecode(), script->GetUserContext()));
+
+		// Push all parameters in script stack
+		for (const auto & param : params)
+			m_script->Push(param);
+
+		// Call the bytecode function, indicating the script should finish execution on return
+		m_script->CallBytecodeFunction(functionDef, Script::OnReturn::Finish);
+	}
+
+	inline bool Coroutine::IsFinished()
+	{
+		if (!m_script)
+			return true;
+		bool finished = m_script->IsFinished();
+		if (!finished)
+		{
+			m_script->Execute();
+			finished = m_script->IsFinished();
+			if (finished)
+			{
+				m_returnValue = m_script->Pop();
+			}
+		}
+		return finished;
+	}
+
+	inline Variant Coroutine::GetReturnValue() const
+	{
+		return m_returnValue;
+	}
+
+} // namespace Jinx::Impl
+
+namespace Jinx
+{
+
+	inline CoroutinePtr CreateCoroutine(std::shared_ptr<Impl::Script> script, RuntimeID functionID, const Parameters & params)
+	{
+		return std::allocate_shared<Impl::Coroutine>(Allocator<Impl::Coroutine>(), script, functionID, params);
+	}
+
+}// namespace Jinx
+
+
+
+// end --- JxCoroutine.cpp --- 
+
+
+
 // begin --- JxFunctionSignature.cpp --- 
 
 /*
@@ -4451,7 +4581,7 @@ namespace Jinx::Impl
 		}
 		else if (params[0].IsCoroutine())
 		{
-			return s->AsyncGetReturnValue(params[0].GetCoroutine());
+			return params[0].GetCoroutine()->GetReturnValue();
 		}
 		s->Error("'get value' called with invalid param type");
 		return nullptr;
@@ -4525,7 +4655,7 @@ namespace Jinx::Impl
 			s->Error("'async call' function requires valid function variable as parameter");
 			return nullptr;
 		}
-		return s->AsyncCallFunction(params[0].GetFunction(), Parameters());
+		return CreateCoroutine(s, params[0].GetFunction(), Parameters());
 	}
 
 	inline Variant AsyncCallWith(ScriptPtr script, const Parameters & params)
@@ -4553,7 +4683,7 @@ namespace Jinx::Impl
 		{
 			fnParams.push_back(params[1]);
 		}
-		return s->AsyncCallFunction(params[0].GetFunction(), fnParams);
+		return CreateCoroutine(s, params[0].GetFunction(), fnParams);
 	}
 
 	inline Variant IsFinished(ScriptPtr script, const Parameters & params)
@@ -4569,22 +4699,22 @@ namespace Jinx::Impl
 			s->Error("Invalid parameters to 'is finished' function");
 			return nullptr;
 		}
-		return s->AsyncIsFinished(params[0].GetCoroutine());
+		return params[0].GetCoroutine()->IsFinished();
 	}
 
 	inline Variant AllAreFinished(ScriptPtr script, const Parameters & params)
 	{
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto collPtr = params[0].GetCollection();
 		bool allFinished = true;
 		for (const auto & pair : *collPtr)
 		{
 			if (!pair.second.IsCoroutine())
 			{
+				ScriptIPtr s = std::static_pointer_cast<Script>(script);
 				s->Error("Invalid parameters to 'all (of) {} (are) finished' function");
 				return false;
 			}
-			if (!s->AsyncIsFinished(pair.second.GetCoroutine()))
+			if (!pair.second.GetCoroutine()->IsFinished())
 				allFinished = false;
 		}
 		return allFinished;
@@ -4592,17 +4722,17 @@ namespace Jinx::Impl
 
 	inline Variant AnyIsFinished(ScriptPtr script, const Parameters & params)
 	{
-		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		auto collPtr = params[0].GetCollection();
 		bool anyFinished = false;
 		for (const auto & pair : *collPtr)
 		{
 			if (!pair.second.IsCoroutine())
 			{
+				ScriptIPtr s = std::static_pointer_cast<Script>(script);
 				s->Error("Invalid parameters to 'any (of) {} (is) finished' function");
 				return false;
 			}
-			if (s->AsyncIsFinished(pair.second.GetCoroutine()))
+			if (pair.second.GetCoroutine()->IsFinished())
 			{
 				anyFinished = true;
 				break;
@@ -9373,53 +9503,6 @@ namespace Jinx::Impl
 		return fnDef->GetCallback()(shared_from_this(), params);
 	}
 
-	inline CoroutineID Script::AsyncCallFunction(RuntimeID id, Parameters params)
-	{
-		ScriptIPtr script = std::static_pointer_cast<Script>(m_runtime->CreateScript(m_execution.back().bytecode, m_userContext));
-		CoroutineID coroutine = static_cast<CoroutineID>(m_coroutines.size());
-		m_coroutines.emplace_back(script, nullptr, false);
-
-		for (const auto & param : params)
-			script->Push(param);
-
-		FunctionDefinitionPtr functionDef = m_runtime->FindFunction(id);
-		if (!functionDef)
-		{
-			Error("Could not find function definition");
-			return InvalidCoroutine;
-		}
-		// Check to see if this is a bytecode function
-		if (functionDef->GetBytecode())
-		{
-			script->CallBytecodeFunction(functionDef, OnReturn::Finish);
-		}
-		else
-		{
-			Error("Native function can't be called as asynchronously");
-			return InvalidCoroutine;
-		}
-		return coroutine;
-	}
-
-	inline bool Script::AsyncIsFinished(CoroutineID id)
-	{
-		auto & coroutine = m_coroutines[static_cast<size_t>(id)];
-		if (!coroutine.finished)
-		{
-			coroutine.script->Execute();
-			coroutine.finished = coroutine.script->IsFinished();
-			if (coroutine.finished)
-				m_coroutines[static_cast<size_t>(id)].returnValue = coroutine.script->Pop();
-		}
-		return coroutine.finished;
-	}
-
-	inline Variant Script::AsyncGetReturnValue(CoroutineID id)
-	{
-		const auto & coroutine = m_coroutines[static_cast<size_t>(id)];
-		return coroutine.returnValue;
-	}
-
 	inline std::vector<String, Allocator<String>> Script::GetCallStack() const
 	{
 		std::vector<String, Allocator<String>> strings;
@@ -11885,6 +11968,7 @@ namespace Jinx
 				m_function = copy.m_function;
 				break;
 			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
 				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
@@ -11944,6 +12028,7 @@ namespace Jinx
 				m_function = copy.m_function;
 				break;
 			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
 				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
@@ -12278,6 +12363,9 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				m_collectionItrPair.~CollectionItrPair();
 				break;
+			case ValueType::Coroutine:
+				m_coroutine.~CoroutinePtr();
+				break;
 			case ValueType::UserObject:
 				m_userObject.~UserObjectPtr();
 				break;
@@ -12327,17 +12415,17 @@ namespace Jinx
 			return m_function;
 		Variant v = *this;
 		if (!v.ConvertTo(ValueType::Function))
-			return false;
+			return InvalidID;
 		return v.GetFunction();
 	}
 
-	inline CoroutineID Variant::GetCoroutine() const
+	inline CoroutinePtr Variant::GetCoroutine() const
 	{
 		if (IsCoroutine())
 			return m_coroutine;
 		Variant v = *this;
 		if (!v.ConvertTo(ValueType::Coroutine))
-			return false;
+			return nullptr;
 		return v.GetCoroutine();
 	}
 
@@ -12493,10 +12581,11 @@ namespace Jinx
 		m_function = value;
 	}
 
-	inline void Variant::SetCoroutine(CoroutineID value)
+	inline void Variant::SetCoroutine(const CoroutinePtr & value)
 	{
 		Destroy();
 		m_type = ValueType::Coroutine;
+		new(&m_coroutine) CoroutinePtr();
 		m_coroutine = value;
 	}
 
