@@ -22,12 +22,10 @@ namespace Jinx::Impl
 	private:
 
 		ScriptIPtr m_script;
-		RuntimeID m_functionID = InvalidID;
 		Variant m_returnValue;
 	};
 
-	inline_t Coroutine::Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params) :
-		m_functionID(functionID)
+	inline_t Coroutine::Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params)
 	{
 		auto runtime = script->GetRuntime();
 		FunctionDefinitionPtr functionDef = runtime->FindFunction(functionID);
