@@ -49,21 +49,28 @@ namespace Jinx::Impl
 
 		// Call the bytecode function, indicating the script should finish execution on return
 		m_script->CallBytecodeFunction(functionDef, Script::OnReturn::Finish);
+
+		// Initial script execution
+		m_script->Execute();
+		if (m_script->IsFinished())
+			m_returnValue = m_script->Pop();
 	}
 
 	inline_t bool Coroutine::IsFinished()
 	{
 		if (!m_script)
 			return true;
+		// Check to see if the script is finished executing.
 		bool finished = m_script->IsFinished();
 		if (!finished)
 		{
+			// If not, execute for one cycle
 			m_script->Execute();
 			finished = m_script->IsFinished();
+
+			// If the script is finished, pop off the return value
 			if (finished)
-			{
 				m_returnValue = m_script->Pop();
-			}
 		}
 		return finished;
 	}

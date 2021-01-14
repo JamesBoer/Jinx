@@ -12,20 +12,77 @@ using namespace Jinx;
 
 TEST_CASE("Test Coroutines", "[Coroutines]")
 {
-	SECTION("Test core coroutine function with normal function")
+	SECTION("Test core coroutine function with normal function, no return")
 	{
 		static const char * scriptText =
 			u8R"(
 
 			import core
 
-			-- Function declaration
+			-- Function definition
+			function test
+			end
+
+			-- Execute function asynchronously and store coroutine in variable c
+			set c to async call function test
+
+			-- Wait until coroutine is finished
+			wait until c is finished
+
+			-- Retrieve return value from coroutine
+			set v to c's value
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("c").IsCoroutine());
+		REQUIRE(script->GetVariable("v") == nullptr);
+	}
+
+	SECTION("Test core coroutine function with normal function, return value")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			-- Function definition
 			function test
 				return 123
 			end
 
 			-- Execute function asynchronously and store coroutine in variable c
 			set c to async call function test
+
+			-- Wait until coroutine is finished
+			wait until c is finished
+
+			-- Retrieve return value from coroutine
+			set v to c's value
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("c").IsCoroutine());
+		REQUIRE(script->GetVariable("v") == 123);
+	}
+
+	SECTION("Test core coroutine function with normal function, args, return value")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			-- Function definition
+			function test {x}
+				return x
+			end
+
+			-- Execute function asynchronously and store coroutine in variable c
+			set c to async call function test {} with 123
 
 			-- Wait until coroutine is finished
 			wait until c is finished
@@ -48,11 +105,9 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 
 			import core
 
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop while x < y
-					increment x
+			-- Function definition
+			function count to {integer x}
+				loop from 1 to x
 					wait
 				end
 				return x
@@ -82,11 +137,9 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 
 			import core
 
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop while x < y
-					increment x
+			-- Function definition
+			function count to {integer x}
+				loop from 1 to x
 					wait
 				end
 				return x
@@ -124,11 +177,9 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 
 			import core
 
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop while x < y
-					increment x
+			-- Function definition
+			function count to {integer x}
+				loop from 1 to x
 					wait
 				end
 				return x
@@ -166,11 +217,9 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 
 			import core
 
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop while x < y
-					increment x
+			-- Function definition
+			function count to {integer x}
+				loop from 1 to x
 					wait
 				end
 				return x
@@ -208,11 +257,9 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 
 			import core
 
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop while x < y
-					increment x
+			-- Function definition
+			function count to {integer x}
+				loop from 1 to x
 					wait
 				end
 				return x
@@ -251,11 +298,9 @@ TEST_CASE("Test Coroutines", "[Coroutines]")
 			import core
 			library test
 
-			-- Function declaration
-			function count to {integer y}
-				set x to 0
-				loop while x < y
-					increment x
+			-- Function definition
+			function count to {integer x}
+				loop from 1 to x
 					wait
 				end
 				return x

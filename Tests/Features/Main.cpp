@@ -76,12 +76,12 @@ int main(int argc, char ** argv)
 			import core
 
 			-- Function declaration
-			function test
-				return 123
+			function test {x}
+				return x
 			end
 
 			-- Execute function asynchronously and store coroutine in variable c
-			set c to async call function test
+			set c to async call function test {} with 123
 
 			-- Wait until coroutine is finished
 			wait until c is finished
