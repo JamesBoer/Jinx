@@ -86,9 +86,10 @@ case a project wishes to target macOS clients earlier than 10.14.
 #endif
 
 #include "JxMemory.h"
+#include "JxTypes.h"
 #include "JxBuffer.h"
 #include "JxCollection.h"
-#include "JxGuid.h"
+#include "JxCoroutine.h"
 #include "JxVariant.h"
 
 #ifndef inline_t
@@ -102,10 +103,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 1;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 2;
+	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 4;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -118,9 +119,6 @@ namespace Jinx
 
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
-
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
 
 #ifdef JINX_USE_ANY
 	using Any = std::any;

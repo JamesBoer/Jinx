@@ -1368,4 +1368,95 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script->Execute());
 	}
 
+	SECTION("Test '{} (get) key' with invalid parameter")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			set a to 1
+			set b to a's key
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test '{} (get) value' with invalid parameter")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			set a to 1
+			set b to a's value
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test misnamed function declaration")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x}
+				return x
+			end
+
+			set f to function test_error {}
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test 'call' with invalid parameter")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test
+			end
+
+			set f to 0
+			call f
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test 'call with' with invalid parameter")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x}
+			end
+
+			set f to 0
+			call f with 3
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
 }

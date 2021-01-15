@@ -43,6 +43,12 @@ namespace Jinx::Impl
 			FunctionPartData partData;
 		};
 
+		enum class SignatureParseMode
+		{
+			FunctionDefinition,
+			SignatureOnly,
+		};
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -126,6 +132,7 @@ namespace Jinx::Impl
 		bool CheckName() const;
 		bool CheckValue() const;
 		bool CheckValueType() const;
+		bool CheckValueType(SymbolListCItr currSym) const;
 		bool CheckFunctionNamePart() const;
 		bool CheckVariable(SymbolListCItr currSym, size_t * symCount = nullptr) const;
 		bool CheckVariable() const;
@@ -133,6 +140,9 @@ namespace Jinx::Impl
 		bool CheckProperty(size_t * symCount = nullptr) const;
 		bool CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const;
 		String CheckLibraryName() const;
+		bool CheckFunctionSignature(SymbolListCItr currSym, const FunctionSignature & signature, size_t * symCount) const;
+		bool CheckFunctionDeclaration(SymbolListCItr currSym, size_t * symCount) const;
+		bool CheckFunctionDeclaration() const;
 		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const;
 		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
@@ -156,8 +166,9 @@ namespace Jinx::Impl
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 		String ParseFunctionNamePart();
-		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
+		FunctionSignature ParseFunctionSignature(VisibilityType access, SignatureParseMode mode);
 		void ParseFunctionDefinition(VisibilityType scope);
+		void ParseFunctionDeclaration();
 		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
 		void ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol);

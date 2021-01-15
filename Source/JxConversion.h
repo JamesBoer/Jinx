@@ -43,6 +43,14 @@ namespace Jinx::Impl
 		return String(buffer);
 	}
 
+	// Unsigned integer conversions
+	inline String UnsignedIntegerToString(uint64_t value)
+	{
+		char buffer[32];
+		snprintf(buffer, 32, "%" PRIu64, value);
+		return String(buffer);
+	}
+
 	// Boolean conversions
 	inline double BooleanToNumber(bool value) { return value ? 1.0 : 0.0; }
 	inline int64_t BooleanToInteger(bool value) { return value ? 1ll : 0ll; }

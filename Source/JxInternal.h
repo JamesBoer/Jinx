@@ -51,7 +51,6 @@ Copyright (c) 2016 James Boer
 #include "JxCommon.h"
 #include "JxUnicode.h"
 #include "JxUnicodeCaseFolding.h"
-#include "JxGuid.h"
 #include "JxConversion.h"
 #include "JxSerialize.h"
 #include "JxPropertyName.h"

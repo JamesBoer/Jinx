@@ -12,6 +12,8 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx::Impl
 {
+	class Script;
+	using ScriptIPtr = std::shared_ptr<Script>;
 
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
@@ -34,24 +36,28 @@ namespace Jinx::Impl
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
 
-	private:
+		enum class OnReturn
+		{
+			Continue,
+			Wait,
+			Finish,
+		};
+
+		std::shared_ptr<Runtime> GetRuntime() const { return std::static_pointer_cast<Runtime>(m_runtime); }
+		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
+		void Push(const Variant & value);
+		Variant Pop();
+
 		void Error(const char * message);
 
+	private:
+
 		Variant GetVariable(RuntimeID id) const;
-		Variant Pop();
-		void Push(const Variant & value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
-		enum class OnReturn
-		{
-			Continue,
-			Wait
-		};
-
-		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
@@ -104,6 +110,20 @@ namespace Jinx::Impl
 		// Runtime stack
 		std::vector<Variant, Allocator<Variant>> m_stack;
 
+		// Coroutine runtime data
+		struct CoroutineData
+		{
+			CoroutineData(const ScriptIPtr & s, const Variant & rv, bool f) :
+				script(s), returnValue(rv), finished(f)
+			{}
+			ScriptIPtr script;
+			Variant returnValue;
+			bool finished = false;
+		};
+
+		// Executing coroutines
+		std::vector<CoroutineData, Allocator<CoroutineData>> m_coroutines;
+
 		// Current library
 		LibraryIPtr m_library;
 
@@ -123,7 +143,6 @@ namespace Jinx::Impl
 		String m_name;
 	};
 
-	using ScriptIPtr = std::shared_ptr<Script>;
 
 } // namespace Jinx::Impl
 

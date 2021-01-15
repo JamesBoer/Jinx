@@ -29,11 +29,16 @@ namespace Jinx::Impl
 	inline_t FunctionSignature Library::FindFunctionSignature(Visibility visibility, const String & name) const
 	{
 		auto signature = CreateFunctionSignature(visibility, name);
+		return FindFunctionSignature(signature);
+	}
+
+	inline_t FunctionSignature Library::FindFunctionSignature(const FunctionSignature & signature) const
+	{
 		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
-		return signature;
+		return *itr;
 	}
 
 	inline_t const FunctionPtrList Library::Functions() const

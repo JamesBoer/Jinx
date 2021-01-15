@@ -113,6 +113,7 @@ namespace Jinx::Impl
 		Break,
 		By,
 		Collection,
+		Coroutine,
 		Decrement,
 		Else,
 		End,

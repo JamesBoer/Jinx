@@ -197,11 +197,15 @@ namespace Jinx::Impl
 				if (functionDef->GetBytecode())
 				{
 					CallBytecodeFunction(functionDef, OnReturn::Continue);
+					if (m_error)
+						return false;
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
 				{
 					Push(CallNativeFunction(functionDef));
+					if (m_error)
+						return false;
 				}
 				else
 				{
@@ -779,14 +783,19 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
-				bool exit = m_execution.back().onReturn == OnReturn::Wait ? true : false;
+				auto onReturn = m_execution.back().onReturn;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
 					m_stack.pop_back();
 				Push(val);
-				if (exit)
+				if (onReturn == OnReturn::Wait)
 					opcode = Opcode::Wait;
+				else if (onReturn == OnReturn::Finish)
+				{
+					opcode = Opcode::Exit;
+					m_finished = true;
+				}
 			}
 			break;
 			case Opcode::ScopeBegin:
