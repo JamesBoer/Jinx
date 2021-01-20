@@ -122,6 +122,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4ac8de7cf06352081b56fb778cef4159"><td class="memItemLeft" align="right" valign="top"><a id="a4ac8de7cf06352081b56fb778cef4159"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Variant</b> (const CollectionItrPair &amp;value)</td></tr>
 <tr class="separator:a4ac8de7cf06352081b56fb778cef4159"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac298f14a2ba0179416b4968a051d3228"><td class="memItemLeft" align="right" valign="top"><a id="ac298f14a2ba0179416b4968a051d3228"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Variant</b> (RuntimeID value)</td></tr>
+<tr class="separator:ac298f14a2ba0179416b4968a051d3228"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a208e4469114e441dc40a929b4422ff3b"><td class="memItemLeft" align="right" valign="top"><a id="a208e4469114e441dc40a929b4422ff3b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Variant</b> (const CoroutinePtr &amp;value)</td></tr>
+<tr class="separator:a208e4469114e441dc40a929b4422ff3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb544bf42d535350f91c10adb151ca65"><td class="memItemLeft" align="right" valign="top"><a id="acb544bf42d535350f91c10adb151ca65"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Variant</b> (const UserObjectPtr &amp;value)</td></tr>
 <tr class="separator:acb544bf42d535350f91c10adb151ca65"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,6 +185,12 @@ CollectionPtr&#160;</td><td class="memItemRight" valign="bottom"><b>GetCollectio
 <tr class="memitem:aaa689faa4aa19f7fba4662717f9468a4"><td class="memItemLeft" align="right" valign="top"><a id="aaa689faa4aa19f7fba4662717f9468a4"></a>
 CollectionItrPair&#160;</td><td class="memItemRight" valign="bottom"><b>GetCollectionItr</b> () const</td></tr>
 <tr class="separator:aaa689faa4aa19f7fba4662717f9468a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd238c758d0546dbad7336e4e46cfd8b"><td class="memItemLeft" align="right" valign="top"><a id="afd238c758d0546dbad7336e4e46cfd8b"></a>
+RuntimeID&#160;</td><td class="memItemRight" valign="bottom"><b>GetFunction</b> () const</td></tr>
+<tr class="separator:afd238c758d0546dbad7336e4e46cfd8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bb3e1a8abf45d826179a64fc61a5e41"><td class="memItemLeft" align="right" valign="top"><a id="a8bb3e1a8abf45d826179a64fc61a5e41"></a>
+CoroutinePtr&#160;</td><td class="memItemRight" valign="bottom"><b>GetCoroutine</b> () const</td></tr>
+<tr class="separator:a8bb3e1a8abf45d826179a64fc61a5e41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ceebaeb5b84534ac342b6b973a14751"><td class="memItemLeft" align="right" valign="top"><a id="a8ceebaeb5b84534ac342b6b973a14751"></a>
 UserObjectPtr&#160;</td><td class="memItemRight" valign="bottom"><b>GetUserObject</b> () const</td></tr>
 <tr class="separator:a8ceebaeb5b84534ac342b6b973a14751"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -224,6 +236,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsCollection</b> () c
 <tr class="memitem:a0b8c049e5bdca18534abd55342893822"><td class="memItemLeft" align="right" valign="top"><a id="a0b8c049e5bdca18534abd55342893822"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsCollectionItr</b> () const</td></tr>
 <tr class="separator:a0b8c049e5bdca18534abd55342893822"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6bb2d0c500250f611ccbe0dece9aab04"><td class="memItemLeft" align="right" valign="top"><a id="a6bb2d0c500250f611ccbe0dece9aab04"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsFunction</b> () const</td></tr>
+<tr class="separator:a6bb2d0c500250f611ccbe0dece9aab04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4551f356c96028b26538c8d0542ce4fb"><td class="memItemLeft" align="right" valign="top"><a id="a4551f356c96028b26538c8d0542ce4fb"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsCoroutine</b> () const</td></tr>
+<tr class="separator:a4551f356c96028b26538c8d0542ce4fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf8d7b0bd530b5ef31be7bd4a126c7eb"><td class="memItemLeft" align="right" valign="top"><a id="acf8d7b0bd530b5ef31be7bd4a126c7eb"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsUserObject</b> () const</td></tr>
 <tr class="separator:acf8d7b0bd530b5ef31be7bd4a126c7eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -263,6 +281,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>SetCollection</b> (co
 <tr class="memitem:af7e4383c0da2d6c9b00332a06043ae5b"><td class="memItemLeft" align="right" valign="top"><a id="af7e4383c0da2d6c9b00332a06043ae5b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>SetCollectionItr</b> (const CollectionItrPair &amp;value)</td></tr>
 <tr class="separator:af7e4383c0da2d6c9b00332a06043ae5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67693e957c2c97bde030a8866cf5e35b"><td class="memItemLeft" align="right" valign="top"><a id="a67693e957c2c97bde030a8866cf5e35b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>SetFunction</b> (RuntimeID value)</td></tr>
+<tr class="separator:a67693e957c2c97bde030a8866cf5e35b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a365dbc18d3dfc7f2f90ddb9ddcfc997c"><td class="memItemLeft" align="right" valign="top"><a id="a365dbc18d3dfc7f2f90ddb9ddcfc997c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>SetCoroutine</b> (const CoroutinePtr &amp;value)</td></tr>
+<tr class="separator:a365dbc18d3dfc7f2f90ddb9ddcfc997c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe4a8b25f52762c6a2fd0282593752df"><td class="memItemLeft" align="right" valign="top"><a id="afe4a8b25f52762c6a2fd0282593752df"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>SetUserObject</b> (const UserObjectPtr &amp;value)</td></tr>
 <tr class="separator:afe4a8b25f52762c6a2fd0282593752df"><td class="memSeparator" colspan="2">&#160;</td></tr>
