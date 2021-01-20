@@ -189,6 +189,55 @@ namespace Jinx
 	};
 
 	MemoryStats GetMemoryStats();
+}
+
+#endif // JX_MEMORY_H__
+
+
+// end --- JxMemory.h --- 
+
+
+
+// begin --- JxTypes.h --- 
+
+/*
+The Jinx library is distributed under the MIT License (MIT)
+https://opensource.org/licenses/MIT
+See LICENSE.TXT or Jinx.h for license details.
+Copyright (c) 2016 James Boer
+*/
+
+#pragma once
+#ifndef JX_TYPES_H__
+#define JX_TYPES_H__
+
+namespace Jinx
+{
+
+	struct Guid
+	{
+		uint32_t data1;
+		uint16_t  data2;
+		uint16_t  data3;
+		uint8_t  data4[8];
+	};
+
+	const Guid NullGuid = { 0, 0, 0,{ 0, 0, 0, 0, 0, 0, 0, 0 } };
+
+	inline bool operator < (const Guid & left, const Guid & right)
+	{
+		return (memcmp(&left, &right, sizeof(Guid)) < 0) ? true : false;
+	}
+
+	inline bool operator == (const Guid & left, const Guid & right)
+	{
+		return (memcmp(&left, &right, sizeof(Guid)) == 0) ? true : false;
+	}
+
+	inline bool operator != (const Guid & left, const Guid & right)
+	{
+		return !(left == right);
+	}
 
 	// Define a custom UTF-8 string using internal allocator
 	using String = std::basic_string <char, std::char_traits<char>, Allocator<char>>;
@@ -198,12 +247,17 @@ namespace Jinx
 
 	// Define a custom wide character string using internal allocator
 	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
+
+	// Runtime ID used for unique identifiers
+	using RuntimeID = uint64_t;
+	const RuntimeID InvalidID = 0;
+
 }
 
 #endif // JX_MEMORY_H__
 
 
-// end --- JxMemory.h --- 
+// end --- JxTypes.h --- 
 
 
 
@@ -294,7 +348,7 @@ namespace Jinx
 
 
 
-// begin --- JxGuid.h --- 
+// begin --- JxCoroutine.h --- 
 
 /*
 The Jinx library is distributed under the MIT License (MIT)
@@ -304,46 +358,37 @@ Copyright (c) 2016 James Boer
 */
 
 #pragma once
-#ifndef JX_GUID_H__
-#define JX_GUID_H__
+#ifndef JX_COROUTINE_H__
+#define JX_COROUTINE_H__
 
+/*! \file */
+
+/*! \namespace */
 namespace Jinx
 {
-
-	struct Guid
+	class ICoroutine
 	{
-		uint32_t data1;
-		uint16_t  data2;
-		uint16_t  data3;
-		uint8_t  data4[8];
+	public:
+		virtual bool IsFinished() = 0;
+		virtual Variant GetReturnValue() const = 0;
+
+	protected:
+		virtual ~ICoroutine() {}
 	};
 
-	const Guid NullGuid = { 0, 0, 0,{ 0, 0, 0, 0, 0, 0, 0, 0 } };
-
-	inline bool operator < (const Guid & left, const Guid & right)
+	namespace Impl
 	{
-		return (memcmp(&left, &right, sizeof(Guid)) < 0) ? true : false;
+		class Script;
 	}
-
-	inline bool operator == (const Guid & left, const Guid & right)
-	{
-		return (memcmp(&left, &right, sizeof(Guid)) == 0) ? true : false;
-	}
-
-	inline bool operator != (const Guid & left, const Guid & right)
-	{
-		return !(left == right);
-	}
-
+	using CoroutinePtr = std::shared_ptr<ICoroutine>;
+	CoroutinePtr CreateCoroutine(std::shared_ptr<Jinx::Impl::Script> script, RuntimeID functionID, const std::vector<Variant, Allocator<Variant>> & params);
 }
 
+#endif // JX_COROUTINE_H__
 
 
 
-#endif // JX_GUID_H__
-
-
-// end --- JxGuid.h --- 
+// end --- JxCoroutine.h --- 
 
 
 
@@ -388,6 +433,8 @@ namespace Jinx
 		String,
 		Collection,
 		CollectionItr,
+		Function,
+		Coroutine,
 		UserObject,
 		Buffer,
 		Guid,
@@ -424,6 +471,8 @@ namespace Jinx
 		Variant(const WString & value) : m_type(ValueType::Null) { SetString(value); }
 		Variant(const CollectionPtr & value) : m_type(ValueType::Null) { SetCollection(value); }
 		Variant(const CollectionItrPair & value) : m_type(ValueType::Null) { SetCollectionItr(value); }
+		Variant(RuntimeID value) : m_type(ValueType::Null) { SetFunction(value); }
+		Variant(const CoroutinePtr & value) : m_type(ValueType::Null) { SetCoroutine(value); }
 		Variant(const UserObjectPtr & value) : m_type(ValueType::Null) { SetUserObject(value); }
 		Variant(const BufferPtr & value) : m_type(ValueType::Null) { SetBuffer(value); }
 		Variant(const Guid & value) : m_type(ValueType::Null) { SetGuid(value); }
@@ -462,6 +511,8 @@ namespace Jinx
 		WString GetWString() const;
 		CollectionPtr GetCollection() const;
 		CollectionItrPair GetCollectionItr() const;
+		RuntimeID GetFunction() const;
+		CoroutinePtr GetCoroutine() const;
 		UserObjectPtr GetUserObject() const;
 		BufferPtr GetBuffer() const;
 		Guid GetGuid() const;
@@ -485,6 +536,8 @@ namespace Jinx
 		bool IsString() const { return m_type == ValueType::String ? true : false; }
 		bool IsCollection() const { return m_type == ValueType::Collection ? true : false; }
 		bool IsCollectionItr() const { return m_type == ValueType::CollectionItr ? true : false; }
+		bool IsFunction() const { return m_type == ValueType::Function ? true : false; }
+		bool IsCoroutine() const { return m_type == ValueType::Coroutine ? true : false; }
 		bool IsUserObject() const { return m_type == ValueType::UserObject ? true : false; }
 		bool IsBuffer() const { return m_type == ValueType::Buffer ? true : false; }
 		bool IsGuid() const { return m_type == ValueType::Guid ? true : false; }
@@ -500,6 +553,8 @@ namespace Jinx
 		void SetString(const WString & value);
 		void SetCollection(const CollectionPtr & value);
 		void SetCollectionItr(const CollectionItrPair & value);
+		void SetFunction(RuntimeID value);
+		void SetCoroutine(const CoroutinePtr & value);
 		void SetUserObject(const UserObjectPtr & value);
 		void SetBuffer(const BufferPtr & value);
 		void SetGuid(const Guid & value);
@@ -529,6 +584,8 @@ namespace Jinx
 			String m_string;
 			CollectionPtr m_collection;
 			CollectionItrPair m_collectionItrPair;
+			RuntimeID m_function;
+			CoroutinePtr m_coroutine;
 			UserObjectPtr m_userObject;
 			BufferPtr m_buffer;
 			Guid m_guid;
@@ -578,10 +635,10 @@ namespace Jinx
 	const uint32_t MajorVersion = 1;
 
 	/// Minor version number
-	const uint32_t MinorVersion = 2;
+	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 4;
+	const uint32_t PatchNumber = 0;
 
 	// Forward declaration
 	class IScript;
@@ -594,9 +651,6 @@ namespace Jinx
 
 	// Signature for native function callback
 	using FunctionCallback = std::function<Variant(ScriptPtr, const Parameters &)>;
-
-	using RuntimeID = uint64_t;
-	const RuntimeID InvalidID = 0;
 
 #ifdef JINX_USE_ANY
 	using Any = std::any;
@@ -1155,6 +1209,7 @@ namespace Jinx::Impl
 		Break,
 		By,
 		Collection,
+		Coroutine,
 		Decrement,
 		Else,
 		End,
@@ -1427,6 +1482,14 @@ namespace Jinx::Impl
 	{
 		char buffer[32];
 		snprintf(buffer, 32, "%" PRId64, value);
+		return String(buffer);
+	}
+
+	// Unsigned integer conversions
+	inline String UnsignedIntegerToString(uint64_t value)
+	{
+		char buffer[32];
+		snprintf(buffer, 32, "%" PRIu64, value);
 		return String(buffer);
 	}
 
@@ -2003,6 +2066,7 @@ namespace Jinx::Impl
 		void RegisterFunctionSignature(const FunctionSignature & signature);
 		bool FunctionSignatureExists(const FunctionSignature & signature) const;
 		FunctionSignature FindFunctionSignature(Visibility visibility, const String & name) const;
+		FunctionSignature FindFunctionSignature(const FunctionSignature & signature) const;
 		const FunctionPtrList Functions() const;
 
 	private:
@@ -2166,6 +2230,12 @@ namespace Jinx::Impl
 			FunctionPartData partData;
 		};
 
+		enum class SignatureParseMode
+		{
+			FunctionDefinition,
+			SignatureOnly,
+		};
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -2249,6 +2319,7 @@ namespace Jinx::Impl
 		bool CheckName() const;
 		bool CheckValue() const;
 		bool CheckValueType() const;
+		bool CheckValueType(SymbolListCItr currSym) const;
 		bool CheckFunctionNamePart() const;
 		bool CheckVariable(SymbolListCItr currSym, size_t * symCount = nullptr) const;
 		bool CheckVariable() const;
@@ -2256,6 +2327,9 @@ namespace Jinx::Impl
 		bool CheckProperty(size_t * symCount = nullptr) const;
 		bool CheckPropertyName(LibraryIPtr library, SymbolListCItr currSym, size_t * symCount) const;
 		String CheckLibraryName() const;
+		bool CheckFunctionSignature(SymbolListCItr currSym, const FunctionSignature & signature, size_t * symCount) const;
+		bool CheckFunctionDeclaration(SymbolListCItr currSym, size_t * symCount) const;
+		bool CheckFunctionDeclaration() const;
 		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const;
 		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
@@ -2279,8 +2353,9 @@ namespace Jinx::Impl
 		PropertyName ParsePropertyName();
 		PropertyName ParsePropertyNameParts(LibraryIPtr library);
 		String ParseFunctionNamePart();
-		FunctionSignature ParseFunctionSignature(VisibilityType access, bool signatureOnly = true);
+		FunctionSignature ParseFunctionSignature(VisibilityType access, SignatureParseMode mode);
 		void ParseFunctionDefinition(VisibilityType scope);
+		void ParseFunctionDeclaration();
 		void ParseFunctionCall(const FunctionMatch & match);
 		void ParseCast();
 		void ParseSubexpressionOperand(bool required, SymbolListCItr endSymbol);
@@ -2372,6 +2447,8 @@ Copyright (c) 2016 James Boer
 
 namespace Jinx::Impl
 {
+	class Script;
+	using ScriptIPtr = std::shared_ptr<Script>;
 
 	class Script : public IScript, public std::enable_shared_from_this<Script>
 	{
@@ -2394,24 +2471,28 @@ namespace Jinx::Impl
 
 		std::vector<String, Allocator<String>> GetCallStack() const;
 
-	private:
+		enum class OnReturn
+		{
+			Continue,
+			Wait,
+			Finish,
+		};
+
+		std::shared_ptr<Runtime> GetRuntime() const { return std::static_pointer_cast<Runtime>(m_runtime); }
+		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
+		void Push(const Variant & value);
+		Variant Pop();
+
 		void Error(const char * message);
 
+	private:
+
 		Variant GetVariable(RuntimeID id) const;
-		Variant Pop();
-		void Push(const Variant & value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
-		enum class OnReturn
-		{
-			Continue,
-			Wait
-		};
-
-		void CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn);
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
@@ -2464,6 +2545,20 @@ namespace Jinx::Impl
 		// Runtime stack
 		std::vector<Variant, Allocator<Variant>> m_stack;
 
+		// Coroutine runtime data
+		struct CoroutineData
+		{
+			CoroutineData(const ScriptIPtr & s, const Variant & rv, bool f) :
+				script(s), returnValue(rv), finished(f)
+			{}
+			ScriptIPtr script;
+			Variant returnValue;
+			bool finished = false;
+		};
+
+		// Executing coroutines
+		std::vector<CoroutineData, Allocator<CoroutineData>> m_coroutines;
+
 		// Current library
 		LibraryIPtr m_library;
 
@@ -2483,7 +2578,6 @@ namespace Jinx::Impl
 		String m_name;
 	};
 
-	using ScriptIPtr = std::shared_ptr<Script>;
 
 } // namespace Jinx::Impl
 
@@ -2850,6 +2944,7 @@ namespace Jinx
 				"break",
 				"by",
 				"collection",
+				"coroutine",
 				"decrement",
 				"else",
 				"end",
@@ -2895,6 +2990,8 @@ namespace Jinx
 				"string",
 				"collection",
 				"collectionitr",
+				"function",
+				"coroutine",
 				"userobject",
 				"buffer",
 				"guid",
@@ -3034,11 +3131,13 @@ namespace Jinx::Impl
 			4,  // String,
 			5,  // Collection,
 			6,  // CollectionItr,
-			7,  // UserData,
-			8,  // Buffer,
-			9,  // Guid,
-			10, // ValType,
-			11, // Any
+			7,  // Function,
+			8,  // Coroutine,
+			9,  // UserData,
+			10, // Buffer,
+			11, // Guid,
+			12, // ValType,
+			13, // Any
 		};
 
 		static_assert(countof(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
@@ -3052,6 +3151,8 @@ namespace Jinx::Impl
 			ValueType::String,
 			ValueType::Collection,
 			ValueType::CollectionItr,
+			ValueType::Function,
+			ValueType::Coroutine,
 			ValueType::UserObject,
 			ValueType::Buffer,
 			ValueType::Guid,
@@ -3186,6 +3287,11 @@ namespace Jinx::Impl
 		else if (value == "collectionitr")
 		{
 			*outValue = ValueType::CollectionItr;
+			return true;
+		}
+		else if (value == "function")
+		{
+			*outValue = ValueType::Function;
 			return true;
 		}
 		else if (value == "buffer")
@@ -3443,6 +3549,106 @@ namespace Jinx::Impl
 
 
 // end --- JxConversion.cpp --- 
+
+
+
+// begin --- JxCoroutine.cpp --- 
+
+/*
+The Jinx library is distributed under the MIT License (MIT)
+https://opensource.org/licenses/MIT
+See LICENSE.TXT or Jinx.h for license details.
+Copyright (c) 2016 James Boer
+*/
+
+
+namespace Jinx::Impl
+{
+
+	class Coroutine : public ICoroutine
+	{
+	public:
+		Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params);
+
+		bool IsFinished() override;
+		Variant GetReturnValue() const override;
+
+	private:
+
+		ScriptIPtr m_script;
+		Variant m_returnValue;
+	};
+
+	inline Coroutine::Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params)
+	{
+		auto runtime = script->GetRuntime();
+		FunctionDefinitionPtr functionDef = runtime->FindFunction(functionID);
+		if (!functionDef)
+		{
+			script->Error("Could not find function definition for coroutine");
+			return;
+		}
+		if (!functionDef->GetBytecode())
+		{
+			script->Error("Native function can't be called as asynchronously as a coroutine");
+			return;
+		}
+
+		// Create a script to act as a coroutine.
+		m_script = std::static_pointer_cast<Script>(runtime->CreateScript(functionDef->GetBytecode(), script->GetUserContext()));
+
+		// Push all parameters in script stack
+		for (const auto & param : params)
+			m_script->Push(param);
+
+		// Call the bytecode function, indicating the script should finish execution on return
+		m_script->CallBytecodeFunction(functionDef, Script::OnReturn::Finish);
+
+		// Initial script execution
+		m_script->Execute();
+		if (m_script->IsFinished())
+			m_returnValue = m_script->Pop();
+	}
+
+	inline bool Coroutine::IsFinished()
+	{
+		if (!m_script)
+			return true;
+		// Check to see if the script is finished executing.
+		bool finished = m_script->IsFinished();
+		if (!finished)
+		{
+			// If not, execute for one cycle
+			m_script->Execute();
+			finished = m_script->IsFinished();
+
+			// If the script is finished, pop off the return value
+			if (finished)
+				m_returnValue = m_script->Pop();
+		}
+		return finished;
+	}
+
+	inline Variant Coroutine::GetReturnValue() const
+	{
+		return m_returnValue;
+	}
+
+} // namespace Jinx::Impl
+
+namespace Jinx
+{
+
+	inline CoroutinePtr CreateCoroutine(std::shared_ptr<Impl::Script> script, RuntimeID functionID, const Parameters & params)
+	{
+		return std::allocate_shared<Impl::Coroutine>(Allocator<Impl::Coroutine>(), script, functionID, params);
+	}
+
+}// namespace Jinx
+
+
+
+// end --- JxCoroutine.cpp --- 
 
 
 
@@ -4362,24 +4568,30 @@ namespace Jinx::Impl
 		return nullptr;
 	}
 
-	inline Variant GetKey(ScriptPtr, const Parameters & params)
+	inline Variant GetKey(ScriptPtr script, const Parameters & params)
 	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
 		if (!params[0].IsCollectionItr())
 		{
-			LogWriteLine(LogLevel::Error, "'get key' called with non-iterator param");
+			s->Error("'get key' called with non-iterator param");
 			return nullptr;
 		}
 		return params[0].GetCollectionItr().first->first;
 	}
 
-	inline Variant GetValue(ScriptPtr, const Parameters & params)
+	inline Variant GetValue(ScriptPtr script, const Parameters & params)
 	{
-		if (!params[0].IsCollectionItr())
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params[0].IsCollectionItr())
 		{
-			LogWriteLine(LogLevel::Error, "'get value' called with non-iterator param");
-			return nullptr;
+			return params[0].GetCollectionItr().first->second;
 		}
-		return params[0].GetCollectionItr().first->second;
+		else if (params[0].IsCoroutine())
+		{
+			return params[0].GetCoroutine()->GetReturnValue();
+		}
+		s->Error("'get value' called with invalid param type");
+		return nullptr;
 	}
 
 	inline Variant GetCallStack(ScriptPtr script, [[maybe_unused]] const Parameters & params)
@@ -4393,6 +4605,149 @@ namespace Jinx::Impl
 		return var;
 	}
 
+	inline Variant Call(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'call' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			s->Error("'call' function requires valid function variable as parameter");
+			return nullptr;
+		}
+		return s->CallFunction(params[0].GetFunction(), Parameters());
+	}
+
+	inline Variant CallWith(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'call with' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			s->Error("Invalid parameters to 'call with' function");
+			return nullptr;
+		}
+		Parameters fnParams;
+		if (params[1].IsCollection())
+		{
+			auto collPtr = params[1].GetCollection();
+			auto & coll = *collPtr;
+			for (const auto & pair : coll)
+				fnParams.push_back(pair.second);
+		}
+		else
+		{
+			fnParams.push_back(params[1]);
+		}
+		return s->CallFunction(params[0].GetFunction(), fnParams);
+	}
+
+	inline Variant AsyncCall(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'async call' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			s->Error("'async call' function requires valid function variable as parameter");
+			return nullptr;
+		}
+		return CreateCoroutine(s, params[0].GetFunction(), Parameters());
+	}
+
+	inline Variant AsyncCallWith(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'async call with' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsFunction())
+		{
+			s->Error("Invalid parameters to 'async call with' function");
+			return nullptr;
+		}
+		Parameters fnParams;
+		if (params[1].IsCollection())
+		{
+			auto collPtr = params[1].GetCollection();
+			auto & coll = *collPtr;
+			for (const auto & pair : coll)
+				fnParams.push_back(pair.second);
+		}
+		else
+		{
+			fnParams.push_back(params[1]);
+		}
+		return CreateCoroutine(s, params[0].GetFunction(), fnParams);
+	}
+
+	inline Variant IsFinished(ScriptPtr script, const Parameters & params)
+	{
+		ScriptIPtr s = std::static_pointer_cast<Script>(script);
+		if (params.empty())
+		{
+			s->Error("'is finished' function invoked with no parameters");
+			return nullptr;
+		}
+		if (!params[0].IsCoroutine())
+		{
+			s->Error("Invalid parameters to 'is finished' function");
+			return nullptr;
+		}
+		return params[0].GetCoroutine()->IsFinished();
+	}
+
+	inline Variant AllAreFinished(ScriptPtr script, const Parameters & params)
+	{
+		auto collPtr = params[0].GetCollection();
+		bool allFinished = true;
+		for (const auto & pair : *collPtr)
+		{
+			if (!pair.second.IsCoroutine())
+			{
+				ScriptIPtr s = std::static_pointer_cast<Script>(script);
+				s->Error("Invalid parameters to 'all (of) {} (are) finished' function");
+				return false;
+			}
+			if (!pair.second.GetCoroutine()->IsFinished())
+				allFinished = false;
+		}
+		return allFinished;
+	}
+
+	inline Variant AnyIsFinished(ScriptPtr script, const Parameters & params)
+	{
+		auto collPtr = params[0].GetCollection();
+		bool anyFinished = false;
+		for (const auto & pair : *collPtr)
+		{
+			if (!pair.second.IsCoroutine())
+			{
+				ScriptIPtr s = std::static_pointer_cast<Script>(script);
+				s->Error("Invalid parameters to 'any (of) {} (is) finished' function");
+				return false;
+			}
+			if (pair.second.GetCoroutine()->IsFinished())
+			{
+				anyFinished = true;
+				break;
+			}
+		}
+		return anyFinished;
+	}
+
 	inline void RegisterLibCore(RuntimePtr runtime)
 	{
 		auto library = runtime->GetLibrary("core");
@@ -4402,9 +4757,16 @@ namespace Jinx::Impl
 		library->RegisterFunction(Visibility::Public, { "write line {}" }, WriteLine);
 		library->RegisterFunction(Visibility::Public, { "{} (get) size" }, GetSize);
 		library->RegisterFunction(Visibility::Public, { "{} (is) empty" }, IsEmpty);
-		library->RegisterFunction(Visibility::Public, { "{} (get) key" }, GetKey);
+		library->RegisterFunction(Visibility::Public, { "{iterator} (get) key" }, GetKey);
 		library->RegisterFunction(Visibility::Public, { "{} (get) value" }, GetValue);
 		library->RegisterFunction(Visibility::Public, { "(get) call stack" }, GetCallStack);
+		library->RegisterFunction(Visibility::Public, { "call {function}" }, Call);
+		library->RegisterFunction(Visibility::Public, { "call {function} with {}" }, CallWith);
+		library->RegisterFunction(Visibility::Public, { "async call {function}" }, AsyncCall);
+		library->RegisterFunction(Visibility::Public, { "async call {function} with {}" }, AsyncCallWith);
+		library->RegisterFunction(Visibility::Public, { "{coroutine} (is) finished" }, IsFinished);
+		library->RegisterFunction(Visibility::Public, { "all (of) {collection} (are) finished" }, AllAreFinished);
+		library->RegisterFunction(Visibility::Public, { "any (of) {collection} (is) finished" }, AnyIsFinished);
 
 		// Register core properties
 		library->RegisterProperty(Visibility::Public, Access::ReadOnly, { "newline" }, "\n");
@@ -4449,11 +4811,16 @@ namespace Jinx::Impl
 	inline FunctionSignature Library::FindFunctionSignature(Visibility visibility, const String & name) const
 	{
 		auto signature = CreateFunctionSignature(visibility, name);
+		return FindFunctionSignature(signature);
+	}
+
+	inline FunctionSignature Library::FindFunctionSignature(const FunctionSignature & signature) const
+	{
 		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
 		if (itr == m_functionList.end())
 			return FunctionSignature();
-		return signature;
+		return *itr;
 	}
 
 	inline const FunctionPtrList Library::Functions() const
@@ -4843,7 +5210,7 @@ namespace Jinx::Impl
 	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
 	{
 		m_library = m_runtime->GetLibraryInternal(libraryName);
-		return ParseFunctionSignature(access, false);
+		return ParseFunctionSignature(access, SignatureParseMode::SignatureOnly);
 	}
 
 	inline String Parser::GetNameFromID(RuntimeID id) const
@@ -5152,19 +5519,27 @@ namespace Jinx::Impl
 			type == SymbolType::Null;
 	}
 
-	inline bool Parser::CheckValueType() const
+	inline bool Parser::CheckValueType(SymbolListCItr currSym) const
 	{
-		if (m_error || m_currentSymbol == m_symbolList.end())
+		if (m_error || currSym == m_symbolList.end())
 			return false;
-		auto type = m_currentSymbol->type;
+		auto type = currSym->type;
 		return
 			type == SymbolType::Number ||
 			type == SymbolType::Integer ||
 			type == SymbolType::Boolean ||
 			type == SymbolType::String ||
 			type == SymbolType::Collection ||
+			type == SymbolType::Function ||
+			type == SymbolType::Coroutine ||
 			type == SymbolType::Guid ||
 			type == SymbolType::Null;
+
+	}
+
+	inline bool Parser::CheckValueType() const
+	{
+		return CheckValueType(m_currentSymbol);
 	}
 
 	inline bool Parser::CheckFunctionNamePart() const
@@ -5260,7 +5635,7 @@ namespace Jinx::Impl
 
 			// Check for valid expressions
 			size_t symCount = 0;
-			if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount))
+			if (CheckVariable(currSym, &symCount) || CheckProperty(currSym, &symCount) || CheckFunctionDeclaration(currSym, &symCount))
 			{
 				for (size_t i = 0; i < symCount; ++i)
 					++currSym;
@@ -5645,6 +6020,99 @@ namespace Jinx::Impl
 		return false;
 	}
 
+	inline bool Parser::CheckFunctionSignature(SymbolListCItr currSym, const FunctionSignature & signature, size_t * symCount) const
+	{
+		size_t count = 0;
+		if (symCount)
+			*symCount = 0;
+		for (const auto & part : signature.GetParts())
+		{
+			if (!IsSymbolValid(currSym))
+				return false;
+			if (part.partType == FunctionSignaturePartType::Parameter)
+			{
+				if (currSym->type != SymbolType::CurlyOpen)
+					return false;
+				++currSym;
+				++count;
+				if (!IsSymbolValid(currSym))
+					return false;
+				if (CheckValueType(currSym))
+				{
+					++currSym;
+					++count;
+					if (!IsSymbolValid(currSym))
+						return false;
+				}
+				if (currSym->type != SymbolType::CurlyClose)
+					return false;
+			}
+			else
+			{
+				bool matched = false;
+				for (const auto & name : part.names)
+				{
+					if (name == currSym->text)
+					{
+						matched = true;
+						break;
+					}
+				}
+				if (!matched && !part.optional)
+					return false;
+			}
+			++currSym;
+			++count;
+		}
+		if (symCount)
+			*symCount += count;
+		return true;
+	}
+
+	inline bool Parser::CheckFunctionDeclaration(SymbolListCItr currSym, size_t * symCount) const
+	{
+		if (!IsSymbolValid(currSym))
+			return false;
+
+		// First check for function keyword
+		if (currSym->type != SymbolType::Function)
+			return false;
+
+		// Since we parsed the function symbol, count starts at 1
+		if (symCount)
+			*symCount = 1;
+
+		// Advance symbol and check validity
+		++currSym;
+		if (!IsSymbolValid(currSym))
+			return false;
+
+		// Check for match in local functions
+		for (const auto & signature : m_localFunctions)
+		{
+			if (CheckFunctionSignature(currSym, signature, symCount))
+				return true;
+		}
+
+		// Check for match in all import libraries
+		for (const auto & import : m_importList)
+		{
+			auto library = m_runtime->GetLibraryInternal(import);
+			auto functions = library->Functions();
+			for (const auto & signature : functions)
+			{
+				if (CheckFunctionSignature(currSym, *signature, symCount))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	inline bool Parser::CheckFunctionDeclaration() const
+	{
+		return CheckFunctionDeclaration(m_currentSymbol, nullptr);
+	}
+
 	inline VisibilityType Parser::ParseScope()
 	{
 		if (m_error || m_currentSymbol == m_symbolList.end())
@@ -5766,6 +6234,10 @@ namespace Jinx::Impl
 			return ValueType::Null;
 		case SymbolType::Collection:
 			return ValueType::Collection;
+		case SymbolType::Function:
+			return ValueType::Function;
+		case SymbolType::Coroutine:
+			return ValueType::Coroutine;
 		case SymbolType::Guid:
 			return ValueType::Guid;
 		default:
@@ -5953,7 +6425,11 @@ namespace Jinx::Impl
 
 		if (Accept(SymbolType::To))
 		{
+			// Parse expression
 			ParseExpression();
+			Expect(SymbolType::NewLine);
+
+			// Set property opcode
 			EmitOpcode(Opcode::SetProp);
 			EmitId(propertyName.GetId());
 			m_idNameMap[propertyName.GetId()] = propertyName.GetName();
@@ -5964,7 +6440,10 @@ namespace Jinx::Impl
 			Error("Must assign property an initial value");
 			return;
 		}
-		Expect(SymbolType::NewLine);
+		else
+		{
+			Expect(SymbolType::NewLine);
+		}
 	}
 
 	inline PropertyName Parser::ParsePropertyName()
@@ -6092,7 +6571,7 @@ namespace Jinx::Impl
 		return s;
 	}
 
-	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, bool signatureOnly)
+	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType scope, SignatureParseMode mode)
 	{
 		if (Check(SymbolType::NewLine))
 		{
@@ -6136,9 +6615,9 @@ namespace Jinx::Impl
 					}
 					part.names.push_back(paramName);
 				}
-				else if (signatureOnly)
+				else if (mode == SignatureParseMode::FunctionDefinition)
 				{
-					Error("No variable name or class identifier found in function signature");
+					Error("No variable name found in function signature");
 					return FunctionSignature();
 				}
 				Expect(SymbolType::CurlyClose);
@@ -6192,11 +6671,6 @@ namespace Jinx::Impl
 			}
 			signatureParts.push_back(part);
 		}
-		if (!Expect(SymbolType::NewLine))
-		{
-			Error("Expected new line at end of function signature");
-			return FunctionSignature();
-		}
 
 		// Check for function signature validity with matching keywords
 		if (!parsedNonKeywordName)
@@ -6215,18 +6689,8 @@ namespace Jinx::Impl
 			return FunctionSignature();
 		}
 
-		// Create the function signature
-		FunctionSignature signature(scope, m_library->GetName(), signatureParts);
-
-		// This flag indicates that we're not generating bytecode, so no need to output that data.
-		if (signatureOnly)
-		{
-			// Emit function definition opcode
-			EmitOpcode(Opcode::Function);
-			signature.Write(m_writer);
-		}
-
-		return signature;
+		// Create and return the function signature
+		return FunctionSignature(scope, m_library->GetName(), signatureParts);
 	}
 
 	inline void Parser::ParseFunctionDefinition(VisibilityType scope)
@@ -6246,12 +6710,25 @@ namespace Jinx::Impl
 		}
 
 		// Parse function signature
-		FunctionSignature signature = ParseFunctionSignature(scope);
+		FunctionSignature signature = ParseFunctionSignature(scope, SignatureParseMode::FunctionDefinition);
 		if (!signature.IsValid())
 		{
 			Error("Invalid function definition");
 			return;
 		}
+
+		m_idNameMap[signature.GetId()] = signature.GetName();
+
+		// Check for newline
+		if (!Expect(SymbolType::NewLine))
+		{
+			Error("Expected new line at end of function signature");
+			return;
+		}
+
+		// Write function call opcode followed by signature data
+		EmitOpcode(Opcode::Function);
+		signature.Write(m_writer);
 
 		// Check function scope type
 		if (signature.GetVisibility() == VisibilityType::Local)
@@ -6325,6 +6802,53 @@ namespace Jinx::Impl
 
 		// Mark end of execution frame
 		FrameEnd();
+	}
+
+	inline void Parser::ParseFunctionDeclaration()
+	{
+		FunctionSignature signature;
+		size_t symCount = 0;
+
+		// Check for match in local functions
+		for (const auto & sig : m_localFunctions)
+		{
+			size_t count;
+			if (CheckFunctionSignature(m_currentSymbol, sig, &count))
+			{
+				if (sig.GetLength() > signature.GetLength())
+				{
+					signature = sig;
+					symCount = count;
+				}
+			}
+		}
+
+		// Check for match in all import libraries
+		for (const auto & import : m_importList)
+		{
+			auto library = m_runtime->GetLibraryInternal(import);
+			auto functions = library->Functions();
+			for (const auto & sig : functions)
+			{
+				size_t count;
+				if (CheckFunctionSignature(m_currentSymbol, *sig, &count))
+				{
+					if (sig->GetLength() > signature.GetLength())
+					{
+						signature = *sig;
+						symCount = count;
+					}
+				}
+			}
+		}
+
+		for (size_t i = 0; i < symCount; ++i)
+			NextSymbol();
+
+		// Push the function ID on the stack
+		EmitOpcode(Opcode::PushVal);
+		EmitValue(signature.GetId());
+		m_idNameMap[signature.GetId()] = signature.GetName();
 	}
 
 	inline void Parser::ParseFunctionCall(const FunctionMatch & match)
@@ -6425,6 +6949,15 @@ namespace Jinx::Impl
 				ParseSubscriptGet();
 				if (Accept(SymbolType::Type))
 					EmitOpcode(Opcode::Type);
+			}
+			else if (CheckFunctionDeclaration())
+			{
+				if (!Expect(SymbolType::Function))
+				{
+					Error("Expected function keyword");
+					return;
+				}
+				ParseFunctionDeclaration();
 			}
 			else if (CheckValue())
 			{
@@ -7088,7 +7621,7 @@ namespace Jinx::Impl
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
 
-						// Parse assignment expression
+						// Parse expression
 						ParseExpression();
 						Expect(SymbolType::NewLine);
 
@@ -7100,6 +7633,7 @@ namespace Jinx::Impl
 						}
 						else
 							EmitOpcode(Opcode::SetProp);
+
 						EmitId(propertyName.GetId());
 						m_idNameMap[propertyName.GetId()] = propertyName.GetName();
 					}
@@ -7115,7 +7649,7 @@ namespace Jinx::Impl
 						// Check for a 'to' statement
 						Expect(SymbolType::To);
 
-						// Parse assignment expression
+						// Parse expression
 						ParseExpression();
 						Expect(SymbolType::NewLine);
 
@@ -7728,6 +8262,8 @@ namespace Jinx::Impl
 				val.Read(reader);
 				if (val.IsString())
 					LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
+				else if (val.IsFunction())
+					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(val.GetFunction()).c_str());
 				else
 					LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
 			}
@@ -8102,11 +8638,15 @@ namespace Jinx::Impl
 				if (functionDef->GetBytecode())
 				{
 					CallBytecodeFunction(functionDef, OnReturn::Continue);
+					if (m_error)
+						return false;
 				}
 				// Otherwise, call a native function callback
 				else if (functionDef->GetCallback())
 				{
 					Push(CallNativeFunction(functionDef));
+					if (m_error)
+						return false;
 				}
 				else
 				{
@@ -8684,14 +9224,19 @@ namespace Jinx::Impl
 				auto val = Pop();
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
-				bool exit = m_execution.back().onReturn == OnReturn::Wait ? true : false;
+				auto onReturn = m_execution.back().onReturn;
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
 					m_stack.pop_back();
 				Push(val);
-				if (exit)
+				if (onReturn == OnReturn::Wait)
 					opcode = Opcode::Wait;
+				else if (onReturn == OnReturn::Finish)
+				{
+					opcode = Opcode::Exit;
+					m_finished = true;
+				}
 			}
 			break;
 			case Opcode::ScopeBegin:
@@ -11379,6 +11924,8 @@ namespace Jinx
 				true,	// String
 				false,	// Collection
 				false,	// CollectionItr
+				true,   // Function
+				true,   // Coroutine
 				false,	// UserObject
 				false,	// Buffer
 				true,	// Guid
@@ -11423,6 +11970,13 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				new(&m_collectionItrPair) CollectionItrPair();
 				m_collectionItrPair = copy.m_collectionItrPair;
+				break;
+			case ValueType::Function:
+				m_function = copy.m_function;
+				break;
+			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
+				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
 				new(&m_userObject) UserObjectPtr();
@@ -11476,6 +12030,13 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				new(&m_collectionItrPair) CollectionItrPair();
 				m_collectionItrPair = copy.m_collectionItrPair;
+				break;
+			case ValueType::Function:
+				m_function = copy.m_function;
+				break;
+			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
+				m_coroutine = copy.m_coroutine;
 				break;
 			case ValueType::UserObject:
 				new(&m_userObject) UserObjectPtr();
@@ -11743,6 +12304,16 @@ namespace Jinx
 				};
 			}
 			break;
+			case ValueType::Function:
+				switch (type)
+				{
+					case ValueType::String:
+						SetString(Impl::UnsignedIntegerToString(m_function));
+						return true;
+					default:
+						break;
+				};
+				break;
 			case ValueType::Collection:
 				switch (type)
 				{
@@ -11799,6 +12370,9 @@ namespace Jinx
 			case ValueType::CollectionItr:
 				m_collectionItrPair.~CollectionItrPair();
 				break;
+			case ValueType::Coroutine:
+				m_coroutine.~CoroutinePtr();
+				break;
 			case ValueType::UserObject:
 				m_userObject.~UserObjectPtr();
 				break;
@@ -11840,6 +12414,26 @@ namespace Jinx
 		if (!v.ConvertTo(ValueType::CollectionItr))
 			return CollectionItrPair();
 		return v.GetCollectionItr();
+	}
+
+	inline RuntimeID Variant::GetFunction() const
+	{
+		if (IsFunction())
+			return m_function;
+		Variant v = *this;
+		if (!v.ConvertTo(ValueType::Function))
+			return InvalidID;
+		return v.GetFunction();
+	}
+
+	inline CoroutinePtr Variant::GetCoroutine() const
+	{
+		if (IsCoroutine())
+			return m_coroutine;
+		Variant v = *this;
+		if (!v.ConvertTo(ValueType::Coroutine))
+			return nullptr;
+		return v.GetCoroutine();
 	}
 
 	inline UserObjectPtr Variant::GetUserObject() const
@@ -11987,6 +12581,21 @@ namespace Jinx
 		m_collectionItrPair = value;
 	}
 
+	inline void Variant::SetFunction(RuntimeID value)
+	{
+		Destroy();
+		m_type = ValueType::Function;
+		m_function = value;
+	}
+
+	inline void Variant::SetCoroutine(const CoroutinePtr & value)
+	{
+		Destroy();
+		m_type = ValueType::Coroutine;
+		new(&m_coroutine) CoroutinePtr();
+		m_coroutine = value;
+	}
+
 	inline void Variant::SetGuid(const Guid & value)
 	{
 		Destroy();
@@ -12074,6 +12683,11 @@ namespace Jinx
 				break;
 			case ValueType::CollectionItr:
 				break;
+			case ValueType::Function:
+				writer.Write(m_function);
+				break;
+			case ValueType::Coroutine:
+				break;
 			case ValueType::UserObject:
 				break;
 			case ValueType::Buffer:
@@ -12118,6 +12732,11 @@ namespace Jinx
 			case ValueType::Collection:
 				break;
 			case ValueType::CollectionItr:
+				break;
+			case ValueType::Function:
+				reader.Read(&m_function);
+				break;
+			case ValueType::Coroutine:
 				break;
 			case ValueType::UserObject:
 				break;
@@ -12329,6 +12948,18 @@ namespace Jinx
 					return false;
 				return left.GetCollectionItr() == right.GetCollectionItr();
 			}
+			case ValueType::Function:
+			{
+				if (!right.IsFunction())
+					return false;
+				return left.GetFunction() == right.GetFunction();
+			}
+			case ValueType::Coroutine:
+			{
+				if (!right.IsCoroutine())
+					return false;
+				return left.GetCoroutine() == right.GetCoroutine();
+			}
 			case ValueType::UserObject:
 			{
 				if (!right.IsUserObject())
@@ -12408,6 +13039,16 @@ namespace Jinx
 				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
 				return false;
 			}
+			case ValueType::Function:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing function type with < operator");
+				return false;
+			}
+			case ValueType::Coroutine:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing coroutine type with < operator");
+				return false;
+			}
 			case ValueType::UserObject:
 			{
 				if (!right.IsUserObject())
@@ -12479,12 +13120,22 @@ namespace Jinx
 			}
 			case ValueType::Collection:
 			{
-				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collection type with <= operator");
 				return false;
 			}
 			case ValueType::CollectionItr:
 			{
-				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with < operator");
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing collectionitr type with <= operator");
+				return false;
+			}
+			case ValueType::Function:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing function type with <= operator");
+				return false;
+			}
+			case ValueType::Coroutine:
+			{
+				Impl::LogWriteLine(LogLevel::Error, "Error comparing coroutine type with <= operator");
 				return false;
 			}
 			case ValueType::UserObject:

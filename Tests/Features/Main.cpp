@@ -91,5 +91,12 @@ int main(int argc, char ** argv)
 	REQUIRE(script->GetVariable("a") == true);
 	REQUIRE(script->GetVariable("b") == false);
 
+	auto memStats = GetMemoryStats();
+	printf("\nMemory Stats\n");
+	printf("-------------\n");
+	printf("Allocation count: %zu\n", memStats.allocationCount);
+	printf("Free count: %zu\n", memStats.freeCount);
+	printf("Allocated memory: %zu bytes\n", memStats.allocatedMemory);
+
 	return 0;
 }

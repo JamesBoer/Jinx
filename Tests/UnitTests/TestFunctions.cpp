@@ -834,4 +834,269 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("b") == false);
 	}
 
+	SECTION("Test function assignment to local variable #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+			end
+
+			set a to function test
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to local variable #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {integer i} test {string s}
+				return i, s
+			end
+
+			set a to function {integer} test {string}
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to new property #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+			end
+
+			set public a to function test
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+
+	SECTION("Test function assignment to new property #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {integer i} test {string s}
+				return i, s
+			end
+
+			set private a to function {integer} test {string}
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to existing property #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+			end
+
+			set public a to null
+			set a to function test
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+	SECTION("Test function assignment to existing property #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function {integer i} test {string s}
+				return i, s
+			end
+
+			set private a to null
+			set a to function {integer} test {string}
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a").IsFunction());
+	}
+
+	SECTION("Test function resolution with matching optional/non-optional name parts")
+	{
+		const char * scriptText =
+			u8R"(
+
+			function {x} (is) alpha
+				return true
+			end
+
+			function {x} is beta
+				return false
+			end
+
+			set a to 123 is alpha
+			set b to 456 is beta
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == true);
+		REQUIRE(script->GetVariable("b") == false);
+	}
+
+	SECTION("Test function declaration as expression #1")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+				return 123
+			end
+
+			set a to 111, function test, "test"
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #2")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {x}
+				return x
+			end
+
+			set a to 111, function test {}, "test"
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #3")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test {integer x}
+				return x
+			end
+
+			set a to 111, function test {integer}, "test"
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2).IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #4")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function foo {x}
+				return x
+			end
+
+			function bar {x} buzz
+				return x
+			end
+
+			set a to bar function foo {} buzz
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #5")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function {w} foo {x}
+				return x + w
+			end
+
+			function bar {x} buzz
+				return x
+			end
+
+			set a to bar function {} foo {} buzz
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
+	SECTION("Test function declaration as expression #6")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function {w} foo {x}
+				return x + w
+			end
+
+			function bar {w} fizz {x} buzz
+				return x
+			end
+
+			set a to bar function {} foo {} fizz function {} foo {} buzz
+			
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsFunction());
+	}
+
 }

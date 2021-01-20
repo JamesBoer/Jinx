@@ -61,7 +61,7 @@ TEST_CASE("Test Core Library", "[Core]")
 			import core
 
 			set a to "いろは"
-			set b to a size
+			set b to a's size
 
 			)";
 
@@ -71,7 +71,7 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("b") == 3);
 	}
 
-	SECTION("Test to empty functions")
+	SECTION("Test empty function")
 	{
 		const char * scriptText =
 			u8R"(
@@ -151,6 +151,199 @@ TEST_CASE("Test Core Library", "[Core]")
 		REQUIRE(script->GetVariable("a").IsCollection());
 		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == "root");
 		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == "test func one");
+	}
+
+	SECTION("Test 'call' no-arg no-return function with local function variable")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			set public a to 0
+			function test
+				set a to 123
+			end
+
+			set f to function test
+			call f
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a") == 123);
+	}
+
+	SECTION("Test 'call' no-arg function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test
+				return 123
+			end
+
+			set f to function test
+			set a to call f
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+	SECTION("Test 'call with' one-arg function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x}
+				return x
+			end
+
+			set f to function test {}
+			set a to call f with 123
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+	SECTION("Test 'call with' two-arg function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x} and {y}
+				return x, y
+			end
+
+			set f to function test {} and {}
+			set a to call f with 12, 34
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a").IsCollection());
+		REQUIRE(script->GetVariable("a").GetCollection()->at(1) == 12);
+		REQUIRE(script->GetVariable("a").GetCollection()->at(2) == 34);
+	}
+
+	SECTION("Test 'call' function from library")
+	{
+		static const char * libText =
+			u8R"(
+
+			library lib
+
+			public function test
+				return 123
+			end
+
+
+			)";
+
+		static const char * scriptText =
+			u8R"(
+
+			import core
+			import lib
+
+			set f to function test
+			set a to call f
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libScript = TestExecuteScript(libText, runtime);
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(libScript);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 123);
+	}
+
+	SECTION("Test 'call with' function from library")
+	{
+		static const char * libText =
+			u8R"(
+
+			library lib
+
+			public function {x} test {y}
+				return x + y
+			end
+
+
+			)";
+
+		static const char * scriptText =
+			u8R"(
+
+			import core
+			import lib
+
+			set f to function {} test {}
+			set a to call f with "Hello ", "world!"
+
+			)";
+
+		auto runtime = TestCreateRuntime();
+		auto libScript = TestExecuteScript(libText, runtime);
+		auto script = TestExecuteScript(scriptText, runtime);
+		REQUIRE(libScript);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == "Hello world!");
+	}
+
+	SECTION("Test 'call with' function with wait")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			import core
+
+			function test {x}
+				set z to 0
+				loop i from 1 to x
+					increment z by i
+					wait
+				end
+				return z
+			end
+
+			set f to function test {}
+			set a to call f with 4
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		REQUIRE(!script->IsFinished());
+		while (!script->IsFinished())
+		{
+			REQUIRE(script->Execute());
+		}
+		REQUIRE(script->GetVariable("f").IsFunction());
+		REQUIRE(script->GetVariable("a") == 10);
 	}
 
 }
