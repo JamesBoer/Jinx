@@ -2545,20 +2545,6 @@ namespace Jinx::Impl
 		// Runtime stack
 		std::vector<Variant, Allocator<Variant>> m_stack;
 
-		// Coroutine runtime data
-		struct CoroutineData
-		{
-			CoroutineData(const ScriptIPtr & s, const Variant & rv, bool f) :
-				script(s), returnValue(rv), finished(f)
-			{}
-			ScriptIPtr script;
-			Variant returnValue;
-			bool finished = false;
-		};
-
-		// Executing coroutines
-		std::vector<CoroutineData, Allocator<CoroutineData>> m_coroutines;
-
 		// Current library
 		LibraryIPtr m_library;
 
