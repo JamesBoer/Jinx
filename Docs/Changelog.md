@@ -1,7 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2021-01-11
+## [1.3.1] - 2021-01-20
+
+- Updated amalgamated header
+
+## [1.3.0] - 2021-01-20
 
 - Add support for first-class functions
 - Add support for coroutines
