@@ -93,7 +93,7 @@ namespace Jinx::Impl
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
 	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	using FunctionList = std::list<FunctionSignature, Allocator<FunctionSignature>>;
+	using FunctionList = std::vector<FunctionSignature, Allocator<FunctionSignature>>;
 	using  FunctionPtrList = std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>>;
 
 } // namespace Jinx::Impl

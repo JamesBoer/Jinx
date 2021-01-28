@@ -252,7 +252,7 @@ namespace Jinx::Impl
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
 
 	// Shared aliases
-	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
+	using SymbolTypeMap = std::map<std::string_view, SymbolType, std::less<std::string_view>, Allocator<std::pair<const std::string_view, SymbolType>>>;
 
 } // namespace Jinx::Impl
 

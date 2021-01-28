@@ -19,7 +19,7 @@ namespace Jinx::Impl
 		{
 			SymbolType symType = static_cast<SymbolType>(i);
 			auto symTypeText = GetSymbolTypeText(symType);
-			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+			m_symbolTypeMap.insert(std::make_pair(symTypeText, symType));
 		}
 	}
 
@@ -387,7 +387,7 @@ namespace Jinx::Impl
 		return m_propertyMap.find(id) != m_propertyMap.end();
 	}
 
-	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
+	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset)
 	{
 		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
 		std::lock_guard<std::mutex> lock(mutex);

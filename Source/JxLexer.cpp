@@ -21,6 +21,7 @@ namespace Jinx::Impl
 		m_error(false),
 		m_symbolTypeMap(symbolTypeMap)
 	{
+		m_symbolList.reserve(256);
 	}
 
 	inline_t void Lexer::AdvanceCurrent()

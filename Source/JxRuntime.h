@@ -33,7 +33,7 @@ namespace Jinx::Impl
 		inline LibraryIPtr GetLibraryInternal(const String & name) { return std::static_pointer_cast<Library>(GetLibrary(name)); }
 		FunctionDefinitionPtr FindFunction(RuntimeID id) const;
 		bool LibraryExists(const String & name) const;
-		void RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset);
+		void RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset);
 		void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
 		Variant GetProperty(RuntimeID id) const;
 		bool PropertyExists(RuntimeID id) const;
