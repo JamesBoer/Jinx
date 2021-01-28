@@ -62,7 +62,6 @@ namespace Jinx::Impl
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
 	private:
-		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
