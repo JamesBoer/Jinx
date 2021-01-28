@@ -12,14 +12,13 @@ namespace Jinx::Impl
 
 	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
-		m_userContext(userContext),
-		m_bytecodeStart(0),
-		m_finished(false),
-		m_error(false)
+		m_userContext(userContext)
 	{
 		m_execution.reserve(6);
-		m_execution.push_back(ExecutionFrame(bytecode, "root"));
+		m_execution.emplace_back(bytecode, "root");
 		m_stack.reserve(32);
+		m_scopeStack.reserve(32);
+		m_idIndexData.reserve(32);
 
 		// Assume default unnamed library unless explicitly overridden
 		m_library = m_runtime->GetLibraryInternal("");
@@ -784,6 +783,12 @@ namespace Jinx::Impl
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
 				auto onReturn = m_execution.back().onReturn;
+				while (!m_idIndexData.empty())
+				{
+					if (m_idIndexData.back().frameIndex < m_execution.size())
+						break;
+					m_idIndexData.pop_back();
+				}
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
@@ -800,22 +805,20 @@ namespace Jinx::Impl
 			break;
 			case Opcode::ScopeBegin:
 			{
-				m_execution.back().scopeStack.push_back(m_stack.size());
+				m_scopeStack.push_back(m_stack.size());
 			}
 			break;
 			case Opcode::ScopeEnd:
 			{
-				auto stackTop = m_execution.back().scopeStack.back();
-				m_execution.back().scopeStack.pop_back();
+				auto stackTop = m_scopeStack.back();
+				m_scopeStack.pop_back();
 				while (m_stack.size() > stackTop)
 					m_stack.pop_back();
-				auto & ids = m_execution.back().ids;
-				for (auto itr = ids.begin(); itr != ids.end();)
+				while (!m_idIndexData.empty())
 				{
-					if (itr->second >= stackTop)
-						itr = ids.erase(itr);
-					else
-						++itr;
+					if (m_idIndexData.back().index < stackTop)
+						break;
+					m_idIndexData.pop_back();
 				}
 			}
 			break;
@@ -1009,7 +1012,7 @@ namespace Jinx::Impl
 
 	inline_t void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn)
 	{
-		m_execution.push_back(ExecutionFrame(fnDef));
+		m_execution.emplace_back(fnDef);
 		m_execution.back().onReturn = onReturn;
 		m_execution.back().reader.Seek(fnDef->GetOffset());
 		assert(m_stack.size() >= fnDef->GetParameterCount());
@@ -1086,17 +1089,17 @@ namespace Jinx::Impl
 
 	inline_t Variant Script::GetVariable(RuntimeID id) const
 	{
-		auto & names = m_execution.back().ids;
-		auto itr = names.find(id);
-		if (itr != names.end())
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
+			if (ritr->id == id)
 			{
-				LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
-				return Variant();
+				if (ritr->index >= m_stack.size())
+				{
+					LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
+					return Variant();
+				}
+				return m_stack[ritr->index];
 			}
-			return m_stack[itr->second];
 		}
 		return Variant();
 	}
@@ -1132,34 +1135,46 @@ namespace Jinx::Impl
 
 	inline_t void Script::SetVariable(RuntimeID id, const Variant & value)
 	{
+
 		// Search the current frame for the variable
-		auto & names = m_execution.back().ids;
-		auto itr = names.find(id);
-		if (itr != names.end())
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
+			if (ritr->frameIndex < m_execution.size())
+				break;
+			if (ritr->id == id)
 			{
-				itr->second = m_stack.size();
-				m_stack.push_back(value);
-				return;
-			}
-			else
-			{
-				m_stack[itr->second] = value;
+				if (ritr->index >= m_stack.size())
+				{
+					ritr->index = m_stack.size();
+					m_stack.push_back(value);
+				}
+				else
+				{
+					m_stack[ritr->index] = value;
+				}
 				return;
 			}
 		}
 
 		// If we don't find the name, create a new variable on the top of the stack
-		names.insert(std::make_pair(id, m_stack.size()));
+		m_idIndexData.emplace_back(id, m_stack.size(), m_execution.size());
 		m_stack.push_back(value);
 	}
 
 	inline_t void Script::SetVariableAtIndex(RuntimeID id, size_t index)
 	{
 		assert(index < m_stack.size());
-		m_execution.back().ids.insert(std::make_pair(id, index));
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
+		{
+			if (ritr->frameIndex < m_execution.size())
+				break;
+			if (ritr->id == id)
+			{
+				ritr->index = index;
+				return;
+			}
+		}
+		m_idIndexData.emplace_back(id, index, m_execution.size());
 	}
 
 	inline_t std::pair<CollectionPtr, Variant> Script::WalkSubscripts(uint32_t subscripts, CollectionPtr collection)

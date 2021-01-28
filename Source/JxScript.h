@@ -63,8 +63,6 @@ namespace Jinx::Impl
 
 	private:
 		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
-		using ScopeStack = std::vector<size_t, Allocator<size_t>>;
-		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
@@ -72,10 +70,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
-			{
-				scopeStack.reserve(32);
-			}
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n) {}
 			explicit ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
 
 			// Buffer containing script bytecode
@@ -91,12 +86,6 @@ namespace Jinx::Impl
 			// safer string copy, which would cause an allocation cost for each function call.
 			const char * name;
 
-			// Variable id lookup map
-			IdIndexMap ids;
-
-			// Track top of stack for each level of scope
-			ScopeStack scopeStack;
-
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop = 0;
 
@@ -110,6 +99,19 @@ namespace Jinx::Impl
 		// Runtime stack
 		std::vector<Variant, Allocator<Variant>> m_stack;
 
+		// Track top of stack for each level of scope
+		std::vector<size_t, Allocator<size_t>> m_scopeStack;
+
+		// Collection of ID-index associations
+		struct IdIndexData
+		{
+			IdIndexData(RuntimeID i, size_t idx, size_t f) : id(i), index(idx), frameIndex(f) {}
+			RuntimeID id;
+			size_t index;
+			size_t frameIndex;
+		};
+		std::vector<IdIndexData, Allocator<IdIndexData>> m_idIndexData;
+
 		// Current library
 		LibraryIPtr m_library;
 
@@ -117,13 +119,13 @@ namespace Jinx::Impl
 		Any m_userContext;
 
 		// Initial position of bytecode for this script
-		size_t m_bytecodeStart;
+		size_t m_bytecodeStart = 0;
 
 		// Is finished executing
-		bool m_finished;
+		bool m_finished = false;
 
 		// Runtime error
-		bool m_error;
+		bool m_error = false;
 
 		// Script name
 		String m_name;
