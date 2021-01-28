@@ -56,6 +56,7 @@ namespace Jinx::Impl
 		void Push(Variant && value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
+		void SetVariable(RuntimeID id, Variant && value);
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 

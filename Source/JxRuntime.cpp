@@ -416,6 +416,12 @@ namespace Jinx::Impl
 		m_propertyMap[id] = value;
 	}
 
+	inline_t void Runtime::SetProperty(RuntimeID id, Variant && value)
+	{
+		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		m_propertyMap[id] = value;
+	}
+
 	inline_t BufferPtr Runtime::StripDebugInfo(BufferPtr bytecode) const
 	{
 		// Validate input

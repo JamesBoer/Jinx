@@ -848,7 +848,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				m_runtime->SetProperty(id, val);
+				m_runtime->SetProperty(id, std::move(val));
 			}
 			break;
 			case Opcode::SetPropKeyVal:
@@ -911,7 +911,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				SetVariable(id, val);
+				SetVariable(id, std::move(val));
 			}
 			break;
 			case Opcode::SetVarKeyVal:
@@ -1139,6 +1139,12 @@ namespace Jinx::Impl
 	}
 
 	inline_t void Script::SetVariable(RuntimeID id, const Variant & value)
+	{
+		auto val = value;
+		SetVariable(id, std::move(val));
+	}
+
+	inline_t void Script::SetVariable(RuntimeID id, Variant && value)
 	{
 
 		// Search the current frame for the variable
