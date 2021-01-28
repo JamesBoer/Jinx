@@ -53,6 +53,7 @@ namespace Jinx::Impl
 	private:
 
 		Variant GetVariable(RuntimeID id) const;
+		void Push(Variant && value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
 
