@@ -23,6 +23,7 @@ Copyright (c) 2016 James Boer
 #include <optional>
 #include <memory>
 #include <string>
+#include <array>
 #include <list>
 #include <map>
 #include <set>

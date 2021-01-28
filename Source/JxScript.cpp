@@ -12,13 +12,20 @@ namespace Jinx::Impl
 
 	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
+		m_execution(&m_staticMem),
+		m_stack(&m_staticMem),
+		m_scopeStack(&m_staticMem),
+		m_idIndexData(&m_staticMem),
 		m_userContext(userContext)
 	{
+		// Reserve initial memory
 		m_execution.reserve(6);
-		m_execution.emplace_back(bytecode, "root");
 		m_stack.reserve(32);
 		m_scopeStack.reserve(32);
 		m_idIndexData.reserve(32);
+
+		// Create root execution frame
+		m_execution.emplace_back(bytecode, "root");
 
 		// Assume default unnamed library unless explicitly overridden
 		m_library = m_runtime->GetLibraryInternal("");

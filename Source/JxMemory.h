@@ -63,6 +63,18 @@ namespace Jinx
 	template <typename T>
 	bool operator != (const Allocator<T> &, const Allocator<T> &) { return false; }
 
+
+	class mem_resource : public std::pmr::memory_resource
+	{
+	public:
+		void * do_allocate(std::size_t bytes, [[maybe_unused]] std::size_t alignment) override { return MemAllocate(bytes); }
+		void do_deallocate(void * p, [[maybe_unused]] size_t bytes, [[maybe_unused]] size_t alignment) override { MemFree(p); }
+		bool do_is_equal([[maybe_unused]] const memory_resource & other) const noexcept override { return true; }
+
+	private:
+	};
+
+
 	struct GlobalParams;
 	void InitializeMemory(const GlobalParams & params);
 

@@ -70,6 +70,7 @@ case a project wishes to target macOS clients earlier than 10.14.
 #define JINX_USE_ANY
 
 #include <memory>
+#include <memory_resource>
 #include <functional>
 #include <vector>
 #include <map>
