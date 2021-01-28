@@ -66,11 +66,21 @@ On macOS, use of std::any is restricted to applications targeting versions 10.14
 limitations in std::any_cast.  As such, Jinx provides optional void * aliases in place of std::any in
 case a project wishes to target macOS clients earlier than 10.14.
 */
-
 #define JINX_USE_ANY
 
+/*
+The default Xcode toolchain, as of 1/28/2021, does not support C++'s polymorphic allocators.  Once
+AppleClang and it's std libraries catch up to VC and gcc, we can enable this optimization for Macs by
+default.  After enough time has passed, we should be able to safely remove this conditional compilation.
+*/
+#ifndef JINX_MACOS
+#define JINX_USE_PMR
+#endif
+
 #include <memory>
+#ifdef JINX_USE_PMR
 #include <memory_resource>
+#endif
 #include <functional>
 #include <vector>
 #include <map>

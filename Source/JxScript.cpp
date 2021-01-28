@@ -12,10 +12,12 @@ namespace Jinx::Impl
 
 	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
+#ifdef JINX_USE_PMR
 		m_execution(&m_staticMem),
 		m_stack(&m_staticMem),
 		m_scopeStack(&m_staticMem),
 		m_idIndexData(&m_staticMem),
+#endif
 		m_userContext(userContext)
 	{
 		// Reserve initial memory

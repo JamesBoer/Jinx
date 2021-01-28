@@ -46,6 +46,14 @@ namespace Jinx
 	// Define a custom wide character string using internal allocator
 	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
 
+#ifdef JINX_USE_PMR
+	template <typename T>
+	using Vector = std::pmr::vector<T>;
+#else
+	template <typename T>
+	using Vector = std::vector<T, Allocator<T>>;
+#endif
+
 	// Runtime ID used for unique identifiers
 	using RuntimeID = uint64_t;
 	const RuntimeID InvalidID = 0;

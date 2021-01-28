@@ -63,7 +63,7 @@ namespace Jinx
 	template <typename T>
 	bool operator != (const Allocator<T> &, const Allocator<T> &) { return false; }
 
-
+#ifdef JINX_USE_PMR
 	class mem_resource : public std::pmr::memory_resource
 	{
 	public:
@@ -73,7 +73,7 @@ namespace Jinx
 
 	private:
 	};
-
+#endif
 
 	struct GlobalParams;
 	void InitializeMemory(const GlobalParams & params);
