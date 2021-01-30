@@ -21,31 +21,10 @@ namespace Jinx::Impl
 
 	struct FunctionSignaturePart
 	{
-		FunctionSignaturePart()
-		{}
-		FunctionSignaturePart(const FunctionSignaturePart & copy) : FunctionSignaturePart()
-		{
-			partType = copy.partType;
-			optional = copy.optional;
-			valueType = copy.valueType;
-			names.reserve(copy.names.size());
-			for (const auto & name : copy.names)
-				names.push_back(name);
-		}
-		FunctionSignaturePart & operator= (const FunctionSignaturePart & copy)
-		{
-			if (this != &copy)
-			{
-				partType = copy.partType;
-				optional = copy.optional;
-				valueType = copy.valueType;
-				std::copy(copy.names.begin(), copy.names.end(), names.begin());
-				names.reserve(copy.names.size());
-				for (const auto & name : copy.names)
-					names.push_back(name);
-			}
-			return *this;
-		}
+		FunctionSignaturePart() {}
+		FunctionSignaturePart(const FunctionSignaturePart & copy);
+		FunctionSignaturePart & operator= (const FunctionSignaturePart & copy);
+
 		static const size_t ArenaSize = 128;
 		StaticArena<ArenaSize> staticArena;
 		FunctionSignaturePartType partType = FunctionSignaturePartType::Name;

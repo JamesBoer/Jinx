@@ -94,6 +94,7 @@ namespace Jinx::Impl
 			OnReturn onReturn = OnReturn::Continue;
 		};
 
+		// Static memory pool for fast allocations
 		static const size_t ArenaSize = 4096;
 		StaticArena<ArenaSize> m_staticArena;
 

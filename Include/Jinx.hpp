@@ -92,7 +92,6 @@ On macOS, use of std::any is restricted to applications targeting versions 10.14
 limitations in std::any_cast.  As such, Jinx provides optional void * aliases in place of std::any in
 case a project wishes to target macOS clients earlier than 10.14.
 */
-
 #define JINX_USE_ANY
 
 #include <memory>
@@ -103,6 +102,7 @@ case a project wishes to target macOS clients earlier than 10.14.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#include <cassert>
 #ifdef JINX_USE_ANY
 #include <any>
 #endif
@@ -178,6 +178,132 @@ namespace Jinx
 	template <typename T>
 	bool operator != (const Allocator<T> &, const Allocator<T> &) { return false; }
 
+
+	// A fixed-size static memory arena used by StaticAllocator for fast, one-time allocations.
+	// Based on Howard Hinnant's short_alloc, which is MIT licensed code.
+	template <std::size_t N, std::size_t alignment = alignof(std::max_align_t)>
+	class StaticArena
+	{
+		alignas(alignment) char m_buffer[N];
+		char * m_ptr;
+
+	public:
+		~StaticArena() { m_ptr = nullptr; }
+		StaticArena() noexcept : m_ptr(m_buffer) {}
+		StaticArena(const StaticArena &) = delete;
+		StaticArena & operator=(const StaticArena &) = delete;
+
+		template <std::size_t ReqAlign> char * allocate(std::size_t n);
+		void deallocate(char * p, std::size_t n) noexcept;
+
+		static constexpr std::size_t size() noexcept { return N; }
+		std::size_t used() const noexcept { return static_cast<std::size_t>(m_ptr - m_buffer); }
+		void reset() noexcept { m_ptr = m_buffer; }
+
+	private:
+		static std::size_t align_up(std::size_t n) noexcept
+		{
+			return (n + (alignment - 1)) & ~(alignment - 1);
+		}
+
+		bool pointer_in_buffer(char * p) noexcept
+		{
+			return std::uintptr_t(m_buffer) <= std::uintptr_t(p) &&
+				std::uintptr_t(p) <= std::uintptr_t(m_buffer) + N;
+		}
+	};
+
+	template <std::size_t N, std::size_t alignment>
+	template <std::size_t ReqAlign>
+	char * StaticArena<N, alignment>::allocate(std::size_t n)
+	{
+		static_assert(ReqAlign <= alignment, "alignment is too small for this arena");
+		assert(pointer_in_buffer(m_ptr) && "short_alloc has outlived arena");
+		auto const aligned_n = align_up(n);
+		if (static_cast<decltype(aligned_n)>(m_buffer + N - m_ptr) >= aligned_n)
+		{
+			char * r = m_ptr;
+			m_ptr += aligned_n;
+			return r;
+		}
+
+		static_assert(alignment <= alignof(std::max_align_t), "you've chosen an "
+			"alignment that is larger than alignof(std::max_align_t), and "
+			"cannot be guaranteed by normal operator new");
+		return static_cast<char *>(Jinx::MemAllocate(n));
+	}
+
+	template <std::size_t N, std::size_t alignment>
+	void StaticArena<N, alignment>::deallocate(char * p, std::size_t n) noexcept
+	{
+		assert(pointer_in_buffer(m_ptr) && "short_alloc has outlived arena");
+		if (pointer_in_buffer(p))
+		{
+			n = align_up(n);
+			if (p + n == m_ptr)
+				m_ptr = p;
+		}
+		else
+			Jinx::MemFree(p);
+	}
+
+	template <class T, std::size_t N, std::size_t Align = alignof(std::max_align_t)>
+	class StaticAllocator
+	{
+	public:
+		using value_type = T;
+		static auto constexpr alignment = Align;
+		static auto constexpr size = N;
+		using arena_type = StaticArena<size, alignment>;
+
+	private:
+		arena_type & m_arena;
+
+	public:
+		StaticAllocator(const StaticAllocator &) = default;
+		StaticAllocator & operator=(const StaticAllocator &) = delete;
+
+		StaticAllocator(arena_type & a) noexcept : m_arena(a)
+		{
+			static_assert(size % alignment == 0,
+				"size N needs to be a multiple of alignment Align");
+		}
+		template <class U>
+		StaticAllocator(const StaticAllocator<U, N, alignment> & a) noexcept
+			: m_arena(a.m_arena)
+		{
+		}
+
+		template <class _Up> struct rebind { using other = StaticAllocator<_Up, N, alignment>; };
+
+		T * allocate(std::size_t n)
+		{
+			return reinterpret_cast<T *>(m_arena.template allocate<alignof(T)>(n * sizeof(T)));
+		}
+		void deallocate(T * p, std::size_t n) noexcept
+		{
+			m_arena.deallocate(reinterpret_cast<char *>(p), n * sizeof(T));
+		}
+
+		template <class T1, std::size_t N1, std::size_t A1, class U, std::size_t M, std::size_t A2>
+		friend bool operator == (const StaticAllocator<T1, N1, A1> & x, const StaticAllocator<U, M, A2> & y) noexcept;
+
+		template <class U, std::size_t M, std::size_t A> friend class StaticAllocator;
+	};
+
+	template <class T, std::size_t N, std::size_t A1, class U, std::size_t M, std::size_t A2>
+	inline bool operator == (const StaticAllocator<T, N, A1> & x, const StaticAllocator<U, M, A2> & y) noexcept
+	{
+		return N == M && A1 == A2 && &x.m_arena == &y.m_arena;
+	}
+
+	template <class T, std::size_t N, std::size_t A1, class U, std::size_t M, std::size_t A2>
+	inline bool operator != (const StaticAllocator<T, N, A1> & x, const StaticAllocator<U, M, A2> & y) noexcept
+	{
+		return !(x == y);
+	}
+
+
 	struct GlobalParams;
 	void InitializeMemory(const GlobalParams & params);
 
@@ -240,13 +366,16 @@ namespace Jinx
 	}
 
 	// Define a custom UTF-8 string using internal allocator
-	using String = std::basic_string <char, std::char_traits<char>, Allocator<char>>;
+	using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
+
+	template<size_t S>
+	using StringI = std::basic_string<char, std::char_traits<char>, StaticAllocator<char, S>>;
 
 	// Define a custom UTF-16 string using internal allocator
-	using StringU16 = std::basic_string <char16_t, std::char_traits<char16_t>, Allocator<char16_t>>;
+	using StringU16 = std::basic_string<char16_t, std::char_traits<char16_t>, Allocator<char16_t>>;
 
 	// Define a custom wide character string using internal allocator
-	using WString = std::basic_string <wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
+	using WString = std::basic_string<wchar_t, std::char_traits<wchar_t>, Allocator<wchar_t>>;
 
 	// Runtime ID used for unique identifiers
 	using RuntimeID = uint64_t;
@@ -458,6 +587,7 @@ namespace Jinx
 			m_type(ValueType::Null)
 		{}
 		Variant(const Variant & copy);
+		Variant(Variant && other);
 		Variant(std::nullptr_t) : m_type(ValueType::Null) { SetNull(); }
 		Variant(bool value) : m_type(ValueType::Null) { SetBoolean(value); }
 		Variant(int32_t value) : m_type(ValueType::Null) { SetInteger(value); }
@@ -483,6 +613,7 @@ namespace Jinx
 
 		// Assignment operator overloads
 		Variant & operator= (const Variant & copy);
+		Variant & operator= (Variant && other);
 
 		// Increment operators
 		Variant & operator++();
@@ -572,7 +703,9 @@ namespace Jinx
 
 	private:
 
+		void Copy(const Variant & copy);
 		void Destroy();
+		void Move(Variant && other);
 
 		ValueType m_type;
 		union
@@ -1034,6 +1167,7 @@ namespace Jinx
 #include <optional>
 #include <memory>
 #include <string>
+#include <array>
 #include <list>
 #include <map>
 #include <set>
@@ -1348,7 +1482,8 @@ namespace Jinx::Impl
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
 
 	// Shared aliases
-	using SymbolTypeMap = std::map<String, SymbolType, std::less<String>, Allocator<std::pair<const String, SymbolType>>>;
+	static const size_t RuntimeArenaSize = 4096;
+	using SymbolTypeMap = std::map<std::string_view, SymbolType, std::less<std::string_view>, StaticAllocator<std::pair<const std::string_view, SymbolType>, RuntimeArenaSize>>;
 
 } // namespace Jinx::Impl
 
@@ -1387,7 +1522,9 @@ namespace Jinx::Impl
 	WString ConvertUtf8ToWString(const String & utf8Str);
 	String ConvertWStringToUtf8(const WString & wStr);
 
+	bool IsCaseFolded(std::string_view source);
 	bool IsCaseFolded(const String & source);
+	String FoldCase(std::string_view source);
 	String FoldCase(const String & source);
 
 	size_t GetStringCount(const String & source);
@@ -1612,6 +1749,7 @@ namespace Jinx
 		inline void Write(float val) { m_buffer->Write(&m_pos, &val, sizeof(float)); }
 		inline void Write(double val) { m_buffer->Write(&m_pos, &val, sizeof(double)); }
 
+		void Write(const char * val);
 		void Write(const String & val);
 		void Write(const BufferPtr & val);
 		void Write(BinaryReader & reader, size_t bytes);
@@ -1739,7 +1877,7 @@ namespace Jinx::Impl
 		uint32_t columnNumber;
 	};
 
-	using SymbolList = std::list<Symbol, Allocator<Symbol>>;
+	using SymbolList = std::vector<Symbol, Allocator<Symbol>>;
 	using SymbolListCItr = SymbolList::const_iterator;
 
 	class Lexer
@@ -1774,8 +1912,8 @@ namespace Jinx::Impl
 		void CreateSymbol(SymbolType type);
 		void CreateSymbol(double number);
 		void CreateSymbol(int64_t integer);
-		void CreateSymbol(const String & name);
-		void CreateSymbolString(String && text);
+		void CreateSymbol(std::string_view name);
+		void CreateSymbolString(std::string_view text);
 
 		// Character queries
 		inline bool IsEndOfText() const { return (!(*m_current) || m_current > m_end) ? true : false; }
@@ -1876,25 +2014,30 @@ namespace Jinx::Impl
 
 	struct FunctionSignaturePart
 	{
-		FunctionSignaturePart() :
-			partType(FunctionSignaturePartType::Name),
-			optional(false),
-			valueType(ValueType::Any)
-		{}
-		FunctionSignaturePartType partType;
-		bool optional;
-		ValueType valueType;
-		std::vector<String, Allocator<String>> names;
+		FunctionSignaturePart() {}
+		FunctionSignaturePart(const FunctionSignaturePart & copy);
+		FunctionSignaturePart & operator= (const FunctionSignaturePart & copy);
+
+		static const size_t ArenaSize = 128;
+		StaticArena<ArenaSize> staticArena;
+		FunctionSignaturePartType partType = FunctionSignaturePartType::Name;
+		bool optional = false;
+		ValueType valueType = ValueType::Any;
+		std::vector<String, StaticAllocator<String, ArenaSize>> names{ staticArena };
 	};
 
+	static const size_t FSPBufferSize = 1024;
+	using FunctionSignaturePartsI = std::vector<FunctionSignaturePart, StaticAllocator<FunctionSignaturePart, FSPBufferSize>>;
 	using FunctionSignatureParts = std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>>;
 
 	// Function and member function signature object.
 	class FunctionSignature
 	{
 	public:
-		FunctionSignature();
+		FunctionSignature() {}
 		FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
+		FunctionSignature(const FunctionSignature & copy);
+		FunctionSignature & operator= (const FunctionSignature & copy);
 
 		// Get unique function id
 		RuntimeID GetId() const { return m_id; }
@@ -1909,7 +2052,7 @@ namespace Jinx::Impl
 		VisibilityType GetVisibility() const { return m_visibility; }
 
 		// Get signature parts
-		const FunctionSignatureParts & GetParts() const { return m_parts; }
+		const FunctionSignaturePartsI & GetParts() const { return m_parts; }
 
 		// Is this a valid signature?
 		inline bool IsValid() const { return !m_parts.empty(); }
@@ -1928,7 +2071,8 @@ namespace Jinx::Impl
 
 		friend bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	private:
+		// Static memory arena for fast allocations
+		StaticArena<FSPBufferSize> m_staticArena;
 
 		// Unique id
 		RuntimeID m_id = 0;
@@ -1941,14 +2085,13 @@ namespace Jinx::Impl
 
 		// Each signature is made up of any number of parts representing either part
 		// of the function name or a variable placeholder.
-		FunctionSignatureParts m_parts;
-
+		FunctionSignaturePartsI m_parts{ m_staticArena };
 	};
 
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
 	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	using FunctionList = std::list<FunctionSignature, Allocator<FunctionSignature>>;
+	using FunctionList = std::vector<FunctionSignature, Allocator<FunctionSignature>>;
 	using  FunctionPtrList = std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>>;
 
 } // namespace Jinx::Impl
@@ -2161,17 +2304,19 @@ namespace Jinx::Impl
 
 		void CalculateMaxVariableParts();
 
-		using VariableSet = std::set<String, std::less<String>, Allocator<String>>;
-		using VariableStack = std::vector<VariableSet, Allocator<VariableSet>>;
+		static const size_t VSFArenaSize = 2048;
+		StaticArena<VSFArenaSize> m_staticArena;
+
 		struct FrameData
 		{
-			FrameData() : maxVariableParts(0) {}
+			using VariableSet = std::set<String, std::less<String>, Allocator<String>>;
+			using VariableStack = std::vector<VariableSet, Allocator<VariableSet>>;
 			VariableStack stack;
-			size_t maxVariableParts;
+			size_t maxVariableParts = 0;
 		};
-		using VariableFrames = std::vector<FrameData, Allocator<FrameData>>;
-		VariableFrames m_frames;
-		String m_errorMessage;
+		using VariableFrames = std::vector<FrameData, StaticAllocator<FrameData, VSFArenaSize>>;
+		VariableFrames m_frames{ m_staticArena };
+		StringI<VSFArenaSize> m_errorMessage{ m_staticArena };
 	};
 
 } // namespace Jinx::Impl
@@ -2330,7 +2475,7 @@ namespace Jinx::Impl
 		bool CheckFunctionSignature(SymbolListCItr currSym, const FunctionSignature & signature, size_t * symCount) const;
 		bool CheckFunctionDeclaration(SymbolListCItr currSym, size_t * symCount) const;
 		bool CheckFunctionDeclaration() const;
-		bool CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const;
+		bool CheckFunctionCallPart(const FunctionSignaturePartsI & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const;
 		FunctionMatch CheckFunctionCall(const FunctionSignature & signature, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(const FunctionList & functionList, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
 		FunctionMatch CheckFunctionCall(LibraryIPtr library, SymbolListCItr currSym, SymbolListCItr endSym, bool skipInitialParam) const;
@@ -2374,13 +2519,18 @@ namespace Jinx::Impl
 		void ParseScript();
 
 	private:
-		using IDNameMap = std::map <RuntimeID, String, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, String>>>;
+
+		// Static memory pool for fast allocations
+		static const size_t ArenaSize = 8192;
+		StaticArena<ArenaSize> m_staticArena;
+
+		using IDNameMap = std::map<RuntimeID, String, std::less<RuntimeID>, StaticAllocator<std::pair<const RuntimeID, String>, ArenaSize>>;
 
 		// Runtime object
 		RuntimeIPtr m_runtime;
 
 		// Unique name
-		String m_name;
+		StringI<ArenaSize> m_name{ m_staticArena };
 
 		// Symbol list to parse
 		const SymbolList & m_symbolList;
@@ -2389,13 +2539,13 @@ namespace Jinx::Impl
 		SymbolListCItr m_currentSymbol;
 
 		// Last parsed line
-		uint32_t m_lastLine;
+		uint32_t m_lastLine = 1;
 
 		// Signal an error
-		bool m_error;
+		bool m_error = false;
 
 		// Break jump backfill address
-		size_t m_breakAddress;
+		size_t m_breakAddress = 0;
 
 		// Bytecode data buffer
 		BufferPtr m_bytecode;
@@ -2404,7 +2554,7 @@ namespace Jinx::Impl
 		BinaryWriter m_writer;
 
 		// Write opcode debug data
-		std::vector<DebugLineEntry, Allocator<DebugLineEntry>> m_debugLines;
+		std::vector<DebugLineEntry, StaticAllocator<DebugLineEntry, ArenaSize>> m_debugLines{ m_staticArena };
 
 		// Current library;
 		LibraryIPtr m_library;
@@ -2413,13 +2563,13 @@ namespace Jinx::Impl
 		FunctionList m_localFunctions;
 
 		// Library import list
-		std::list<String, Allocator<String>> m_importList;
+		std::vector<String, StaticAllocator<String, ArenaSize>> m_importList{ m_staticArena };
 
 		// Keep track of variables currently in scope
 		VariableStackFrame m_variableStackFrame;
 
 		// ID to name mapping for debug output
-		IDNameMap m_idNameMap;
+		IDNameMap m_idNameMap{ m_staticArena };
 	};
 
 } // namespace Jinx::Impl
@@ -2488,8 +2638,10 @@ namespace Jinx::Impl
 	private:
 
 		Variant GetVariable(RuntimeID id) const;
+		void Push(Variant && value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
+		void SetVariable(RuntimeID id, Variant && value);
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
@@ -2497,9 +2649,6 @@ namespace Jinx::Impl
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
 	private:
-		using IdIndexMap = std::map<RuntimeID, size_t, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, size_t>>>;
-		using ScopeStack = std::vector<size_t, Allocator<size_t>>;
-		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
 
 		// Pointer to runtime object
 		RuntimeIPtr m_runtime;
@@ -2507,10 +2656,7 @@ namespace Jinx::Impl
 		// Execution frame allows jumping to remote code (function calls) and returning
 		struct ExecutionFrame
 		{
-			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n)
-			{
-				scopeStack.reserve(32);
-			}
+			ExecutionFrame(BufferPtr b, const char * n) : bytecode(b), reader(b), name(n) {}
 			explicit ExecutionFrame(FunctionDefinitionPtr fn) : ExecutionFrame(fn->GetBytecode(), fn->GetName()) {}
 
 			// Buffer containing script bytecode
@@ -2526,12 +2672,6 @@ namespace Jinx::Impl
 			// safer string copy, which would cause an allocation cost for each function call.
 			const char * name;
 
-			// Variable id lookup map
-			IdIndexMap ids;
-
-			// Track top of stack for each level of scope
-			ScopeStack scopeStack;
-
 			// Top of the stack to clear to when this frame is popped
 			size_t stackTop = 0;
 
@@ -2539,11 +2679,28 @@ namespace Jinx::Impl
 			OnReturn onReturn = OnReturn::Continue;
 		};
 
+		// Static memory pool for fast allocations
+		static const size_t ArenaSize = 4096;
+		StaticArena<ArenaSize> m_staticArena;
+
 		// Execution frame stack
-		std::vector<ExecutionFrame, Allocator<ExecutionFrame>> m_execution;
+		std::vector<ExecutionFrame, StaticAllocator<ExecutionFrame, ArenaSize>> m_execution{ m_staticArena };
 
 		// Runtime stack
-		std::vector<Variant, Allocator<Variant>> m_stack;
+		std::vector<Variant, StaticAllocator<Variant, ArenaSize>> m_stack{ m_staticArena };
+
+		// Track top of stack for each level of scope
+		std::vector<size_t, StaticAllocator<size_t, ArenaSize>> m_scopeStack{ m_staticArena };
+
+		// Collection of ID-index associations
+		struct IdIndexData
+		{
+			IdIndexData(RuntimeID i, size_t idx, size_t f) : id(i), index(idx), frameIndex(f) {}
+			RuntimeID id;
+			size_t index;
+			size_t frameIndex;
+		};
+		std::vector<IdIndexData, StaticAllocator<IdIndexData, ArenaSize>> m_idIndexData{ m_staticArena };
 
 		// Current library
 		LibraryIPtr m_library;
@@ -2552,13 +2709,13 @@ namespace Jinx::Impl
 		Any m_userContext;
 
 		// Initial position of bytecode for this script
-		size_t m_bytecodeStart;
+		size_t m_bytecodeStart = 0;
 
 		// Is finished executing
-		bool m_finished;
+		bool m_finished = false;
 
 		// Runtime error
-		bool m_error;
+		bool m_error = false;
 
 		// Script name
 		String m_name;
@@ -2611,36 +2768,36 @@ namespace Jinx::Impl
 		inline LibraryIPtr GetLibraryInternal(const String & name) { return std::static_pointer_cast<Library>(GetLibrary(name)); }
 		FunctionDefinitionPtr FindFunction(RuntimeID id) const;
 		bool LibraryExists(const String & name) const;
-		void RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset);
+		void RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset);
 		void RegisterFunction(const FunctionSignature & signature, FunctionCallback function);
 		Variant GetProperty(RuntimeID id) const;
 		bool PropertyExists(RuntimeID id) const;
 		bool SetProperty(RuntimeID id, std::function<bool(Variant &)> fn);
 		void SetProperty(RuntimeID id, const Variant & value);
+		void SetProperty(RuntimeID id, Variant && value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
-
-		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, Allocator<std::pair<const String, LibraryIPtr>>>;
-		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
-		using PropertyMap = std::map<RuntimeID, Variant, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, Variant>>>;
+		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, StaticAllocator<std::pair<const String, LibraryIPtr>, RuntimeArenaSize>>;
+		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, StaticAllocator<std::pair<const RuntimeID, FunctionDefinitionPtr>, RuntimeArenaSize>>;
+		using PropertyMap = std::map<RuntimeID, Variant, std::less<RuntimeID>, StaticAllocator<std::pair<const RuntimeID, Variant>, RuntimeArenaSize>>;
 		void LogBytecode(const Parser & parser) const;
 		void LogSymbols(const SymbolList & symbolList) const;
 
 	private:
-
+		StaticArena<RuntimeArenaSize> m_staticArena;
 		static const size_t NumMutexes = 8;
 		mutable std::mutex m_libraryMutex;
-		LibraryMap m_libraryMap;
+		LibraryMap m_libraryMap{ m_staticArena };
 		mutable std::mutex m_functionMutex[NumMutexes];
-		FunctionMap m_functionMap;
+		FunctionMap m_functionMap{ m_staticArena };
 		mutable std::mutex m_propertyMutex[NumMutexes];
-		PropertyMap m_propertyMap;
+		PropertyMap m_propertyMap{ m_staticArena };
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
-		SymbolTypeMap m_symbolTypeMap;
+		SymbolTypeMap m_symbolTypeMap{ m_staticArena };
 	};
 
 } // namespace Jinx::Impl
@@ -3650,15 +3807,55 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline FunctionSignature::FunctionSignature()
+	inline FunctionSignaturePart::FunctionSignaturePart(const FunctionSignaturePart & copy) :
+		partType(copy.partType),
+		optional(copy.optional),
+		valueType(copy.valueType)
 	{
+		names = copy.names;
+	}
+
+	inline FunctionSignaturePart & FunctionSignaturePart::operator = (const FunctionSignaturePart & copy)
+	{
+		if (this != &copy)
+		{
+			partType = copy.partType;
+			optional = copy.optional;
+			valueType = copy.valueType;
+			names = copy.names;
+		}
+		return *this;
+	}
+
+
+	inline FunctionSignature::FunctionSignature(const FunctionSignature & copy) :
+		m_id(copy.m_id),
+		m_visibility(copy.m_visibility),
+		m_libraryName(copy.m_libraryName)
+	{
+		m_parts = copy.m_parts;
+	}
+
+	inline FunctionSignature & FunctionSignature::operator= (const FunctionSignature & copy)
+	{
+		if (this != &copy)
+		{
+			m_id = copy.m_id;
+			m_visibility = copy.m_visibility;
+			m_libraryName = copy.m_libraryName;
+			m_parts = copy.m_parts;
+		}
+		return *this;
 	}
 
 	inline FunctionSignature::FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts) :
 		m_visibility(visibility),
-		m_libraryName(libraryName),
-		m_parts(parts)
+		m_libraryName(libraryName)
 	{
+		m_parts.reserve(parts.size());
+		for (const auto & part : parts)
+			m_parts.emplace_back(part);
+
 		if (m_visibility == VisibilityType::Local)
 		{
 			// Local functions use a randomly generated ID to avoid collisions with any other name.
@@ -3769,6 +3966,7 @@ namespace Jinx::Impl
 		reader.Read(&m_libraryName);
 		uint8_t partSize;
 		reader.Read(&partSize);
+		m_parts.reserve(partSize);
 		for (uint8_t i = 0; i < partSize; ++i)
 		{
 			FunctionSignaturePart part;
@@ -3777,11 +3975,12 @@ namespace Jinx::Impl
 			reader.Read<ValueType, uint8_t>(&part.valueType);
 			uint8_t nameSize;
 			reader.Read(&nameSize);
+			part.names.reserve(nameSize);
 			for (uint8_t j = 0; j < nameSize; ++j)
 			{
 				String name;
 				reader.Read(&name);
-				part.names.push_back(name);
+				part.names.push_back(std::move(name));
 			}
 			m_parts.push_back(part);
 		}
@@ -3960,6 +4159,7 @@ namespace Jinx::Impl
 		m_error(false),
 		m_symbolTypeMap(symbolTypeMap)
 	{
+		m_symbolList.reserve(256);
 	}
 
 	inline void Lexer::AdvanceCurrent()
@@ -3991,10 +4191,12 @@ namespace Jinx::Impl
 		m_columnMarker = m_columnNumber;
 	}
 
-	inline void Lexer::CreateSymbol(const String & name)
+	inline void Lexer::CreateSymbol(std::string_view name)
 	{
 		Symbol symbol(SymbolType::NameValue, m_lineNumber, m_columnMarker);
-		symbol.text = FoldCase(name);
+		symbol.text = name;
+		if (!IsCaseFolded(name))
+			symbol.text = FoldCase(name).c_str();
 		auto itr = m_symbolTypeMap.find(symbol.text);
 		if (itr != m_symbolTypeMap.end())
 		{
@@ -4020,10 +4222,10 @@ namespace Jinx::Impl
 		m_columnMarker = m_columnNumber;
 	}
 
-	inline void Lexer::CreateSymbolString(String && text)
+	inline void Lexer::CreateSymbolString(std::string_view text)
 	{
 		Symbol symbol(SymbolType::StringValue, m_lineNumber, m_columnMarker);
-		symbol.text = std::move(text);
+		symbol.text = text;
 		m_symbolList.push_back(symbol);
 		m_columnMarker = m_columnNumber;
 	}
@@ -4354,8 +4556,7 @@ namespace Jinx::Impl
 		size_t count = m_current - startName;
 		if (quotedName)
 			AdvanceCurrent();
-		auto name = String(startName, count);
-		CreateSymbol(name);
+		CreateSymbol(std::string_view(startName, count));
 
 		// Check for apostrophe-s.  If the name is quoted, no additional quote is needed
 		if (!quotedName)
@@ -4438,8 +4639,7 @@ namespace Jinx::Impl
 			return;
 		}
 		size_t count = m_current - startName;
-		auto str = String(startName, count);
-		CreateSymbolString(std::move(str));
+		CreateSymbolString(std::string_view(startName, count));
 	}
 
 	inline void Lexer::ParseWhitespace()
@@ -4783,6 +4983,7 @@ namespace Jinx::Impl
 		m_maxPropertyParts(0),
 		m_runtime(runtime)
 	{
+		m_functionList.reserve(16);
 	}
 
 	inline FunctionSignature Library::CreateFunctionSignature(Visibility visibility, const String & name) const
@@ -5147,14 +5348,11 @@ namespace Jinx::Impl
 
 	inline Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name, std::initializer_list<String> libraries) :
 		m_runtime(runtime),
-		m_name(name),
 		m_symbolList(symbolList),
-		m_lastLine(1),
-		m_error(false),
-		m_breakAddress(false),
 		m_bytecode(CreateBuffer()),
 		m_writer(m_bytecode)
 	{
+		m_name = name.c_str();
 		m_currentSymbol = symbolList.begin();
 		m_importList = libraries;
 		if (EnableDebugInfo())
@@ -5163,7 +5361,6 @@ namespace Jinx::Impl
 
 	inline Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name) :
 		m_runtime(runtime),
-		m_name(name),
 		m_symbolList(symbolList),
 		m_lastLine(1),
 		m_error(false),
@@ -5171,6 +5368,7 @@ namespace Jinx::Impl
 		m_bytecode(CreateBuffer()),
 		m_writer(m_bytecode)
 	{
+		m_name = name.c_str();
 		m_currentSymbol = symbolList.begin();
 	}
 
@@ -5184,7 +5382,7 @@ namespace Jinx::Impl
 		m_writer.Write(&header, sizeof(header));
 
 		// Write script name
-		m_writer.Write(m_name);
+		m_writer.Write(m_name.c_str());
 
 		// Parse script symbols into bytecode
 		ParseScript();
@@ -5204,7 +5402,7 @@ namespace Jinx::Impl
 		auto itr = m_idNameMap.find(id);
 		if (itr == m_idNameMap.end())
 			return String();
-		return itr->second;
+		return String(itr->second);
 	}
 
 	inline RuntimeID Parser::VariableNameToRuntimeID(const String & name)
@@ -5540,7 +5738,7 @@ namespace Jinx::Impl
 		String libraryName;
 		if (m_currentSymbol->type == SymbolType::NameValue || IsKeyword(m_currentSymbol->type))
 		{
-			String tokenName = m_currentSymbol->text;
+			auto tokenName = m_currentSymbol->text;
 			if (tokenName == m_library->GetName())
 			{
 				libraryName = m_library->GetName();
@@ -5560,7 +5758,7 @@ namespace Jinx::Impl
 		return libraryName;
 	}
 
-	inline bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
+	inline bool Parser::CheckFunctionCallPart(const FunctionSignaturePartsI & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
 	{
 		// If we reach the end of the parts list, return failure
 		if (partsIndex >= parts.size())
@@ -5888,7 +6086,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = currSym;
-			String name = curr->text;
+			auto name = String(curr->text);
 			size_t sc = 1;
 			bool error = false;
 			for (size_t i = 1; i < s; ++i)
@@ -5984,7 +6182,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = currSym;
-			String name = curr->text;
+			auto name = String(curr->text);
 			size_t sc = 1;
 			for (size_t i = 1; i < s; ++i)
 			{
@@ -6188,7 +6386,7 @@ namespace Jinx::Impl
 			val.SetBoolean(m_currentSymbol->boolVal);
 			break;
 		case SymbolType::StringValue:
-			val.SetString(m_currentSymbol->text);
+			val.SetString(String(m_currentSymbol->text));
 			break;
 		case SymbolType::Null:
 			break;
@@ -6242,7 +6440,7 @@ namespace Jinx::Impl
 			Error("Unexpected symbol type when parsing name");
 			return String();
 		}
-		String s = m_currentSymbol->text;
+		String s = String(m_currentSymbol->text);
 		NextSymbol();
 		return s;
 	}
@@ -6256,7 +6454,7 @@ namespace Jinx::Impl
 			Error("Unexpected symbol type when parsing name");
 			return String();
 		}
-		String s = m_currentSymbol->text;
+		String s = String(m_currentSymbol->text);
 		NextSymbol();
 
 		while (IsSymbolValid(m_currentSymbol) && !m_currentSymbol->text.empty())
@@ -6292,7 +6490,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = m_currentSymbol;
-			String name = curr->text;
+			auto name = String(curr->text);
 			size_t symbolCount = 1;
 			for (size_t i = 1; i < s; ++i)
 			{
@@ -6517,7 +6715,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = m_currentSymbol;
-			String name = curr->text;
+			String name = String(curr->text);
 			size_t symbolCount = 1;
 			for (size_t i = 1; i < s; ++i)
 			{
@@ -6552,7 +6750,7 @@ namespace Jinx::Impl
 			Error("Unexpected symbol type when parsing function name");
 			return String();
 		}
-		String s = m_currentSymbol->text;
+		String s = String(m_currentSymbol->text);
 		NextSymbol();
 		return s;
 	}
@@ -7978,7 +8176,7 @@ namespace Jinx::Impl
 		{
 			SymbolType symType = static_cast<SymbolType>(i);
 			auto symTypeText = GetSymbolTypeText(symType);
-			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+			m_symbolTypeMap.insert(std::make_pair(symTypeText, symType));
 		}
 	}
 
@@ -8315,7 +8513,7 @@ namespace Jinx::Impl
 			case SymbolType::NameValue:
 				// Display names with spaces as surrounded by single quotes to help delineate them
 				// from surrounding symbols.
-				if (strstr(symbol->text.c_str(), " "))
+				if (strstr(String(symbol->text).c_str(), " "))
 					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
 				else
 					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());
@@ -8346,7 +8544,7 @@ namespace Jinx::Impl
 		return m_propertyMap.find(id) != m_propertyMap.end();
 	}
 
-	inline void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
+	inline void Runtime::RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset)
 	{
 		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
 		std::lock_guard<std::mutex> lock(mutex);
@@ -8370,6 +8568,12 @@ namespace Jinx::Impl
 	}
 
 	inline void Runtime::SetProperty(RuntimeID id, const Variant & value)
+	{
+		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		m_propertyMap[id] = value;
+	}
+
+	inline void Runtime::SetProperty(RuntimeID id, Variant && value)
 	{
 		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 		m_propertyMap[id] = value;
@@ -8439,14 +8643,16 @@ namespace Jinx::Impl
 
 	inline Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
-		m_userContext(userContext),
-		m_bytecodeStart(0),
-		m_finished(false),
-		m_error(false)
+		m_userContext(userContext)
 	{
+		// Reserve initial memory
 		m_execution.reserve(6);
-		m_execution.push_back(ExecutionFrame(bytecode, "root"));
 		m_stack.reserve(32);
+		m_scopeStack.reserve(32);
+		m_idIndexData.reserve(32);
+
+		// Create root execution frame
+		m_execution.emplace_back(bytecode, "root");
 
 		// Assume default unnamed library unless explicitly overridden
 		m_library = m_runtime->GetLibraryInternal("");
@@ -8599,7 +8805,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for addition");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::And:
@@ -8607,7 +8813,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1.GetBoolean() && op2.GetBoolean();
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::CallFunc:
@@ -8665,7 +8871,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				op2 -= op1;
-				Push(op2);
+				Push(std::move(op2));
 			}
 			break;
 			case Opcode::Divide:
@@ -8683,7 +8889,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for division");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Equals:
@@ -8691,7 +8897,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 == op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::EraseItr:
@@ -8801,7 +9007,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 > op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::GreaterEq:
@@ -8814,7 +9020,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 >= op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Increment:
@@ -8832,7 +9038,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				op2 += op1;
-				Push(op2);
+				Push(std::move(op2));
 			}
 			break;
 			case Opcode::Jump:
@@ -8906,7 +9112,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 < op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::LessEq:
@@ -8919,7 +9125,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 <= op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Library:
@@ -8990,7 +9196,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for mod");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Multiply:
@@ -9003,7 +9209,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for multiply");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Negate:
@@ -9015,14 +9221,14 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 * -1;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Not:
 			{
 				auto op1 = Pop();
 				auto result = !op1.GetBoolean();
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::NotEquals:
@@ -9030,7 +9236,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 != op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Or:
@@ -9038,7 +9244,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1.GetBoolean() || op2.GetBoolean();
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Pop:
@@ -9092,7 +9298,7 @@ namespace Jinx::Impl
 				}
 				for (uint32_t i = 0; i < count * 2; ++i)
 					m_stack.pop_back();
-				Push(collection);
+				Push(std::move(collection));
 			}
 			break;
 			case Opcode::PushItr:
@@ -9106,7 +9312,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				Variant itr = std::make_pair(coll.GetCollection()->begin(), coll.GetCollection());
-				Push(itr);
+				Push(std::move(itr));
 			}
 			break;
 			case Opcode::PushKeyVal:
@@ -9172,7 +9378,7 @@ namespace Jinx::Impl
 				}
 				for (uint32_t i = 0; i < count; ++i)
 					m_stack.pop_back();
-				Push(collection);
+				Push(std::move(collection));
 			}
 			break;
 			case Opcode::PushProp:
@@ -9180,14 +9386,14 @@ namespace Jinx::Impl
 				uint64_t id;
 				m_execution.back().reader.Read(&id);
 				auto val = m_runtime->GetProperty(id);
-				Push(val);
+				Push(std::move(val));
 			}
 			break;
 			case Opcode::PushTop:
 			{
 				assert(m_stack.size() >= 1);
 				auto op = m_stack[m_stack.size() - 1];
-				Push(op);
+				Push(std::move(op));
 			}
 			break;
 			case Opcode::PushVar:
@@ -9195,14 +9401,14 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				auto var = GetVariable(id);
-				Push(var);
+				Push(std::move(var));
 			}
 			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(m_execution.back().reader);
-				Push(val);
+				Push(std::move(val));
 			}
 			break;
 			case Opcode::Return:
@@ -9211,6 +9417,12 @@ namespace Jinx::Impl
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
 				auto onReturn = m_execution.back().onReturn;
+				while (!m_idIndexData.empty())
+				{
+					if (m_idIndexData.back().frameIndex < m_execution.size())
+						break;
+					m_idIndexData.pop_back();
+				}
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
@@ -9227,22 +9439,20 @@ namespace Jinx::Impl
 			break;
 			case Opcode::ScopeBegin:
 			{
-				m_execution.back().scopeStack.push_back(m_stack.size());
+				m_scopeStack.push_back(m_stack.size());
 			}
 			break;
 			case Opcode::ScopeEnd:
 			{
-				auto stackTop = m_execution.back().scopeStack.back();
-				m_execution.back().scopeStack.pop_back();
+				auto stackTop = m_scopeStack.back();
+				m_scopeStack.pop_back();
 				while (m_stack.size() > stackTop)
 					m_stack.pop_back();
-				auto & ids = m_execution.back().ids;
-				for (auto itr = ids.begin(); itr != ids.end();)
+				while (!m_idIndexData.empty())
 				{
-					if (itr->second >= stackTop)
-						itr = ids.erase(itr);
-					else
-						++itr;
+					if (m_idIndexData.back().index < stackTop)
+						break;
+					m_idIndexData.pop_back();
 				}
 			}
 			break;
@@ -9272,7 +9482,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				m_runtime->SetProperty(id, val);
+				m_runtime->SetProperty(id, std::move(val));
 			}
 			break;
 			case Opcode::SetPropKeyVal:
@@ -9335,7 +9545,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				SetVariable(id, val);
+				SetVariable(id, std::move(val));
 			}
 			break;
 			case Opcode::SetVarKeyVal:
@@ -9436,7 +9646,7 @@ namespace Jinx::Impl
 
 	inline void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn)
 	{
-		m_execution.push_back(ExecutionFrame(fnDef));
+		m_execution.emplace_back(fnDef);
 		m_execution.back().onReturn = onReturn;
 		m_execution.back().reader.Seek(fnDef->GetOffset());
 		assert(m_stack.size() >= fnDef->GetParameterCount());
@@ -9513,17 +9723,17 @@ namespace Jinx::Impl
 
 	inline Variant Script::GetVariable(RuntimeID id) const
 	{
-		auto & names = m_execution.back().ids;
-		auto itr = names.find(id);
-		if (itr != names.end())
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
+			if (ritr->id == id)
 			{
-				LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
-				return Variant();
+				if (ritr->index >= m_stack.size())
+				{
+					LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
+					return Variant();
+				}
+				return m_stack[ritr->index];
 			}
-			return m_stack[itr->second];
 		}
 		return Variant();
 	}
@@ -9540,7 +9750,7 @@ namespace Jinx::Impl
 			Error("Stack underflow");
 			return Variant();
 		}
-		auto var = m_stack.back();
+		auto var = std::move(m_stack.back());
 		m_stack.pop_back();
 		return var;
 	}
@@ -9548,6 +9758,11 @@ namespace Jinx::Impl
 	inline void Script::Push(const Variant & value)
 	{
 		m_stack.push_back(value);
+	}
+
+	inline void Script::Push(Variant && value)
+	{
+		m_stack.push_back(std::move(value));
 	}
 
 	inline void Script::SetVariable(const String & name, const Variant & value)
@@ -9559,34 +9774,52 @@ namespace Jinx::Impl
 
 	inline void Script::SetVariable(RuntimeID id, const Variant & value)
 	{
+		auto val = value;
+		SetVariable(id, std::move(val));
+	}
+
+	inline void Script::SetVariable(RuntimeID id, Variant && value)
+	{
+
 		// Search the current frame for the variable
-		auto & names = m_execution.back().ids;
-		auto itr = names.find(id);
-		if (itr != names.end())
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
+			if (ritr->frameIndex < m_execution.size())
+				break;
+			if (ritr->id == id)
 			{
-				itr->second = m_stack.size();
-				m_stack.push_back(value);
-				return;
-			}
-			else
-			{
-				m_stack[itr->second] = value;
+				if (ritr->index >= m_stack.size())
+				{
+					ritr->index = m_stack.size();
+					m_stack.push_back(value);
+				}
+				else
+				{
+					m_stack[ritr->index] = value;
+				}
 				return;
 			}
 		}
 
 		// If we don't find the name, create a new variable on the top of the stack
-		names.insert(std::make_pair(id, m_stack.size()));
+		m_idIndexData.emplace_back(id, m_stack.size(), m_execution.size());
 		m_stack.push_back(value);
 	}
 
 	inline void Script::SetVariableAtIndex(RuntimeID id, size_t index)
 	{
 		assert(index < m_stack.size());
-		m_execution.back().ids.insert(std::make_pair(id, index));
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
+		{
+			if (ritr->frameIndex < m_execution.size())
+				break;
+			if (ritr->id == id)
+			{
+				ritr->index = index;
+				return;
+			}
+		}
+		m_idIndexData.emplace_back(id, index, m_execution.size());
 	}
 
 	inline std::pair<CollectionPtr, Variant> Script::WalkSubscripts(uint32_t subscripts, CollectionPtr collection)
@@ -9687,16 +9920,23 @@ namespace Jinx
 	}
 
 
+	inline void BinaryWriter::Write(const char * val)
+	{
+		uint32_t size = static_cast<uint32_t>(strlen(val));
+		m_buffer->Write(&m_pos, &size, sizeof(size));
+		m_buffer->Write(&m_pos, val, size + 1);
+	}
+
 	inline void BinaryWriter::Write(const String & val)
 	{
-		uint32_t size = (uint32_t)val.size();
+		uint32_t size = static_cast<uint32_t>(val.size());
 		m_buffer->Write(&m_pos, &size, sizeof(size));
 		m_buffer->Write(&m_pos, val.c_str(), size + 1);
 	}
 
 	inline void BinaryWriter::Write(const BufferPtr & val)
 	{
-		uint32_t size = (uint32_t)val->Size();
+		uint32_t size = static_cast<uint32_t>(val->Size());
 		m_buffer->Write(&m_pos, &size, sizeof(uint32_t));
 		m_buffer->Write(&m_pos, val->Ptr(), val->Size());
 	}
@@ -10066,10 +10306,8 @@ namespace Jinx::Impl
 		}
 	}
 
-	inline bool IsCaseFolded(const String & source)
+	inline bool IsCaseFolded(const char * curr, const char * end)
 	{
-		const char * curr = source.c_str();
-		const char * end = source.c_str() + source.size();
 		while (curr < end)
 		{
 			// ASCII characters can do a fast table-based check
@@ -10094,16 +10332,22 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline String FoldCase(const String & source)
+	inline bool IsCaseFolded(std::string_view source)
 	{
-		// Check to see if we can simply return the original source
-		if (IsCaseFolded(source))
-			return source;
+		return IsCaseFolded(source.data(), source.data() + source.size());
+	}
+
+	inline bool IsCaseFolded(const String & source)
+	{
+		return IsCaseFolded(source.data(), source.data() + source.size());
+	}
+
+	inline String FoldCase(const char * curr, const char * end)
+	{
+		assert(!IsCaseFolded(curr, end));
 
 		String s;
-		s.reserve(source.size());
-		const char * curr = source.c_str();
-		const char * end = source.c_str() + source.size();
+		s.reserve(end - curr);
 		while (curr < end)
 		{
 			// Attempt simple (ASCII-only) folding if possible first
@@ -10145,6 +10389,19 @@ namespace Jinx::Impl
 		}
 
 		return s;
+	}
+
+	inline String FoldCase(std::string_view source)
+	{
+		return FoldCase(source.data(), source.data() + source.size());
+	}
+
+	inline String FoldCase(const String & source)
+	{
+		// Check to see if we can simply return the original source
+		if (IsCaseFolded(source))
+			return source;
+		return FoldCase(source.data(), source.data() + source.size());
 	}
 
 	inline const char * GetUtf8CstrByIndex(const String & source, int64_t index)
@@ -11706,8 +11963,8 @@ namespace Jinx::Impl
 
 	inline VariableStackFrame::VariableStackFrame()
 	{
-		m_frames.push_back(FrameData());
-		m_frames.back().stack.push_back(VariableSet());
+		m_frames.emplace_back();
+		m_frames.back().stack.emplace_back();
 	}
 
 	inline void VariableStackFrame::CalculateMaxVariableParts()
@@ -11822,8 +12079,8 @@ namespace Jinx::Impl
 
 	inline void VariableStackFrame::FrameBegin()
 	{
-		m_frames.push_back(FrameData());
-		m_frames.back().stack.push_back(VariableSet());
+		m_frames.emplace_back();
+		m_frames.back().stack.emplace_back();
 	}
 
 	inline bool VariableStackFrame::FrameEnd()
@@ -11845,7 +12102,7 @@ namespace Jinx::Impl
 			return false;
 		}
 		FrameData & frame = m_frames.back();
-		frame.stack.push_back(VariableSet());
+		frame.stack.emplace_back();
 		return true;
 	}
 
@@ -11931,56 +12188,12 @@ namespace Jinx
 
 	inline Variant::Variant(const Variant & copy)
 	{
-		m_type = copy.m_type;
-		switch (m_type)
-		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = copy.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = copy.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = copy.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				m_string = copy.m_string;
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				m_collection = copy.m_collection;
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				m_collectionItrPair = copy.m_collectionItrPair;
-				break;
-			case ValueType::Function:
-				m_function = copy.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				m_coroutine = copy.m_coroutine;
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				m_userObject = copy.m_userObject;
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				m_buffer = copy.m_buffer;
-				break;
-			case ValueType::Guid:
-				m_guid = copy.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = copy.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
+		Copy(copy);
+	}
+
+	inline Variant::Variant(Variant && other)
+	{
+		Move(std::move(other));
 	}
 
 	inline Variant::~Variant()
@@ -11990,57 +12203,21 @@ namespace Jinx
 
 	inline Variant & Variant::operator= (const Variant & copy)
 	{
-		Destroy();
-		m_type = copy.m_type;
-		switch (m_type)
+		if (this != &copy)
 		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = copy.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = copy.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = copy.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				m_string = copy.m_string;
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				m_collection = copy.m_collection;
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				m_collectionItrPair = copy.m_collectionItrPair;
-				break;
-			case ValueType::Function:
-				m_function = copy.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				m_coroutine = copy.m_coroutine;
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				m_userObject = copy.m_userObject;
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				m_buffer = copy.m_buffer;
-				break;
-			case ValueType::Guid:
-				m_guid = copy.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = copy.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
+			Destroy();
+			Copy(copy);
+		}
+		return *this;
+	}
+
+	inline Variant & Variant::operator= (Variant && other)
+	{
+		if (this != &other)
+		{
+			Destroy();
+			Move(std::move(other));
+		}
 		return *this;
 	}
 
@@ -12338,6 +12515,60 @@ namespace Jinx
 		return false;
 	}
 
+	inline void Variant::Copy(const Variant & copy)
+	{
+		m_type = copy.m_type;
+		switch (m_type)
+		{
+			case ValueType::Null:
+				break;
+			case ValueType::Number:
+				m_number = copy.m_number;
+				break;
+			case ValueType::Integer:
+				m_integer = copy.m_integer;
+				break;
+			case ValueType::Boolean:
+				m_boolean = copy.m_boolean;
+				break;
+			case ValueType::String:
+				new(&m_string) String();
+				m_string = copy.m_string;
+				break;
+			case ValueType::Collection:
+				new(&m_collection) CollectionPtr();
+				m_collection = copy.m_collection;
+				break;
+			case ValueType::CollectionItr:
+				new(&m_collectionItrPair) CollectionItrPair();
+				m_collectionItrPair = copy.m_collectionItrPair;
+				break;
+			case ValueType::Function:
+				m_function = copy.m_function;
+				break;
+			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
+				m_coroutine = copy.m_coroutine;
+				break;
+			case ValueType::UserObject:
+				new(&m_userObject) UserObjectPtr();
+				m_userObject = copy.m_userObject;
+				break;
+			case ValueType::Buffer:
+				new(&m_buffer) BufferPtr();
+				m_buffer = copy.m_buffer;
+				break;
+			case ValueType::Guid:
+				m_guid = copy.m_guid;
+				break;
+			case ValueType::ValType:
+				m_valType = copy.m_valType;
+				break;
+			default:
+				assert(!"Unknown variant type!");
+		};
+	}
+
 	inline void Variant::Destroy()
 	{
 		// Optimize for common case
@@ -12523,6 +12754,62 @@ namespace Jinx
 		if (m_type == ValueType::Integer || m_type == ValueType::Number)
 			return true;
 		return false;
+	}
+
+	inline void Variant::Move(Variant && other)
+	{
+		m_type = other.m_type;
+		switch (m_type)
+		{
+			case ValueType::Null:
+				break;
+			case ValueType::Number:
+				m_number = other.m_number;
+				break;
+			case ValueType::Integer:
+				m_integer = other.m_integer;
+				break;
+			case ValueType::Boolean:
+				m_boolean = other.m_boolean;
+				break;
+			case ValueType::String:
+				new(&m_string) String();
+				std::swap(m_string, other.m_string);
+				break;
+			case ValueType::Collection:
+				new(&m_collection) CollectionPtr();
+				std::swap(m_collection, other.m_collection);
+				break;
+			case ValueType::CollectionItr:
+				new(&m_collectionItrPair) CollectionItrPair();
+				std::swap(m_collectionItrPair, other.m_collectionItrPair);
+				break;
+			case ValueType::Function:
+				m_function = other.m_function;
+				break;
+			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
+				std::swap(m_coroutine, other.m_coroutine);
+				break;
+			case ValueType::UserObject:
+				new(&m_userObject) UserObjectPtr();
+				std::swap(m_userObject, other.m_userObject);
+				break;
+			case ValueType::Buffer:
+				new(&m_buffer) BufferPtr();
+				std::swap(m_buffer, other.m_buffer);
+				break;
+			case ValueType::Guid:
+				m_guid = other.m_guid;
+				break;
+			case ValueType::ValType:
+				m_valType = other.m_valType;
+				break;
+			default:
+				assert(!"Unknown variant type!");
+		};
+		other.m_type = ValueType::Null;
+
 	}
 
 	inline void Variant::SetBuffer(const BufferPtr & value)

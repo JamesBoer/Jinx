@@ -356,7 +356,7 @@ namespace Jinx::Impl
 			case SymbolType::NameValue:
 				// Display names with spaces as surrounded by single quotes to help delineate them
 				// from surrounding symbols.
-				if (strstr(symbol->text.c_str(), " "))
+				if (strstr(String(symbol->text).c_str(), " "))
 					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
 				else
 					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());

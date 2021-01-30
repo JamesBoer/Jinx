@@ -252,7 +252,8 @@ namespace Jinx::Impl
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
 
 	// Shared aliases
-	using SymbolTypeMap = std::map<std::string_view, SymbolType, std::less<std::string_view>, Allocator<std::pair<const std::string_view, SymbolType>>>;
+	static const size_t RuntimeArenaSize = 4096;
+	using SymbolTypeMap = std::map<std::string_view, SymbolType, std::less<std::string_view>, StaticAllocator<std::pair<const std::string_view, SymbolType>, RuntimeArenaSize>>;
 
 } // namespace Jinx::Impl
 

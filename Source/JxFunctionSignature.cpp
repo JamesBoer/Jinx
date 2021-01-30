@@ -10,14 +10,33 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
+	inline_t FunctionSignaturePart::FunctionSignaturePart(const FunctionSignaturePart & copy) :
+		partType(copy.partType),
+		optional(copy.optional),
+		valueType(copy.valueType)
+	{
+		names = copy.names;
+	}
+
+	inline_t FunctionSignaturePart & FunctionSignaturePart::operator = (const FunctionSignaturePart & copy)
+	{
+		if (this != &copy)
+		{
+			partType = copy.partType;
+			optional = copy.optional;
+			valueType = copy.valueType;
+			names = copy.names;
+		}
+		return *this;
+	}
+
+
 	inline_t FunctionSignature::FunctionSignature(const FunctionSignature & copy) :
 		m_id(copy.m_id),
 		m_visibility(copy.m_visibility),
 		m_libraryName(copy.m_libraryName)
 	{
-		m_parts.reserve(copy.m_parts.size());
-		for (const auto & part : copy.m_parts)
-			m_parts.push_back(part);
+		m_parts = copy.m_parts;
 	}
 
 	inline_t FunctionSignature & FunctionSignature::operator= (const FunctionSignature & copy)
@@ -27,9 +46,7 @@ namespace Jinx::Impl
 			m_id = copy.m_id;
 			m_visibility = copy.m_visibility;
 			m_libraryName = copy.m_libraryName;
-			m_parts.reserve(copy.m_parts.size());
-			for (const auto & part : copy.m_parts)
-				m_parts.push_back(part);
+			m_parts = copy.m_parts;
 		}
 		return *this;
 	}

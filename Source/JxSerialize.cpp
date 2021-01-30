@@ -38,16 +38,23 @@ namespace Jinx
 	}
 
 
+	inline_t void BinaryWriter::Write(const char * val)
+	{
+		uint32_t size = static_cast<uint32_t>(strlen(val));
+		m_buffer->Write(&m_pos, &size, sizeof(size));
+		m_buffer->Write(&m_pos, val, size + 1);
+	}
+
 	inline_t void BinaryWriter::Write(const String & val)
 	{
-		uint32_t size = (uint32_t)val.size();
+		uint32_t size = static_cast<uint32_t>(val.size());
 		m_buffer->Write(&m_pos, &size, sizeof(size));
 		m_buffer->Write(&m_pos, val.c_str(), size + 1);
 	}
 
 	inline_t void BinaryWriter::Write(const BufferPtr & val)
 	{
-		uint32_t size = (uint32_t)val->Size();
+		uint32_t size = static_cast<uint32_t>(val->Size());
 		m_buffer->Write(&m_pos, &size, sizeof(uint32_t));
 		m_buffer->Write(&m_pos, val->Ptr(), val->Size());
 	}

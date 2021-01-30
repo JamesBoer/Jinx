@@ -48,18 +48,20 @@ namespace Jinx::Impl
 		// Private internal functions
 		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
-		using PropertyNameTable = std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>>;
+		// Static memory pool for fast allocations
+		static const size_t ArenaSize = 4096;
+		StaticArena<ArenaSize> m_staticArena;
 
 		// Library name
 		String m_name;
 
 		// Track function definitions
 		mutable std::mutex m_functionMutex;
-		FunctionList m_functionList;
+		std::vector<FunctionSignature, StaticAllocator<FunctionSignature, ArenaSize>> m_functionList{ m_staticArena };
 
 		// Properties
 		mutable std::mutex m_propertyMutex;
-		PropertyNameTable m_propertyNameTable;
+		std::map<String, PropertyName, std::less<String>, StaticAllocator<std::pair<const String, PropertyName>, ArenaSize>> m_propertyNameTable{ m_staticArena };
 		size_t m_maxPropertyParts;
 
 		// Weak ptr to runtime system

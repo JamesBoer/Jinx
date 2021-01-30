@@ -71,8 +71,8 @@ namespace Jinx::Impl
 		void CreateSymbol(SymbolType type);
 		void CreateSymbol(double number);
 		void CreateSymbol(int64_t integer);
-		void CreateSymbol(const String & name);
-		void CreateSymbolString(String && text);
+		void CreateSymbol(std::string_view name);
+		void CreateSymbolString(std::string_view text);
 
 		// Character queries
 		inline bool IsEndOfText() const { return (!(*m_current) || m_current > m_end) ? true : false; }

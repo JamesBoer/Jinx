@@ -44,26 +44,25 @@ namespace Jinx::Impl
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 
 	private:
-
-		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, Allocator<std::pair<const String, LibraryIPtr>>>;
-		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, FunctionDefinitionPtr>>>;
-		using PropertyMap = std::map<RuntimeID, Variant, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, Variant>>>;
+		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, StaticAllocator<std::pair<const String, LibraryIPtr>, RuntimeArenaSize>>;
+		using FunctionMap = std::map<RuntimeID, FunctionDefinitionPtr, std::less<RuntimeID>, StaticAllocator<std::pair<const RuntimeID, FunctionDefinitionPtr>, RuntimeArenaSize>>;
+		using PropertyMap = std::map<RuntimeID, Variant, std::less<RuntimeID>, StaticAllocator<std::pair<const RuntimeID, Variant>, RuntimeArenaSize>>;
 		void LogBytecode(const Parser & parser) const;
 		void LogSymbols(const SymbolList & symbolList) const;
 
 	private:
-
+		StaticArena<RuntimeArenaSize> m_staticArena;
 		static const size_t NumMutexes = 8;
 		mutable std::mutex m_libraryMutex;
-		LibraryMap m_libraryMap;
+		LibraryMap m_libraryMap{ m_staticArena };
 		mutable std::mutex m_functionMutex[NumMutexes];
-		FunctionMap m_functionMap;
+		FunctionMap m_functionMap{ m_staticArena };
 		mutable std::mutex m_propertyMutex[NumMutexes];
-		PropertyMap m_propertyMap;
+		PropertyMap m_propertyMap{ m_staticArena };
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
 		std::chrono::time_point<std::chrono::high_resolution_clock> m_perfStartTime;
-		SymbolTypeMap m_symbolTypeMap;
+		SymbolTypeMap m_symbolTypeMap{ m_staticArena };
 	};
 
 } // namespace Jinx::Impl

@@ -187,13 +187,18 @@ namespace Jinx::Impl
 		void ParseScript();
 
 	private:
-		using IDNameMap = std::map <RuntimeID, String, std::less<RuntimeID>, Allocator<std::pair<const RuntimeID, String>>>;
+
+		// Static memory pool for fast allocations
+		static const size_t ArenaSize = 8192;
+		StaticArena<ArenaSize> m_staticArena;
+
+		using IDNameMap = std::map<RuntimeID, String, std::less<RuntimeID>, StaticAllocator<std::pair<const RuntimeID, String>, ArenaSize>>;
 
 		// Runtime object
 		RuntimeIPtr m_runtime;
 
 		// Unique name
-		String m_name;
+		StringI<ArenaSize> m_name{ m_staticArena };
 
 		// Symbol list to parse
 		const SymbolList & m_symbolList;
@@ -202,13 +207,13 @@ namespace Jinx::Impl
 		SymbolListCItr m_currentSymbol;
 
 		// Last parsed line
-		uint32_t m_lastLine;
+		uint32_t m_lastLine = 1;
 
 		// Signal an error
-		bool m_error;
+		bool m_error = false;
 
 		// Break jump backfill address
-		size_t m_breakAddress;
+		size_t m_breakAddress = 0;
 
 		// Bytecode data buffer
 		BufferPtr m_bytecode;
@@ -217,7 +222,7 @@ namespace Jinx::Impl
 		BinaryWriter m_writer;
 
 		// Write opcode debug data
-		std::vector<DebugLineEntry, Allocator<DebugLineEntry>> m_debugLines;
+		std::vector<DebugLineEntry, StaticAllocator<DebugLineEntry, ArenaSize>> m_debugLines{ m_staticArena };
 
 		// Current library;
 		LibraryIPtr m_library;
@@ -226,13 +231,13 @@ namespace Jinx::Impl
 		FunctionList m_localFunctions;
 
 		// Library import list
-		std::list<String, Allocator<String>> m_importList;
+		std::vector<String, StaticAllocator<String, ArenaSize>> m_importList{ m_staticArena };
 
 		// Keep track of variables currently in scope
 		VariableStackFrame m_variableStackFrame;
 
 		// ID to name mapping for debug output
-		IDNameMap m_idNameMap;
+		IDNameMap m_idNameMap{ m_staticArena };
 	};
 
 } // namespace Jinx::Impl
