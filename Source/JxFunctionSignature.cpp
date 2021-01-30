@@ -11,7 +11,38 @@ namespace Jinx::Impl
 {
 
 	inline_t FunctionSignature::FunctionSignature()
+#ifdef JINX_USE_PMR
+		:
+		m_parts(&m_staticMem)
+#endif
 	{
+	}
+
+	inline_t FunctionSignature::FunctionSignature(const FunctionSignature & copy) :
+		m_id(copy.m_id),
+		m_visibility(copy.m_visibility),
+		m_libraryName(copy.m_libraryName)
+#ifdef JINX_USE_PMR
+		, m_parts(&m_staticMem)
+#endif
+	{
+		m_parts.reserve(copy.m_parts.size());
+		for (const auto & part : copy.m_parts)
+			m_parts.push_back(part);
+	}
+
+	inline_t FunctionSignature & FunctionSignature::operator= (const FunctionSignature & copy)
+	{
+		if (this != &copy)
+		{
+			m_id = copy.m_id;
+			m_visibility = copy.m_visibility;
+			m_libraryName = copy.m_libraryName;
+			m_parts.reserve(copy.m_parts.size());
+			for (const auto & part : copy.m_parts)
+				m_parts.push_back(part);
+		}
+		return *this;
 	}
 
 	inline_t FunctionSignature::FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts) :
@@ -129,6 +160,7 @@ namespace Jinx::Impl
 		reader.Read(&m_libraryName);
 		uint8_t partSize;
 		reader.Read(&partSize);
+		m_parts.reserve(partSize);
 		for (uint8_t i = 0; i < partSize; ++i)
 		{
 			FunctionSignaturePart part;
@@ -137,11 +169,12 @@ namespace Jinx::Impl
 			reader.Read<ValueType, uint8_t>(&part.valueType);
 			uint8_t nameSize;
 			reader.Read(&nameSize);
+			part.names.reserve(nameSize);
 			for (uint8_t j = 0; j < nameSize; ++j)
 			{
 				String name;
 				reader.Read(&name);
-				part.names.push_back(name);
+				part.names.push_back(std::move(name));
 			}
 			m_parts.push_back(part);
 		}

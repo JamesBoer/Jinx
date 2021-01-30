@@ -21,18 +21,47 @@ namespace Jinx::Impl
 
 	struct FunctionSignaturePart
 	{
-		FunctionSignaturePart() :
-			partType(FunctionSignaturePartType::Name),
-			optional(false),
-			valueType(ValueType::Any)
+		FunctionSignaturePart()
+#ifdef JINX_USE_PMR
+			: names(&staticMem)
+#endif
 		{}
-		FunctionSignaturePartType partType;
-		bool optional;
-		ValueType valueType;
-		std::vector<String, Allocator<String>> names;
+		FunctionSignaturePart(const FunctionSignaturePart & copy) : FunctionSignaturePart()
+		{
+			partType = copy.partType;
+			optional = copy.optional;
+			valueType = copy.valueType;
+			names.reserve(copy.names.size());
+			for (const auto & name : copy.names)
+				names.push_back(name);
+		}
+		FunctionSignaturePart & operator= (const FunctionSignaturePart & copy)
+		{
+			if (this != &copy)
+			{
+				partType = copy.partType;
+				optional = copy.optional;
+				valueType = copy.valueType;
+				std::copy(copy.names.begin(), copy.names.end(), names.begin());
+				names.reserve(copy.names.size());
+				for (const auto & name : copy.names)
+					names.push_back(name);
+			}
+			return *this;
+		}
+#ifdef JINX_USE_PMR
+		// Local memory resources
+		std::array<std::byte, 128> memBuffer{};
+		mem_resource defaultMem;
+		std::pmr::monotonic_buffer_resource staticMem{ memBuffer.data(), memBuffer.size(), &defaultMem };
+#endif
+		FunctionSignaturePartType partType = FunctionSignaturePartType::Name;
+		bool optional = false;
+		ValueType valueType = ValueType::Any;
+		Vector<String> names;
 	};
 
-	using FunctionSignatureParts = std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>>;
+	using FunctionSignatureParts = Vector<FunctionSignaturePart>;
 
 	// Function and member function signature object.
 	class FunctionSignature
@@ -40,6 +69,8 @@ namespace Jinx::Impl
 	public:
 		FunctionSignature();
 		FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
+		FunctionSignature(const FunctionSignature & copy);
+		FunctionSignature & operator= (const FunctionSignature & copy);
 
 		// Get unique function id
 		RuntimeID GetId() const { return m_id; }
@@ -74,6 +105,13 @@ namespace Jinx::Impl
 		friend bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
 	private:
+
+#ifdef JINX_USE_PMR
+		// Local memory resources
+		std::array<std::byte, 1024> m_memBuffer{};
+		mem_resource m_defaultMem;
+		std::pmr::monotonic_buffer_resource m_staticMem{ m_memBuffer.data(), m_memBuffer.size(), &m_defaultMem };
+#endif
 
 		// Unique id
 		RuntimeID m_id = 0;
