@@ -425,7 +425,7 @@ namespace Jinx::Impl
 		return libraryName;
 	}
 
-	inline_t bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
+	inline_t bool Parser::CheckFunctionCallPart(const FunctionSignaturePartsI & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
 	{
 		// If we reach the end of the parts list, return failure
 		if (partsIndex >= parts.size())

@@ -22,9 +22,6 @@ namespace Jinx::Impl
 	struct FunctionSignaturePart
 	{
 		FunctionSignaturePart()
-#ifdef JINX_USE_PMR
-			: names(&staticMem)
-#endif
 		{}
 		FunctionSignaturePart(const FunctionSignaturePart & copy) : FunctionSignaturePart()
 		{
@@ -49,25 +46,23 @@ namespace Jinx::Impl
 			}
 			return *this;
 		}
-#ifdef JINX_USE_PMR
-		// Local memory resources
-		std::array<std::byte, 128> memBuffer{};
-		mem_resource defaultMem;
-		std::pmr::monotonic_buffer_resource staticMem{ memBuffer.data(), memBuffer.size(), &defaultMem };
-#endif
+		static const size_t ArenaSize = 128;
+		StaticArena<ArenaSize> staticArena;
 		FunctionSignaturePartType partType = FunctionSignaturePartType::Name;
 		bool optional = false;
 		ValueType valueType = ValueType::Any;
-		Vector<String> names;
+		std::vector<String, StaticAllocator<String, ArenaSize>> names{ staticArena };
 	};
 
-	using FunctionSignatureParts = Vector<FunctionSignaturePart>;
+	static const size_t FSPBufferSize = 1024;
+	using FunctionSignaturePartsI = std::vector<FunctionSignaturePart, StaticAllocator<FunctionSignaturePart, FSPBufferSize>>;
+	using FunctionSignatureParts = std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>>;
 
 	// Function and member function signature object.
 	class FunctionSignature
 	{
 	public:
-		FunctionSignature();
+		FunctionSignature() {}
 		FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
 		FunctionSignature(const FunctionSignature & copy);
 		FunctionSignature & operator= (const FunctionSignature & copy);
@@ -85,7 +80,7 @@ namespace Jinx::Impl
 		VisibilityType GetVisibility() const { return m_visibility; }
 
 		// Get signature parts
-		const FunctionSignatureParts & GetParts() const { return m_parts; }
+		const FunctionSignaturePartsI & GetParts() const { return m_parts; }
 
 		// Is this a valid signature?
 		inline bool IsValid() const { return !m_parts.empty(); }
@@ -104,14 +99,8 @@ namespace Jinx::Impl
 
 		friend bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	private:
-
-#ifdef JINX_USE_PMR
-		// Local memory resources
-		std::array<std::byte, 1024> m_memBuffer{};
-		mem_resource m_defaultMem;
-		std::pmr::monotonic_buffer_resource m_staticMem{ m_memBuffer.data(), m_memBuffer.size(), &m_defaultMem };
-#endif
+		// Static memory arena for fast allocations
+		StaticArena<FSPBufferSize> m_staticArena;
 
 		// Unique id
 		RuntimeID m_id = 0;
@@ -124,8 +113,7 @@ namespace Jinx::Impl
 
 		// Each signature is made up of any number of parts representing either part
 		// of the function name or a variable placeholder.
-		FunctionSignatureParts m_parts;
-
+		FunctionSignaturePartsI m_parts{ m_staticArena };
 	};
 
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);

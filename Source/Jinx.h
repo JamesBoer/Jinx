@@ -68,19 +68,7 @@ case a project wishes to target macOS clients earlier than 10.14.
 */
 #define JINX_USE_ANY
 
-/*
-The default Xcode toolchain, as of 1/28/2021, does not support C++'s polymorphic allocators.  Once
-AppleClang and it's std libraries catch up to VC and gcc, we can enable this optimization for Macs by
-default.  After enough time has passed, we should be able to safely remove this conditional compilation.
-*/
-#ifndef JINX_MACOS
-#define JINX_USE_PMR
-#endif
-
 #include <memory>
-#ifdef JINX_USE_PMR
-#include <memory_resource>
-#endif
 #include <functional>
 #include <vector>
 #include <map>
@@ -88,6 +76,7 @@ default.  After enough time has passed, we should be able to safely remove this 
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#include <cassert>
 #ifdef JINX_USE_ANY
 #include <any>
 #endif

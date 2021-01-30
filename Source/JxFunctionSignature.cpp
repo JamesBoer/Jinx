@@ -10,21 +10,10 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t FunctionSignature::FunctionSignature()
-#ifdef JINX_USE_PMR
-		:
-		m_parts(&m_staticMem)
-#endif
-	{
-	}
-
 	inline_t FunctionSignature::FunctionSignature(const FunctionSignature & copy) :
 		m_id(copy.m_id),
 		m_visibility(copy.m_visibility),
 		m_libraryName(copy.m_libraryName)
-#ifdef JINX_USE_PMR
-		, m_parts(&m_staticMem)
-#endif
 	{
 		m_parts.reserve(copy.m_parts.size());
 		for (const auto & part : copy.m_parts)
@@ -47,9 +36,12 @@ namespace Jinx::Impl
 
 	inline_t FunctionSignature::FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts) :
 		m_visibility(visibility),
-		m_libraryName(libraryName),
-		m_parts(parts)
+		m_libraryName(libraryName)
 	{
+		m_parts.reserve(parts.size());
+		for (const auto & part : parts)
+			m_parts.emplace_back(part);
+
 		if (m_visibility == VisibilityType::Local)
 		{
 			// Local functions use a randomly generated ID to avoid collisions with any other name.

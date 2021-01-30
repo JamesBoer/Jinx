@@ -94,21 +94,17 @@ namespace Jinx::Impl
 			OnReturn onReturn = OnReturn::Continue;
 		};
 
-#ifdef JINX_USE_PMR
-		// Local memory resources
-		std::array<std::byte, 4096> m_memBuffer{};
-		mem_resource m_defaultMem;
-		std::pmr::monotonic_buffer_resource m_staticMem{ m_memBuffer.data(), m_memBuffer.size(), &m_defaultMem };
-#endif
+		static const size_t ArenaSize = 4096;
+		StaticArena<ArenaSize> m_staticArena;
 
 		// Execution frame stack
-		Vector<ExecutionFrame> m_execution;
+		std::vector<ExecutionFrame, StaticAllocator<ExecutionFrame, ArenaSize>> m_execution{ m_staticArena };
 
 		// Runtime stack
-		Vector<Variant> m_stack;
+		std::vector<Variant, StaticAllocator<Variant, ArenaSize>> m_stack{ m_staticArena };
 
 		// Track top of stack for each level of scope
-		Vector<size_t> m_scopeStack;
+		std::vector<size_t, StaticAllocator<size_t, ArenaSize>> m_scopeStack{ m_staticArena };
 
 		// Collection of ID-index associations
 		struct IdIndexData
@@ -118,7 +114,7 @@ namespace Jinx::Impl
 			size_t index;
 			size_t frameIndex;
 		};
-		Vector<IdIndexData> m_idIndexData;
+		std::vector<IdIndexData, StaticAllocator<IdIndexData, ArenaSize>> m_idIndexData{ m_staticArena };
 
 		// Current library
 		LibraryIPtr m_library;
