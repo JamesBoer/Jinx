@@ -128,20 +128,13 @@ namespace Jinx
 {
 	// Stand-alone global allocation functions
 	void * MemAllocate(size_t bytes);
-	void * MemReallocate(void * ptr, size_t bytes);
-	void MemFree(void * ptr);
+	void MemFree(void * ptr, size_t bytes);
 
 	// Jinx allocator for use in STL containers
 	template <typename T>
 	class Allocator
 	{
 	public:
-		using size_type = size_t;
-		using difference_type = ptrdiff_t;
-		using pointer = T*;
-		using const_pointer = const T*;
-		using reference = T&;
-		using const_reference = const T&;
 		using value_type = T;
 
 		Allocator() throw() {};
@@ -150,27 +143,8 @@ namespace Jinx
 		template<typename U>
 		explicit Allocator(const Allocator<U>&) throw() { }
 
-		template<typename U>
-		Allocator & operator = ([[maybe_unused]] const Allocator<U> & other) { other; return *this; }
-		Allocator & operator = ([[maybe_unused]] const Allocator & other) { other; return *this; }
-		~Allocator() {}
-
-		pointer address(reference value) const { return &value; }
-		const_pointer address(const_reference value) const { return &value; }
-
-		pointer allocate(size_type n) { return static_cast<pointer> (Jinx::MemAllocate(n * sizeof(value_type))); }
-		pointer allocate(size_type n, const void *) { return static_cast<pointer> (Jinx::MemAllocate(n * sizeof(value_type))); }
-		void deallocate(void* ptr, size_type) { Jinx::MemFree(static_cast<T*> (ptr)); }
-
-		template<typename U, typename... Args>
-		void construct(U* ptr, Args&&  ... args) { ::new ((void*)(ptr)) U(std::forward<Args>(args)...); }
-		void construct(pointer ptr, const T& val) { new (static_cast<T*> (ptr)) T(val); }
-
-		template<typename U>
-		void destroy([[maybe_unused]] U* ptr) { ptr->~U(); }
-		void destroy([[maybe_unused]] pointer ptr) { ptr->~T(); }
-
-		size_type max_size() const { return std::numeric_limits<std::size_t>::max() / sizeof(T); }
+		T* allocate(size_t n) { return static_cast<T*> (Jinx::MemAllocate(n * sizeof(value_type))); }
+		void deallocate(void* ptr, size_t n) { Jinx::MemFree(static_cast<T*> (ptr), n * sizeof(value_type)); }
 	};
 
 	template <typename T>
@@ -244,7 +218,7 @@ namespace Jinx
 				m_ptr = p;
 		}
 		else
-			Jinx::MemFree(p);
+			Jinx::MemFree(p, n);
 	}
 
 	template <class T, std::size_t N, std::size_t Align = alignof(std::max_align_t)>
@@ -1093,11 +1067,8 @@ namespace Jinx
 	/// Prototype for global memory allocation function callback
 	using AllocFn = std::function<void *(size_t)>;
 
-	/// Prototype for global memory re-allocation function callback
-	using ReallocFn = std::function<void *(void *, size_t)>;
-
 	/// Prototype for global memory free function callback
-	using FreeFn = std::function<void(void *)>;
+	using FreeFn = std::function<void(void *, size_t)>;
 
 	/// Prototype for global logging function callback
 	using LogFn = std::function<void(LogLevel level, const char *)>;
@@ -1123,8 +1094,6 @@ namespace Jinx
 		bool enableDebugInfo = true;
 		/// Alloc memory function
 		AllocFn allocFn;
-		/// Realloc memory function
-		ReallocFn reallocFn;
 		/// Free memory function
 		FreeFn freeFn;
 		/// Maximum number of instructions per script per Execute() function
@@ -2220,18 +2189,20 @@ namespace Jinx::Impl
 		// Private internal functions
 		bool RegisterPropertyNameInternal(const PropertyName & propertyName, bool checkForDuplicates);
 
-		using PropertyNameTable = std::map <String, PropertyName, std::less<String>, Allocator<std::pair<const String, PropertyName>>>;
+		// Static memory pool for fast allocations
+		static const size_t ArenaSize = 4096;
+		StaticArena<ArenaSize> m_staticArena;
 
 		// Library name
 		String m_name;
 
 		// Track function definitions
 		mutable std::mutex m_functionMutex;
-		FunctionList m_functionList;
+		std::vector<FunctionSignature, StaticAllocator<FunctionSignature, ArenaSize>> m_functionList{ m_staticArena };
 
 		// Properties
 		mutable std::mutex m_propertyMutex;
-		PropertyNameTable m_propertyNameTable;
+		std::map<String, PropertyName, std::less<String>, StaticAllocator<std::pair<const String, PropertyName>, ArenaSize>> m_propertyNameTable{ m_staticArena };
 		size_t m_maxPropertyParts;
 
 		// Weak ptr to runtime system
@@ -2855,7 +2826,7 @@ namespace Jinx
 
 	inline Buffer::~Buffer()
 	{
-		MemFree(m_data);
+		MemFree(m_data, m_capacity);
 	}
 
 	inline size_t Buffer::Capacity() const
@@ -2896,16 +2867,12 @@ namespace Jinx
 	{
 		if (m_data)
 		{
-			m_data = (uint8_t *)MemReallocate(m_data, size);
-			m_capacity = size;
-			if (m_size < m_capacity)
-				m_size = m_capacity;
+			if (size < m_capacity)
+				return;
+			MemFree(m_data, m_capacity);
 		}
-		else
-		{
-			m_data = (uint8_t *)MemAllocate(size);
-			m_capacity = size;
-		}
+		m_data = (uint8_t *)MemAllocate(size);
+		m_capacity = size;	
 	}
 
 	inline void Buffer::Write(const void * data, size_t bytes)
@@ -5256,63 +5223,38 @@ namespace Jinx
 	namespace Impl
 	{
 		static inline AllocFn allocFn = [](size_t size) { return malloc(size); };
-		static inline ReallocFn reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-		static inline FreeFn freeFn = [](void * p) { return free(p); };
+		static inline FreeFn freeFn = [](void * p, size_t) { return free(p); };
 
 		static inline std::atomic_uint64_t allocationCount = 0;
 		static inline std::atomic_uint64_t freeCount = 0;
 		static inline std::atomic_uint64_t allocatedMemory = 0;
 
-		struct MemoryHeader
-		{
-			size_t allocSize;
-		};
 	} 
 
 	inline void * MemAllocate(size_t bytes)
 	{
-		Impl::MemoryHeader * hdr = static_cast<Impl::MemoryHeader *>(Impl::allocFn(bytes + sizeof(Impl::MemoryHeader)));
-		hdr->allocSize = bytes;
 		Impl::allocationCount++;
 		Impl::allocatedMemory += bytes;
-		return reinterpret_cast<uint8_t *>(hdr) + sizeof(Impl::MemoryHeader);
+		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
 	}
 
-	inline void * MemReallocate(void * ptr, size_t bytes)
-	{
-		if (!ptr)
-			return MemAllocate(bytes);
-		if (!bytes)
-		{
-			MemFree(ptr);
-			return nullptr;
-		}
-		Impl::MemoryHeader * hdr = reinterpret_cast<Impl::MemoryHeader *>(reinterpret_cast<uint8_t *>(ptr) - sizeof(Impl::MemoryHeader));
-		size_t oldSize = hdr->allocSize;
-		ptr = Impl::reallocFn(hdr, bytes + sizeof(Impl::MemoryHeader));
-		Impl::allocatedMemory += (bytes - oldSize);
-		return reinterpret_cast<uint8_t *>(ptr) + sizeof(Impl::MemoryHeader);
-	}
-
-	inline void MemFree(void * ptr)
+	inline void MemFree(void * ptr, size_t bytes)
 	{
 		if (!ptr)
 			return;
-		Impl::MemoryHeader * hdr = reinterpret_cast<Impl::MemoryHeader *>(reinterpret_cast<uint8_t *>(ptr) - sizeof(Impl::MemoryHeader));
 		Impl::freeCount++;
-		assert(Impl::allocatedMemory >= hdr->allocSize);
-		Impl::allocatedMemory -= hdr->allocSize;
-		Impl::freeFn(hdr);
+		assert(Impl::allocatedMemory >= bytes);
+		Impl::allocatedMemory -= bytes;
+		Impl::freeFn(ptr, bytes);
 	}
 
 	inline void InitializeMemory(const GlobalParams & params)
 	{
-		if (params.allocFn || params.reallocFn || params.freeFn)
+		if (params.allocFn || params.freeFn)
 		{
 			// If you're using one custom memory function, you must use them ALL
-			assert(params.allocFn && params.reallocFn && params.freeFn);
+			assert(params.allocFn && params.freeFn);
 			Impl::allocFn = params.allocFn;
-			Impl::reallocFn = params.reallocFn;
 			Impl::freeFn = params.freeFn;
 		}
 	}
@@ -9907,7 +9849,7 @@ namespace Jinx
 			char * buffer = (char *)MemAllocate(length + 2);
 			m_buffer->Read(&m_pos, buffer, length + 1);
 			*val = buffer;
-			MemFree(buffer);
+			MemFree(buffer, length + 1);
 		}
 	}
 

@@ -25,7 +25,7 @@ namespace Jinx
 			char * buffer = (char *)MemAllocate(length + 2);
 			m_buffer->Read(&m_pos, buffer, length + 1);
 			*val = buffer;
-			MemFree(buffer);
+			MemFree(buffer, length + 1);
 		}
 	}
 

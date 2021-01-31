@@ -271,20 +271,7 @@ TEST_CASE("Test Native", "[Native]")
 	{
 		void * p = Jinx::MemAllocate(64);
 		memset(p, 7, 64);
-		Jinx::MemFree(p);
-	}
-
-	SECTION("Test native realloc")
-	{
-		void * p1 = Jinx::MemAllocate(64);
-		memset(p1, 7, 64);
-		void * p2 = Jinx::MemAllocate(64);
-		memset(p2, 7, 64);
-		REQUIRE(memcmp(p1, p2, 64) == 0);
-		p2 = Jinx::MemReallocate(p2, 128);
-		REQUIRE(memcmp(p1, p2, 64) == 0);
-		Jinx::MemFree(p1);
-		Jinx::MemFree(p2);
+		Jinx::MemFree(p, 64);
 	}
 
 }
