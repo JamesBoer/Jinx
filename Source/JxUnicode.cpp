@@ -350,10 +350,8 @@ namespace Jinx::Impl
 		}
 	}
 
-	inline_t bool IsCaseFolded(const String & source)
+	inline_t bool IsCaseFolded(const char * curr, const char * end)
 	{
-		const char * curr = source.c_str();
-		const char * end = source.c_str() + source.size();
 		while (curr < end)
 		{
 			// ASCII characters can do a fast table-based check
@@ -378,16 +376,22 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline_t String FoldCase(const String & source)
+	inline_t bool IsCaseFolded(std::string_view source)
 	{
-		// Check to see if we can simply return the original source
-		if (IsCaseFolded(source))
-			return source;
+		return IsCaseFolded(source.data(), source.data() + source.size());
+	}
+
+	inline_t bool IsCaseFolded(const String & source)
+	{
+		return IsCaseFolded(source.data(), source.data() + source.size());
+	}
+
+	inline_t String FoldCase(const char * curr, const char * end)
+	{
+		assert(!IsCaseFolded(curr, end));
 
 		String s;
-		s.reserve(source.size());
-		const char * curr = source.c_str();
-		const char * end = source.c_str() + source.size();
+		s.reserve(end - curr);
 		while (curr < end)
 		{
 			// Attempt simple (ASCII-only) folding if possible first
@@ -429,6 +433,19 @@ namespace Jinx::Impl
 		}
 
 		return s;
+	}
+
+	inline_t String FoldCase(std::string_view source)
+	{
+		return FoldCase(source.data(), source.data() + source.size());
+	}
+
+	inline_t String FoldCase(const String & source)
+	{
+		// Check to see if we can simply return the original source
+		if (IsCaseFolded(source))
+			return source;
+		return FoldCase(source.data(), source.data() + source.size());
 	}
 
 	inline_t const char * GetUtf8CstrByIndex(const String & source, int64_t index)

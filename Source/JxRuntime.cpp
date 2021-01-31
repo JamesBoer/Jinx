@@ -19,7 +19,7 @@ namespace Jinx::Impl
 		{
 			SymbolType symType = static_cast<SymbolType>(i);
 			auto symTypeText = GetSymbolTypeText(symType);
-			m_symbolTypeMap.insert(std::make_pair(String(symTypeText), symType));
+			m_symbolTypeMap.insert(std::make_pair(symTypeText, symType));
 		}
 	}
 
@@ -356,7 +356,7 @@ namespace Jinx::Impl
 			case SymbolType::NameValue:
 				// Display names with spaces as surrounded by single quotes to help delineate them
 				// from surrounding symbols.
-				if (strstr(symbol->text.c_str(), " "))
+				if (strstr(String(symbol->text).c_str(), " "))
 					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
 				else
 					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());
@@ -387,7 +387,7 @@ namespace Jinx::Impl
 		return m_propertyMap.find(id) != m_propertyMap.end();
 	}
 
-	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, BufferPtr bytecode, size_t offset)
+	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset)
 	{
 		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
 		std::lock_guard<std::mutex> lock(mutex);
@@ -411,6 +411,12 @@ namespace Jinx::Impl
 	}
 
 	inline_t void Runtime::SetProperty(RuntimeID id, const Variant & value)
+	{
+		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		m_propertyMap[id] = value;
+	}
+
+	inline_t void Runtime::SetProperty(RuntimeID id, Variant && value)
 	{
 		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
 		m_propertyMap[id] = value;

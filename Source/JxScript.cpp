@@ -12,14 +12,16 @@ namespace Jinx::Impl
 
 	inline_t Script::Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext) :
 		m_runtime(runtime),
-		m_userContext(userContext),
-		m_bytecodeStart(0),
-		m_finished(false),
-		m_error(false)
+		m_userContext(userContext)
 	{
+		// Reserve initial memory
 		m_execution.reserve(6);
-		m_execution.push_back(ExecutionFrame(bytecode, "root"));
 		m_stack.reserve(32);
+		m_scopeStack.reserve(32);
+		m_idIndexData.reserve(32);
+
+		// Create root execution frame
+		m_execution.emplace_back(bytecode, "root");
 
 		// Assume default unnamed library unless explicitly overridden
 		m_library = m_runtime->GetLibraryInternal("");
@@ -172,7 +174,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for addition");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::And:
@@ -180,7 +182,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1.GetBoolean() && op2.GetBoolean();
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::CallFunc:
@@ -238,7 +240,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				op2 -= op1;
-				Push(op2);
+				Push(std::move(op2));
 			}
 			break;
 			case Opcode::Divide:
@@ -256,7 +258,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for division");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Equals:
@@ -264,7 +266,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 == op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::EraseItr:
@@ -374,7 +376,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 > op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::GreaterEq:
@@ -387,7 +389,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 >= op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Increment:
@@ -405,7 +407,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				op2 += op1;
-				Push(op2);
+				Push(std::move(op2));
 			}
 			break;
 			case Opcode::Jump:
@@ -479,7 +481,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 < op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::LessEq:
@@ -492,7 +494,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 <= op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Library:
@@ -563,7 +565,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for mod");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Multiply:
@@ -576,7 +578,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for multiply");
 					return false;
 				}
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Negate:
@@ -588,14 +590,14 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 * -1;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Not:
 			{
 				auto op1 = Pop();
 				auto result = !op1.GetBoolean();
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::NotEquals:
@@ -603,7 +605,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 != op2;
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Or:
@@ -611,7 +613,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1.GetBoolean() || op2.GetBoolean();
-				Push(result);
+				Push(std::move(result));
 			}
 			break;
 			case Opcode::Pop:
@@ -665,7 +667,7 @@ namespace Jinx::Impl
 				}
 				for (uint32_t i = 0; i < count * 2; ++i)
 					m_stack.pop_back();
-				Push(collection);
+				Push(std::move(collection));
 			}
 			break;
 			case Opcode::PushItr:
@@ -679,7 +681,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				Variant itr = std::make_pair(coll.GetCollection()->begin(), coll.GetCollection());
-				Push(itr);
+				Push(std::move(itr));
 			}
 			break;
 			case Opcode::PushKeyVal:
@@ -745,7 +747,7 @@ namespace Jinx::Impl
 				}
 				for (uint32_t i = 0; i < count; ++i)
 					m_stack.pop_back();
-				Push(collection);
+				Push(std::move(collection));
 			}
 			break;
 			case Opcode::PushProp:
@@ -753,14 +755,14 @@ namespace Jinx::Impl
 				uint64_t id;
 				m_execution.back().reader.Read(&id);
 				auto val = m_runtime->GetProperty(id);
-				Push(val);
+				Push(std::move(val));
 			}
 			break;
 			case Opcode::PushTop:
 			{
 				assert(m_stack.size() >= 1);
 				auto op = m_stack[m_stack.size() - 1];
-				Push(op);
+				Push(std::move(op));
 			}
 			break;
 			case Opcode::PushVar:
@@ -768,14 +770,14 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				auto var = GetVariable(id);
-				Push(var);
+				Push(std::move(var));
 			}
 			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(m_execution.back().reader);
-				Push(val);
+				Push(std::move(val));
 			}
 			break;
 			case Opcode::Return:
@@ -784,6 +786,12 @@ namespace Jinx::Impl
 				assert(!m_execution.empty());
 				size_t targetSize = m_execution.back().stackTop;
 				auto onReturn = m_execution.back().onReturn;
+				while (!m_idIndexData.empty())
+				{
+					if (m_idIndexData.back().frameIndex < m_execution.size())
+						break;
+					m_idIndexData.pop_back();
+				}
 				m_execution.pop_back();
 				assert(!m_execution.empty());
 				while (m_stack.size() > targetSize)
@@ -800,22 +808,20 @@ namespace Jinx::Impl
 			break;
 			case Opcode::ScopeBegin:
 			{
-				m_execution.back().scopeStack.push_back(m_stack.size());
+				m_scopeStack.push_back(m_stack.size());
 			}
 			break;
 			case Opcode::ScopeEnd:
 			{
-				auto stackTop = m_execution.back().scopeStack.back();
-				m_execution.back().scopeStack.pop_back();
+				auto stackTop = m_scopeStack.back();
+				m_scopeStack.pop_back();
 				while (m_stack.size() > stackTop)
 					m_stack.pop_back();
-				auto & ids = m_execution.back().ids;
-				for (auto itr = ids.begin(); itr != ids.end();)
+				while (!m_idIndexData.empty())
 				{
-					if (itr->second >= stackTop)
-						itr = ids.erase(itr);
-					else
-						++itr;
+					if (m_idIndexData.back().index < stackTop)
+						break;
+					m_idIndexData.pop_back();
 				}
 			}
 			break;
@@ -845,7 +851,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				m_runtime->SetProperty(id, val);
+				m_runtime->SetProperty(id, std::move(val));
 			}
 			break;
 			case Opcode::SetPropKeyVal:
@@ -908,7 +914,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				SetVariable(id, val);
+				SetVariable(id, std::move(val));
 			}
 			break;
 			case Opcode::SetVarKeyVal:
@@ -1009,7 +1015,7 @@ namespace Jinx::Impl
 
 	inline_t void Script::CallBytecodeFunction(const FunctionDefinitionPtr & fnDef, OnReturn onReturn)
 	{
-		m_execution.push_back(ExecutionFrame(fnDef));
+		m_execution.emplace_back(fnDef);
 		m_execution.back().onReturn = onReturn;
 		m_execution.back().reader.Seek(fnDef->GetOffset());
 		assert(m_stack.size() >= fnDef->GetParameterCount());
@@ -1086,17 +1092,17 @@ namespace Jinx::Impl
 
 	inline_t Variant Script::GetVariable(RuntimeID id) const
 	{
-		auto & names = m_execution.back().ids;
-		auto itr = names.find(id);
-		if (itr != names.end())
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
+			if (ritr->id == id)
 			{
-				LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
-				return Variant();
+				if (ritr->index >= m_stack.size())
+				{
+					LogWriteLine(LogLevel::Error, "Attempted to access stack at invalid index");
+					return Variant();
+				}
+				return m_stack[ritr->index];
 			}
-			return m_stack[itr->second];
 		}
 		return Variant();
 	}
@@ -1113,7 +1119,7 @@ namespace Jinx::Impl
 			Error("Stack underflow");
 			return Variant();
 		}
-		auto var = m_stack.back();
+		auto var = std::move(m_stack.back());
 		m_stack.pop_back();
 		return var;
 	}
@@ -1121,6 +1127,11 @@ namespace Jinx::Impl
 	inline_t void Script::Push(const Variant & value)
 	{
 		m_stack.push_back(value);
+	}
+
+	inline_t void Script::Push(Variant && value)
+	{
+		m_stack.push_back(std::move(value));
 	}
 
 	inline_t void Script::SetVariable(const String & name, const Variant & value)
@@ -1132,34 +1143,52 @@ namespace Jinx::Impl
 
 	inline_t void Script::SetVariable(RuntimeID id, const Variant & value)
 	{
+		auto val = value;
+		SetVariable(id, std::move(val));
+	}
+
+	inline_t void Script::SetVariable(RuntimeID id, Variant && value)
+	{
+
 		// Search the current frame for the variable
-		auto & names = m_execution.back().ids;
-		auto itr = names.find(id);
-		if (itr != names.end())
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
-			auto index = itr->second;
-			if (index >= m_stack.size())
+			if (ritr->frameIndex < m_execution.size())
+				break;
+			if (ritr->id == id)
 			{
-				itr->second = m_stack.size();
-				m_stack.push_back(value);
-				return;
-			}
-			else
-			{
-				m_stack[itr->second] = value;
+				if (ritr->index >= m_stack.size())
+				{
+					ritr->index = m_stack.size();
+					m_stack.push_back(value);
+				}
+				else
+				{
+					m_stack[ritr->index] = value;
+				}
 				return;
 			}
 		}
 
 		// If we don't find the name, create a new variable on the top of the stack
-		names.insert(std::make_pair(id, m_stack.size()));
+		m_idIndexData.emplace_back(id, m_stack.size(), m_execution.size());
 		m_stack.push_back(value);
 	}
 
 	inline_t void Script::SetVariableAtIndex(RuntimeID id, size_t index)
 	{
 		assert(index < m_stack.size());
-		m_execution.back().ids.insert(std::make_pair(id, index));
+		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
+		{
+			if (ritr->frameIndex < m_execution.size())
+				break;
+			if (ritr->id == id)
+			{
+				ritr->index = index;
+				return;
+			}
+		}
+		m_idIndexData.emplace_back(id, index, m_execution.size());
 	}
 
 	inline_t std::pair<CollectionPtr, Variant> Script::WalkSubscripts(uint32_t subscripts, CollectionPtr collection)

@@ -62,6 +62,7 @@ namespace Jinx
 			m_type(ValueType::Null)
 		{}
 		Variant(const Variant & copy);
+		Variant(Variant && other);
 		Variant(std::nullptr_t) : m_type(ValueType::Null) { SetNull(); }
 		Variant(bool value) : m_type(ValueType::Null) { SetBoolean(value); }
 		Variant(int32_t value) : m_type(ValueType::Null) { SetInteger(value); }
@@ -87,6 +88,7 @@ namespace Jinx
 
 		// Assignment operator overloads
 		Variant & operator= (const Variant & copy);
+		Variant & operator= (Variant && other);
 
 		// Increment operators
 		Variant & operator++();
@@ -176,7 +178,9 @@ namespace Jinx
 
 	private:
 
+		void Copy(const Variant & copy);
 		void Destroy();
+		void Move(Variant && other);
 
 		ValueType m_type;
 		union

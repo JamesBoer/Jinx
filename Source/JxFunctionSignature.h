@@ -21,25 +21,30 @@ namespace Jinx::Impl
 
 	struct FunctionSignaturePart
 	{
-		FunctionSignaturePart() :
-			partType(FunctionSignaturePartType::Name),
-			optional(false),
-			valueType(ValueType::Any)
-		{}
-		FunctionSignaturePartType partType;
-		bool optional;
-		ValueType valueType;
-		std::vector<String, Allocator<String>> names;
+		FunctionSignaturePart() {}
+		FunctionSignaturePart(const FunctionSignaturePart & copy);
+		FunctionSignaturePart & operator= (const FunctionSignaturePart & copy);
+
+		static const size_t ArenaSize = 128;
+		StaticArena<ArenaSize> staticArena;
+		FunctionSignaturePartType partType = FunctionSignaturePartType::Name;
+		bool optional = false;
+		ValueType valueType = ValueType::Any;
+		std::vector<String, StaticAllocator<String, ArenaSize>> names{ staticArena };
 	};
 
+	static const size_t FSPBufferSize = 1024;
+	using FunctionSignaturePartsI = std::vector<FunctionSignaturePart, StaticAllocator<FunctionSignaturePart, FSPBufferSize>>;
 	using FunctionSignatureParts = std::vector<FunctionSignaturePart, Allocator<FunctionSignaturePart>>;
 
 	// Function and member function signature object.
 	class FunctionSignature
 	{
 	public:
-		FunctionSignature();
+		FunctionSignature() {}
 		FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts);
+		FunctionSignature(const FunctionSignature & copy);
+		FunctionSignature & operator= (const FunctionSignature & copy);
 
 		// Get unique function id
 		RuntimeID GetId() const { return m_id; }
@@ -54,7 +59,7 @@ namespace Jinx::Impl
 		VisibilityType GetVisibility() const { return m_visibility; }
 
 		// Get signature parts
-		const FunctionSignatureParts & GetParts() const { return m_parts; }
+		const FunctionSignaturePartsI & GetParts() const { return m_parts; }
 
 		// Is this a valid signature?
 		inline bool IsValid() const { return !m_parts.empty(); }
@@ -73,7 +78,8 @@ namespace Jinx::Impl
 
 		friend bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	private:
+		// Static memory arena for fast allocations
+		StaticArena<FSPBufferSize> m_staticArena;
 
 		// Unique id
 		RuntimeID m_id = 0;
@@ -86,14 +92,13 @@ namespace Jinx::Impl
 
 		// Each signature is made up of any number of parts representing either part
 		// of the function name or a variable placeholder.
-		FunctionSignatureParts m_parts;
-
+		FunctionSignaturePartsI m_parts{ m_staticArena };
 	};
 
 	bool operator == (const FunctionSignaturePart & left, const FunctionSignaturePart & right);
 	bool operator == (const FunctionSignature & left, const FunctionSignature & right);
 
-	using FunctionList = std::list<FunctionSignature, Allocator<FunctionSignature>>;
+	using FunctionList = std::vector<FunctionSignature, Allocator<FunctionSignature>>;
 	using  FunctionPtrList = std::vector<const FunctionSignature*, Allocator<const FunctionSignature*>>;
 
 } // namespace Jinx::Impl

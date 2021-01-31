@@ -15,6 +15,7 @@ namespace Jinx::Impl
 		m_maxPropertyParts(0),
 		m_runtime(runtime)
 	{
+		m_functionList.reserve(16);
 	}
 
 	inline_t FunctionSignature Library::CreateFunctionSignature(Visibility visibility, const String & name) const

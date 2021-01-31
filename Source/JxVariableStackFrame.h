@@ -51,17 +51,19 @@ namespace Jinx::Impl
 
 		void CalculateMaxVariableParts();
 
-		using VariableSet = std::set<String, std::less<String>, Allocator<String>>;
-		using VariableStack = std::vector<VariableSet, Allocator<VariableSet>>;
+		static const size_t VSFArenaSize = 2048;
+		StaticArena<VSFArenaSize> m_staticArena;
+
 		struct FrameData
 		{
-			FrameData() : maxVariableParts(0) {}
+			using VariableSet = std::set<String, std::less<String>, Allocator<String>>;
+			using VariableStack = std::vector<VariableSet, Allocator<VariableSet>>;
 			VariableStack stack;
-			size_t maxVariableParts;
+			size_t maxVariableParts = 0;
 		};
-		using VariableFrames = std::vector<FrameData, Allocator<FrameData>>;
-		VariableFrames m_frames;
-		String m_errorMessage;
+		using VariableFrames = std::vector<FrameData, StaticAllocator<FrameData, VSFArenaSize>>;
+		VariableFrames m_frames{ m_staticArena };
+		StringI<VSFArenaSize> m_errorMessage{ m_staticArena };
 	};
 
 } // namespace Jinx::Impl

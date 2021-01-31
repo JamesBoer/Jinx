@@ -12,14 +12,11 @@ namespace Jinx::Impl
 
 	inline_t Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name, std::initializer_list<String> libraries) :
 		m_runtime(runtime),
-		m_name(name),
 		m_symbolList(symbolList),
-		m_lastLine(1),
-		m_error(false),
-		m_breakAddress(false),
 		m_bytecode(CreateBuffer()),
 		m_writer(m_bytecode)
 	{
+		m_name = name.c_str();
 		m_currentSymbol = symbolList.begin();
 		m_importList = libraries;
 		if (EnableDebugInfo())
@@ -28,7 +25,6 @@ namespace Jinx::Impl
 
 	inline_t Parser::Parser(RuntimeIPtr runtime, const SymbolList & symbolList, const String & name) :
 		m_runtime(runtime),
-		m_name(name),
 		m_symbolList(symbolList),
 		m_lastLine(1),
 		m_error(false),
@@ -36,6 +32,7 @@ namespace Jinx::Impl
 		m_bytecode(CreateBuffer()),
 		m_writer(m_bytecode)
 	{
+		m_name = name.c_str();
 		m_currentSymbol = symbolList.begin();
 	}
 
@@ -49,7 +46,7 @@ namespace Jinx::Impl
 		m_writer.Write(&header, sizeof(header));
 
 		// Write script name
-		m_writer.Write(m_name);
+		m_writer.Write(m_name.c_str());
 
 		// Parse script symbols into bytecode
 		ParseScript();
@@ -69,7 +66,7 @@ namespace Jinx::Impl
 		auto itr = m_idNameMap.find(id);
 		if (itr == m_idNameMap.end())
 			return String();
-		return itr->second;
+		return String(itr->second);
 	}
 
 	inline_t RuntimeID Parser::VariableNameToRuntimeID(const String & name)
@@ -405,7 +402,7 @@ namespace Jinx::Impl
 		String libraryName;
 		if (m_currentSymbol->type == SymbolType::NameValue || IsKeyword(m_currentSymbol->type))
 		{
-			String tokenName = m_currentSymbol->text;
+			auto tokenName = m_currentSymbol->text;
 			if (tokenName == m_library->GetName())
 			{
 				libraryName = m_library->GetName();
@@ -425,7 +422,7 @@ namespace Jinx::Impl
 		return libraryName;
 	}
 
-	inline_t bool Parser::CheckFunctionCallPart(const FunctionSignatureParts & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
+	inline_t bool Parser::CheckFunctionCallPart(const FunctionSignaturePartsI & parts, size_t partsIndex, SymbolListCItr currSym, SymbolListCItr endSym, FunctionMatch & match) const
 	{
 		// If we reach the end of the parts list, return failure
 		if (partsIndex >= parts.size())
@@ -753,7 +750,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = currSym;
-			String name = curr->text;
+			auto name = String(curr->text);
 			size_t sc = 1;
 			bool error = false;
 			for (size_t i = 1; i < s; ++i)
@@ -849,7 +846,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = currSym;
-			String name = curr->text;
+			auto name = String(curr->text);
 			size_t sc = 1;
 			for (size_t i = 1; i < s; ++i)
 			{
@@ -1053,7 +1050,7 @@ namespace Jinx::Impl
 			val.SetBoolean(m_currentSymbol->boolVal);
 			break;
 		case SymbolType::StringValue:
-			val.SetString(m_currentSymbol->text);
+			val.SetString(String(m_currentSymbol->text));
 			break;
 		case SymbolType::Null:
 			break;
@@ -1107,7 +1104,7 @@ namespace Jinx::Impl
 			Error("Unexpected symbol type when parsing name");
 			return String();
 		}
-		String s = m_currentSymbol->text;
+		String s = String(m_currentSymbol->text);
 		NextSymbol();
 		return s;
 	}
@@ -1121,7 +1118,7 @@ namespace Jinx::Impl
 			Error("Unexpected symbol type when parsing name");
 			return String();
 		}
-		String s = m_currentSymbol->text;
+		String s = String(m_currentSymbol->text);
 		NextSymbol();
 
 		while (IsSymbolValid(m_currentSymbol) && !m_currentSymbol->text.empty())
@@ -1157,7 +1154,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = m_currentSymbol;
-			String name = curr->text;
+			auto name = String(curr->text);
 			size_t symbolCount = 1;
 			for (size_t i = 1; i < s; ++i)
 			{
@@ -1382,7 +1379,7 @@ namespace Jinx::Impl
 		for (size_t s = maxParts; s > 0; --s)
 		{
 			auto curr = m_currentSymbol;
-			String name = curr->text;
+			String name = String(curr->text);
 			size_t symbolCount = 1;
 			for (size_t i = 1; i < s; ++i)
 			{
@@ -1417,7 +1414,7 @@ namespace Jinx::Impl
 			Error("Unexpected symbol type when parsing function name");
 			return String();
 		}
-		String s = m_currentSymbol->text;
+		String s = String(m_currentSymbol->text);
 		NextSymbol();
 		return s;
 	}

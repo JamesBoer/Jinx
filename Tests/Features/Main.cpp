@@ -62,7 +62,7 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 int main(int argc, char ** argv)
 {
 	printf("Jinx version: %s\n", Jinx::GetVersionString().c_str());
-
+	
 	GlobalParams params;
 	params.logBytecode = true;
 	params.logSymbols = true;
@@ -90,7 +90,7 @@ int main(int argc, char ** argv)
 	REQUIRE(script);
 	REQUIRE(script->GetVariable("a") == true);
 	REQUIRE(script->GetVariable("b") == false);
-
+	
 	auto memStats = GetMemoryStats();
 	printf("\nMemory Stats\n");
 	printf("-------------\n");

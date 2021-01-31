@@ -16,7 +16,7 @@ namespace Jinx
 
 	inline_t Buffer::~Buffer()
 	{
-		MemFree(m_data);
+		MemFree(m_data, m_capacity);
 	}
 
 	inline_t size_t Buffer::Capacity() const
@@ -57,16 +57,12 @@ namespace Jinx
 	{
 		if (m_data)
 		{
-			m_data = (uint8_t *)MemReallocate(m_data, size);
-			m_capacity = size;
-			if (m_size < m_capacity)
-				m_size = m_capacity;
+			if (size < m_capacity)
+				return;
+			MemFree(m_data, m_capacity);
 		}
-		else
-		{
-			m_data = (uint8_t *)MemAllocate(size);
-			m_capacity = size;
-		}
+		m_data = (uint8_t *)MemAllocate(size);
+		m_capacity = size;	
 	}
 
 	inline_t void Buffer::Write(const void * data, size_t bytes)

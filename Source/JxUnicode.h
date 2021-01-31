@@ -21,7 +21,9 @@ namespace Jinx::Impl
 	WString ConvertUtf8ToWString(const String & utf8Str);
 	String ConvertWStringToUtf8(const WString & wStr);
 
+	bool IsCaseFolded(std::string_view source);
 	bool IsCaseFolded(const String & source);
+	String FoldCase(std::string_view source);
 	String FoldCase(const String & source);
 
 	size_t GetStringCount(const String & source);

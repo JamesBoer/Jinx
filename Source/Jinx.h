@@ -66,7 +66,6 @@ On macOS, use of std::any is restricted to applications targeting versions 10.14
 limitations in std::any_cast.  As such, Jinx provides optional void * aliases in place of std::any in
 case a project wishes to target macOS clients earlier than 10.14.
 */
-
 #define JINX_USE_ANY
 
 #include <memory>
@@ -77,6 +76,7 @@ case a project wishes to target macOS clients earlier than 10.14.
 #include <cstddef>
 #include <limits>
 #include <cstring>
+#include <cassert>
 #ifdef JINX_USE_ANY
 #include <any>
 #endif
@@ -428,11 +428,8 @@ namespace Jinx
 	/// Prototype for global memory allocation function callback
 	using AllocFn = std::function<void *(size_t)>;
 
-	/// Prototype for global memory re-allocation function callback
-	using ReallocFn = std::function<void *(void *, size_t)>;
-
 	/// Prototype for global memory free function callback
-	using FreeFn = std::function<void(void *)>;
+	using FreeFn = std::function<void(void *, size_t)>;
 
 	/// Prototype for global logging function callback
 	using LogFn = std::function<void(LogLevel level, const char *)>;
@@ -458,8 +455,6 @@ namespace Jinx
 		bool enableDebugInfo = true;
 		/// Alloc memory function
 		AllocFn allocFn;
-		/// Realloc memory function
-		ReallocFn reallocFn;
 		/// Free memory function
 		FreeFn freeFn;
 		/// Maximum number of instructions per script per Execute() function
