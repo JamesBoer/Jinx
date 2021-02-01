@@ -785,7 +785,7 @@ namespace Jinx
 		m_valType = value;
 	}
 
-	inline_t void Variant::Write(BinaryWriter & writer) const
+	inline_t void Variant::Write(Impl::BinaryWriter & writer) const
 	{
 
 		// Write out the type
@@ -834,7 +834,7 @@ namespace Jinx
 
 	}
 
-	inline_t void Variant::Read(BinaryReader & reader)
+	inline_t void Variant::Read(Impl::BinaryReader & reader)
 	{
 		Destroy();
 		uint8_t t;

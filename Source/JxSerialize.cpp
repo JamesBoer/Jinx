@@ -7,7 +7,7 @@ Copyright (c) 2016 James Boer
 
 #include "JxInternal.h"
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	inline_t void BinaryReader::Read(String * val)
@@ -66,4 +66,4 @@ namespace Jinx
 		reader.m_pos += bytes;
 	}
 
-} // namespace Jinx
+} // namespace Jinx::Impl

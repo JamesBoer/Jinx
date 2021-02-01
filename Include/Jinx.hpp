@@ -513,9 +513,11 @@ Copyright (c) 2016 James Boer
 /*! \namespace */
 namespace Jinx
 {
-
-	class BinaryReader;
-	class BinaryWriter;
+	namespace Impl
+	{
+		class BinaryReader;
+		class BinaryWriter;
+	}
 
 	/// Interface for user objects in scripts
 	class IUserObject
@@ -672,8 +674,8 @@ namespace Jinx
 		bool ConvertTo(ValueType type);
 
 		// Serialization
-		void Read(BinaryReader & reader);
-		void Write(BinaryWriter & writer) const;
+		void Read(Impl::BinaryReader & reader);
+		void Write(Impl::BinaryWriter & writer) const;
 
 	private:
 
@@ -1645,7 +1647,7 @@ Copyright (c) 2016 James Boer
 #define JX_SERIALIZE_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class BinaryReader
@@ -1742,7 +1744,7 @@ namespace Jinx
 		size_t m_pos;
 	};
 
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 #endif // JX_SERIALIZE_H__
 
@@ -2865,15 +2867,17 @@ namespace Jinx
 
 	inline void Buffer::Reserve(size_t size)
 	{
+		if (size <= m_capacity)
+			return;
+		auto data = (uint8_t *)MemAllocate(size);
 		if (m_data)
 		{
-			if (size < m_capacity)
-				return;
+			memcpy(data, m_data, m_size);
 			MemFree(m_data, m_capacity);
 		}
-		m_data = (uint8_t *)MemAllocate(size);
-		m_capacity = size;	
-	}
+		m_capacity = size;
+		m_data = data;
+}
 
 	inline void Buffer::Write(const void * data, size_t bytes)
 	{
@@ -9831,7 +9835,7 @@ See LICENSE.TXT or Jinx.h for license details.
 Copyright (c) 2016 James Boer
 */
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	inline void BinaryReader::Read(String * val)
@@ -9890,7 +9894,7 @@ namespace Jinx
 		reader.m_pos += bytes;
 	}
 
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 // end --- JxSerialize.cpp --- 
 
@@ -12871,7 +12875,7 @@ namespace Jinx
 		m_valType = value;
 	}
 
-	inline void Variant::Write(BinaryWriter & writer) const
+	inline void Variant::Write(Impl::BinaryWriter & writer) const
 	{
 
 		// Write out the type
@@ -12920,7 +12924,7 @@ namespace Jinx
 
 	}
 
-	inline void Variant::Read(BinaryReader & reader)
+	inline void Variant::Read(Impl::BinaryReader & reader)
 	{
 		Destroy();
 		uint8_t t;
