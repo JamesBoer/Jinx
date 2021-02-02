@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_SERIALIZE_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class BinaryReader
@@ -107,6 +107,6 @@ namespace Jinx
 		size_t m_pos;
 	};
 
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 #endif // JX_SERIALIZE_H__

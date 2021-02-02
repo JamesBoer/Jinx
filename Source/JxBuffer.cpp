@@ -55,15 +55,17 @@ namespace Jinx
 
 	inline_t void Buffer::Reserve(size_t size)
 	{
+		if (size <= m_capacity)
+			return;
+		auto data = (uint8_t *)MemAllocate(size);
 		if (m_data)
 		{
-			if (size < m_capacity)
-				return;
+			memcpy(data, m_data, m_size);
 			MemFree(m_data, m_capacity);
 		}
-		m_data = (uint8_t *)MemAllocate(size);
-		m_capacity = size;	
-	}
+		m_capacity = size;
+		m_data = data;
+}
 
 	inline_t void Buffer::Write(const void * data, size_t bytes)
 	{

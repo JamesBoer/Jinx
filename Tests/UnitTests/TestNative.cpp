@@ -273,5 +273,48 @@ TEST_CASE("Test Native", "[Native]")
 		memset(p, 7, 64);
 		Jinx::MemFree(p, 64);
 	}
+	
+	SECTION("Test buffer set / get with reserve")
+	{
+		auto buffer = Jinx::CreateBuffer();
+		buffer->Reserve(1000);
+		size_t pos = 0;
+		for (uint32_t i = 0; i < 100; ++i)
+			buffer->Write(&pos, &i, sizeof(i));
+		pos = 0;
+		bool allMatch = true;
+		for (uint32_t i = 0; i < 100; ++i)
+		{
+			uint32_t check;
+			buffer->Read(&pos, &check, sizeof(check));
+			if (i != check)
+			{
+				allMatch = false;
+				break;
+			}
+		}
+		REQUIRE(allMatch == true);
+	}
 
+	SECTION("Test buffer set / get without reserve")
+	{
+		auto buffer = Jinx::CreateBuffer();
+		size_t pos = 0;
+		for (uint32_t i = 0; i < 100; ++i)
+			buffer->Write(&pos, &i, sizeof(i));
+		pos = 0;
+		bool allMatch = true;
+		for (uint32_t i = 0; i < 100; ++i)
+		{
+			uint32_t check;
+			buffer->Read(&pos, &check, sizeof(check));
+			if (i != check)
+			{
+				allMatch = false;
+				break;
+			}
+		}
+		REQUIRE(allMatch == true);
+	}
+	
 }

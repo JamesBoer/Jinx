@@ -14,9 +14,11 @@ Copyright (c) 2016 James Boer
 /*! \namespace */
 namespace Jinx
 {
-
-	class BinaryReader;
-	class BinaryWriter;
+	namespace Impl
+	{
+		class BinaryReader;
+		class BinaryWriter;
+	}
 
 	/// Interface for user objects in scripts
 	class IUserObject
@@ -173,8 +175,8 @@ namespace Jinx
 		bool ConvertTo(ValueType type);
 
 		// Serialization
-		void Read(BinaryReader & reader);
-		void Write(BinaryWriter & writer) const;
+		void Read(Impl::BinaryReader & reader);
+		void Write(Impl::BinaryWriter & writer) const;
 
 	private:
 
