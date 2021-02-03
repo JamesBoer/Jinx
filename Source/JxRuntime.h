@@ -42,6 +42,7 @@ namespace Jinx::Impl
 		void SetProperty(RuntimeID id, Variant && value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
+		void UnregisterFunction(RuntimeID id);
 
 	private:
 		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, StaticAllocator<std::pair<const String, LibraryIPtr>, RuntimeArenaSize>>;

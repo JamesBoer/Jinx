@@ -452,6 +452,13 @@ namespace Jinx::Impl
 		return bytecode;
 	}
 
+	inline_t void Runtime::UnregisterFunction(RuntimeID id)
+	{
+		std::mutex & mutex = m_functionMutex[id % NumMutexes];
+		std::lock_guard<std::mutex> lock(mutex);
+		m_functionMap.erase(id);
+	}
+
 } // namespace Jinx::Impl
 
 namespace Jinx

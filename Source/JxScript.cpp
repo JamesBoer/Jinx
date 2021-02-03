@@ -19,6 +19,7 @@ namespace Jinx::Impl
 		m_stack.reserve(32);
 		m_scopeStack.reserve(32);
 		m_idIndexData.reserve(32);
+		m_localFunctions.reserve(8);
 
 		// Create root execution frame
 		m_execution.emplace_back(bytecode, "root");
@@ -58,6 +59,10 @@ namespace Jinx::Impl
 				}
 			}
 		}
+
+		// Unregister local functions
+		for (auto id : m_localFunctions)
+			m_runtime->UnregisterFunction(id);
 	}
 
 	inline_t void Script::Error(const char * message)
@@ -362,6 +367,8 @@ namespace Jinx::Impl
 				signature.Read(m_execution.back().reader);
 				if (signature.GetVisibility() != VisibilityType::Local)
 					m_library->RegisterFunctionSignature(signature);
+				else
+					m_localFunctions.push_back(signature.GetId());
 				// Note: we add 5 bytes to the current position to skip over the jump command and offset value
 				m_runtime->RegisterFunction(signature, m_execution.back().bytecode, m_execution.back().reader.Tell() + 5);
 			}

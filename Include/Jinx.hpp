@@ -2675,6 +2675,10 @@ namespace Jinx::Impl
 		};
 		std::vector<IdIndexData, StaticAllocator<IdIndexData, ArenaSize>> m_idIndexData{ m_staticArena };
 
+		// Local function map
+		using LocalFunctionList = std::vector<RuntimeID, StaticAllocator<RuntimeID, ArenaSize>>;
+		LocalFunctionList m_localFunctions{ m_staticArena };
+
 		// Current library
 		LibraryIPtr m_library;
 
@@ -2750,6 +2754,7 @@ namespace Jinx::Impl
 		void SetProperty(RuntimeID id, Variant && value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
+		void UnregisterFunction(RuntimeID id);
 
 	private:
 		using LibraryMap = std::map<String, LibraryIPtr, std::less<String>, StaticAllocator<std::pair<const String, LibraryIPtr>, RuntimeArenaSize>>;
@@ -8555,6 +8560,13 @@ namespace Jinx::Impl
 		return bytecode;
 	}
 
+	inline void Runtime::UnregisterFunction(RuntimeID id)
+	{
+		std::mutex & mutex = m_functionMutex[id % NumMutexes];
+		std::lock_guard<std::mutex> lock(mutex);
+		m_functionMap.erase(id);
+	}
+
 } // namespace Jinx::Impl
 
 namespace Jinx
@@ -8596,6 +8608,7 @@ namespace Jinx::Impl
 		m_stack.reserve(32);
 		m_scopeStack.reserve(32);
 		m_idIndexData.reserve(32);
+		m_localFunctions.reserve(8);
 
 		// Create root execution frame
 		m_execution.emplace_back(bytecode, "root");
@@ -8635,6 +8648,10 @@ namespace Jinx::Impl
 				}
 			}
 		}
+
+		// Unregister local functions
+		for (auto id : m_localFunctions)
+			m_runtime->UnregisterFunction(id);
 	}
 
 	inline void Script::Error(const char * message)
@@ -8939,6 +8956,8 @@ namespace Jinx::Impl
 				signature.Read(m_execution.back().reader);
 				if (signature.GetVisibility() != VisibilityType::Local)
 					m_library->RegisterFunctionSignature(signature);
+				else
+					m_localFunctions.push_back(signature.GetId());
 				// Note: we add 5 bytes to the current position to skip over the jump command and offset value
 				m_runtime->RegisterFunction(signature, m_execution.back().bytecode, m_execution.back().reader.Tell() + 5);
 			}
