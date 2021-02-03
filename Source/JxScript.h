@@ -117,6 +117,10 @@ namespace Jinx::Impl
 		};
 		std::vector<IdIndexData, StaticAllocator<IdIndexData, ArenaSize>> m_idIndexData{ m_staticArena };
 
+		// Local function map
+		using LocalFunctionList = std::vector<RuntimeID, StaticAllocator<RuntimeID, ArenaSize>>;
+		LocalFunctionList m_localFunctions{ m_staticArena };
+
 		// Current library
 		LibraryIPtr m_library;
 
