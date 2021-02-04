@@ -18,7 +18,6 @@ Copyright (c) 2016 James Boer
 using namespace Jinx;
 using namespace clara;
 
-const size_t NumPermutations = 100000;
 
 static const char * s_testScripts[] =
 {
@@ -459,14 +458,113 @@ static const char * s_testScripts[] =
 
 	)",
 
+	u8R"(
+
+		function some values
+			return "wolf", "goat", "cabbage"
+		end
+
+		set wolf to some values [1]
+		set goat to some values [2]
+		set cabbage to some values [3]
+
+	)",
+
+	u8R"(
+
+		function do nothing/nada/ziltch
+			-- do nothing
+		end
+
+		do nothing
+		do nada
+		do ziltch
+
+	)",
+
+	u8R"(
+
+		function (a) b/c/d (e)
+			-- do nothing
+		end
+
+		a b e
+		a c e
+		a d e
+		b e
+		c e
+		d e
+		b
+		c
+		d			
+
+	)",
+
+	u8R"(
+
+		import core
+
+		function {w} foo {x}
+			return x + w
+		end
+
+		function bar {x} buzz
+			return x
+		end
+
+		set a to bar function {} foo {} buzz
+
+	)",
+
+	u8R"(
+
+		import core
+
+		-- Function definition
+		function test
+		end
+
+		-- Execute function asynchronously and store coroutine in variable c
+		set c to async call function test
+
+		-- Wait until coroutine is finished
+		wait until c is finished
+
+		-- Retrieve return value from coroutine
+		set v to c's value
+
+	)",
+
+	u8R"(
+
+		import core
+
+		-- Function definition
+		function test {x}
+			return x
+		end
+
+		-- Execute function asynchronously and store coroutine in variable c
+		set c to async call function test {} with 123
+
+		-- Wait until coroutine is finished
+		wait until c is finished
+
+		-- Retrieve return value from coroutine
+		set v to c's value
+
+	)",
+
+	u8R"(
+
+		set a to "いろは"
+		set a[1] to "は"
+		set a[3] to "い"
+
+	)",
+
 };
 		
-
-template<typename T, size_t s>
-constexpr size_t countof(T(&)[s])
-{
-	return s;
-}
 
 class Fuzzer
 {
@@ -552,7 +650,7 @@ int main(int argc, char * argv[])
 	auto runtime = CreateRuntime();
 
 	// Validate that all scripts compile and execute successfully
-	for (auto i = 0u; i < countof(s_testScripts); ++i)
+	for (auto i = 0u; i < std::size(s_testScripts); ++i)
 	{
 		// Compile the text to bytecode
 		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script", { "core" });
@@ -575,7 +673,7 @@ int main(int argc, char * argv[])
 			{
 				if (std::chrono::high_resolution_clock::now() > stopTime)
 					break;
-				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
+				for (int i = 0; i < static_cast<int>(std::size(s_testScripts)); ++i)
 				{
 					// Compile the text to bytecode
 					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j), "Test Script");
