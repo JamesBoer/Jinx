@@ -486,43 +486,30 @@ public:
 		return m_string.c_str();
 	}
 
-	BufferPtr Fuzz(BufferPtr buffer, int seed)
-	{
-		m_rng.seed(static_cast<unsigned int>(seed));
-		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
-		mutation = mutation * mutation * mutation;
-		for (size_t i = 0; i < m_string.length(); ++i)
-		{
-			double rnd = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
-			if (rnd < mutation)
-			{
-				uint32_t rval = std::uniform_int_distribution<uint32_t>(1, 255)(m_rng);
-				buffer->Ptr()[i] = static_cast<char>(rval);
-			}
-		}
-		return buffer;
-	}
-
 private:
 	std::mt19937 m_rng;
 	std::string m_string;
 };
 
-// Comment out to test sequentially
-#define PARALLEL_EXECUTION
 
 int main(int argc, char * argv[])
 {
+	uint64_t permutations = 10000;
+	uint64_t start = 0;
+	uint32_t minutes = 0;
+	uint32_t hours = 0;
+
+
 	Jinx::GlobalParams globalParams;
 	globalParams.logSymbols = false;
 	globalParams.logBytecode = false;
 	globalParams.enableLogging = false;
 	Jinx::Initialize(globalParams);
+	auto runtime = CreateRuntime();
 
 	// Validate that all scripts compile and execute successfully
 	for (auto i = 0u; i < countof(s_testScripts); ++i)
 	{
-		auto runtime = CreateRuntime();
 		// Compile the text to bytecode
 		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script", { "core" });
 		assert(bytecode);
@@ -537,14 +524,11 @@ int main(int argc, char * argv[])
 	int numCores = std::thread::hardware_concurrency();
 	for (int n = 0; n < numCores; ++n)
 	{
-		threadList.push_back(std::thread([n, numCores]()
+		threadList.push_back(std::thread([n, numCores, permutations, runtime]()
 		{
-			auto begin = (int)NumPermutations / numCores * n;
-			auto end = (int)NumPermutations / numCores * (n + 1);
-			for (int j = begin; j < end; ++j)
+			for (int j = n; j < permutations; j += numCores)
 			{
 				Fuzzer sourceFuzzer;
-				auto runtime = CreateRuntime();
 				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
 				{
 					// Compile the text to bytecode
@@ -554,39 +538,6 @@ int main(int argc, char * argv[])
 				}
 				auto stats = Jinx::GetMemoryStats();
 				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
-			}
-		}));
-	}
-
-	// Wait for all threads to finish
-	for (auto & t : threadList)
-		t.join();
-	threadList.clear();
-
-	for (int n = 0; n < numCores; ++n)
-	{
-		threadList.push_back(std::thread([n, numCores]()
-		{
-			auto begin = (int)NumPermutations / numCores * n;
-			auto end = (int)NumPermutations / numCores * (n + 1);
-			for (int j = begin; j < end; ++j)
-			{
-				Fuzzer bytecodeFuzzer;
-				auto runtime = CreateRuntime();
-				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
-				{
-					// Compile the text to bytecode
-					auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
-					if (!bytecode)
-						continue;
-
-					// Create a runtime script with the given bytecode if it exists
-					auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode, j));
-					assert(script);
-					script->Execute();
-				}
-				auto stats = Jinx::GetMemoryStats();
-				printf("Bytecode permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
 			}
 		}));
 	}
