@@ -30,8 +30,10 @@ namespace Jinx
 
 	inline_t void * MemReallocate(void * ptr, size_t newBytes, size_t oldBytes)
 	{
-		Impl::freeCount++;
-		Impl::allocationCount++;
+		// Disallow now-ambiguous behavior of passing zero bytes
+		assert(newBytes);
+		if (ptr)
+			Impl::freeCount++;
 		Impl::allocatedMemory += (newBytes - oldBytes);
 		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, oldBytes));
 	}
