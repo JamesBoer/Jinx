@@ -131,7 +131,7 @@ namespace Jinx::Impl
 
 	inline_t FunctionDefinitionPtr Runtime::FindFunction(RuntimeID id) const
 	{
-		std::lock_guard<std::mutex> lock(m_functionMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto itr = m_functionMap.find(id);
 		if (itr == m_functionMap.end())
 			return nullptr;
@@ -154,7 +154,7 @@ namespace Jinx::Impl
 
 	inline_t Variant Runtime::GetProperty(RuntimeID id) const
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		auto itr = m_propertyMap.find(id);
 		if (itr == m_propertyMap.end())
 			return Variant();
@@ -383,42 +383,40 @@ namespace Jinx::Impl
 
 	inline_t bool Runtime::PropertyExists(RuntimeID id) const
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		return m_propertyMap.find(id) != m_propertyMap.end();
 	}
 
 	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset)
 	{
-		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, bytecode, offset);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
 	inline_t void Runtime::RegisterFunction(const FunctionSignature & signature, FunctionCallback function)
 	{
-		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
 	inline_t bool Runtime::SetProperty(RuntimeID id, std::function<bool(Variant &)> fn)
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		auto& prop = m_propertyMap[id];
 		return fn(prop);
 	}
 
 	inline_t void Runtime::SetProperty(RuntimeID id, const Variant & value)
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		m_propertyMap[id] = value;
 	}
 
 	inline_t void Runtime::SetProperty(RuntimeID id, Variant && value)
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		m_propertyMap[id] = value;
 	}
 
@@ -454,8 +452,7 @@ namespace Jinx::Impl
 
 	inline_t void Runtime::UnregisterFunction(RuntimeID id)
 	{
-		std::mutex & mutex = m_functionMutex[id % NumMutexes];
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		m_functionMap.erase(id);
 	}
 
