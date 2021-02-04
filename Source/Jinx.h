@@ -428,6 +428,9 @@ namespace Jinx
 	/// Prototype for global memory allocation function callback
 	using AllocFn = std::function<void *(size_t)>;
 
+	/// Prototype for global memory realloc function callback
+	using ReallocFn = std::function<void *(void *, size_t, size_t)>;
+
 	/// Prototype for global memory free function callback
 	using FreeFn = std::function<void(void *, size_t)>;
 
@@ -455,6 +458,8 @@ namespace Jinx
 		bool enableDebugInfo = true;
 		/// Alloc memory function
 		AllocFn allocFn;
+		/// Realloc memory function
+		ReallocFn reallocFn;
 		/// Free memory function
 		FreeFn freeFn;
 		/// Maximum number of instructions per script per Execute() function

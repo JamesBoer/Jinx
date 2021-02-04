@@ -128,6 +128,7 @@ namespace Jinx
 {
 	// Stand-alone global allocation functions
 	void * MemAllocate(size_t bytes);
+	void * MemReallocate(void * ptr, size_t newBytes, size_t oldBytes);
 	void MemFree(void * ptr, size_t bytes);
 
 	// Jinx allocator for use in STL containers
@@ -1069,6 +1070,9 @@ namespace Jinx
 	/// Prototype for global memory allocation function callback
 	using AllocFn = std::function<void *(size_t)>;
 
+	/// Prototype for global memory realloc function callback
+	using ReallocFn = std::function<void *(void *, size_t, size_t)>;
+
 	/// Prototype for global memory free function callback
 	using FreeFn = std::function<void(void *, size_t)>;
 
@@ -1096,6 +1100,8 @@ namespace Jinx
 		bool enableDebugInfo = true;
 		/// Alloc memory function
 		AllocFn allocFn;
+		/// Realloc memory function
+		ReallocFn reallocFn;
 		/// Free memory function
 		FreeFn freeFn;
 		/// Maximum number of instructions per script per Execute() function
@@ -2873,15 +2879,9 @@ namespace Jinx
 	{
 		if (size <= m_capacity)
 			return;
-		auto data = (uint8_t *)MemAllocate(size);
-		if (m_data)
-		{
-			memcpy(data, m_data, m_size);
-			MemFree(m_data, m_capacity);
-		}
+		m_data = static_cast<uint8_t *>(MemReallocate(m_data, size, m_capacity));
 		m_capacity = size;
-		m_data = data;
-}
+	}
 
 	inline void Buffer::Write(const void * data, size_t bytes)
 	{
@@ -5231,12 +5231,12 @@ namespace Jinx
 	namespace Impl
 	{
 		static inline AllocFn allocFn = [](size_t size) { return malloc(size); };
+		static inline ReallocFn reallocFn = [] (void * p, size_t s, size_t) { return realloc(p, s); };
 		static inline FreeFn freeFn = [](void * p, size_t) { return free(p); };
 
 		static inline std::atomic_uint64_t allocationCount = 0;
 		static inline std::atomic_uint64_t freeCount = 0;
 		static inline std::atomic_uint64_t allocatedMemory = 0;
-
 	} 
 
 	inline void * MemAllocate(size_t bytes)
@@ -5244,6 +5244,14 @@ namespace Jinx
 		Impl::allocationCount++;
 		Impl::allocatedMemory += bytes;
 		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
+	}
+
+	inline void * MemReallocate(void * ptr, size_t newBytes, size_t oldBytes)
+	{
+		Impl::freeCount++;
+		Impl::allocationCount++;
+		Impl::allocatedMemory += (newBytes - oldBytes);
+		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, oldBytes));
 	}
 
 	inline void MemFree(void * ptr, size_t bytes)
@@ -5258,11 +5266,12 @@ namespace Jinx
 
 	inline void InitializeMemory(const GlobalParams & params)
 	{
-		if (params.allocFn || params.freeFn)
+		if (params.allocFn || params.reallocFn || params.freeFn)
 		{
 			// If you're using one custom memory function, you must use them ALL
-			assert(params.allocFn && params.freeFn);
+			assert(params.allocFn && params.reallocFn && params.freeFn);
 			Impl::allocFn = params.allocFn;
+			Impl::reallocFn = params.reallocFn;
 			Impl::freeFn = params.freeFn;
 		}
 	}
