@@ -10,10 +10,13 @@ Copyright (c) 2016 James Boer
 #include <thread>
 #include <list>
 #include <inttypes.h>
+#include <iostream>
 
 #include "../../Source/Jinx.h"
+#include "clara.hpp"
 
 using namespace Jinx;
+using namespace clara;
 
 const size_t NumPermutations = 100000;
 
@@ -494,11 +497,52 @@ private:
 
 int main(int argc, char * argv[])
 {
-	uint64_t permutations = 10000;
+	// Handle command-line options
+	uint64_t permutations = 0;
 	uint64_t start = 0;
 	uint32_t minutes = 0;
 	uint32_t hours = 0;
+	bool showHelp = false;
+	auto parser =
+		Opt(permutations, "permutations")["-p"]["--permutations"]("Max number of permutations to run") |
+		Opt(start, "start")["-s"]["--start"]("Starting permutation") |
+		Opt(minutes, "minutes")["-m"]["--minutes"]("Minutes to run fuzz tests") |
+		Opt(hours, "hours")["-h"]["--hours"]("Hours to run fuzz tests") |
+		Help(showHelp);
 
+	auto result = parser.parse(Args(argc, argv));
+	if (!result)
+	{
+		std::cerr << "Error in command line: " << result.errorMessage() << "\n";
+		return 1;
+	}
+	else if (showHelp)
+	{
+		parser.writeToStream(std::cout);
+		return 0;
+	}
+
+	// Set max permutations and/or time to run
+	if (!permutations && !minutes && !hours)
+	{
+		// Pick a default number of permutatiosn to run if no arguments are passed
+		permutations = 100000;
+		minutes = std::numeric_limits<uint32_t>::max();
+	}
+	else
+	{
+		if (hours)
+			minutes += (hours * 60);
+		if (minutes)
+		{
+			if (!permutations)
+				permutations = std::numeric_limits<uint64_t>::max();
+		}
+	}
+
+	// Start timer
+	const auto startTime = std::chrono::high_resolution_clock::now();
+	const auto stopTime = startTime + std::chrono::minutes(minutes);
 
 	Jinx::GlobalParams globalParams;
 	globalParams.logSymbols = false;
@@ -524,20 +568,33 @@ int main(int argc, char * argv[])
 	int numCores = std::thread::hardware_concurrency();
 	for (int n = 0; n < numCores; ++n)
 	{
-		threadList.push_back(std::thread([n, numCores, permutations, runtime]()
+		threadList.push_back(std::thread([n, numCores, permutations, runtime, stopTime]()
 		{
+			Fuzzer sourceFuzzer;
 			for (int j = n; j < permutations; j += numCores)
 			{
-				Fuzzer sourceFuzzer;
+				if (std::chrono::high_resolution_clock::now() > stopTime)
+					break;
 				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
 				{
 					// Compile the text to bytecode
 					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j), "Test Script");
 					if (!bytecode)
 						continue;
+
+					// Create and execute the script if viable
+					auto script = runtime->CreateScript(bytecode);
+					if (!script)
+						continue;
+					do
+					{
+						if (!script->Execute())
+							break;
+					}
+					while (!script->IsFinished());
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
+				printf("Permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
 			}
 		}));
 	}
