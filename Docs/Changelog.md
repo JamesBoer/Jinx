@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Removed realloc memory callback since it is not used internally
 - Free memory callback now passes a size parameter
 - Fix small internal memory leak caused by local functions
+- Fix multi-threaded safety issue
 
 ## [1.3.1] - 2021-01-20
 

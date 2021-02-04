@@ -53,12 +53,11 @@ namespace Jinx::Impl
 
 	private:
 		StaticArena<RuntimeArenaSize> m_staticArena;
-		static const size_t NumMutexes = 8;
 		mutable std::mutex m_libraryMutex;
 		LibraryMap m_libraryMap{ m_staticArena };
-		mutable std::mutex m_functionMutex[NumMutexes];
+		mutable std::mutex m_functionMutex;
 		FunctionMap m_functionMap{ m_staticArena };
-		mutable std::mutex m_propertyMutex[NumMutexes];
+		mutable std::mutex m_propertyMutex;
 		PropertyMap m_propertyMap{ m_staticArena };
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
