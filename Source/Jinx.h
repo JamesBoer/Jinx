@@ -426,16 +426,16 @@ namespace Jinx
 
 
 	/// Prototype for global memory allocation function callback
-	using AllocFn = std::function<void *(size_t)>;
+	using AllocFn = std::function<void *(size_t bytes)>;
 
 	/// Prototype for global memory realloc function callback
-	using ReallocFn = std::function<void *(void *, size_t, size_t)>;
+	using ReallocFn = std::function<void *(void *, size_t newBytes, size_t currBytes)>;
 
 	/// Prototype for global memory free function callback
-	using FreeFn = std::function<void(void *, size_t)>;
+	using FreeFn = std::function<void(void *, size_t bytes)>;
 
 	/// Prototype for global logging function callback
-	using LogFn = std::function<void(LogLevel level, const char *)>;
+	using LogFn = std::function<void(LogLevel level, const char * msg)>;
 
 
 	/// Initializes global Jinx parameters
