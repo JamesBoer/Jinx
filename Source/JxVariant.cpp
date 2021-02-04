@@ -47,11 +47,6 @@ namespace Jinx
 		Copy(copy);
 	}
 
-	inline_t Variant::Variant(Variant && other)
-	{
-		Move(std::move(other));
-	}
-
 	inline_t Variant::~Variant()
 	{
 		Destroy();
@@ -63,16 +58,6 @@ namespace Jinx
 		{
 			Destroy();
 			Copy(copy);
-		}
-		return *this;
-	}
-
-	inline_t Variant & Variant::operator= (Variant && other)
-	{
-		if (this != &other)
-		{
-			Destroy();
-			Move(std::move(other));
 		}
 		return *this;
 	}
@@ -610,62 +595,6 @@ namespace Jinx
 		if (m_type == ValueType::Integer || m_type == ValueType::Number)
 			return true;
 		return false;
-	}
-
-	inline_t void Variant::Move(Variant && other)
-	{
-		m_type = other.m_type;
-		switch (m_type)
-		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = other.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = other.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = other.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				std::swap(m_string, other.m_string);
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				std::swap(m_collection, other.m_collection);
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				std::swap(m_collectionItrPair, other.m_collectionItrPair);
-				break;
-			case ValueType::Function:
-				m_function = other.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				std::swap(m_coroutine, other.m_coroutine);
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				std::swap(m_userObject, other.m_userObject);
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				std::swap(m_buffer, other.m_buffer);
-				break;
-			case ValueType::Guid:
-				m_guid = other.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = other.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
-		other.m_type = ValueType::Null;
-
 	}
 
 	inline_t void Variant::SetBuffer(const BufferPtr & value)

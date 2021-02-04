@@ -200,6 +200,30 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(script->GetVariable("a") == 123);
 	}
 
+	SECTION("Test for memory leak after multiple compilation of a script with strings")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			set x to "test"
+			
+			
+			)";
+
+		auto runtime = TestCreateRuntime();
+		{
+			auto script = runtime->CreateScript(scriptText);
+			REQUIRE(script);
+		}
+		auto memStats1 = Jinx::GetMemoryStats();
+		{
+			auto script = runtime->CreateScript(scriptText);
+			REQUIRE(script);
+		}
+		auto memStats2 = Jinx::GetMemoryStats();
+		REQUIRE(memStats1.allocatedMemory == memStats2.allocatedMemory);
+	}
+
 	SECTION("Test for memory leak after multiple executions of a script with local function")
 	{
 		static const char * scriptText =

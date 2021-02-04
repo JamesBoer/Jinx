@@ -128,7 +128,7 @@ namespace Jinx
 {
 	// Stand-alone global allocation functions
 	void * MemAllocate(size_t bytes);
-	void * MemReallocate(void * ptr, size_t newBytes, size_t oldBytes);
+	void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes);
 	void MemFree(void * ptr, size_t bytes);
 
 	// Jinx allocator for use in STL containers
@@ -564,7 +564,6 @@ namespace Jinx
 			m_type(ValueType::Null)
 		{}
 		Variant(const Variant & copy);
-		Variant(Variant && other);
 		Variant(std::nullptr_t) : m_type(ValueType::Null) { SetNull(); }
 		Variant(bool value) : m_type(ValueType::Null) { SetBoolean(value); }
 		Variant(int32_t value) : m_type(ValueType::Null) { SetInteger(value); }
@@ -590,7 +589,6 @@ namespace Jinx
 
 		// Assignment operator overloads
 		Variant & operator= (const Variant & copy);
-		Variant & operator= (Variant && other);
 
 		// Increment operators
 		Variant & operator++();
@@ -682,7 +680,6 @@ namespace Jinx
 
 		void Copy(const Variant & copy);
 		void Destroy();
-		void Move(Variant && other);
 
 		ValueType m_type;
 		union
@@ -1068,16 +1065,16 @@ namespace Jinx
 
 
 	/// Prototype for global memory allocation function callback
-	using AllocFn = std::function<void *(size_t)>;
+	using AllocFn = std::function<void *(size_t bytes)>;
 
 	/// Prototype for global memory realloc function callback
-	using ReallocFn = std::function<void *(void *, size_t, size_t)>;
+	using ReallocFn = std::function<void *(void *, size_t newBytes, size_t currBytes)>;
 
 	/// Prototype for global memory free function callback
-	using FreeFn = std::function<void(void *, size_t)>;
+	using FreeFn = std::function<void(void *, size_t bytes)>;
 
 	/// Prototype for global logging function callback
-	using LogFn = std::function<void(LogLevel level, const char *)>;
+	using LogFn = std::function<void(LogLevel level, const char * msg)>;
 
 
 	/// Initializes global Jinx parameters
@@ -5246,12 +5243,23 @@ namespace Jinx
 		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
 	}
 
-	inline void * MemReallocate(void * ptr, size_t newBytes, size_t oldBytes)
+	inline void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
 	{
-		Impl::freeCount++;
+		// With a size of zero, this acts like free()
+		if (newBytes == 0)
+		{
+			MemFree(ptr, currBytes);
+			return nullptr;
+		}
+
+		// If we have currently allocated memory, we track this as a free() as well as an alloc()
+		if (ptr)
+			Impl::freeCount++;
+
+		// Normal realloc behaviorwith preserved data
 		Impl::allocationCount++;
-		Impl::allocatedMemory += (newBytes - oldBytes);
-		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, oldBytes));
+		Impl::allocatedMemory += (newBytes - currBytes);
+		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
 	}
 
 	inline void MemFree(void * ptr, size_t bytes)
@@ -6345,7 +6353,7 @@ namespace Jinx::Impl
 			val.SetBoolean(m_currentSymbol->boolVal);
 			break;
 		case SymbolType::StringValue:
-			val.SetString(String(m_currentSymbol->text));
+			val.SetString(m_currentSymbol->text);
 			break;
 		case SymbolType::Null:
 			break;
@@ -12161,11 +12169,6 @@ namespace Jinx
 		Copy(copy);
 	}
 
-	inline Variant::Variant(Variant && other)
-	{
-		Move(std::move(other));
-	}
-
 	inline Variant::~Variant()
 	{
 		Destroy();
@@ -12177,16 +12180,6 @@ namespace Jinx
 		{
 			Destroy();
 			Copy(copy);
-		}
-		return *this;
-	}
-
-	inline Variant & Variant::operator= (Variant && other)
-	{
-		if (this != &other)
-		{
-			Destroy();
-			Move(std::move(other));
 		}
 		return *this;
 	}
@@ -12724,62 +12717,6 @@ namespace Jinx
 		if (m_type == ValueType::Integer || m_type == ValueType::Number)
 			return true;
 		return false;
-	}
-
-	inline void Variant::Move(Variant && other)
-	{
-		m_type = other.m_type;
-		switch (m_type)
-		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = other.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = other.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = other.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				std::swap(m_string, other.m_string);
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				std::swap(m_collection, other.m_collection);
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				std::swap(m_collectionItrPair, other.m_collectionItrPair);
-				break;
-			case ValueType::Function:
-				m_function = other.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				std::swap(m_coroutine, other.m_coroutine);
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				std::swap(m_userObject, other.m_userObject);
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				std::swap(m_buffer, other.m_buffer);
-				break;
-			case ValueType::Guid:
-				m_guid = other.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = other.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
-		other.m_type = ValueType::Null;
-
 	}
 
 	inline void Variant::SetBuffer(const BufferPtr & value)

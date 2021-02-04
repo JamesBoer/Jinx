@@ -28,12 +28,23 @@ namespace Jinx
 		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
 	}
 
-	inline_t void * MemReallocate(void * ptr, size_t newBytes, size_t oldBytes)
+	inline_t void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
 	{
-		Impl::freeCount++;
+		// With a size of zero, this acts like free()
+		if (newBytes == 0)
+		{
+			MemFree(ptr, currBytes);
+			return nullptr;
+		}
+
+		// If we have currently allocated memory, we track this as a free() as well as an alloc()
+		if (ptr)
+			Impl::freeCount++;
+
+		// Normal realloc behaviorwith preserved data
 		Impl::allocationCount++;
-		Impl::allocatedMemory += (newBytes - oldBytes);
-		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, oldBytes));
+		Impl::allocatedMemory += (newBytes - currBytes);
+		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
 	}
 
 	inline_t void MemFree(void * ptr, size_t bytes)
