@@ -10,15 +10,55 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	inline_t FunctionSignature::FunctionSignature()
+	inline_t FunctionSignaturePart::FunctionSignaturePart(const FunctionSignaturePart & copy) :
+		partType(copy.partType),
+		optional(copy.optional),
+		valueType(copy.valueType)
 	{
+		names = copy.names;
+	}
+
+	inline_t FunctionSignaturePart & FunctionSignaturePart::operator = (const FunctionSignaturePart & copy)
+	{
+		if (this != &copy)
+		{
+			partType = copy.partType;
+			optional = copy.optional;
+			valueType = copy.valueType;
+			names = copy.names;
+		}
+		return *this;
+	}
+
+
+	inline_t FunctionSignature::FunctionSignature(const FunctionSignature & copy) :
+		m_id(copy.m_id),
+		m_visibility(copy.m_visibility),
+		m_libraryName(copy.m_libraryName)
+	{
+		m_parts = copy.m_parts;
+	}
+
+	inline_t FunctionSignature & FunctionSignature::operator= (const FunctionSignature & copy)
+	{
+		if (this != &copy)
+		{
+			m_id = copy.m_id;
+			m_visibility = copy.m_visibility;
+			m_libraryName = copy.m_libraryName;
+			m_parts = copy.m_parts;
+		}
+		return *this;
 	}
 
 	inline_t FunctionSignature::FunctionSignature(VisibilityType visibility, const String & libraryName, const FunctionSignatureParts & parts) :
 		m_visibility(visibility),
-		m_libraryName(libraryName),
-		m_parts(parts)
+		m_libraryName(libraryName)
 	{
+		m_parts.reserve(parts.size());
+		for (const auto & part : parts)
+			m_parts.emplace_back(part);
+
 		if (m_visibility == VisibilityType::Local)
 		{
 			// Local functions use a randomly generated ID to avoid collisions with any other name.
@@ -129,6 +169,7 @@ namespace Jinx::Impl
 		reader.Read(&m_libraryName);
 		uint8_t partSize;
 		reader.Read(&partSize);
+		m_parts.reserve(partSize);
 		for (uint8_t i = 0; i < partSize; ++i)
 		{
 			FunctionSignaturePart part;
@@ -137,11 +178,12 @@ namespace Jinx::Impl
 			reader.Read<ValueType, uint8_t>(&part.valueType);
 			uint8_t nameSize;
 			reader.Read(&nameSize);
+			part.names.reserve(nameSize);
 			for (uint8_t j = 0; j < nameSize; ++j)
 			{
 				String name;
 				reader.Read(&name);
-				part.names.push_back(name);
+				part.names.push_back(std::move(name));
 			}
 			m_parts.push_back(part);
 		}

@@ -200,6 +200,63 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(script->GetVariable("a") == 123);
 	}
 
+	SECTION("Test for memory leak after multiple compilation of a script with strings")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			set x to "test"
+			
+			
+			)";
+
+		auto runtime = TestCreateRuntime();
+		{
+			auto script = runtime->CreateScript(scriptText);
+			REQUIRE(script);
+		}
+		auto memStats1 = Jinx::GetMemoryStats();
+		{
+			auto script = runtime->CreateScript(scriptText);
+			REQUIRE(script);
+		}
+		auto memStats2 = Jinx::GetMemoryStats();
+		REQUIRE(memStats1.allocatedMemory == memStats2.allocatedMemory);
+	}
+
+	SECTION("Test for memory leak after multiple executions of a script with local function")
+	{
+		static const char * scriptText =
+			u8R"(
+
+			function test
+				return 123
+			end
+					
+			set a to test
+			
+			)";
+
+		auto runtime = TestCreateRuntime();
+		{
+			auto script = runtime->CreateScript(scriptText);
+			REQUIRE(script);
+			REQUIRE(script->Execute());
+			REQUIRE(script->IsFinished());
+			REQUIRE(script->GetVariable("a") == 123);
+		}
+		auto memStats1 = Jinx::GetMemoryStats();
+		{
+			auto script = runtime->CreateScript(scriptText);
+			REQUIRE(script);
+			REQUIRE(script->Execute());
+			REQUIRE(script->IsFinished());
+			REQUIRE(script->GetVariable("a") == 123);
+		}
+		auto memStats2 = Jinx::GetMemoryStats();
+		REQUIRE(memStats1.allocatedMemory == memStats2.allocatedMemory);
+	}
+
 	SECTION("Test Jinx function execution from C++")
 	{
 		const char * scriptText =
@@ -271,20 +328,50 @@ TEST_CASE("Test Native", "[Native]")
 	{
 		void * p = Jinx::MemAllocate(64);
 		memset(p, 7, 64);
-		Jinx::MemFree(p);
+		Jinx::MemFree(p, 64);
 	}
-
-	SECTION("Test native realloc")
+	
+	SECTION("Test buffer set / get with reserve")
 	{
-		void * p1 = Jinx::MemAllocate(64);
-		memset(p1, 7, 64);
-		void * p2 = Jinx::MemAllocate(64);
-		memset(p2, 7, 64);
-		REQUIRE(memcmp(p1, p2, 64) == 0);
-		p2 = Jinx::MemReallocate(p2, 128);
-		REQUIRE(memcmp(p1, p2, 64) == 0);
-		Jinx::MemFree(p1);
-		Jinx::MemFree(p2);
+		auto buffer = Jinx::CreateBuffer();
+		buffer->Reserve(1000);
+		size_t pos = 0;
+		for (uint32_t i = 0; i < 100; ++i)
+			buffer->Write(&pos, &i, sizeof(i));
+		pos = 0;
+		bool allMatch = true;
+		for (uint32_t i = 0; i < 100; ++i)
+		{
+			uint32_t check;
+			buffer->Read(&pos, &check, sizeof(check));
+			if (i != check)
+			{
+				allMatch = false;
+				break;
+			}
+		}
+		REQUIRE(allMatch == true);
 	}
 
+	SECTION("Test buffer set / get without reserve")
+	{
+		auto buffer = Jinx::CreateBuffer();
+		size_t pos = 0;
+		for (uint32_t i = 0; i < 100; ++i)
+			buffer->Write(&pos, &i, sizeof(i));
+		pos = 0;
+		bool allMatch = true;
+		for (uint32_t i = 0; i < 100; ++i)
+		{
+			uint32_t check;
+			buffer->Read(&pos, &check, sizeof(check));
+			if (i != check)
+			{
+				allMatch = false;
+				break;
+			}
+		}
+		REQUIRE(allMatch == true);
+	}
+	
 }

@@ -21,6 +21,7 @@ namespace Jinx::Impl
 		m_error(false),
 		m_symbolTypeMap(symbolTypeMap)
 	{
+		m_symbolList.reserve(256);
 	}
 
 	inline_t void Lexer::AdvanceCurrent()
@@ -52,10 +53,12 @@ namespace Jinx::Impl
 		m_columnMarker = m_columnNumber;
 	}
 
-	inline_t void Lexer::CreateSymbol(const String & name)
+	inline_t void Lexer::CreateSymbol(std::string_view name)
 	{
 		Symbol symbol(SymbolType::NameValue, m_lineNumber, m_columnMarker);
-		symbol.text = FoldCase(name);
+		symbol.text = name;
+		if (!IsCaseFolded(name))
+			symbol.text = FoldCase(name).c_str();
 		auto itr = m_symbolTypeMap.find(symbol.text);
 		if (itr != m_symbolTypeMap.end())
 		{
@@ -81,10 +84,10 @@ namespace Jinx::Impl
 		m_columnMarker = m_columnNumber;
 	}
 
-	inline_t void Lexer::CreateSymbolString(String && text)
+	inline_t void Lexer::CreateSymbolString(std::string_view text)
 	{
 		Symbol symbol(SymbolType::StringValue, m_lineNumber, m_columnMarker);
-		symbol.text = std::move(text);
+		symbol.text = text;
 		m_symbolList.push_back(symbol);
 		m_columnMarker = m_columnNumber;
 	}
@@ -415,8 +418,7 @@ namespace Jinx::Impl
 		size_t count = m_current - startName;
 		if (quotedName)
 			AdvanceCurrent();
-		auto name = String(startName, count);
-		CreateSymbol(name);
+		CreateSymbol(std::string_view(startName, count));
 
 		// Check for apostrophe-s.  If the name is quoted, no additional quote is needed
 		if (!quotedName)
@@ -499,8 +501,7 @@ namespace Jinx::Impl
 			return;
 		}
 		size_t count = m_current - startName;
-		auto str = String(startName, count);
-		CreateSymbolString(std::move(str));
+		CreateSymbolString(std::string_view(startName, count));
 	}
 
 	inline_t void Lexer::ParseWhitespace()

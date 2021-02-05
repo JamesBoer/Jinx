@@ -44,56 +44,7 @@ namespace Jinx
 
 	inline_t Variant::Variant(const Variant & copy)
 	{
-		m_type = copy.m_type;
-		switch (m_type)
-		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = copy.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = copy.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = copy.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				m_string = copy.m_string;
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				m_collection = copy.m_collection;
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				m_collectionItrPair = copy.m_collectionItrPair;
-				break;
-			case ValueType::Function:
-				m_function = copy.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				m_coroutine = copy.m_coroutine;
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				m_userObject = copy.m_userObject;
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				m_buffer = copy.m_buffer;
-				break;
-			case ValueType::Guid:
-				m_guid = copy.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = copy.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
+		Copy(copy);
 	}
 
 	inline_t Variant::~Variant()
@@ -103,57 +54,11 @@ namespace Jinx
 
 	inline_t Variant & Variant::operator= (const Variant & copy)
 	{
-		Destroy();
-		m_type = copy.m_type;
-		switch (m_type)
+		if (this != &copy)
 		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = copy.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = copy.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = copy.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				m_string = copy.m_string;
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				m_collection = copy.m_collection;
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				m_collectionItrPair = copy.m_collectionItrPair;
-				break;
-			case ValueType::Function:
-				m_function = copy.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				m_coroutine = copy.m_coroutine;
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				m_userObject = copy.m_userObject;
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				m_buffer = copy.m_buffer;
-				break;
-			case ValueType::Guid:
-				m_guid = copy.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = copy.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
+			Destroy();
+			Copy(copy);
+		}
 		return *this;
 	}
 
@@ -449,6 +354,60 @@ namespace Jinx
 		Impl::LogWriteLine(LogLevel::Error, "Error converting %s to %s", Impl::GetValueTypeName(m_type), Impl::GetValueTypeName(type));
 		SetNull();
 		return false;
+	}
+
+	inline_t void Variant::Copy(const Variant & copy)
+	{
+		m_type = copy.m_type;
+		switch (m_type)
+		{
+			case ValueType::Null:
+				break;
+			case ValueType::Number:
+				m_number = copy.m_number;
+				break;
+			case ValueType::Integer:
+				m_integer = copy.m_integer;
+				break;
+			case ValueType::Boolean:
+				m_boolean = copy.m_boolean;
+				break;
+			case ValueType::String:
+				new(&m_string) String();
+				m_string = copy.m_string;
+				break;
+			case ValueType::Collection:
+				new(&m_collection) CollectionPtr();
+				m_collection = copy.m_collection;
+				break;
+			case ValueType::CollectionItr:
+				new(&m_collectionItrPair) CollectionItrPair();
+				m_collectionItrPair = copy.m_collectionItrPair;
+				break;
+			case ValueType::Function:
+				m_function = copy.m_function;
+				break;
+			case ValueType::Coroutine:
+				new(&m_coroutine) CoroutinePtr();
+				m_coroutine = copy.m_coroutine;
+				break;
+			case ValueType::UserObject:
+				new(&m_userObject) UserObjectPtr();
+				m_userObject = copy.m_userObject;
+				break;
+			case ValueType::Buffer:
+				new(&m_buffer) BufferPtr();
+				m_buffer = copy.m_buffer;
+				break;
+			case ValueType::Guid:
+				m_guid = copy.m_guid;
+				break;
+			case ValueType::ValType:
+				m_valType = copy.m_valType;
+				break;
+			default:
+				assert(!"Unknown variant type!");
+		};
 	}
 
 	inline_t void Variant::Destroy()
@@ -755,7 +714,7 @@ namespace Jinx
 		m_valType = value;
 	}
 
-	inline_t void Variant::Write(BinaryWriter & writer) const
+	inline_t void Variant::Write(Impl::BinaryWriter & writer) const
 	{
 
 		// Write out the type
@@ -804,7 +763,7 @@ namespace Jinx
 
 	}
 
-	inline_t void Variant::Read(BinaryReader & reader)
+	inline_t void Variant::Read(Impl::BinaryReader & reader)
 	{
 		Destroy();
 		uint8_t t;

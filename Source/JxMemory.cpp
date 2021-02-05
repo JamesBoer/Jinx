@@ -13,53 +13,48 @@ namespace Jinx
 	namespace Impl
 	{
 		static inline AllocFn allocFn = [](size_t size) { return malloc(size); };
-		static inline ReallocFn reallocFn = [](void * p, size_t size) { return realloc(p, size); };
-		static inline FreeFn freeFn = [](void * p) { return free(p); };
+		static inline ReallocFn reallocFn = [] (void * p, size_t s, size_t) { return realloc(p, s); };
+		static inline FreeFn freeFn = [](void * p, size_t) { return free(p); };
 
 		static inline std::atomic_uint64_t allocationCount = 0;
 		static inline std::atomic_uint64_t freeCount = 0;
 		static inline std::atomic_uint64_t allocatedMemory = 0;
-
-		struct MemoryHeader
-		{
-			size_t allocSize;
-		};
 	} 
 
 	inline_t void * MemAllocate(size_t bytes)
 	{
-		Impl::MemoryHeader * hdr = static_cast<Impl::MemoryHeader *>(Impl::allocFn(bytes + sizeof(Impl::MemoryHeader)));
-		hdr->allocSize = bytes;
 		Impl::allocationCount++;
 		Impl::allocatedMemory += bytes;
-		return reinterpret_cast<uint8_t *>(hdr) + sizeof(Impl::MemoryHeader);
+		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
 	}
 
-	inline_t void * MemReallocate(void * ptr, size_t bytes)
+	inline_t void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
 	{
-		if (!ptr)
-			return MemAllocate(bytes);
-		if (!bytes)
+		// With a size of zero, this acts like free()
+		if (newBytes == 0)
 		{
-			MemFree(ptr);
+			MemFree(ptr, currBytes);
 			return nullptr;
 		}
-		Impl::MemoryHeader * hdr = reinterpret_cast<Impl::MemoryHeader *>(reinterpret_cast<uint8_t *>(ptr) - sizeof(Impl::MemoryHeader));
-		size_t oldSize = hdr->allocSize;
-		ptr = Impl::reallocFn(hdr, bytes + sizeof(Impl::MemoryHeader));
-		Impl::allocatedMemory += (bytes - oldSize);
-		return reinterpret_cast<uint8_t *>(ptr) + sizeof(Impl::MemoryHeader);
+
+		// If we have currently allocated memory, we track this as a free() as well as an alloc()
+		if (ptr)
+			Impl::freeCount++;
+
+		// Normal realloc behaviorwith preserved data
+		Impl::allocationCount++;
+		Impl::allocatedMemory += (newBytes - currBytes);
+		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
 	}
 
-	inline_t void MemFree(void * ptr)
+	inline_t void MemFree(void * ptr, size_t bytes)
 	{
 		if (!ptr)
 			return;
-		Impl::MemoryHeader * hdr = reinterpret_cast<Impl::MemoryHeader *>(reinterpret_cast<uint8_t *>(ptr) - sizeof(Impl::MemoryHeader));
 		Impl::freeCount++;
-		assert(Impl::allocatedMemory >= hdr->allocSize);
-		Impl::allocatedMemory -= hdr->allocSize;
-		Impl::freeFn(hdr);
+		assert(Impl::allocatedMemory >= bytes);
+		Impl::allocatedMemory -= bytes;
+		Impl::freeFn(ptr, bytes);
 	}
 
 	inline_t void InitializeMemory(const GlobalParams & params)

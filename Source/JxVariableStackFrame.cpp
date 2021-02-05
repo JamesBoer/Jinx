@@ -12,8 +12,8 @@ namespace Jinx::Impl
 
 	inline_t VariableStackFrame::VariableStackFrame()
 	{
-		m_frames.push_back(FrameData());
-		m_frames.back().stack.push_back(VariableSet());
+		m_frames.emplace_back();
+		m_frames.back().stack.emplace_back();
 	}
 
 	inline_t void VariableStackFrame::CalculateMaxVariableParts()
@@ -128,8 +128,8 @@ namespace Jinx::Impl
 
 	inline_t void VariableStackFrame::FrameBegin()
 	{
-		m_frames.push_back(FrameData());
-		m_frames.back().stack.push_back(VariableSet());
+		m_frames.emplace_back();
+		m_frames.back().stack.emplace_back();
 	}
 
 	inline_t bool VariableStackFrame::FrameEnd()
@@ -151,7 +151,7 @@ namespace Jinx::Impl
 			return false;
 		}
 		FrameData & frame = m_frames.back();
-		frame.stack.push_back(VariableSet());
+		frame.stack.emplace_back();
 		return true;
 	}
 

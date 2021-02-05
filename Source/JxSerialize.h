@@ -10,7 +10,7 @@ Copyright (c) 2016 James Boer
 #define JX_SERIALIZE_H__
 
 
-namespace Jinx
+namespace Jinx::Impl
 {
 
 	class BinaryReader
@@ -83,6 +83,7 @@ namespace Jinx
 		inline void Write(float val) { m_buffer->Write(&m_pos, &val, sizeof(float)); }
 		inline void Write(double val) { m_buffer->Write(&m_pos, &val, sizeof(double)); }
 
+		void Write(const char * val);
 		void Write(const String & val);
 		void Write(const BufferPtr & val);
 		void Write(BinaryReader & reader, size_t bytes);
@@ -106,6 +107,6 @@ namespace Jinx
 		size_t m_pos;
 	};
 
-} // namespace Jinx
+} // namespace Jinx::Impl
 
 #endif // JX_SERIALIZE_H__
