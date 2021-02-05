@@ -569,9 +569,14 @@ static const char * s_testScripts[] =
 class Fuzzer
 {
 public:
-	const char * Fuzz(const char * str, int seed)
+	const char * Fuzz(const char * str, uint64_t seed)
 	{
-		m_rng.seed(static_cast<unsigned int>(seed));
+		std::seed_seq seq =
+		{
+			static_cast<uint32_t>(seed & 0x00000000FFFFFFFF),
+			static_cast<uint32_t>((seed & 0xFFFFFFFF00000000) >> 32),
+		};
+		m_rng.seed(seq);
 		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
 		mutation = mutation * mutation * mutation;
 		m_string = str;
@@ -612,7 +617,7 @@ int main(int argc, char * argv[])
 	if (!result)
 	{
 		std::cerr << "Error in command line: " << result.errorMessage() << "\n";
-		return 1;
+		return -1;
 	}
 	else if (showHelp)
 	{
@@ -623,25 +628,35 @@ int main(int argc, char * argv[])
 	// Set max permutations and/or time to run
 	if (!permutations && !minutes && !hours)
 	{
-		// Pick a default number of permutatiosn to run if no arguments are passed
-		permutations = 100000;
-		minutes = std::numeric_limits<uint32_t>::max();
+		// Pick a default number of permutations to run if no arguments are passed
+		permutations = 100'000;
+
 	}
 	else
 	{
+		// Convert hours to minutes
 		if (hours)
 			minutes += (hours * 60);
+
 		if (minutes)
 		{
+			// If permutation limit hasn't been specified
 			if (!permutations)
-				permutations = std::numeric_limits<uint64_t>::max();
+				permutations = 1'000'000'000'000;
 		}
 	}
 
+	if (!minutes)
+	{
+		// If time isn't specified, set max time to 1000 hours
+		minutes = 60 * 1000;
+	}
+
 	// Start timer
-	const auto startTime = std::chrono::high_resolution_clock::now();
+	const auto startTime = std::chrono::system_clock::now();
 	const auto stopTime = startTime + std::chrono::minutes(minutes);
 
+	// Initialize Jinx and
 	Jinx::GlobalParams globalParams;
 	globalParams.logSymbols = false;
 	globalParams.logBytecode = false;
@@ -654,29 +669,37 @@ int main(int argc, char * argv[])
 	{
 		// Compile the text to bytecode
 		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script", { "core" });
-		assert(bytecode);
+		if (!bytecode)
+		{
+			std::cerr << "Unable to compile test script #" << i << "\n";
+			return -1;
+		}
 
 		// Create a runtime script with the given bytecode
 		auto script = runtime->CreateScript(bytecode);
-		assert(bytecode);
-		assert(script->Execute());
+		
+		if (!script->Execute())
+		{
+			std::cerr << "Unable to execute test script #" << i << "\n";
+			return -1;
+		}
 	}
 
 	std::list<std::thread> threadList;
 	int numCores = std::thread::hardware_concurrency();
 	for (int n = 0; n < numCores; ++n)
 	{
-		threadList.push_back(std::thread([n, numCores, permutations, runtime, stopTime]()
+		threadList.push_back(std::thread([n, start, numCores, permutations, runtime, stopTime]()
 		{
 			Fuzzer sourceFuzzer;
-			for (int j = n; j < permutations; j += numCores)
+			for (uint64_t j = n; j < permutations; j += numCores)
 			{
-				if (std::chrono::high_resolution_clock::now() > stopTime)
+				if (std::chrono::system_clock::now() > stopTime)
 					break;
 				for (int i = 0; i < static_cast<int>(std::size(s_testScripts)); ++i)
 				{
 					// Compile the text to bytecode
-					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j), "Test Script");
+					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j + start), "Test Script");
 					if (!bytecode)
 						continue;
 
@@ -692,7 +715,7 @@ int main(int argc, char * argv[])
 					while (!script->IsFinished());
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
+				printf("Permutation %" PRIu64 " (Allocated Memory = %" PRIu64 " KB)\n", j + start, stats.allocatedMemory / 1024);
 			}
 		}));
 	}
