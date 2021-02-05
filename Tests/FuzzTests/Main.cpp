@@ -10,12 +10,14 @@ Copyright (c) 2016 James Boer
 #include <thread>
 #include <list>
 #include <inttypes.h>
+#include <iostream>
 
 #include "../../Source/Jinx.h"
+#include "clara.hpp"
 
 using namespace Jinx;
+using namespace clara;
 
-const size_t NumPermutations = 100000;
 
 static const char * s_testScripts[] =
 {
@@ -456,21 +458,125 @@ static const char * s_testScripts[] =
 
 	)",
 
+	u8R"(
+
+		function some values
+			return "wolf", "goat", "cabbage"
+		end
+
+		set wolf to some values [1]
+		set goat to some values [2]
+		set cabbage to some values [3]
+
+	)",
+
+	u8R"(
+
+		function do nothing/nada/ziltch
+			-- do nothing
+		end
+
+		do nothing
+		do nada
+		do ziltch
+
+	)",
+
+	u8R"(
+
+		function (a) b/c/d (e)
+			-- do nothing
+		end
+
+		a b e
+		a c e
+		a d e
+		b e
+		c e
+		d e
+		b
+		c
+		d			
+
+	)",
+
+	u8R"(
+
+		import core
+
+		function {w} foo {x}
+			return x + w
+		end
+
+		function bar {x} buzz
+			return x
+		end
+
+		set a to bar function {} foo {} buzz
+
+	)",
+
+	u8R"(
+
+		import core
+
+		-- Function definition
+		function test
+		end
+
+		-- Execute function asynchronously and store coroutine in variable c
+		set c to async call function test
+
+		-- Wait until coroutine is finished
+		wait until c is finished
+
+		-- Retrieve return value from coroutine
+		set v to c's value
+
+	)",
+
+	u8R"(
+
+		import core
+
+		-- Function definition
+		function test {x}
+			return x
+		end
+
+		-- Execute function asynchronously and store coroutine in variable c
+		set c to async call function test {} with 123
+
+		-- Wait until coroutine is finished
+		wait until c is finished
+
+		-- Retrieve return value from coroutine
+		set v to c's value
+
+	)",
+
+	u8R"(
+
+		set a to "いろは"
+		set a[1] to "は"
+		set a[3] to "い"
+
+	)",
+
 };
 		
-
-template<typename T, size_t s>
-constexpr size_t countof(T(&)[s])
-{
-	return s;
-}
 
 class Fuzzer
 {
 public:
-	const char * Fuzz(const char * str, int seed)
+	const char * Fuzz(const char * str, uint64_t seed)
 	{
-		m_rng.seed(static_cast<unsigned int>(seed));
+		std::seed_seq seq =
+		{
+			static_cast<uint32_t>(seed & 0x00000000FFFFFFFF),
+			static_cast<uint32_t>((seed & 0xFFFFFFFF00000000) >> 32),
+		};
+		m_rng.seed(seq);
 		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
 		mutation = mutation * mutation * mutation;
 		m_string = str;
@@ -486,107 +592,130 @@ public:
 		return m_string.c_str();
 	}
 
-	BufferPtr Fuzz(BufferPtr buffer, int seed)
-	{
-		m_rng.seed(static_cast<unsigned int>(seed));
-		double mutation = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
-		mutation = mutation * mutation * mutation;
-		for (size_t i = 0; i < m_string.length(); ++i)
-		{
-			double rnd = std::uniform_real_distribution<double>(0.0, 1.0)(m_rng);
-			if (rnd < mutation)
-			{
-				uint32_t rval = std::uniform_int_distribution<uint32_t>(1, 255)(m_rng);
-				buffer->Ptr()[i] = static_cast<char>(rval);
-			}
-		}
-		return buffer;
-	}
-
 private:
 	std::mt19937 m_rng;
 	std::string m_string;
 };
 
-// Comment out to test sequentially
-#define PARALLEL_EXECUTION
 
 int main(int argc, char * argv[])
 {
+	// Handle command-line options
+	uint64_t permutations = 0;
+	uint64_t start = 0;
+	uint32_t minutes = 0;
+	uint32_t hours = 0;
+	bool showHelp = false;
+	auto parser =
+		Opt(permutations, "permutations")["-p"]["--permutations"]("Max number of permutations to run") |
+		Opt(start, "start")["-s"]["--start"]("Starting permutation") |
+		Opt(minutes, "minutes")["-m"]["--minutes"]("Minutes to run fuzz tests") |
+		Opt(hours, "hours")["-h"]["--hours"]("Hours to run fuzz tests") |
+		Help(showHelp);
+
+	auto result = parser.parse(Args(argc, argv));
+	if (!result)
+	{
+		std::cerr << "Error in command line: " << result.errorMessage() << "\n";
+		return -1;
+	}
+	else if (showHelp)
+	{
+		parser.writeToStream(std::cout);
+		return 0;
+	}
+
+	// Set max permutations and/or time to run
+	if (!permutations && !minutes && !hours)
+	{
+		// Pick a default number of permutations to run if no arguments are passed
+		permutations = 100'000;
+
+	}
+	else
+	{
+		// Convert hours to minutes
+		if (hours)
+			minutes += (hours * 60);
+
+		if (minutes)
+		{
+			// If permutation limit hasn't been specified
+			if (!permutations)
+				permutations = 1'000'000'000'000;
+		}
+	}
+
+	if (!minutes)
+	{
+		// If time isn't specified, set max time to 1000 hours
+		minutes = 60 * 1000;
+	}
+
+	// Start timer
+	const auto startTime = std::chrono::system_clock::now();
+	const auto stopTime = startTime + std::chrono::minutes(minutes);
+
+	// Initialize Jinx and
 	Jinx::GlobalParams globalParams;
 	globalParams.logSymbols = false;
 	globalParams.logBytecode = false;
 	globalParams.enableLogging = false;
 	Jinx::Initialize(globalParams);
+	auto runtime = CreateRuntime();
 
 	// Validate that all scripts compile and execute successfully
-	for (auto i = 0u; i < countof(s_testScripts); ++i)
+	for (auto i = 0u; i < std::size(s_testScripts); ++i)
 	{
-		auto runtime = CreateRuntime();
 		// Compile the text to bytecode
 		auto bytecode = runtime->Compile(s_testScripts[i], "Test Script", { "core" });
-		assert(bytecode);
+		if (!bytecode)
+		{
+			std::cerr << "Unable to compile test script #" << i << "\n";
+			return -1;
+		}
 
 		// Create a runtime script with the given bytecode
 		auto script = runtime->CreateScript(bytecode);
-		assert(bytecode);
-		assert(script->Execute());
+		
+		if (!script->Execute())
+		{
+			std::cerr << "Unable to execute test script #" << i << "\n";
+			return -1;
+		}
 	}
 
 	std::list<std::thread> threadList;
 	int numCores = std::thread::hardware_concurrency();
 	for (int n = 0; n < numCores; ++n)
 	{
-		threadList.push_back(std::thread([n, numCores]()
+		threadList.push_back(std::thread([n, start, numCores, permutations, runtime, stopTime]()
 		{
-			auto begin = (int)NumPermutations / numCores * n;
-			auto end = (int)NumPermutations / numCores * (n + 1);
-			for (int j = begin; j < end; ++j)
+			Fuzzer sourceFuzzer;
+			for (uint64_t j = n; j < permutations; j += numCores)
 			{
-				Fuzzer sourceFuzzer;
-				auto runtime = CreateRuntime();
-				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
+				if (std::chrono::system_clock::now() > stopTime)
+					break;
+				for (int i = 0; i < static_cast<int>(std::size(s_testScripts)); ++i)
 				{
 					// Compile the text to bytecode
-					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j), "Test Script");
-					if (!bytecode)
-						continue;
-				}
-				auto stats = Jinx::GetMemoryStats();
-				printf("Source permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
-			}
-		}));
-	}
-
-	// Wait for all threads to finish
-	for (auto & t : threadList)
-		t.join();
-	threadList.clear();
-
-	for (int n = 0; n < numCores; ++n)
-	{
-		threadList.push_back(std::thread([n, numCores]()
-		{
-			auto begin = (int)NumPermutations / numCores * n;
-			auto end = (int)NumPermutations / numCores * (n + 1);
-			for (int j = begin; j < end; ++j)
-			{
-				Fuzzer bytecodeFuzzer;
-				auto runtime = CreateRuntime();
-				for (int i = 0; i < static_cast<int>(countof(s_testScripts)); ++i)
-				{
-					// Compile the text to bytecode
-					auto bytecode = runtime->Compile(s_testScripts[i], "Test Script");
+					auto bytecode = runtime->Compile(sourceFuzzer.Fuzz(s_testScripts[i], j + start), "Test Script");
 					if (!bytecode)
 						continue;
 
-					// Create a runtime script with the given bytecode if it exists
-					auto script = runtime->CreateScript(bytecodeFuzzer.Fuzz(bytecode, j));
-					assert(script);
-					script->Execute();
+					// Create and execute the script if viable
+					auto script = runtime->CreateScript(bytecode);
+					if (!script)
+						continue;
+					do
+					{
+						if (!script->Execute())
+							break;
+					}
+					while (!script->IsFinished());
 				}
 				auto stats = Jinx::GetMemoryStats();
-				printf("Bytecode permutation %i (Allocated Memory = %" PRIu64 ")\n", j, stats.allocatedMemory);
+				printf("Permutation %" PRIu64 " (Allocated Memory = %" PRIu64 " KB)\n", j + start, stats.allocatedMemory / 1024);
 			}
 		}));
 	}
