@@ -505,6 +505,7 @@ namespace Jinx::Impl
 			return std::optional<String>();
 		srcEnd += GetUtf8CharSize(srcEnd);
 		String out;
+		out.reserve(range.second - range.first + 1);
 		while (srcCurr < srcEnd)
 		{
 			out += *srcCurr;
@@ -563,6 +564,7 @@ namespace Jinx::Impl
 		if (targetStart == nullptr || targetEnd == nullptr)
 			return std::optional<String>();
 		String out;
+		out.reserve(dest.size());
 		const char * destCurr = destStart;
 		while (destCurr < destEnd)
 		{
