@@ -63,6 +63,9 @@ namespace Jinx::Impl
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
 
+		bool IsIntegerPair(const Variant & value) const;
+		std::pair<int64_t, int64_t> GetIntegerPair(const Variant & value) const;
+
 	private:
 
 		// Pointer to runtime object

@@ -1503,7 +1503,9 @@ namespace Jinx::Impl
 
 	size_t GetStringCount(const String & source);
 	std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index);
+	std::optional<String> GetUtf8CharsByRange(const String & source, const std::pair<int64_t, int64_t> & range);
 	std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index);
+	std::optional<String> ReplaceUtf8CharsAtRange(const String & dest, const String & source, const std::pair<int64_t, int64_t> & range);
 
 } // namespace Jinx::Impl
 
@@ -2623,6 +2625,9 @@ namespace Jinx::Impl
 
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
+
+		bool IsIntegerPair(const Variant & value) const;
+		std::pair<int64_t, int64_t> GetIntegerPair(const Variant & value) const;
 
 	private:
 
@@ -9317,12 +9322,16 @@ namespace Jinx::Impl
 				}
 				else if (var.IsString())
 				{
-					if (!key.IsInteger())
+					if (!key.IsInteger() && !IsIntegerPair(key))
 					{
 						Error("Invalid index type for string");
 						return false;
 					}
-					auto optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					std::optional<String> optStr;
+					if (key.IsInteger())
+						optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					else
+						optStr = GetUtf8CharsByRange(var.GetString(), GetIntegerPair(key));
 					if (!optStr)
 					{
 						Error("Unable to get string character via index");
@@ -9494,12 +9503,16 @@ namespace Jinx::Impl
 							return false;
 						}
 						Variant index = Pop();
-						if (!index.IsInteger())
+						if (!index.IsInteger() && !IsIntegerPair(index))
 						{
-							Error("String index must be an integer");
+							Error("String index must be an integer or integer pair");
 							return false;
 						}
-						auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						std::optional<String> s;
+						if (index.IsInteger())
+							s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						else
+							s = ReplaceUtf8CharsAtRange(var.GetString(), val.GetString(), GetIntegerPair(index));
 						if (!s)
 						{
 							Error("Unable to set string via index");
@@ -9553,12 +9566,16 @@ namespace Jinx::Impl
 						return false;
 					}
 					Variant index = Pop();
-					if (!index.IsInteger())
+					if (!index.IsInteger() && !IsIntegerPair(index))
 					{
-						Error("String index must be an integer");
+						Error("String index must be an integer or integer pair");
 						return false;
 					}
-					auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					std::optional<String> s;
+					if (index.IsInteger())
+						s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					else
+						s = ReplaceUtf8CharsAtRange(var.GetString(), val.GetString(), GetIntegerPair(index));
 					if (!s)
 					{
 						Error("Unable to set string via index");
@@ -9719,6 +9736,29 @@ namespace Jinx::Impl
 	inline bool Script::IsFinished() const
 	{
 		return m_finished || m_error;
+	}
+
+	bool Script::IsIntegerPair(const Variant & value) const
+	{
+		if (!value.IsCollection())
+			return false;
+		auto coll = value.GetCollection();
+		if (coll->size() != 2)
+			return false;
+		const auto & first = coll->begin()->first;
+		const auto & second = coll->rbegin()->first;
+		if (!first.IsInteger() || !second.IsInteger())
+			return false;
+		return true;
+	}
+
+	std::pair<int64_t, int64_t> Script::GetIntegerPair(const Variant & value) const
+	{
+		assert(IsIntegerPair(value));
+		auto coll = value.GetCollection();
+		const auto & first = coll->begin()->second;
+		const auto & second = coll->rbegin()->second;
+		return { first.GetInteger(), second.GetInteger() };
 	}
 
 	inline Variant Script::Pop()
@@ -10426,6 +10466,27 @@ namespace Jinx::Impl
 		return out;
 	}
 
+	inline std::optional<String> GetUtf8CharsByRange(const String & source, const std::pair<int64_t, int64_t> & range)
+	{
+		if (range.first > range.second)
+		{
+			LogWriteLine(LogLevel::Error, "First range index is greater than second");
+			return std::optional<String>();
+		}
+		const char * srcCurr = GetUtf8CstrByIndex(source, range.first);
+		const char * srcEnd = GetUtf8CstrByIndex(source, range.second);
+		if (srcCurr == nullptr || srcEnd == nullptr)
+			return std::optional<String>();
+		srcEnd += GetUtf8CharSize(srcEnd);
+		String out;
+		while (srcCurr < srcEnd)
+		{
+			out += *srcCurr;
+			++srcCurr;
+		}
+		return out;
+	}
+
 	inline std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index)
 	{
 		const char * destStart = dest.c_str();
@@ -10452,6 +10513,52 @@ namespace Jinx::Impl
 				}
 				size_t size = GetUtf8CharSize(destCurr);
 				destCurr += size;
+			}
+			else
+			{
+				out += *destCurr;
+				++destCurr;
+			}
+		}
+		return out;
+	}
+
+	inline std::optional<String> ReplaceUtf8CharsAtRange(const String & dest, const String & source, const std::pair<int64_t, int64_t> & range)
+	{
+		if (range.first > range.second)
+		{
+			LogWriteLine(LogLevel::Error, "First range index is greater than second");
+			return std::optional<String>();
+		}
+		const char * destStart = dest.c_str();
+		const char * destEnd = destStart + dest.size();
+		const char * targetStart = GetUtf8CstrByIndex(dest, range.first);
+		const char * targetEnd = GetUtf8CstrByIndex(dest, range.second);
+		if (targetStart == nullptr || targetEnd == nullptr)
+			return std::optional<String>();
+		String out;
+		const char * destCurr = destStart;
+		while (destCurr < destEnd)
+		{
+			if (destCurr == targetStart)
+			{
+				const char * srcCurr = source.c_str();
+				const char * srcEnd = srcCurr + source.size();
+				while (srcCurr < srcEnd)
+				{
+					size_t charCount = GetUtf8CharSize(srcCurr);
+					for (size_t i = 0; i < charCount; ++i)
+					{
+						out += *srcCurr;
+						++srcCurr;
+					}
+				}
+				size_t rangeCount = range.second - range.first + 1;
+				for (auto i = 0; i < rangeCount; ++i)
+				{
+					size_t size = GetUtf8CharSize(destCurr);
+					destCurr += size;
+				}
 			}
 			else
 			{

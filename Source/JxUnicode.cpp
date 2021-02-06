@@ -492,6 +492,27 @@ namespace Jinx::Impl
 		return out;
 	}
 
+	inline_t std::optional<String> GetUtf8CharsByRange(const String & source, const std::pair<int64_t, int64_t> & range)
+	{
+		if (range.first > range.second)
+		{
+			LogWriteLine(LogLevel::Error, "First range index is greater than second");
+			return std::optional<String>();
+		}
+		const char * srcCurr = GetUtf8CstrByIndex(source, range.first);
+		const char * srcEnd = GetUtf8CstrByIndex(source, range.second);
+		if (srcCurr == nullptr || srcEnd == nullptr)
+			return std::optional<String>();
+		srcEnd += GetUtf8CharSize(srcEnd);
+		String out;
+		while (srcCurr < srcEnd)
+		{
+			out += *srcCurr;
+			++srcCurr;
+		}
+		return out;
+	}
+
 	inline_t std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index)
 	{
 		const char * destStart = dest.c_str();
@@ -518,6 +539,52 @@ namespace Jinx::Impl
 				}
 				size_t size = GetUtf8CharSize(destCurr);
 				destCurr += size;
+			}
+			else
+			{
+				out += *destCurr;
+				++destCurr;
+			}
+		}
+		return out;
+	}
+
+	inline_t std::optional<String> ReplaceUtf8CharsAtRange(const String & dest, const String & source, const std::pair<int64_t, int64_t> & range)
+	{
+		if (range.first > range.second)
+		{
+			LogWriteLine(LogLevel::Error, "First range index is greater than second");
+			return std::optional<String>();
+		}
+		const char * destStart = dest.c_str();
+		const char * destEnd = destStart + dest.size();
+		const char * targetStart = GetUtf8CstrByIndex(dest, range.first);
+		const char * targetEnd = GetUtf8CstrByIndex(dest, range.second);
+		if (targetStart == nullptr || targetEnd == nullptr)
+			return std::optional<String>();
+		String out;
+		const char * destCurr = destStart;
+		while (destCurr < destEnd)
+		{
+			if (destCurr == targetStart)
+			{
+				const char * srcCurr = source.c_str();
+				const char * srcEnd = srcCurr + source.size();
+				while (srcCurr < srcEnd)
+				{
+					size_t charCount = GetUtf8CharSize(srcCurr);
+					for (size_t i = 0; i < charCount; ++i)
+					{
+						out += *srcCurr;
+						++srcCurr;
+					}
+				}
+				size_t rangeCount = range.second - range.first + 1;
+				for (auto i = 0; i < rangeCount; ++i)
+				{
+					size_t size = GetUtf8CharSize(destCurr);
+					destCurr += size;
+				}
 			}
 			else
 			{
