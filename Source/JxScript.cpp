@@ -1131,7 +1131,7 @@ namespace Jinx::Impl
 		return m_finished || m_error;
 	}
 
-	bool Script::IsIntegerPair(const Variant & value) const
+	inline_t bool Script::IsIntegerPair(const Variant & value) const
 	{
 		if (!value.IsCollection())
 			return false;
@@ -1145,7 +1145,7 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	std::pair<int64_t, int64_t> Script::GetIntegerPair(const Variant & value) const
+	inline_t std::pair<int64_t, int64_t> Script::GetIntegerPair(const Variant & value) const
 	{
 		assert(IsIntegerPair(value));
 		auto coll = value.GetCollection();
