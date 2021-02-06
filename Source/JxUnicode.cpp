@@ -580,7 +580,7 @@ namespace Jinx::Impl
 					}
 				}
 				size_t rangeCount = range.second - range.first + 1;
-				for (auto i = 0; i < rangeCount; ++i)
+				for (size_t i = 0; i < rangeCount; ++i)
 				{
 					size_t size = GetUtf8CharSize(destCurr);
 					destCurr += size;
