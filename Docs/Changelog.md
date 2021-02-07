@@ -1,13 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.3.2] - 2021-02-03
+## [1.3.2] - 2021-02-04
 
 - Various internal optimizations improves Jinx runtime performance by up to 25%
 - Updated Performance doc
-- Removed realloc memory callback since it is not used internally
-- Free memory callback now passes a size parameter
-- Fix small internal memory leak caused by local functions
+- Free and realloc memory callbacks now pass an additional size parameter
+- Fix small internal memory leaks
+- Fix multi-threaded safety issue
+- Improved fuzz tester
 
 ## [1.3.1] - 2021-01-20
 

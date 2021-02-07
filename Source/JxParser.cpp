@@ -1050,7 +1050,7 @@ namespace Jinx::Impl
 			val.SetBoolean(m_currentSymbol->boolVal);
 			break;
 		case SymbolType::StringValue:
-			val.SetString(String(m_currentSymbol->text));
+			val.SetString(m_currentSymbol->text);
 			break;
 		case SymbolType::Null:
 			break;

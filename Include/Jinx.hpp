@@ -128,6 +128,7 @@ namespace Jinx
 {
 	// Stand-alone global allocation functions
 	void * MemAllocate(size_t bytes);
+	void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes);
 	void MemFree(void * ptr, size_t bytes);
 
 	// Jinx allocator for use in STL containers
@@ -563,7 +564,6 @@ namespace Jinx
 			m_type(ValueType::Null)
 		{}
 		Variant(const Variant & copy);
-		Variant(Variant && other);
 		Variant(std::nullptr_t) : m_type(ValueType::Null) { SetNull(); }
 		Variant(bool value) : m_type(ValueType::Null) { SetBoolean(value); }
 		Variant(int32_t value) : m_type(ValueType::Null) { SetInteger(value); }
@@ -589,7 +589,6 @@ namespace Jinx
 
 		// Assignment operator overloads
 		Variant & operator= (const Variant & copy);
-		Variant & operator= (Variant && other);
 
 		// Increment operators
 		Variant & operator++();
@@ -681,7 +680,6 @@ namespace Jinx
 
 		void Copy(const Variant & copy);
 		void Destroy();
-		void Move(Variant && other);
 
 		ValueType m_type;
 		union
@@ -1067,13 +1065,16 @@ namespace Jinx
 
 
 	/// Prototype for global memory allocation function callback
-	using AllocFn = std::function<void *(size_t)>;
+	using AllocFn = std::function<void *(size_t bytes)>;
+
+	/// Prototype for global memory realloc function callback
+	using ReallocFn = std::function<void *(void *, size_t newBytes, size_t currBytes)>;
 
 	/// Prototype for global memory free function callback
-	using FreeFn = std::function<void(void *, size_t)>;
+	using FreeFn = std::function<void(void *, size_t bytes)>;
 
 	/// Prototype for global logging function callback
-	using LogFn = std::function<void(LogLevel level, const char *)>;
+	using LogFn = std::function<void(LogLevel level, const char * msg)>;
 
 
 	/// Initializes global Jinx parameters
@@ -1096,6 +1097,8 @@ namespace Jinx
 		bool enableDebugInfo = true;
 		/// Alloc memory function
 		AllocFn allocFn;
+		/// Realloc memory function
+		ReallocFn reallocFn;
 		/// Free memory function
 		FreeFn freeFn;
 		/// Maximum number of instructions per script per Execute() function
@@ -2765,12 +2768,11 @@ namespace Jinx::Impl
 
 	private:
 		StaticArena<RuntimeArenaSize> m_staticArena;
-		static const size_t NumMutexes = 8;
 		mutable std::mutex m_libraryMutex;
 		LibraryMap m_libraryMap{ m_staticArena };
-		mutable std::mutex m_functionMutex[NumMutexes];
+		mutable std::mutex m_functionMutex;
 		FunctionMap m_functionMap{ m_staticArena };
-		mutable std::mutex m_propertyMutex[NumMutexes];
+		mutable std::mutex m_propertyMutex;
 		PropertyMap m_propertyMap{ m_staticArena };
 		std::mutex m_perfMutex;
 		PerformanceStats m_perfStats;
@@ -2874,15 +2876,9 @@ namespace Jinx
 	{
 		if (size <= m_capacity)
 			return;
-		auto data = (uint8_t *)MemAllocate(size);
-		if (m_data)
-		{
-			memcpy(data, m_data, m_size);
-			MemFree(m_data, m_capacity);
-		}
+		m_data = static_cast<uint8_t *>(MemReallocate(m_data, size, m_capacity));
 		m_capacity = size;
-		m_data = data;
-}
+	}
 
 	inline void Buffer::Write(const void * data, size_t bytes)
 	{
@@ -5232,12 +5228,12 @@ namespace Jinx
 	namespace Impl
 	{
 		static inline AllocFn allocFn = [](size_t size) { return malloc(size); };
+		static inline ReallocFn reallocFn = [] (void * p, size_t s, size_t) { return realloc(p, s); };
 		static inline FreeFn freeFn = [](void * p, size_t) { return free(p); };
 
 		static inline std::atomic_uint64_t allocationCount = 0;
 		static inline std::atomic_uint64_t freeCount = 0;
 		static inline std::atomic_uint64_t allocatedMemory = 0;
-
 	} 
 
 	inline void * MemAllocate(size_t bytes)
@@ -5245,6 +5241,25 @@ namespace Jinx
 		Impl::allocationCount++;
 		Impl::allocatedMemory += bytes;
 		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
+	}
+
+	inline void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
+	{
+		// With a size of zero, this acts like free()
+		if (newBytes == 0)
+		{
+			MemFree(ptr, currBytes);
+			return nullptr;
+		}
+
+		// If we have currently allocated memory, we track this as a free() as well as an alloc()
+		if (ptr)
+			Impl::freeCount++;
+
+		// Normal realloc behaviorwith preserved data
+		Impl::allocationCount++;
+		Impl::allocatedMemory += (newBytes - currBytes);
+		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
 	}
 
 	inline void MemFree(void * ptr, size_t bytes)
@@ -5259,11 +5274,12 @@ namespace Jinx
 
 	inline void InitializeMemory(const GlobalParams & params)
 	{
-		if (params.allocFn || params.freeFn)
+		if (params.allocFn || params.reallocFn || params.freeFn)
 		{
 			// If you're using one custom memory function, you must use them ALL
-			assert(params.allocFn && params.freeFn);
+			assert(params.allocFn && params.reallocFn && params.freeFn);
 			Impl::allocFn = params.allocFn;
+			Impl::reallocFn = params.reallocFn;
 			Impl::freeFn = params.freeFn;
 		}
 	}
@@ -6337,7 +6353,7 @@ namespace Jinx::Impl
 			val.SetBoolean(m_currentSymbol->boolVal);
 			break;
 		case SymbolType::StringValue:
-			val.SetString(String(m_currentSymbol->text));
+			val.SetString(m_currentSymbol->text);
 			break;
 		case SymbolType::Null:
 			break;
@@ -8239,7 +8255,7 @@ namespace Jinx::Impl
 
 	inline FunctionDefinitionPtr Runtime::FindFunction(RuntimeID id) const
 	{
-		std::lock_guard<std::mutex> lock(m_functionMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto itr = m_functionMap.find(id);
 		if (itr == m_functionMap.end())
 			return nullptr;
@@ -8262,7 +8278,7 @@ namespace Jinx::Impl
 
 	inline Variant Runtime::GetProperty(RuntimeID id) const
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		auto itr = m_propertyMap.find(id);
 		if (itr == m_propertyMap.end())
 			return Variant();
@@ -8491,42 +8507,40 @@ namespace Jinx::Impl
 
 	inline bool Runtime::PropertyExists(RuntimeID id) const
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		return m_propertyMap.find(id) != m_propertyMap.end();
 	}
 
 	inline void Runtime::RegisterFunction(const FunctionSignature & signature, const BufferPtr & bytecode, size_t offset)
 	{
-		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, bytecode, offset);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
 	inline void Runtime::RegisterFunction(const FunctionSignature & signature, FunctionCallback function)
 	{
-		std::mutex & mutex = m_functionMutex[signature.GetId() % NumMutexes];
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		auto functionDefPtr = std::allocate_shared<FunctionDefinition>(Allocator<FunctionDefinition>(), signature, function);
 		m_functionMap.insert(std::make_pair(signature.GetId(), functionDefPtr));
 	}
 
 	inline bool Runtime::SetProperty(RuntimeID id, std::function<bool(Variant &)> fn)
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		auto& prop = m_propertyMap[id];
 		return fn(prop);
 	}
 
 	inline void Runtime::SetProperty(RuntimeID id, const Variant & value)
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		m_propertyMap[id] = value;
 	}
 
 	inline void Runtime::SetProperty(RuntimeID id, Variant && value)
 	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex[id % NumMutexes]);
+		std::lock_guard<std::mutex> lock(m_propertyMutex);
 		m_propertyMap[id] = value;
 	}
 
@@ -8562,8 +8576,7 @@ namespace Jinx::Impl
 
 	inline void Runtime::UnregisterFunction(RuntimeID id)
 	{
-		std::mutex & mutex = m_functionMutex[id % NumMutexes];
-		std::lock_guard<std::mutex> lock(mutex);
+		std::lock_guard<std::mutex> lock(m_functionMutex);
 		m_functionMap.erase(id);
 	}
 
@@ -12156,11 +12169,6 @@ namespace Jinx
 		Copy(copy);
 	}
 
-	inline Variant::Variant(Variant && other)
-	{
-		Move(std::move(other));
-	}
-
 	inline Variant::~Variant()
 	{
 		Destroy();
@@ -12172,16 +12180,6 @@ namespace Jinx
 		{
 			Destroy();
 			Copy(copy);
-		}
-		return *this;
-	}
-
-	inline Variant & Variant::operator= (Variant && other)
-	{
-		if (this != &other)
-		{
-			Destroy();
-			Move(std::move(other));
 		}
 		return *this;
 	}
@@ -12719,62 +12717,6 @@ namespace Jinx
 		if (m_type == ValueType::Integer || m_type == ValueType::Number)
 			return true;
 		return false;
-	}
-
-	inline void Variant::Move(Variant && other)
-	{
-		m_type = other.m_type;
-		switch (m_type)
-		{
-			case ValueType::Null:
-				break;
-			case ValueType::Number:
-				m_number = other.m_number;
-				break;
-			case ValueType::Integer:
-				m_integer = other.m_integer;
-				break;
-			case ValueType::Boolean:
-				m_boolean = other.m_boolean;
-				break;
-			case ValueType::String:
-				new(&m_string) String();
-				std::swap(m_string, other.m_string);
-				break;
-			case ValueType::Collection:
-				new(&m_collection) CollectionPtr();
-				std::swap(m_collection, other.m_collection);
-				break;
-			case ValueType::CollectionItr:
-				new(&m_collectionItrPair) CollectionItrPair();
-				std::swap(m_collectionItrPair, other.m_collectionItrPair);
-				break;
-			case ValueType::Function:
-				m_function = other.m_function;
-				break;
-			case ValueType::Coroutine:
-				new(&m_coroutine) CoroutinePtr();
-				std::swap(m_coroutine, other.m_coroutine);
-				break;
-			case ValueType::UserObject:
-				new(&m_userObject) UserObjectPtr();
-				std::swap(m_userObject, other.m_userObject);
-				break;
-			case ValueType::Buffer:
-				new(&m_buffer) BufferPtr();
-				std::swap(m_buffer, other.m_buffer);
-				break;
-			case ValueType::Guid:
-				m_guid = other.m_guid;
-				break;
-			case ValueType::ValType:
-				m_valType = other.m_valType;
-				break;
-			default:
-				assert(!"Unknown variant type!");
-		};
-		other.m_type = ValueType::Null;
-
 	}
 
 	inline void Variant::SetBuffer(const BufferPtr & value)

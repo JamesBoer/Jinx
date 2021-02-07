@@ -13,6 +13,7 @@ namespace Jinx
 {
 	// Stand-alone global allocation functions
 	void * MemAllocate(size_t bytes);
+	void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes);
 	void MemFree(void * ptr, size_t bytes);
 
 	// Jinx allocator for use in STL containers
