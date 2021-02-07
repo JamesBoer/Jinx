@@ -393,6 +393,13 @@ namespace Jinx
 		~Buffer();
 		size_t Capacity() const;
 		void Clear();
+		template <typename T>
+		void Read(size_t * pos, T data)
+		{
+			assert(sizeof(*data) <= (m_size - *pos));
+			*data = *reinterpret_cast<T>(m_data + *pos);
+			*pos += sizeof(*data);
+		}
 		void Read(size_t * pos, void * data, size_t bytes);
 		void Read(size_t * pos, BufferPtr & buffer, size_t bytes);
 		void Reserve(size_t size);
@@ -745,7 +752,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 2;
+	const uint32_t PatchNumber = 3;
 
 	// Forward declaration
 	class IScript;
@@ -1667,18 +1674,18 @@ namespace Jinx::Impl
 			m_pos(other.m_pos)
 		{}
 
-		inline void Read(bool * val) { uint8_t b = false; m_buffer->Read(&m_pos, &b, sizeof(uint8_t)); *val = b ? true : false; }
-		inline void Read(char * val) { m_buffer->Read(&m_pos, val, sizeof(char)); }
-		inline void Read(int8_t * val) { m_buffer->Read(&m_pos, val, sizeof(int8_t)); }
-		inline void Read(int16_t * val) { m_buffer->Read(&m_pos, val, sizeof(int16_t)); }
-		inline void Read(int32_t * val) { m_buffer->Read(&m_pos, val, sizeof(int32_t)); }
-		inline void Read(int64_t * val) { m_buffer->Read(&m_pos, val, sizeof(int64_t)); }
-		inline void Read(uint8_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint8_t)); }
-		inline void Read(uint16_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint16_t)); }
-		inline void Read(uint32_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint32_t)); }
-		inline void Read(uint64_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint64_t)); }
-		inline void Read(float * val) { m_buffer->Read(&m_pos, val, sizeof(float)); }
-		inline void Read(double * val) { m_buffer->Read(&m_pos, val, sizeof(double)); }
+		inline void Read(bool * val) { uint8_t b = false; m_buffer->Read(&m_pos, &b); *val = b ? true : false; }
+		inline void Read(char * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int8_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int16_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int32_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int64_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint8_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint16_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint32_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint64_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(float * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(double * val) { m_buffer->Read(&m_pos, val); }
 
 		void Read(String * val);
 		void Read(BufferPtr & val);
@@ -2855,7 +2862,6 @@ namespace Jinx
 
 	inline void Buffer::Read(size_t * pos, void * data, size_t bytes)
 	{
-		assert(*pos < m_size);
 		assert(bytes <= (m_size - *pos));
 		size_t bytesToCopy = std::min(bytes, m_size - *pos);
 		assert(bytesToCopy);
@@ -2866,7 +2872,6 @@ namespace Jinx
 
 	inline void Buffer::Read(size_t * pos, BufferPtr & buffer, size_t bytes)
 	{
-		assert(*pos < m_size);
 		assert(bytes <= (m_size - *pos));
 		size_t bytesToCopy = std::min(bytes, m_size - *pos);
 		assert(bytesToCopy);
@@ -10479,6 +10484,7 @@ namespace Jinx::Impl
 			return std::optional<String>();
 		srcEnd += GetUtf8CharSize(srcEnd);
 		String out;
+		out.reserve(range.second - range.first + 1);
 		while (srcCurr < srcEnd)
 		{
 			out += *srcCurr;
@@ -10537,6 +10543,7 @@ namespace Jinx::Impl
 		if (targetStart == nullptr || targetEnd == nullptr)
 			return std::optional<String>();
 		String out;
+		out.reserve(dest.size());
 		const char * destCurr = destStart;
 		while (destCurr < destEnd)
 		{
@@ -10554,7 +10561,7 @@ namespace Jinx::Impl
 					}
 				}
 				size_t rangeCount = range.second - range.first + 1;
-				for (auto i = 0; i < rangeCount; ++i)
+				for (size_t i = 0; i < rangeCount; ++i)
 				{
 					size_t size = GetUtf8CharSize(destCurr);
 					destCurr += size;
