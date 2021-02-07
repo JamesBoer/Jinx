@@ -24,6 +24,13 @@ namespace Jinx
 		~Buffer();
 		size_t Capacity() const;
 		void Clear();
+		template <typename T>
+		void Read(size_t * pos, T data)
+		{
+			assert(sizeof(*data) <= (m_size - *pos));
+			*data = *reinterpret_cast<T>(m_data + *pos);
+			*pos += sizeof(*data);
+		}
 		void Read(size_t * pos, void * data, size_t bytes);
 		void Read(size_t * pos, BufferPtr & buffer, size_t bytes);
 		void Reserve(size_t size);
