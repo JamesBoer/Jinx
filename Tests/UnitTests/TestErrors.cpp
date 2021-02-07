@@ -1278,6 +1278,66 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script->Execute());
 	}
 
+	SECTION("Test out of bounds string index var set low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "Hello world!"
+			set b to a[0]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index range var set low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "Hello world!"
+			set b to a[0, 5]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index var set high")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "Hello world!"
+			set b to a[7, 14]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test reversed range indeces var")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "Hello world!"
+			set b to a[5, 3]
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
 	SECTION("Test out of bounds string index prop set low")
 	{
 		const char * scriptText =
@@ -1330,6 +1390,51 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 			
 			set a to "hello world!"
 			set a[13] to "!"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index pair var get low")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "hello world!"
+			set a[0, 5] to "Howdy"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index pair var get high")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "hello world!"
+			set a[7, 13] to "globe"
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test out of bounds string index pair var reversed")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			set a to "hello world!"
+			set a[6, 3] to "!"
 			
 			)";
 

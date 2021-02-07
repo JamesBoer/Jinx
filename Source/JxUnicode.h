@@ -28,7 +28,9 @@ namespace Jinx::Impl
 
 	size_t GetStringCount(const String & source);
 	std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index);
+	std::optional<String> GetUtf8CharsByRange(const String & source, const std::pair<int64_t, int64_t> & range);
 	std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index);
+	std::optional<String> ReplaceUtf8CharsAtRange(const String & dest, const String & source, const std::pair<int64_t, int64_t> & range);
 
 } // namespace Jinx::Impl
 
