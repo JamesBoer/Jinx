@@ -25,18 +25,18 @@ namespace Jinx::Impl
 			m_pos(other.m_pos)
 		{}
 
-		inline void Read(bool * val) { uint8_t b = false; m_buffer->Read(&m_pos, &b, sizeof(uint8_t)); *val = b ? true : false; }
-		inline void Read(char * val) { m_buffer->Read(&m_pos, val, sizeof(char)); }
-		inline void Read(int8_t * val) { m_buffer->Read(&m_pos, val, sizeof(int8_t)); }
-		inline void Read(int16_t * val) { m_buffer->Read(&m_pos, val, sizeof(int16_t)); }
-		inline void Read(int32_t * val) { m_buffer->Read(&m_pos, val, sizeof(int32_t)); }
-		inline void Read(int64_t * val) { m_buffer->Read(&m_pos, val, sizeof(int64_t)); }
-		inline void Read(uint8_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint8_t)); }
-		inline void Read(uint16_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint16_t)); }
-		inline void Read(uint32_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint32_t)); }
-		inline void Read(uint64_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint64_t)); }
-		inline void Read(float * val) { m_buffer->Read(&m_pos, val, sizeof(float)); }
-		inline void Read(double * val) { m_buffer->Read(&m_pos, val, sizeof(double)); }
+		inline void Read(bool * val) { uint8_t b = false; m_buffer->Read(&m_pos, &b); *val = b ? true : false; }
+		inline void Read(char * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int8_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int16_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int32_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int64_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint8_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint16_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint32_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint64_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(float * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(double * val) { m_buffer->Read(&m_pos, val); }
 
 		void Read(String * val);
 		void Read(BufferPtr & val);
