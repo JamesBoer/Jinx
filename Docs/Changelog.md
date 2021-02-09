@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 
 - Added support for string index pair operator for extraction and insertion of text
 - Additional performance optimizations
+- Improve test coverage
+- Remove unused code
 
 ## [1.3.2] - 2021-02-04
 

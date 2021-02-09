@@ -181,6 +181,7 @@ multiline comment
 			set b to .11111
 			set c to -999
 			set d to 00001
+			set e to +123
 
 			)";
 
@@ -190,6 +191,7 @@ multiline comment
 		REQUIRE(script->GetVariable("b").GetNumber() == Approx(.11111));
 		REQUIRE(script->GetVariable("c") == -999);
 		REQUIRE(script->GetVariable("d") == 1);
+		REQUIRE(script->GetVariable("e") == 123);
 	}
 
 	SECTION("Test variable scope")

@@ -23,6 +23,7 @@ TEST_CASE("Test Casts", "[Casts]")
 			set d to "456" as integer
 			set e to "-123.456" as number
 			set f to (4 + 5 + 6) as string
+			set g to 0 as null
 			)";
 
 		auto script = TestExecuteScript(scriptText);
@@ -39,6 +40,8 @@ TEST_CASE("Test Casts", "[Casts]")
 		REQUIRE(script->GetVariable("e").GetNumber() == Approx(-123.456));
 		REQUIRE(script->GetVariable("f").IsString());
 		REQUIRE(script->GetVariable("f") == "15");
+		REQUIRE(script->GetVariable("g").IsNull());
+		REQUIRE(script->GetVariable("g") == nullptr);
 	}
 	
 	SECTION("Test additional casts")
@@ -69,6 +72,22 @@ TEST_CASE("Test Casts", "[Casts]")
 		REQUIRE(script->GetVariable("f") == true);
 		REQUIRE(script->GetVariable("g") == true);
 		REQUIRE(script->GetVariable("h") == 1);
+	}
+
+	SECTION("Test guid cast")
+	{
+		const char * scriptText =
+			u8R"(
+		
+			set a to "06DF8818-07DB-4AAB-9BF6-3365D0F2D4C9" as guid
+
+			)";
+
+		Guid guid = { 0x06DF8818, 0x07DB, 0x4AAB, {0x9B, 0xF6, 0x33, 0x65, 0xD0, 0xF2, 0xD4, 0xC9} };
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a").IsGuid());
+		REQUIRE(script->GetVariable("a").GetGuid() == guid);
 	}
 
 }

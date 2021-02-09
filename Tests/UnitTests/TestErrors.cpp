@@ -78,6 +78,65 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test invalid ! symbol")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			!
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid name start")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set ' to 1
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid name")
+	{
+		static const char * scriptText =
+			u8"set x\b to 1";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid numeric parse end of line")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			.
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid numeric parse end of file")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			.)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test unassigned variable error")
 	{
 		static const char * scriptText =
@@ -841,6 +900,19 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
+	SECTION("Test unassigned readonly property")
+	{
+		static const char * scriptText =
+			u8R"(
+	
+			set public readonly x
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
 	SECTION("Test property name collision with function parameter name")
 	{
 		static const char * scriptText =
@@ -1199,6 +1271,119 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(!script->Execute());
+	}
+
+	SECTION("Test missing function name")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function consecutive params")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function test {x} {y}
+				return x + y
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test function missing param name")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function test {}
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid function name")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function "test" {x}
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test invalid function name in alternative")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function test {x} alternative/"alternatives"
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test duplicate alternative function name part")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function test {x} alternative/alternative
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test missing ending param for optional function name part")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function test {x} (optional
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
+	}
+
+	SECTION("Test required minimum one non-optional name part")
+	{
+		const char * scriptText =
+			u8R"(
+			
+			function (test) (optional)
+			end
+			
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(!script);
 	}
 
 	SECTION("Test name collision in counting loop variable")
