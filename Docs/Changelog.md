@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.3.3] - 2021-02-10
+
+- Added support for string index pair operator for extraction and insertion of text
+- Additional performance optimizations
+- Improve test coverage
+- Remove unused code
+
 ## [1.3.2] - 2021-02-04
 
 - Various internal optimizations improves Jinx runtime performance by up to 25%

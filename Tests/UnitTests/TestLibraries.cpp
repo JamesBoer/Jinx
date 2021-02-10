@@ -259,4 +259,22 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 		REQUIRE(script->GetVariable("x") == "test val");
 	}
 
+	SECTION("Test function call with explicit library name")
+	{
+		const char * scriptText =
+			u8R"(
+			library test
+
+			private function something
+				return 234
+			end
+
+			set x to test something
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("x") == 234);
+	}
+
 }

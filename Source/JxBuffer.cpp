@@ -31,7 +31,6 @@ namespace Jinx
 
 	inline_t void Buffer::Read(size_t * pos, void * data, size_t bytes)
 	{
-		assert(*pos < m_size);
 		assert(bytes <= (m_size - *pos));
 		size_t bytesToCopy = std::min(bytes, m_size - *pos);
 		assert(bytesToCopy);
@@ -42,7 +41,6 @@ namespace Jinx
 
 	inline_t void Buffer::Read(size_t * pos, BufferPtr & buffer, size_t bytes)
 	{
-		assert(*pos < m_size);
 		assert(bytes <= (m_size - *pos));
 		size_t bytesToCopy = std::min(bytes, m_size - *pos);
 		assert(bytesToCopy);

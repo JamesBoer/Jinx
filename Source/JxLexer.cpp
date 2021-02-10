@@ -166,6 +166,7 @@ namespace Jinx::Impl
 			case '+':
 				if (IsNextDigit())
 				{
+					AdvanceCurrent();
 					ParseNumber();
 					continue;
 				}
@@ -303,11 +304,6 @@ namespace Jinx::Impl
 			{
 				if (*m_current != '-')
 					break;
-				else if (IsNewline(*m_current))
-				{
-					ParseEndOfLine();
-					break;
-				}
 				AdvanceCurrent();
 			}
 
@@ -461,15 +457,30 @@ namespace Jinx::Impl
 			AdvanceCurrent();
 		}
 		if (points > 1)
-			Error("Invalid number format");
+			Error("Invalid number format: too many decimal places");
 		else if (points == 0)
 		{
-			int64_t integer = atol(reinterpret_cast<const char *>(startNum));
+			int64_t integer = 0;
+			if (!StringToInteger(String(startNum, m_current - startNum), &integer))
+			{
+				Error("Invalid integer format: unable to convert string to integer");
+				return;
+			}
 			CreateSymbol(integer);
 		}
 		else
 		{
-			double number = atof(reinterpret_cast<const char *>(startNum));
+			if (m_current - startNum <= 1)
+			{
+				Error("Invalid number format: no digits after decimal place");
+				return;
+			}
+			double number = 0.0f;
+			if (!StringToNumber(String(startNum, m_current - startNum), &number))
+			{
+				Error("Invalid number format: unable to convert string to double");
+				return;
+			}
 			CreateSymbol(number);
 		}
 	}
@@ -516,7 +527,6 @@ namespace Jinx::Impl
 		}
 		m_columnMarker = m_columnNumber;
 	}
-
 
 	inline_t void Lexer::ParseWhitespaceAndNewlines()
 	{

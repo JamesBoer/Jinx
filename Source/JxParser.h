@@ -91,12 +91,6 @@ namespace Jinx::Impl
 		// Check to see if the symbol is a newline or at the end of the list
 		bool IsSymbolValid(SymbolListCItr symbol) const;
 
-		// Check a string to see if it's a library name
-		bool IsLibraryName(const String & name) const;
-
-		// Check to see if this is a property name
-		bool IsPropertyName(const String & libraryName, const String & propertyName) const;
-
 		// Emit functions write to internal bytecode buffer
 		void EmitAddress(size_t address);
 		size_t EmitAddressPlaceholder();

@@ -715,12 +715,16 @@ namespace Jinx::Impl
 				}
 				else if (var.IsString())
 				{
-					if (!key.IsInteger())
+					if (!key.IsInteger() && !IsIntegerPair(key))
 					{
 						Error("Invalid index type for string");
 						return false;
 					}
-					auto optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					std::optional<String> optStr;
+					if (key.IsInteger())
+						optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					else
+						optStr = GetUtf8CharsByRange(var.GetString(), GetIntegerPair(key));
 					if (!optStr)
 					{
 						Error("Unable to get string character via index");
@@ -892,12 +896,16 @@ namespace Jinx::Impl
 							return false;
 						}
 						Variant index = Pop();
-						if (!index.IsInteger())
+						if (!index.IsInteger() && !IsIntegerPair(index))
 						{
-							Error("String index must be an integer");
+							Error("String index must be an integer or integer pair");
 							return false;
 						}
-						auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						std::optional<String> s;
+						if (index.IsInteger())
+							s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						else
+							s = ReplaceUtf8CharsAtRange(var.GetString(), val.GetString(), GetIntegerPair(index));
 						if (!s)
 						{
 							Error("Unable to set string via index");
@@ -951,12 +959,16 @@ namespace Jinx::Impl
 						return false;
 					}
 					Variant index = Pop();
-					if (!index.IsInteger())
+					if (!index.IsInteger() && !IsIntegerPair(index))
 					{
-						Error("String index must be an integer");
+						Error("String index must be an integer or integer pair");
 						return false;
 					}
-					auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					std::optional<String> s;
+					if (index.IsInteger())
+						s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					else
+						s = ReplaceUtf8CharsAtRange(var.GetString(), val.GetString(), GetIntegerPair(index));
 					if (!s)
 					{
 						Error("Unable to set string via index");
@@ -1117,6 +1129,29 @@ namespace Jinx::Impl
 	inline_t bool Script::IsFinished() const
 	{
 		return m_finished || m_error;
+	}
+
+	inline_t bool Script::IsIntegerPair(const Variant & value) const
+	{
+		if (!value.IsCollection())
+			return false;
+		auto coll = value.GetCollection();
+		if (coll->size() != 2)
+			return false;
+		const auto & first = coll->begin()->first;
+		const auto & second = coll->rbegin()->first;
+		if (!first.IsInteger() || !second.IsInteger())
+			return false;
+		return true;
+	}
+
+	inline_t std::pair<int64_t, int64_t> Script::GetIntegerPair(const Variant & value) const
+	{
+		assert(IsIntegerPair(value));
+		auto coll = value.GetCollection();
+		const auto & first = coll->begin()->second;
+		const auto & second = coll->rbegin()->second;
+		return { first.GetInteger(), second.GetInteger() };
 	}
 
 	inline_t Variant Script::Pop()

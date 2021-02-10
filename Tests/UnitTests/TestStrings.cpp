@@ -31,6 +31,24 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script->GetVariable("c") == "!");
 	}
 
+	SECTION("Test string index pair operator var get")
+	{
+		const char * scriptText =
+			R"(
+
+			set a to "Hello world!"
+			set b to a[1, 5]
+			set c to a[7, 11]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == "Hello world!");
+		REQUIRE(script->GetVariable("b") == "Hello");
+		REQUIRE(script->GetVariable("c") == "world");
+	}
+
 	SECTION("Test UTF-8 string index operator var get")
 	{
 		const char * scriptText =
@@ -51,6 +69,24 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script->GetVariable("d") == u8"は");
 	}
 
+	SECTION("Test UTF-8 string index pair operator var get")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set a to "いろは"
+			set b to a[1, 2]
+			set c to a[2, 3]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == u8"いろは");
+		REQUIRE(script->GetVariable("b") == u8"いろ");
+		REQUIRE(script->GetVariable("c") == u8"ろは");
+	}
+
 	SECTION("Test string index operator var set")
 	{
 		const char * scriptText =
@@ -66,6 +102,21 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script->GetVariable("a") == "Hello world!");
 	}
 
+	SECTION("Test string index pair operator var set")
+	{
+		const char * scriptText =
+			R"(
+
+			set a to "hello world!"
+			set a[1, 5] to "HELLO"
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == "HELLO world!");
+	}
+
 	SECTION("Test UTF-8 string index operator var set")
 	{
 		const char * scriptText =
@@ -74,6 +125,22 @@ TEST_CASE("Test Strings", "[Strings]")
 			set a to "いろは"
 			set a[1] to "は"
 			set a[3] to "い"
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == u8"はろい");
+	}
+
+	SECTION("Test UTF-8 string index pair operator var set")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set a to "いろは"
+			set a[1, 2] to "はろ"
+			set a[2, 3] to "ろい"
 
 			)";
 
@@ -127,7 +194,7 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script->GetVariable("a") == u8"い---は");
 	}
 
-	SECTION("Test UTF-8 string index operator var set mixed #3")
+	SECTION("Test UTF-8 string index operator var set mixed #4")
 	{
 		const char * scriptText =
 			u8R"(
@@ -140,6 +207,37 @@ TEST_CASE("Test Strings", "[Strings]")
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == u8"Hはははllo");
+	}
+
+	SECTION("Test UTF-8 string index pair operator var set mixed #1")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set a to "Hello"
+			set a[2, 4] to "は"
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == u8"Hはo");
+	}
+
+
+	SECTION("Test UTF-8 string index pair operator var set mixed #2")
+	{
+		const char * scriptText =
+			u8R"(
+
+			set a to "Hello"
+			set a[2, 4] to "いろは"
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->GetVariable("a") == u8"Hいろはo");
 	}
 
 	SECTION("Test string index operator prop get")
@@ -161,6 +259,25 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script->GetVariable("c") == "!");
 	}
 
+	SECTION("Test string index pair operator prop get")
+	{
+		const char * scriptText =
+			R"(
+
+			set public a to "Hello world!"
+			set b to a[1, 5]
+			set c to a[7, 11]
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a") == "Hello world!");
+		REQUIRE(script->GetVariable("b") == "Hello");
+		REQUIRE(script->GetVariable("c") == "world");
+	}
+
 	SECTION("Test string index operator prop set")
 	{
 		const char * scriptText =
@@ -175,6 +292,22 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script);
 		auto library = script->GetLibrary();
 		REQUIRE(library->GetProperty("a") == "Hello world!");
+	}
+
+	SECTION("Test string index pair operator prop set")
+	{
+		const char * scriptText =
+			R"(
+
+			set public a to "hello world!"
+			set a[1, 5] to "HELLO"
+
+			)";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		auto library = script->GetLibrary();
+		REQUIRE(library->GetProperty("a") == "HELLO world!");
 	}
 
 	SECTION("Test string index operator var get from collection")
@@ -209,6 +342,27 @@ TEST_CASE("Test Strings", "[Strings]")
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("b") == "H");
 		REQUIRE(script->GetVariable("c") == "!");
+	}
+
+	SECTION("Test long strings")
+	{
+		const char * scriptText =
+			"set a to "
+			"\""
+			"abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890"
+			"abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890"
+			"abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890"
+			"abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890"
+			"abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890"
+			"abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890"
+			"\"";
+
+		auto script = TestExecuteScript(scriptText);
+		REQUIRE(script);
+		String s = "";
+		for (int i = 0; i < 30; ++i)
+			s += "abcdefghijklmnopqrstuvwxyz1234567890";
+		REQUIRE(script->GetVariable("a") == s);
 	}
 
 }

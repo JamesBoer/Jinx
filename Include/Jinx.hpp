@@ -393,6 +393,13 @@ namespace Jinx
 		~Buffer();
 		size_t Capacity() const;
 		void Clear();
+		template <typename T>
+		void Read(size_t * pos, T data)
+		{
+			assert(sizeof(*data) <= (m_size - *pos));
+			*data = *reinterpret_cast<T>(m_data + *pos);
+			*pos += sizeof(*data);
+		}
 		void Read(size_t * pos, void * data, size_t bytes);
 		void Read(size_t * pos, BufferPtr & buffer, size_t bytes);
 		void Reserve(size_t size);
@@ -745,7 +752,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 2;
+	const uint32_t PatchNumber = 3;
 
 	// Forward declaration
 	class IScript;
@@ -1503,7 +1510,9 @@ namespace Jinx::Impl
 
 	size_t GetStringCount(const String & source);
 	std::optional<String> GetUtf8CharByIndex(const String & source, int64_t index);
+	std::optional<String> GetUtf8CharsByRange(const String & source, const std::pair<int64_t, int64_t> & range);
 	std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index);
+	std::optional<String> ReplaceUtf8CharsAtRange(const String & dest, const String & source, const std::pair<int64_t, int64_t> & range);
 
 } // namespace Jinx::Impl
 
@@ -1665,18 +1674,18 @@ namespace Jinx::Impl
 			m_pos(other.m_pos)
 		{}
 
-		inline void Read(bool * val) { uint8_t b = false; m_buffer->Read(&m_pos, &b, sizeof(uint8_t)); *val = b ? true : false; }
-		inline void Read(char * val) { m_buffer->Read(&m_pos, val, sizeof(char)); }
-		inline void Read(int8_t * val) { m_buffer->Read(&m_pos, val, sizeof(int8_t)); }
-		inline void Read(int16_t * val) { m_buffer->Read(&m_pos, val, sizeof(int16_t)); }
-		inline void Read(int32_t * val) { m_buffer->Read(&m_pos, val, sizeof(int32_t)); }
-		inline void Read(int64_t * val) { m_buffer->Read(&m_pos, val, sizeof(int64_t)); }
-		inline void Read(uint8_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint8_t)); }
-		inline void Read(uint16_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint16_t)); }
-		inline void Read(uint32_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint32_t)); }
-		inline void Read(uint64_t * val) { m_buffer->Read(&m_pos, val, sizeof(uint64_t)); }
-		inline void Read(float * val) { m_buffer->Read(&m_pos, val, sizeof(float)); }
-		inline void Read(double * val) { m_buffer->Read(&m_pos, val, sizeof(double)); }
+		inline void Read(bool * val) { uint8_t b = false; m_buffer->Read(&m_pos, &b); *val = b ? true : false; }
+		inline void Read(char * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int8_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int16_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int32_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(int64_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint8_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint16_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint32_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(uint64_t * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(float * val) { m_buffer->Read(&m_pos, val); }
+		inline void Read(double * val) { m_buffer->Read(&m_pos, val); }
 
 		void Read(String * val);
 		void Read(BufferPtr & val);
@@ -2399,12 +2408,6 @@ namespace Jinx::Impl
 		// Check to see if the symbol is a newline or at the end of the list
 		bool IsSymbolValid(SymbolListCItr symbol) const;
 
-		// Check a string to see if it's a library name
-		bool IsLibraryName(const String & name) const;
-
-		// Check to see if this is a property name
-		bool IsPropertyName(const String & libraryName, const String & propertyName) const;
-
 		// Emit functions write to internal bytecode buffer
 		void EmitAddress(size_t address);
 		size_t EmitAddressPlaceholder();
@@ -2623,6 +2626,9 @@ namespace Jinx::Impl
 
 		Variant CallFunction(RuntimeID id);
 		Variant CallNativeFunction(const FunctionDefinitionPtr & fnDef);
+
+		bool IsIntegerPair(const Variant & value) const;
+		std::pair<int64_t, int64_t> GetIntegerPair(const Variant & value) const;
 
 	private:
 
@@ -2850,7 +2856,6 @@ namespace Jinx
 
 	inline void Buffer::Read(size_t * pos, void * data, size_t bytes)
 	{
-		assert(*pos < m_size);
 		assert(bytes <= (m_size - *pos));
 		size_t bytesToCopy = std::min(bytes, m_size - *pos);
 		assert(bytesToCopy);
@@ -2861,7 +2866,6 @@ namespace Jinx
 
 	inline void Buffer::Read(size_t * pos, BufferPtr & buffer, size_t bytes)
 	{
-		assert(*pos < m_size);
 		assert(bytes <= (m_size - *pos));
 		size_t bytesToCopy = std::min(bytes, m_size - *pos);
 		assert(bytesToCopy);
@@ -4276,6 +4280,7 @@ namespace Jinx::Impl
 			case '+':
 				if (IsNextDigit())
 				{
+					AdvanceCurrent();
 					ParseNumber();
 					continue;
 				}
@@ -4413,11 +4418,6 @@ namespace Jinx::Impl
 			{
 				if (*m_current != '-')
 					break;
-				else if (IsNewline(*m_current))
-				{
-					ParseEndOfLine();
-					break;
-				}
 				AdvanceCurrent();
 			}
 
@@ -4571,15 +4571,30 @@ namespace Jinx::Impl
 			AdvanceCurrent();
 		}
 		if (points > 1)
-			Error("Invalid number format");
+			Error("Invalid number format: too many decimal places");
 		else if (points == 0)
 		{
-			int64_t integer = atol(reinterpret_cast<const char *>(startNum));
+			int64_t integer = 0;
+			if (!StringToInteger(String(startNum, m_current - startNum), &integer))
+			{
+				Error("Invalid integer format: unable to convert string to integer");
+				return;
+			}
 			CreateSymbol(integer);
 		}
 		else
 		{
-			double number = atof(reinterpret_cast<const char *>(startNum));
+			if (m_current - startNum <= 1)
+			{
+				Error("Invalid number format: no digits after decimal place");
+				return;
+			}
+			double number = 0.0f;
+			if (!StringToNumber(String(startNum, m_current - startNum), &number))
+			{
+				Error("Invalid number format: unable to convert string to double");
+				return;
+			}
 			CreateSymbol(number);
 		}
 	}
@@ -4626,7 +4641,6 @@ namespace Jinx::Impl
 		}
 		m_columnMarker = m_columnNumber;
 	}
-
 
 	inline void Lexer::ParseWhitespaceAndNewlines()
 	{
@@ -5464,39 +5478,6 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline bool Parser::IsLibraryName(const String & name) const
-	{
-		if (name == m_library->GetName())
-			return true;
-		for (const auto & n : m_importList)
-		{
-			if (name == n)
-				return true;
-		}
-		return false;
-	}
-
-	inline bool Parser::IsPropertyName(const String & libraryName, const String & propertyName) const
-	{
-		if (!libraryName.empty())
-		{
-			auto library = m_runtime->GetLibraryInternal(libraryName);
-			return library->PropertyNameExists(propertyName);
-		}
-		else
-		{
-			if (m_library->PropertyNameExists(propertyName))
-				return true;
-			for (const auto & n : m_importList)
-			{
-				auto library = m_runtime->GetLibraryInternal(n);
-				if (library->PropertyNameExists(propertyName))
-					return true;
-			}
-		}
-		return false;
-	}
-
 	inline void Parser::EmitAddress(size_t address)
 	{
 		m_writer.Write(uint32_t(address));
@@ -5574,7 +5555,7 @@ namespace Jinx::Impl
 		// Get bytecode data size
 		size_t currentPos = m_writer.Tell();
 		size_t bytecodeSize = currentPos - sizeof(BytecodeHeader);
-		if (bytecodeSize > UINT_MAX)
+		if (bytecodeSize > 0x7FFFFFFF)
 		{
 			Error("Bytecode data has exceeded maximum allowable size");
 			return;
@@ -9317,12 +9298,16 @@ namespace Jinx::Impl
 				}
 				else if (var.IsString())
 				{
-					if (!key.IsInteger())
+					if (!key.IsInteger() && !IsIntegerPair(key))
 					{
 						Error("Invalid index type for string");
 						return false;
 					}
-					auto optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					std::optional<String> optStr;
+					if (key.IsInteger())
+						optStr = GetUtf8CharByIndex(var.GetString(), key.GetInteger());
+					else
+						optStr = GetUtf8CharsByRange(var.GetString(), GetIntegerPair(key));
 					if (!optStr)
 					{
 						Error("Unable to get string character via index");
@@ -9494,12 +9479,16 @@ namespace Jinx::Impl
 							return false;
 						}
 						Variant index = Pop();
-						if (!index.IsInteger())
+						if (!index.IsInteger() && !IsIntegerPair(index))
 						{
-							Error("String index must be an integer");
+							Error("String index must be an integer or integer pair");
 							return false;
 						}
-						auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						std::optional<String> s;
+						if (index.IsInteger())
+							s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+						else
+							s = ReplaceUtf8CharsAtRange(var.GetString(), val.GetString(), GetIntegerPair(index));
 						if (!s)
 						{
 							Error("Unable to set string via index");
@@ -9553,12 +9542,16 @@ namespace Jinx::Impl
 						return false;
 					}
 					Variant index = Pop();
-					if (!index.IsInteger())
+					if (!index.IsInteger() && !IsIntegerPair(index))
 					{
-						Error("String index must be an integer");
+						Error("String index must be an integer or integer pair");
 						return false;
 					}
-					auto s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					std::optional<String> s;
+					if (index.IsInteger())
+						s = ReplaceUtf8CharAtIndex(var.GetString(), val.GetString(), index.GetInteger());
+					else
+						s = ReplaceUtf8CharsAtRange(var.GetString(), val.GetString(), GetIntegerPair(index));
 					if (!s)
 					{
 						Error("Unable to set string via index");
@@ -9719,6 +9712,29 @@ namespace Jinx::Impl
 	inline bool Script::IsFinished() const
 	{
 		return m_finished || m_error;
+	}
+
+	inline bool Script::IsIntegerPair(const Variant & value) const
+	{
+		if (!value.IsCollection())
+			return false;
+		auto coll = value.GetCollection();
+		if (coll->size() != 2)
+			return false;
+		const auto & first = coll->begin()->first;
+		const auto & second = coll->rbegin()->first;
+		if (!first.IsInteger() || !second.IsInteger())
+			return false;
+		return true;
+	}
+
+	inline std::pair<int64_t, int64_t> Script::GetIntegerPair(const Variant & value) const
+	{
+		assert(IsIntegerPair(value));
+		auto coll = value.GetCollection();
+		const auto & first = coll->begin()->second;
+		const auto & second = coll->rbegin()->second;
+		return { first.GetInteger(), second.GetInteger() };
 	}
 
 	inline Variant Script::Pop()
@@ -10426,6 +10442,28 @@ namespace Jinx::Impl
 		return out;
 	}
 
+	inline std::optional<String> GetUtf8CharsByRange(const String & source, const std::pair<int64_t, int64_t> & range)
+	{
+		if (range.first > range.second)
+		{
+			LogWriteLine(LogLevel::Error, "First range index is greater than second");
+			return std::optional<String>();
+		}
+		const char * srcCurr = GetUtf8CstrByIndex(source, range.first);
+		const char * srcEnd = GetUtf8CstrByIndex(source, range.second);
+		if (srcCurr == nullptr || srcEnd == nullptr)
+			return std::optional<String>();
+		srcEnd += GetUtf8CharSize(srcEnd);
+		String out;
+		out.reserve(range.second - range.first + 1);
+		while (srcCurr < srcEnd)
+		{
+			out += *srcCurr;
+			++srcCurr;
+		}
+		return out;
+	}
+
 	inline std::optional<String> ReplaceUtf8CharAtIndex(const String & dest, const String & source, int64_t index)
 	{
 		const char * destStart = dest.c_str();
@@ -10452,6 +10490,53 @@ namespace Jinx::Impl
 				}
 				size_t size = GetUtf8CharSize(destCurr);
 				destCurr += size;
+			}
+			else
+			{
+				out += *destCurr;
+				++destCurr;
+			}
+		}
+		return out;
+	}
+
+	inline std::optional<String> ReplaceUtf8CharsAtRange(const String & dest, const String & source, const std::pair<int64_t, int64_t> & range)
+	{
+		if (range.first > range.second)
+		{
+			LogWriteLine(LogLevel::Error, "First range index is greater than second");
+			return std::optional<String>();
+		}
+		const char * destStart = dest.c_str();
+		const char * destEnd = destStart + dest.size();
+		const char * targetStart = GetUtf8CstrByIndex(dest, range.first);
+		const char * targetEnd = GetUtf8CstrByIndex(dest, range.second);
+		if (targetStart == nullptr || targetEnd == nullptr)
+			return std::optional<String>();
+		String out;
+		out.reserve(dest.size());
+		const char * destCurr = destStart;
+		while (destCurr < destEnd)
+		{
+			if (destCurr == targetStart)
+			{
+				const char * srcCurr = source.c_str();
+				const char * srcEnd = srcCurr + source.size();
+				while (srcCurr < srcEnd)
+				{
+					size_t charCount = GetUtf8CharSize(srcCurr);
+					for (size_t i = 0; i < charCount; ++i)
+					{
+						out += *srcCurr;
+						++srcCurr;
+					}
+				}
+				size_t rangeCount = range.second - range.first + 1;
+				for (size_t i = 0; i < rangeCount; ++i)
+				{
+					size_t size = GetUtf8CharSize(destCurr);
+					destCurr += size;
+				}
 			}
 			else
 			{

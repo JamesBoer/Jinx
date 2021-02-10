@@ -445,7 +445,8 @@ TEST_CASE("Test Functions", "[Functions]")
 			set a to 2 + 3 minus 3 + 1	
 			set b to (2 + 3) minus (3 + 1)	
 			set c to x + y minus y + z	
-			set d to (x + y) minus (y + z)	
+			set d to (x + y) minus (y + z)
+			set e to ((x + y) * z) minus ((y + z) * z)
 
 			)";
 
@@ -455,6 +456,7 @@ TEST_CASE("Test Functions", "[Functions]")
 		REQUIRE(script->GetVariable("b") == 1);
 		REQUIRE(script->GetVariable("c") == 4);
 		REQUIRE(script->GetVariable("d") == 4);
+		REQUIRE(script->GetVariable("e") == 4);
 	}
 
 	SECTION("Test compound chained functions")

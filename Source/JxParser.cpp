@@ -161,39 +161,6 @@ namespace Jinx::Impl
 		return true;
 	}
 
-	inline_t bool Parser::IsLibraryName(const String & name) const
-	{
-		if (name == m_library->GetName())
-			return true;
-		for (const auto & n : m_importList)
-		{
-			if (name == n)
-				return true;
-		}
-		return false;
-	}
-
-	inline_t bool Parser::IsPropertyName(const String & libraryName, const String & propertyName) const
-	{
-		if (!libraryName.empty())
-		{
-			auto library = m_runtime->GetLibraryInternal(libraryName);
-			return library->PropertyNameExists(propertyName);
-		}
-		else
-		{
-			if (m_library->PropertyNameExists(propertyName))
-				return true;
-			for (const auto & n : m_importList)
-			{
-				auto library = m_runtime->GetLibraryInternal(n);
-				if (library->PropertyNameExists(propertyName))
-					return true;
-			}
-		}
-		return false;
-	}
-
 	inline_t void Parser::EmitAddress(size_t address)
 	{
 		m_writer.Write(uint32_t(address));
@@ -271,7 +238,7 @@ namespace Jinx::Impl
 		// Get bytecode data size
 		size_t currentPos = m_writer.Tell();
 		size_t bytecodeSize = currentPos - sizeof(BytecodeHeader);
-		if (bytecodeSize > UINT_MAX)
+		if (bytecodeSize > 0x7FFFFFFF)
 		{
 			Error("Bytecode data has exceeded maximum allowable size");
 			return;

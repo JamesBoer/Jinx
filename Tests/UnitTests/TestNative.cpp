@@ -373,5 +373,24 @@ TEST_CASE("Test Native", "[Native]")
 		}
 		REQUIRE(allMatch == true);
 	}
-	
+
+	SECTION("Test buffer reserve")
+	{
+		auto buffer = Jinx::CreateBuffer();
+		buffer->Reserve(100);
+		REQUIRE(buffer->Capacity() == 100);
+		buffer->Reserve(10);
+		REQUIRE(buffer->Capacity() == 100);
+	}
+
+	SECTION("Test buffer clear")
+	{
+		auto buffer = Jinx::CreateBuffer();
+		buffer->Reserve(10);
+		buffer->Write("test", 5);
+		REQUIRE(buffer->Size() == 5);
+		buffer->Clear();
+		REQUIRE(buffer->Size() == 0);
+	}
+
 }

@@ -211,6 +211,7 @@ TEST_CASE("Test Expressions", "[Expressions]")
 			set i to 1 >= 1
 			set j to 2 >= 1
 
+			set k to 1 <= 2 and 2 >= 1
 			)";
 
 		auto script = TestExecuteScript(scriptText);
@@ -225,6 +226,7 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("h") == false);
 		REQUIRE(script->GetVariable("i") == true);
 		REQUIRE(script->GetVariable("j") == true);
+		REQUIRE(script->GetVariable("k") == true);
 	}
 
 	SECTION("Test less than or greater than operators on mixed numeric types")
