@@ -15,7 +15,7 @@ namespace Jinx::Impl
 	class Script;
 	using ScriptIPtr = std::shared_ptr<Script>;
 
-	class Script : public IScript, public std::enable_shared_from_this<Script>
+	class Script final : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);

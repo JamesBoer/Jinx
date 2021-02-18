@@ -11,7 +11,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Coroutine : public ICoroutine
+	class Coroutine final : public ICoroutine
 	{
 	public:
 		Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params);

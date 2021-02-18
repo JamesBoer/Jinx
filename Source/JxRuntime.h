@@ -13,7 +13,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
+	class Runtime final : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
 	public:
 		Runtime();
