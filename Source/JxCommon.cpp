@@ -80,7 +80,7 @@ namespace Jinx
 				"wait",
 			};
 			
-			static_assert(countof(opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
+			static_assert(std::size(opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
 
 			static inline const char * symbolTypeName[] =
 			{
@@ -154,7 +154,7 @@ namespace Jinx
 				"while",
 			};
 
-			static_assert(countof(symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");
+			static_assert(std::size(symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");
 
 			static inline const char * valueTypeName[] =
 			{
@@ -174,7 +174,7 @@ namespace Jinx
 				"any",
 			};
 
-			static_assert(countof(valueTypeName) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+			static_assert(std::size(valueTypeName) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 		};
 
 		inline_t const char * GetOpcodeText(Opcode opcode)
@@ -263,7 +263,7 @@ namespace Jinx
 	inline_t String GetVersionString()
 	{
 		char buffer[32];
-		snprintf(buffer, Impl::countof(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
+		snprintf(buffer, std::size(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
 		return buffer;
 	}
 

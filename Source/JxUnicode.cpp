@@ -273,7 +273,7 @@ namespace Jinx::Impl
 		{
 			Impl::ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
 			cInStr += numOut;
-			Impl::ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, countof(outBuffer), &numOut);
+			Impl::ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, std::size(outBuffer), &numOut);
 			outBuffer[numOut] = 0;
 			outString += outBuffer;
 		}
@@ -293,7 +293,7 @@ namespace Jinx::Impl
 		{
 			Impl::ConvertUtf16ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
 			cInStr += numOut;
-			Impl::ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, countof(outBuffer), &numOut);
+			Impl::ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, std::size(outBuffer), &numOut);
 			outBuffer[numOut] = 0;
 			outString += outBuffer;
 		}
@@ -337,7 +337,7 @@ namespace Jinx::Impl
 			size_t numOut = 0;
 			while (*cInStr != 0)
 			{
-				Impl::ConvertUtf32ToUtf8(*cInStr, outBuffer, countof(outBuffer), &numOut);
+				Impl::ConvertUtf32ToUtf8(*cInStr, outBuffer, std::size(outBuffer), &numOut);
 				outBuffer[numOut] = 0;
 				++cInStr;
 				outString += outBuffer;
@@ -413,13 +413,13 @@ namespace Jinx::Impl
 				if (FindCaseFoldingData(codepoint, &cp1, &cp2))
 				{
 					char buffer[5] = { 0, 0, 0, 0, 0 };
-					Impl::ConvertUtf32ToUtf8(cp1, buffer, countof(buffer), &charsOut);
+					Impl::ConvertUtf32ToUtf8(cp1, buffer, std::size(buffer), &charsOut);
 					s.append(buffer);
 					if (cp2)
 					{
 						size_t charsOut2 = 0;
 						char buffer2[5] = { 0, 0, 0, 0, 0 };
-						Impl::ConvertUtf32ToUtf8(cp2, buffer2, countof(buffer2), &charsOut2);
+						Impl::ConvertUtf32ToUtf8(cp2, buffer2, std::size(buffer2), &charsOut2);
 						s.append(buffer);
 						charsOut += charsOut2;
 					}

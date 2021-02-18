@@ -31,7 +31,7 @@ namespace Jinx
 				false,	// ValType
 			};
 
-			static_assert(countof(allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
+			static_assert(std::size(allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
 
 		};
 

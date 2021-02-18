@@ -212,18 +212,6 @@ namespace Jinx::Impl
 		uint32_t lineNumber;
 	};
 
-	template <typename T>
-	inline T NextHighestMultiple(T val, T multiple)
-	{
-		return val + ((multiple - (val % multiple)) % multiple);
-	}
-
-	template<typename T, size_t s>
-	constexpr size_t countof(T(&)[s])
-	{
-		return s;
-	}
-
 	inline const char * StrCopy(char * dest, size_t destBufferSize, const char * source)
 	{
 #if defined(JINX_WINDOWS)
