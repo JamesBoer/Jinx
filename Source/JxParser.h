@@ -49,6 +49,8 @@ namespace Jinx::Impl
 			SignatureOnly,
 		};
 
+		void ErrorWriteDetails() const;
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -56,6 +58,8 @@ namespace Jinx::Impl
 			if (m_error)
 				return;
 			m_error = true;
+
+			// Write error message and location
 			if (m_name.empty())
 				LogWrite(LogLevel::Error, "Error at ");
 			else
@@ -65,6 +69,10 @@ namespace Jinx::Impl
 			else
 				LogWrite(LogLevel::Error, "line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
+
+			// Write out the line of code containing the error, and a second line
+			// that points out the location of the error
+			ErrorWriteDetails();
 		}
 
 		// Hash and register variable or property name and ID mapping
@@ -114,7 +122,7 @@ namespace Jinx::Impl
 
 		// Returns false and flags an error if the current symbol does not match param.  NextSymbol() is
 		// called and true is returned on success.
-		bool Expect(SymbolType symbol);
+		bool Expect(SymbolType symbol, const char * errMsg = nullptr);
 
 		// If the current symbol matches the parameter, NextSymbol() is called and the function returns true.
 		bool Accept(SymbolType symbol);

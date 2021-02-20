@@ -55,6 +55,59 @@ namespace Jinx::Impl
 		return !m_error;
 	}
 
+	inline_t void Parser::ErrorWriteDetails() const
+	{
+		// Write line of code containing error
+
+		// Find starting symbol of error line.  Harder than you might think
+		auto start = m_currentSymbol;
+		if (start == m_symbolList.end())
+			--start;
+		if (start->type == SymbolType::NewLine)
+			--start;
+		while (start->type != SymbolType::NewLine && start != m_symbolList.begin())
+			--start;
+		if (start->type == SymbolType::NewLine)
+			++start;
+
+		// Once we find the supposed start, find the end from that location
+		auto end = start;
+		while (end != m_symbolList.end() && end->type != SymbolType::NewLine)
+			++end;
+
+		// Print out the symbols and find error start index
+		bool foundError = false;
+		size_t errorIndex = 0;
+		size_t lastErrorIndex = 0;
+		size_t endIndex = 0;
+		String symbolText;
+		for (auto curr = start; curr != end; ++curr)
+		{
+			WriteSymbol(curr, symbolText);
+			if (curr == m_currentSymbol)
+				foundError = true;
+			if (!foundError)
+			{
+				lastErrorIndex = errorIndex;
+				errorIndex += symbolText.size();
+			}
+			endIndex += symbolText.size();
+			LogWrite(LogLevel::Error, symbolText.c_str());
+		}
+		if (endIndex)
+			--endIndex;
+		if (errorIndex >= endIndex)
+			errorIndex = lastErrorIndex;
+		LogWrite(LogLevel::Error, "\n");
+
+		// Write marker showing location of error
+		String markerText;
+		markerText.reserve(32);
+		for (size_t i = 0; i < endIndex; ++i)
+			markerText += (i < errorIndex) ? " " : "^";
+		LogWriteLine(LogLevel::Error, markerText.c_str());
+	}
+
 	inline_t FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
 	{
 		m_library = m_runtime->GetLibraryInternal(libraryName);
@@ -278,11 +331,14 @@ namespace Jinx::Impl
 		return false;
 	}
 
-	inline_t bool Parser::Expect(SymbolType symbol)
+	inline_t bool Parser::Expect(SymbolType symbol, const char * errMsg)
 	{
 		if (Accept(symbol))
 			return true;
-		Error("Expected symbol %s", GetSymbolTypeText(symbol));
+		if (errMsg)
+			Error("%s", errMsg);
+		else
+			Error("Expected symbol %s", GetSymbolTypeText(symbol));
 		return false;
 	}
 
@@ -2466,7 +2522,7 @@ namespace Jinx::Impl
 
 						// Parse expression
 						ParseExpression();
-						Expect(SymbolType::NewLine);
+						Expect(SymbolType::NewLine, "Unable to parse expression");
 
 						// Add to variable table
 						VariableAssign(name);
@@ -2655,7 +2711,6 @@ namespace Jinx::Impl
 				Error("Expected valid name after 'import' keyword");
 				return;
 			}
-			Expect(SymbolType::NewLine);
 
 			// Check to make sure we're not adding duplicates
 			bool foundDup = false;
@@ -2678,6 +2733,8 @@ namespace Jinx::Impl
 					break;
 				}
 			}
+
+			Expect(SymbolType::NewLine);
 		}
 	}
 

@@ -239,6 +239,13 @@ namespace Jinx::Impl
 	using RuntimeIPtr = std::shared_ptr<Runtime>;
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
 
+	struct Symbol;
+	using SymbolList = std::vector<Symbol, Allocator<Symbol>>;
+	using SymbolListCItr = SymbolList::const_iterator;
+
+	// Write symbol text to string
+	void WriteSymbol(SymbolListCItr symbol, String & output);
+
 	// Shared aliases
 	static const size_t RuntimeArenaSize = 4096;
 	using SymbolTypeMap = std::map<std::string_view, SymbolType, std::less<std::string_view>, StaticAllocator<std::pair<const std::string_view, SymbolType>, RuntimeArenaSize>>;

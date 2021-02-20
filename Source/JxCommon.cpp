@@ -258,6 +258,50 @@ namespace Jinx
 			return CommonData::globalParams.enableDebugInfo;
 		}
 
+		inline_t void WriteSymbol(SymbolListCItr symbol, String & output)
+		{
+			char buffer[768];
+
+			// Write to the output string based on the symbol type
+			switch (symbol->type)
+			{
+				case SymbolType::None:
+					snprintf(buffer, std::size(buffer), "(None) ");
+					break;
+				case SymbolType::Invalid:
+					snprintf(buffer, std::size(buffer), "(Invalid) ");
+					break;
+				case SymbolType::NewLine:
+					snprintf(buffer, std::size(buffer), "\n");
+					break;
+				case SymbolType::NameValue:
+					// Display names with spaces as surrounded by single quotes to help delineate them
+					// from surrounding symbols.
+					if (strstr(String(symbol->text).c_str(), " "))
+						snprintf(buffer, std::size(buffer), "'%s' ", symbol->text.c_str());
+					else
+						snprintf(buffer, std::size(buffer), "%s ", symbol->text.c_str());
+					break;
+				case SymbolType::StringValue:
+					snprintf(buffer, std::size(buffer), "\"%s\" ", symbol->text.c_str());
+					break;
+				case SymbolType::NumberValue:
+					snprintf(buffer, std::size(buffer), "%f ", symbol->numVal);
+					break;
+				case SymbolType::IntegerValue:
+					snprintf(buffer, std::size(buffer), "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
+					break;
+				case SymbolType::BooleanValue:
+					snprintf(buffer, std::size(buffer), "%s ", symbol->boolVal ? "true" : "false");
+					break;
+				default:
+					snprintf(buffer, std::size(buffer), "%s ", GetSymbolTypeText(symbol->type));
+					break;
+			};
+			output = buffer;
+		}
+
+
 	} // namespace Impl
 
 	inline_t String GetVersionString()

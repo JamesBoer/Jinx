@@ -73,23 +73,13 @@ int main(int argc, char ** argv)
 	const char * scriptText =
 		u8R"(
 
-			function {x} (is) alpha
-				return true
-			end
-
-			function {x} is beta
-				return false
-			end
-
-			set a to 123 is alpha
-			set b to 456 is beta
+			set private a to 123
+			set private a to 234
 
 		)";
 
 	auto script = TestExecuteScript(scriptText);
-	REQUIRE(script);
-	REQUIRE(script->GetVariable("a") == true);
-	REQUIRE(script->GetVariable("b") == false);
+	REQUIRE(!script);
 	
 	auto memStats = GetMemoryStats();
 	printf("\nMemory Stats\n");

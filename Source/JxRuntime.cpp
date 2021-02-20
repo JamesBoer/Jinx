@@ -217,99 +217,99 @@ namespace Jinx::Impl
 			// Read and log opcode arguments
 			switch (opcode)
 			{
-			case Opcode::CallFunc:
-			case Opcode::EraseItr:
-			case Opcode::PushProp:
-			case Opcode::PushVar:
-			case Opcode::SetProp:
-			case Opcode::SetVar:
-			{
-				RuntimeID id;
-				reader.Read(&id);
-				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(id).c_str());
-			}
-			break;
-			case Opcode::ErasePropKeyVal:
-			case Opcode::EraseVarKeyVal:
-			case Opcode::SetPropKeyVal:
-			case Opcode::SetVarKeyVal:
-			{
-				uint32_t subscripts;
-				reader.Read(&subscripts);
-				RuntimeID id;
-				reader.Read(&id);
-				LogWrite(LogLevel::Info, "%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
-			}
-			break;
-			case Opcode::Cast:
-			{
-				uint8_t b;
-				reader.Read(&b);
-				auto type = ByteToValueType(b);
-				LogWrite(LogLevel::Info, "%s", GetValueTypeName(type));
-			}
-			break;
-			case Opcode::Function:
-			{
-				FunctionSignature signature;
-				signature.Read(reader);
-				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(signature.GetId()).c_str());
-			}
-			break;
-			case Opcode::Library:
-			{
-				String name;
-				reader.Read(&name);
-				LogWrite(LogLevel::Info, "%s", name.c_str());
-			}
-			break;
-			case Opcode::Property:
-			{
-				PropertyName propertyName;
-				propertyName.Read(reader);
-			}
-			break;
-			case Opcode::Jump:
-			case Opcode::JumpFalse:
-			case Opcode::JumpFalseCheck:
-			case Opcode::JumpTrue:
-			case Opcode::JumpTrueCheck:
-			case Opcode::PopCount:
-			case Opcode::PushColl:
-			case Opcode::PushList:
-			{
-				uint32_t count;
-				reader.Read(&count);
-				LogWrite(LogLevel::Info, "%i", count);
-			}
-			break;
-			case Opcode::PushVal:
-			{
-				Variant val;
-				val.Read(reader);
-				if (val.IsString())
-					LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
-				else if (val.IsFunction())
-					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(val.GetFunction()).c_str());
-				else
-					LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
-			}
-			break;
-			case Opcode::SetIndex:
-			{
-				RuntimeID id;
-				reader.Read(&id);
-				int32_t stackIndex;
-				reader.Read(&stackIndex);
-				ValueType type;
-				reader.Read<ValueType, uint8_t>(&type);
-				LogWrite(LogLevel::Info, "%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
-			}
-			break;
-			default:
-			{
-			}
-			break;
+				case Opcode::CallFunc:
+				case Opcode::EraseItr:
+				case Opcode::PushProp:
+				case Opcode::PushVar:
+				case Opcode::SetProp:
+				case Opcode::SetVar:
+				{
+					RuntimeID id;
+					reader.Read(&id);
+					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(id).c_str());
+				}
+				break;
+				case Opcode::ErasePropKeyVal:
+				case Opcode::EraseVarKeyVal:
+				case Opcode::SetPropKeyVal:
+				case Opcode::SetVarKeyVal:
+				{
+					uint32_t subscripts;
+					reader.Read(&subscripts);
+					RuntimeID id;
+					reader.Read(&id);
+					LogWrite(LogLevel::Info, "%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
+				}
+				break;
+				case Opcode::Cast:
+				{
+					uint8_t b;
+					reader.Read(&b);
+					auto type = ByteToValueType(b);
+					LogWrite(LogLevel::Info, "%s", GetValueTypeName(type));
+				}
+				break;
+				case Opcode::Function:
+				{
+					FunctionSignature signature;
+					signature.Read(reader);
+					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(signature.GetId()).c_str());
+				}
+				break;
+				case Opcode::Library:
+				{
+					String name;
+					reader.Read(&name);
+					LogWrite(LogLevel::Info, "%s", name.c_str());
+				}
+				break;
+				case Opcode::Property:
+				{
+					PropertyName propertyName;
+					propertyName.Read(reader);
+				}
+				break;
+				case Opcode::Jump:
+				case Opcode::JumpFalse:
+				case Opcode::JumpFalseCheck:
+				case Opcode::JumpTrue:
+				case Opcode::JumpTrueCheck:
+				case Opcode::PopCount:
+				case Opcode::PushColl:
+				case Opcode::PushList:
+				{
+					uint32_t count;
+					reader.Read(&count);
+					LogWrite(LogLevel::Info, "%i", count);
+				}
+				break;
+				case Opcode::PushVal:
+				{
+					Variant val;
+					val.Read(reader);
+					if (val.IsString())
+						LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
+					else if (val.IsFunction())
+						LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(val.GetFunction()).c_str());
+					else
+						LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
+				}
+				break;
+				case Opcode::SetIndex:
+				{
+					RuntimeID id;
+					reader.Read(&id);
+					int32_t stackIndex;
+					reader.Read(&stackIndex);
+					ValueType type;
+					reader.Read<ValueType, uint8_t>(&type);
+					LogWrite(LogLevel::Info, "%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
+				}
+				break;
+				default:
+				{
+				}
+				break;
 			}
 			LogWrite(LogLevel::Info, "\n");
 		}
@@ -328,6 +328,8 @@ namespace Jinx::Impl
 
 		int lineCount = 0;
 
+		String symbolText;
+
 		// Iterate through the symbol list and write everything to the log
 		for (auto symbol = symbolList.begin(); symbol != symbolList.end(); ++symbol)
 		{
@@ -339,44 +341,17 @@ namespace Jinx::Impl
 				newLine = false;
 			}
 
-			// Write to the log based on the symbol type
-			switch (symbol->type)
+			// Write out / lot symbols
+			WriteSymbol(symbol, symbolText);
+			LogWrite(LogLevel::Info, symbolText.c_str());
+
+			// Special handling for newlines
+			if (symbol->type == SymbolType::NewLine)
 			{
-			case SymbolType::None:
-				LogWrite(LogLevel::Info, "(None) ");
-				break;
-			case SymbolType::Invalid:
-				LogWrite(LogLevel::Info, "(Invalid) ");
-				break;
-			case SymbolType::NewLine:
-				LogWrite(LogLevel::Info, "\n");
 				newLine = true;
 				++lineCount;
-				break;
-			case SymbolType::NameValue:
-				// Display names with spaces as surrounded by single quotes to help delineate them
-				// from surrounding symbols.
-				if (strstr(String(symbol->text).c_str(), " "))
-					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
-				else
-					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());
-				break;
-			case SymbolType::StringValue:
-				LogWrite(LogLevel::Info, "\"%s\" ", symbol->text.c_str());
-				break;
-			case SymbolType::NumberValue:
-				LogWrite(LogLevel::Info, "%f ", symbol->numVal);
-				break;
-			case SymbolType::IntegerValue:
-				LogWrite(LogLevel::Info, "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
-				break;
-			case SymbolType::BooleanValue:
-				LogWrite(LogLevel::Info, "%s ", symbol->boolVal ? "true" : "false");
-				break;
-			default:
-				LogWrite(LogLevel::Info, "%s ", GetSymbolTypeText(symbol->type));
-				break;
-			};
+			}
+
 		}
 		LogWrite(LogLevel::Info, "\nLine Count: %i\n\n", lineCount);
 	}

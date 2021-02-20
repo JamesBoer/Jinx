@@ -36,9 +36,6 @@ namespace Jinx::Impl
 		uint32_t columnNumber;
 	};
 
-	using SymbolList = std::vector<Symbol, Allocator<Symbol>>;
-	using SymbolListCItr = SymbolList::const_iterator;
-
 	class Lexer
 	{
 	public:

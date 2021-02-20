@@ -1423,18 +1423,6 @@ namespace Jinx::Impl
 		uint32_t lineNumber;
 	};
 
-	template <typename T>
-	inline T NextHighestMultiple(T val, T multiple)
-	{
-		return val + ((multiple - (val % multiple)) % multiple);
-	}
-
-	template<typename T, size_t s>
-	constexpr size_t countof(T(&)[s])
-	{
-		return s;
-	}
-
 	inline const char * StrCopy(char * dest, size_t destBufferSize, const char * source)
 	{
 #if defined(JINX_WINDOWS)
@@ -1461,6 +1449,13 @@ namespace Jinx::Impl
 	class Runtime;
 	using RuntimeIPtr = std::shared_ptr<Runtime>;
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
+
+	struct Symbol;
+	using SymbolList = std::vector<Symbol, Allocator<Symbol>>;
+	using SymbolListCItr = SymbolList::const_iterator;
+
+	// Write symbol text to string
+	void WriteSymbol(SymbolListCItr symbol, String & output);
 
 	// Shared aliases
 	static const size_t RuntimeArenaSize = 4096;
@@ -1860,9 +1855,6 @@ namespace Jinx::Impl
 		uint32_t columnNumber;
 	};
 
-	using SymbolList = std::vector<Symbol, Allocator<Symbol>>;
-	using SymbolListCItr = SymbolList::const_iterator;
-
 	class Lexer
 	{
 	public:
@@ -2168,7 +2160,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Library : public ILibrary
+	class Library final : public ILibrary
 	{
 	public:
 		Library(RuntimeWPtr runtime, const String & name);
@@ -2366,6 +2358,8 @@ namespace Jinx::Impl
 			SignatureOnly,
 		};
 
+		void ErrorWriteDetails() const;
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -2373,6 +2367,8 @@ namespace Jinx::Impl
 			if (m_error)
 				return;
 			m_error = true;
+
+			// Write error message and location
 			if (m_name.empty())
 				LogWrite(LogLevel::Error, "Error at ");
 			else
@@ -2382,6 +2378,10 @@ namespace Jinx::Impl
 			else
 				LogWrite(LogLevel::Error, "line %i, column %i: ", m_currentSymbol->lineNumber, m_currentSymbol->columnNumber);
 			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
+
+			// Write out the line of code containing the error, and a second line
+			// that points out the location of the error
+			ErrorWriteDetails();
 		}
 
 		// Hash and register variable or property name and ID mapping
@@ -2431,7 +2431,7 @@ namespace Jinx::Impl
 
 		// Returns false and flags an error if the current symbol does not match param.  NextSymbol() is
 		// called and true is returned on success.
-		bool Expect(SymbolType symbol);
+		bool Expect(SymbolType symbol, const char * errMsg = nullptr);
 
 		// If the current symbol matches the parameter, NextSymbol() is called and the function returns true.
 		bool Accept(SymbolType symbol);
@@ -2579,7 +2579,7 @@ namespace Jinx::Impl
 	class Script;
 	using ScriptIPtr = std::shared_ptr<Script>;
 
-	class Script : public IScript, public std::enable_shared_from_this<Script>
+	class Script final : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);
@@ -2734,7 +2734,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
+	class Runtime final : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
 	public:
 		Runtime();
@@ -3024,7 +3024,7 @@ namespace Jinx
 				"wait",
 			};
 			
-			static_assert(countof(opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
+			static_assert(std::size(opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
 
 			static inline const char * symbolTypeName[] =
 			{
@@ -3098,7 +3098,7 @@ namespace Jinx
 				"while",
 			};
 
-			static_assert(countof(symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");
+			static_assert(std::size(symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");
 
 			static inline const char * valueTypeName[] =
 			{
@@ -3118,7 +3118,7 @@ namespace Jinx
 				"any",
 			};
 
-			static_assert(countof(valueTypeName) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+			static_assert(std::size(valueTypeName) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 		};
 
 		inline const char * GetOpcodeText(Opcode opcode)
@@ -3202,12 +3202,56 @@ namespace Jinx
 			return CommonData::globalParams.enableDebugInfo;
 		}
 
+		inline void WriteSymbol(SymbolListCItr symbol, String & output)
+		{
+			char buffer[768];
+
+			// Write to the output string based on the symbol type
+			switch (symbol->type)
+			{
+				case SymbolType::None:
+					snprintf(buffer, std::size(buffer), "(None) ");
+					break;
+				case SymbolType::Invalid:
+					snprintf(buffer, std::size(buffer), "(Invalid) ");
+					break;
+				case SymbolType::NewLine:
+					snprintf(buffer, std::size(buffer), "\n");
+					break;
+				case SymbolType::NameValue:
+					// Display names with spaces as surrounded by single quotes to help delineate them
+					// from surrounding symbols.
+					if (strstr(String(symbol->text).c_str(), " "))
+						snprintf(buffer, std::size(buffer), "'%s' ", symbol->text.c_str());
+					else
+						snprintf(buffer, std::size(buffer), "%s ", symbol->text.c_str());
+					break;
+				case SymbolType::StringValue:
+					snprintf(buffer, std::size(buffer), "\"%s\" ", symbol->text.c_str());
+					break;
+				case SymbolType::NumberValue:
+					snprintf(buffer, std::size(buffer), "%f ", symbol->numVal);
+					break;
+				case SymbolType::IntegerValue:
+					snprintf(buffer, std::size(buffer), "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
+					break;
+				case SymbolType::BooleanValue:
+					snprintf(buffer, std::size(buffer), "%s ", symbol->boolVal ? "true" : "false");
+					break;
+				default:
+					snprintf(buffer, std::size(buffer), "%s ", GetSymbolTypeText(symbol->type));
+					break;
+			};
+			output = buffer;
+		}
+
+
 	} // namespace Impl
 
 	inline String GetVersionString()
 	{
 		char buffer[32];
-		snprintf(buffer, Impl::countof(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
+		snprintf(buffer, std::size(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
 		return buffer;
 	}
 
@@ -3259,7 +3303,7 @@ namespace Jinx::Impl
 			13, // Any
 		};
 
-		static_assert(countof(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+		static_assert(std::size(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 
 		static inline ValueType byteToValueType[] =
 		{
@@ -3279,7 +3323,7 @@ namespace Jinx::Impl
 			ValueType::Any,
 		};
 
-		static_assert(countof(byteToValueType) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+		static_assert(std::size(byteToValueType) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 	};
 
 	inline ValueType ByteToValueType(uint8_t byte)
@@ -3644,7 +3688,7 @@ namespace Jinx::Impl
 		char buffer[64];
 		snprintf(
 			buffer,
-			countof(buffer),
+			std::size(buffer),
 			"%.*X-%.*X-%.*X-%.*X%.*X-%.*X%.*X%.*X%.*X%.*X%.*X",
 			8, value.data1,
 			4, value.data2,
@@ -3684,7 +3728,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Coroutine : public ICoroutine
+	class Coroutine final : public ICoroutine
 	{
 	public:
 		Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params);
@@ -5372,6 +5416,59 @@ namespace Jinx::Impl
 		return !m_error;
 	}
 
+	inline void Parser::ErrorWriteDetails() const
+	{
+		// Write line of code containing error
+
+		// Find starting symbol of error line.  Harder than you might think
+		auto start = m_currentSymbol;
+		if (start == m_symbolList.end())
+			--start;
+		if (start->type == SymbolType::NewLine)
+			--start;
+		while (start->type != SymbolType::NewLine && start != m_symbolList.begin())
+			--start;
+		if (start->type == SymbolType::NewLine)
+			++start;
+
+		// Once we find the supposed start, find the end from that location
+		auto end = start;
+		while (end != m_symbolList.end() && end->type != SymbolType::NewLine)
+			++end;
+
+		// Print out the symbols and find error start index
+		bool foundError = false;
+		size_t errorIndex = 0;
+		size_t lastErrorIndex = 0;
+		size_t endIndex = 0;
+		String symbolText;
+		for (auto curr = start; curr != end; ++curr)
+		{
+			WriteSymbol(curr, symbolText);
+			if (curr == m_currentSymbol)
+				foundError = true;
+			if (!foundError)
+			{
+				lastErrorIndex = errorIndex;
+				errorIndex += symbolText.size();
+			}
+			endIndex += symbolText.size();
+			LogWrite(LogLevel::Error, symbolText.c_str());
+		}
+		if (endIndex)
+			--endIndex;
+		if (errorIndex >= endIndex)
+			errorIndex = lastErrorIndex;
+		LogWrite(LogLevel::Error, "\n");
+
+		// Write marker showing location of error
+		String markerText;
+		markerText.reserve(32);
+		for (size_t i = 0; i < endIndex; ++i)
+			markerText += (i < errorIndex) ? " " : "^";
+		LogWriteLine(LogLevel::Error, markerText.c_str());
+	}
+
 	inline FunctionSignature Parser::ParseFunctionSignature(VisibilityType access, const String & libraryName)
 	{
 		m_library = m_runtime->GetLibraryInternal(libraryName);
@@ -5595,11 +5692,14 @@ namespace Jinx::Impl
 		return false;
 	}
 
-	inline bool Parser::Expect(SymbolType symbol)
+	inline bool Parser::Expect(SymbolType symbol, const char * errMsg)
 	{
 		if (Accept(symbol))
 			return true;
-		Error("Expected symbol %s", GetSymbolTypeText(symbol));
+		if (errMsg)
+			Error("%s", errMsg);
+		else
+			Error("Expected symbol %s", GetSymbolTypeText(symbol));
 		return false;
 	}
 
@@ -7783,7 +7883,7 @@ namespace Jinx::Impl
 
 						// Parse expression
 						ParseExpression();
-						Expect(SymbolType::NewLine);
+						Expect(SymbolType::NewLine, "Unable to parse expression");
 
 						// Add to variable table
 						VariableAssign(name);
@@ -7972,7 +8072,6 @@ namespace Jinx::Impl
 				Error("Expected valid name after 'import' keyword");
 				return;
 			}
-			Expect(SymbolType::NewLine);
 
 			// Check to make sure we're not adding duplicates
 			bool foundDup = false;
@@ -7995,6 +8094,8 @@ namespace Jinx::Impl
 					break;
 				}
 			}
+
+			Expect(SymbolType::NewLine);
 		}
 	}
 
@@ -8322,99 +8423,99 @@ namespace Jinx::Impl
 			// Read and log opcode arguments
 			switch (opcode)
 			{
-			case Opcode::CallFunc:
-			case Opcode::EraseItr:
-			case Opcode::PushProp:
-			case Opcode::PushVar:
-			case Opcode::SetProp:
-			case Opcode::SetVar:
-			{
-				RuntimeID id;
-				reader.Read(&id);
-				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(id).c_str());
-			}
-			break;
-			case Opcode::ErasePropKeyVal:
-			case Opcode::EraseVarKeyVal:
-			case Opcode::SetPropKeyVal:
-			case Opcode::SetVarKeyVal:
-			{
-				uint32_t subscripts;
-				reader.Read(&subscripts);
-				RuntimeID id;
-				reader.Read(&id);
-				LogWrite(LogLevel::Info, "%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
-			}
-			break;
-			case Opcode::Cast:
-			{
-				uint8_t b;
-				reader.Read(&b);
-				auto type = ByteToValueType(b);
-				LogWrite(LogLevel::Info, "%s", GetValueTypeName(type));
-			}
-			break;
-			case Opcode::Function:
-			{
-				FunctionSignature signature;
-				signature.Read(reader);
-				LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(signature.GetId()).c_str());
-			}
-			break;
-			case Opcode::Library:
-			{
-				String name;
-				reader.Read(&name);
-				LogWrite(LogLevel::Info, "%s", name.c_str());
-			}
-			break;
-			case Opcode::Property:
-			{
-				PropertyName propertyName;
-				propertyName.Read(reader);
-			}
-			break;
-			case Opcode::Jump:
-			case Opcode::JumpFalse:
-			case Opcode::JumpFalseCheck:
-			case Opcode::JumpTrue:
-			case Opcode::JumpTrueCheck:
-			case Opcode::PopCount:
-			case Opcode::PushColl:
-			case Opcode::PushList:
-			{
-				uint32_t count;
-				reader.Read(&count);
-				LogWrite(LogLevel::Info, "%i", count);
-			}
-			break;
-			case Opcode::PushVal:
-			{
-				Variant val;
-				val.Read(reader);
-				if (val.IsString())
-					LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
-				else if (val.IsFunction())
-					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(val.GetFunction()).c_str());
-				else
-					LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
-			}
-			break;
-			case Opcode::SetIndex:
-			{
-				RuntimeID id;
-				reader.Read(&id);
-				int32_t stackIndex;
-				reader.Read(&stackIndex);
-				ValueType type;
-				reader.Read<ValueType, uint8_t>(&type);
-				LogWrite(LogLevel::Info, "%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
-			}
-			break;
-			default:
-			{
-			}
-			break;
+				case Opcode::CallFunc:
+				case Opcode::EraseItr:
+				case Opcode::PushProp:
+				case Opcode::PushVar:
+				case Opcode::SetProp:
+				case Opcode::SetVar:
+				{
+					RuntimeID id;
+					reader.Read(&id);
+					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(id).c_str());
+				}
+				break;
+				case Opcode::ErasePropKeyVal:
+				case Opcode::EraseVarKeyVal:
+				case Opcode::SetPropKeyVal:
+				case Opcode::SetVarKeyVal:
+				{
+					uint32_t subscripts;
+					reader.Read(&subscripts);
+					RuntimeID id;
+					reader.Read(&id);
+					LogWrite(LogLevel::Info, "%i %s, %s", subscripts, subscripts == 1 ? "subscript" : "subscripts", parser.GetNameFromID(id).c_str());
+				}
+				break;
+				case Opcode::Cast:
+				{
+					uint8_t b;
+					reader.Read(&b);
+					auto type = ByteToValueType(b);
+					LogWrite(LogLevel::Info, "%s", GetValueTypeName(type));
+				}
+				break;
+				case Opcode::Function:
+				{
+					FunctionSignature signature;
+					signature.Read(reader);
+					LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(signature.GetId()).c_str());
+				}
+				break;
+				case Opcode::Library:
+				{
+					String name;
+					reader.Read(&name);
+					LogWrite(LogLevel::Info, "%s", name.c_str());
+				}
+				break;
+				case Opcode::Property:
+				{
+					PropertyName propertyName;
+					propertyName.Read(reader);
+				}
+				break;
+				case Opcode::Jump:
+				case Opcode::JumpFalse:
+				case Opcode::JumpFalseCheck:
+				case Opcode::JumpTrue:
+				case Opcode::JumpTrueCheck:
+				case Opcode::PopCount:
+				case Opcode::PushColl:
+				case Opcode::PushList:
+				{
+					uint32_t count;
+					reader.Read(&count);
+					LogWrite(LogLevel::Info, "%i", count);
+				}
+				break;
+				case Opcode::PushVal:
+				{
+					Variant val;
+					val.Read(reader);
+					if (val.IsString())
+						LogWrite(LogLevel::Info, "\"%s\"", val.GetString().c_str());
+					else if (val.IsFunction())
+						LogWrite(LogLevel::Info, "%s", parser.GetNameFromID(val.GetFunction()).c_str());
+					else
+						LogWrite(LogLevel::Info, "%s", val.GetString().c_str());
+				}
+				break;
+				case Opcode::SetIndex:
+				{
+					RuntimeID id;
+					reader.Read(&id);
+					int32_t stackIndex;
+					reader.Read(&stackIndex);
+					ValueType type;
+					reader.Read<ValueType, uint8_t>(&type);
+					LogWrite(LogLevel::Info, "%s %i %s", parser.GetNameFromID(id).c_str(), stackIndex, GetValueTypeName(type));
+				}
+				break;
+				default:
+				{
+				}
+				break;
 			}
 			LogWrite(LogLevel::Info, "\n");
 		}
@@ -8433,6 +8534,8 @@ namespace Jinx::Impl
 
 		int lineCount = 0;
 
+		String symbolText;
+
 		// Iterate through the symbol list and write everything to the log
 		for (auto symbol = symbolList.begin(); symbol != symbolList.end(); ++symbol)
 		{
@@ -8444,44 +8547,17 @@ namespace Jinx::Impl
 				newLine = false;
 			}
 
-			// Write to the log based on the symbol type
-			switch (symbol->type)
+			// Write out / lot symbols
+			WriteSymbol(symbol, symbolText);
+			LogWrite(LogLevel::Info, symbolText.c_str());
+
+			// Special handling for newlines
+			if (symbol->type == SymbolType::NewLine)
 			{
-			case SymbolType::None:
-				LogWrite(LogLevel::Info, "(None) ");
-				break;
-			case SymbolType::Invalid:
-				LogWrite(LogLevel::Info, "(Invalid) ");
-				break;
-			case SymbolType::NewLine:
-				LogWrite(LogLevel::Info, "\n");
 				newLine = true;
 				++lineCount;
-				break;
-			case SymbolType::NameValue:
-				// Display names with spaces as surrounded by single quotes to help delineate them
-				// from surrounding symbols.
-				if (strstr(String(symbol->text).c_str(), " "))
-					LogWrite(LogLevel::Info, "'%s' ", symbol->text.c_str());
-				else
-					LogWrite(LogLevel::Info, "%s ", symbol->text.c_str());
-				break;
-			case SymbolType::StringValue:
-				LogWrite(LogLevel::Info, "\"%s\" ", symbol->text.c_str());
-				break;
-			case SymbolType::NumberValue:
-				LogWrite(LogLevel::Info, "%f ", symbol->numVal);
-				break;
-			case SymbolType::IntegerValue:
-				LogWrite(LogLevel::Info, "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
-				break;
-			case SymbolType::BooleanValue:
-				LogWrite(LogLevel::Info, "%s ", symbol->boolVal ? "true" : "false");
-				break;
-			default:
-				LogWrite(LogLevel::Info, "%s ", GetSymbolTypeText(symbol->type));
-				break;
-			};
+			}
+
 		}
 		LogWrite(LogLevel::Info, "\nLine Count: %i\n\n", lineCount);
 	}
@@ -10223,7 +10299,7 @@ namespace Jinx::Impl
 		{
 			Impl::ConvertUtf8ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
 			cInStr += numOut;
-			Impl::ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, countof(outBuffer), &numOut);
+			Impl::ConvertUtf32ToUtf16(utf32CodePoint, outBuffer, std::size(outBuffer), &numOut);
 			outBuffer[numOut] = 0;
 			outString += outBuffer;
 		}
@@ -10243,7 +10319,7 @@ namespace Jinx::Impl
 		{
 			Impl::ConvertUtf16ToUtf32(cInStr, (uint32_t)(cInStrEnd - cInStr), &utf32CodePoint, &numOut);
 			cInStr += numOut;
-			Impl::ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, countof(outBuffer), &numOut);
+			Impl::ConvertUtf32ToUtf8(utf32CodePoint, outBuffer, std::size(outBuffer), &numOut);
 			outBuffer[numOut] = 0;
 			outString += outBuffer;
 		}
@@ -10287,7 +10363,7 @@ namespace Jinx::Impl
 			size_t numOut = 0;
 			while (*cInStr != 0)
 			{
-				Impl::ConvertUtf32ToUtf8(*cInStr, outBuffer, countof(outBuffer), &numOut);
+				Impl::ConvertUtf32ToUtf8(*cInStr, outBuffer, std::size(outBuffer), &numOut);
 				outBuffer[numOut] = 0;
 				++cInStr;
 				outString += outBuffer;
@@ -10363,13 +10439,13 @@ namespace Jinx::Impl
 				if (FindCaseFoldingData(codepoint, &cp1, &cp2))
 				{
 					char buffer[5] = { 0, 0, 0, 0, 0 };
-					Impl::ConvertUtf32ToUtf8(cp1, buffer, countof(buffer), &charsOut);
+					Impl::ConvertUtf32ToUtf8(cp1, buffer, std::size(buffer), &charsOut);
 					s.append(buffer);
 					if (cp2)
 					{
 						size_t charsOut2 = 0;
 						char buffer2[5] = { 0, 0, 0, 0, 0 };
-						Impl::ConvertUtf32ToUtf8(cp2, buffer2, countof(buffer2), &charsOut2);
+						Impl::ConvertUtf32ToUtf8(cp2, buffer2, std::size(buffer2), &charsOut2);
 						s.append(buffer);
 						charsOut += charsOut2;
 					}
@@ -11982,7 +12058,7 @@ namespace Jinx::Impl
 	inline bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
 	{
 		int32_t lower = 0;
-		int32_t upper = static_cast<int32_t>(countof(Impl::FoldTable::caseFoldingTable)) - 1;
+		int32_t upper = static_cast<int32_t>(std::size(Impl::FoldTable::caseFoldingTable)) - 1;
 		while (lower <= upper)
 		{
 			int32_t split = (lower + upper) / 2;
@@ -12238,7 +12314,7 @@ namespace Jinx
 				false,	// ValType
 			};
 
-			static_assert(countof(allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
+			static_assert(std::size(allowValueCompare) == static_cast<size_t>(ValueType::NumValueTypes), "Value compare flags don't match enum count");
 
 		};
 
