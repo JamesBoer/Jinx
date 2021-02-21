@@ -2617,10 +2617,8 @@ namespace Jinx::Impl
 	private:
 
 		Variant GetVariable(RuntimeID id) const;
-		void Push(Variant && value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
-		void SetVariable(RuntimeID id, Variant && value);
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 
@@ -2760,7 +2758,6 @@ namespace Jinx::Impl
 		bool PropertyExists(RuntimeID id) const;
 		bool SetProperty(RuntimeID id, std::function<bool(Variant &)> fn);
 		void SetProperty(RuntimeID id, const Variant & value);
-		void SetProperty(RuntimeID id, Variant && value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 		void UnregisterFunction(RuntimeID id);
@@ -8595,12 +8592,6 @@ namespace Jinx::Impl
 		m_propertyMap[id] = value;
 	}
 
-	inline void Runtime::SetProperty(RuntimeID id, Variant && value)
-	{
-		std::lock_guard<std::mutex> lock(m_propertyMutex);
-		m_propertyMap[id] = value;
-	}
-
 	inline BufferPtr Runtime::StripDebugInfo(BufferPtr bytecode) const
 	{
 		// Validate input
@@ -8838,7 +8829,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for addition");
 					return false;
 				}
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::And:
@@ -8846,7 +8837,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1.GetBoolean() && op2.GetBoolean();
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::CallFunc:
@@ -8904,7 +8895,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				op2 -= op1;
-				Push(std::move(op2));
+				Push(op2);
 			}
 			break;
 			case Opcode::Divide:
@@ -8922,7 +8913,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for division");
 					return false;
 				}
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Equals:
@@ -8930,7 +8921,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 == op2;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::EraseItr:
@@ -9042,7 +9033,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 > op2;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::GreaterEq:
@@ -9055,7 +9046,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 >= op2;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Increment:
@@ -9073,7 +9064,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				op2 += op1;
-				Push(std::move(op2));
+				Push(op2);
 			}
 			break;
 			case Opcode::Jump:
@@ -9147,7 +9138,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 < op2;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::LessEq:
@@ -9160,7 +9151,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 <= op2;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Library:
@@ -9231,7 +9222,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for mod");
 					return false;
 				}
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Multiply:
@@ -9244,7 +9235,7 @@ namespace Jinx::Impl
 					Error("Invalid variable for multiply");
 					return false;
 				}
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Negate:
@@ -9256,14 +9247,14 @@ namespace Jinx::Impl
 					return false;
 				}
 				auto result = op1 * -1;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Not:
 			{
 				auto op1 = Pop();
 				auto result = !op1.GetBoolean();
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::NotEquals:
@@ -9271,7 +9262,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1 != op2;
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Or:
@@ -9279,7 +9270,7 @@ namespace Jinx::Impl
 				auto op2 = Pop();
 				auto op1 = Pop();
 				auto result = op1.GetBoolean() || op2.GetBoolean();
-				Push(std::move(result));
+				Push(result);
 			}
 			break;
 			case Opcode::Pop:
@@ -9333,7 +9324,7 @@ namespace Jinx::Impl
 				}
 				for (uint32_t i = 0; i < count * 2; ++i)
 					m_stack.pop_back();
-				Push(std::move(collection));
+				Push(collection);
 			}
 			break;
 			case Opcode::PushItr:
@@ -9347,7 +9338,7 @@ namespace Jinx::Impl
 					return false;
 				}
 				Variant itr = std::make_pair(coll.GetCollection()->begin(), coll.GetCollection());
-				Push(std::move(itr));
+				Push(itr);
 			}
 			break;
 			case Opcode::PushKeyVal:
@@ -9417,7 +9408,7 @@ namespace Jinx::Impl
 				}
 				for (uint32_t i = 0; i < count; ++i)
 					m_stack.pop_back();
-				Push(std::move(collection));
+				Push(collection);
 			}
 			break;
 			case Opcode::PushProp:
@@ -9425,14 +9416,14 @@ namespace Jinx::Impl
 				uint64_t id;
 				m_execution.back().reader.Read(&id);
 				auto val = m_runtime->GetProperty(id);
-				Push(std::move(val));
+				Push(val);
 			}
 			break;
 			case Opcode::PushTop:
 			{
 				assert(m_stack.size() >= 1);
 				auto op = m_stack[m_stack.size() - 1];
-				Push(std::move(op));
+				Push(op);
 			}
 			break;
 			case Opcode::PushVar:
@@ -9440,14 +9431,14 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				auto var = GetVariable(id);
-				Push(std::move(var));
+				Push(var);
 			}
 			break;
 			case Opcode::PushVal:
 			{
 				Variant val;
 				val.Read(m_execution.back().reader);
-				Push(std::move(val));
+				Push(val);
 			}
 			break;
 			case Opcode::Return:
@@ -9521,7 +9512,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				m_runtime->SetProperty(id, std::move(val));
+				m_runtime->SetProperty(id, val);
 			}
 			break;
 			case Opcode::SetPropKeyVal:
@@ -9588,7 +9579,7 @@ namespace Jinx::Impl
 				RuntimeID id;
 				m_execution.back().reader.Read(&id);
 				Variant val = Pop();
-				SetVariable(id, std::move(val));
+				SetVariable(id, val);
 			}
 			break;
 			case Opcode::SetVarKeyVal:
@@ -9820,7 +9811,7 @@ namespace Jinx::Impl
 			Error("Stack underflow");
 			return Variant();
 		}
-		auto var = std::move(m_stack.back());
+		auto var = m_stack.back();
 		m_stack.pop_back();
 		return var;
 	}
@@ -9828,11 +9819,6 @@ namespace Jinx::Impl
 	inline void Script::Push(const Variant & value)
 	{
 		m_stack.push_back(value);
-	}
-
-	inline void Script::Push(Variant && value)
-	{
-		m_stack.push_back(std::move(value));
 	}
 
 	inline void Script::SetVariable(const String & name, const Variant & value)
@@ -9844,13 +9830,6 @@ namespace Jinx::Impl
 
 	inline void Script::SetVariable(RuntimeID id, const Variant & value)
 	{
-		auto val = value;
-		SetVariable(id, std::move(val));
-	}
-
-	inline void Script::SetVariable(RuntimeID id, Variant && value)
-	{
-
 		// Search the current frame for the variable
 		for (auto ritr = m_idIndexData.rbegin(); ritr != m_idIndexData.rend(); ++ritr)
 		{
