@@ -13,7 +13,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Library : public ILibrary
+	class Library final : public ILibrary
 	{
 	public:
 		Library(RuntimeWPtr runtime, const String & name);

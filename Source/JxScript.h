@@ -15,7 +15,7 @@ namespace Jinx::Impl
 	class Script;
 	using ScriptIPtr = std::shared_ptr<Script>;
 
-	class Script : public IScript, public std::enable_shared_from_this<Script>
+	class Script final : public IScript, public std::enable_shared_from_this<Script>
 	{
 	public:
 		Script(RuntimeIPtr runtime, BufferPtr bytecode, Any userContext);
@@ -53,10 +53,8 @@ namespace Jinx::Impl
 	private:
 
 		Variant GetVariable(RuntimeID id) const;
-		void Push(Variant && value);
 		void SetVariableAtIndex(RuntimeID id, size_t index);
 		void SetVariable(RuntimeID id, const Variant & value);
-		void SetVariable(RuntimeID id, Variant && value);
 
 		std::pair<CollectionPtr, Variant> WalkSubscripts(uint32_t subscripts, CollectionPtr collection);
 

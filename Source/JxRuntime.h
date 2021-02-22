@@ -13,7 +13,7 @@ Copyright (c) 2016 James Boer
 namespace Jinx::Impl
 {
 
-	class Runtime : public IRuntime, public std::enable_shared_from_this<Runtime>
+	class Runtime final : public IRuntime, public std::enable_shared_from_this<Runtime>
 	{
 	public:
 		Runtime();
@@ -39,7 +39,6 @@ namespace Jinx::Impl
 		bool PropertyExists(RuntimeID id) const;
 		bool SetProperty(RuntimeID id, std::function<bool(Variant &)> fn);
 		void SetProperty(RuntimeID id, const Variant & value);
-		void SetProperty(RuntimeID id, Variant && value);
 		void AddPerformanceParams(bool finished, uint64_t timeNs, uint64_t instCount);
 		const SymbolTypeMap & GetSymbolTypeMap() const { return m_symbolTypeMap; }
 		void UnregisterFunction(RuntimeID id);

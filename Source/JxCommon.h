@@ -212,18 +212,6 @@ namespace Jinx::Impl
 		uint32_t lineNumber;
 	};
 
-	template <typename T>
-	inline T NextHighestMultiple(T val, T multiple)
-	{
-		return val + ((multiple - (val % multiple)) % multiple);
-	}
-
-	template<typename T, size_t s>
-	constexpr size_t countof(T(&)[s])
-	{
-		return s;
-	}
-
 	inline const char * StrCopy(char * dest, size_t destBufferSize, const char * source)
 	{
 #if defined(JINX_WINDOWS)
@@ -250,6 +238,13 @@ namespace Jinx::Impl
 	class Runtime;
 	using RuntimeIPtr = std::shared_ptr<Runtime>;
 	using RuntimeWPtr = std::weak_ptr<Runtime>;
+
+	struct Symbol;
+	using SymbolList = std::vector<Symbol, Allocator<Symbol>>;
+	using SymbolListCItr = SymbolList::const_iterator;
+
+	// Write symbol text to string
+	void WriteSymbol(SymbolListCItr symbol, String & output);
 
 	// Shared aliases
 	static const size_t RuntimeArenaSize = 4096;

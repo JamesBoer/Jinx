@@ -1424,7 +1424,7 @@ namespace Jinx::Impl
 	inline_t bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
 	{
 		int32_t lower = 0;
-		int32_t upper = static_cast<int32_t>(countof(Impl::FoldTable::caseFoldingTable)) - 1;
+		int32_t upper = static_cast<int32_t>(std::size(Impl::FoldTable::caseFoldingTable)) - 1;
 		while (lower <= upper)
 		{
 			int32_t split = (lower + upper) / 2;

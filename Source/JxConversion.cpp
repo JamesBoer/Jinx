@@ -30,7 +30,7 @@ namespace Jinx::Impl
 			13, // Any
 		};
 
-		static_assert(countof(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+		static_assert(std::size(valueTypeToByte) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 
 		static inline ValueType byteToValueType[] =
 		{
@@ -50,7 +50,7 @@ namespace Jinx::Impl
 			ValueType::Any,
 		};
 
-		static_assert(countof(byteToValueType) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+		static_assert(std::size(byteToValueType) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 	};
 
 	inline_t ValueType ByteToValueType(uint8_t byte)
@@ -415,7 +415,7 @@ namespace Jinx::Impl
 		char buffer[64];
 		snprintf(
 			buffer,
-			countof(buffer),
+			std::size(buffer),
 			"%.*X-%.*X-%.*X-%.*X%.*X-%.*X%.*X%.*X%.*X%.*X%.*X",
 			8, value.data1,
 			4, value.data2,

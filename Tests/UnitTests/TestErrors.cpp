@@ -846,8 +846,6 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		static const char * scriptText =
 			u8R"(
 			
-			import test
-
 			set private a to 123
 			set public a to 345
 			
@@ -861,8 +859,6 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 	{
 		static const char * scriptText =
 			u8R"(
-			
-			import test
 
 			set private a a to 123
 			set public a a to 345

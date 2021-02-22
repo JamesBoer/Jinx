@@ -80,7 +80,7 @@ namespace Jinx
 				"wait",
 			};
 			
-			static_assert(countof(opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
+			static_assert(std::size(opcodeName) == static_cast<size_t>(Opcode::NumOpcodes), "Opcode descriptions don't match enum count");
 
 			static inline const char * symbolTypeName[] =
 			{
@@ -154,7 +154,7 @@ namespace Jinx
 				"while",
 			};
 
-			static_assert(countof(symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");
+			static_assert(std::size(symbolTypeName) == static_cast<size_t>(SymbolType::NumSymbols), "SymbolType descriptions don't match enum count");
 
 			static inline const char * valueTypeName[] =
 			{
@@ -174,7 +174,7 @@ namespace Jinx
 				"any",
 			};
 
-			static_assert(countof(valueTypeName) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
+			static_assert(std::size(valueTypeName) == (static_cast<size_t>(ValueType::NumValueTypes) + 1), "ValueType names don't match enum count");
 		};
 
 		inline_t const char * GetOpcodeText(Opcode opcode)
@@ -258,12 +258,56 @@ namespace Jinx
 			return CommonData::globalParams.enableDebugInfo;
 		}
 
+		inline_t void WriteSymbol(SymbolListCItr symbol, String & output)
+		{
+			char buffer[768];
+
+			// Write to the output string based on the symbol type
+			switch (symbol->type)
+			{
+				case SymbolType::None:
+					snprintf(buffer, std::size(buffer), "(None) ");
+					break;
+				case SymbolType::Invalid:
+					snprintf(buffer, std::size(buffer), "(Invalid) ");
+					break;
+				case SymbolType::NewLine:
+					snprintf(buffer, std::size(buffer), "\n");
+					break;
+				case SymbolType::NameValue:
+					// Display names with spaces as surrounded by single quotes to help delineate them
+					// from surrounding symbols.
+					if (strstr(String(symbol->text).c_str(), " "))
+						snprintf(buffer, std::size(buffer), "'%s' ", symbol->text.c_str());
+					else
+						snprintf(buffer, std::size(buffer), "%s ", symbol->text.c_str());
+					break;
+				case SymbolType::StringValue:
+					snprintf(buffer, std::size(buffer), "\"%s\" ", symbol->text.c_str());
+					break;
+				case SymbolType::NumberValue:
+					snprintf(buffer, std::size(buffer), "%f ", symbol->numVal);
+					break;
+				case SymbolType::IntegerValue:
+					snprintf(buffer, std::size(buffer), "%" PRId64 " ", static_cast<int64_t>(symbol->intVal));
+					break;
+				case SymbolType::BooleanValue:
+					snprintf(buffer, std::size(buffer), "%s ", symbol->boolVal ? "true" : "false");
+					break;
+				default:
+					snprintf(buffer, std::size(buffer), "%s ", GetSymbolTypeText(symbol->type));
+					break;
+			};
+			output = buffer;
+		}
+
+
 	} // namespace Impl
 
 	inline_t String GetVersionString()
 	{
 		char buffer[32];
-		snprintf(buffer, Impl::countof(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
+		snprintf(buffer, std::size(buffer), "%i.%i.%i", Jinx::MajorVersion, Jinx::MinorVersion, Jinx::PatchNumber);
 		return buffer;
 	}
 
