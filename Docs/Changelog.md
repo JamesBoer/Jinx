@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.3.4] - 2021-02-21
+
+- Improved compiler error messages
+- Minor code cleanup
+
 ## [1.3.3] - 2021-02-10
 
 - Added support for string index pair operator for extraction and insertion of text
