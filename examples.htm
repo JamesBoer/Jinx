@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
+ <meta charset="utf-8"/>
+ <meta name="Generator" content="Xara HTML filter v.8.8.0.483"/>
+ <meta name="XAR Files" content="index_htm_files/xr_files.txt"/>
+ <title>Jinx Scripting Language</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <meta name="keywords" content="scripting, scripting language, language, development, jinx, c++, videogame, videogame development"/>
+ <meta name="description" content="Jinx - Simple Embedable Scripting Language"/>
+ <link rel="stylesheet" href="index_htm_files/xr_fonts.css"/>
+ <script><!--
+ if(navigator.userAgent.indexOf('MSIE')!=-1 || navigator.userAgent.indexOf('Trident')!=-1){ document.write('<link rel="stylesheet" href="index_htm_files/xr_fontsie.css"/>');}
+ --></script>
+ <script>document.documentElement.className="xr_bgh4";</script>
+ <link rel="stylesheet" href="index_htm_files/xr_main.css"/>
+ <link rel="stylesheet" href="index_htm_files/xr_text.css"/>
+ <link rel="stylesheet" href="index_htm_files/custom_styles.css"/>
+ <link rel="shortcut icon" type="image/ico" href="index_htm_files/favicon.ico"/>
+ <link rel="icon" type="image/ico" href="index_htm_files/favicon.ico"/>
+ <meta name="msapplication-TileImage" content="index_htm_files/tileicon.png"/>
+ <link rel="apple-touch-icon" href="index_htm_files/tileicon.png"/>
+ <script src="index_htm_files/roe.js"></script>
+ <script src="index_htm_files/replaceMobileFonts.js"></script>
+ <script src="index_htm_files/prs4.js"></script>
+ <link rel="stylesheet" href="index_htm_files/xr_all.css" id="xr_mvcss"/>
+ <!--[if lt IE 9]><link rel="stylesheet" href="index_htm_files/xr_ie.css"/><![endif]-->
+ <script> var xr_multivar=1;xr_ios_ini2();</script>
+ <script src="index_htm_files/jquery.js"></script>
+ <link rel="stylesheet" href="index_htm_files/ani.css"/>
+</head>
+<body class="xr_bgb4">
+<div class="xr_ap" id="xr_xrii"  style="width: 100%; height: 100%; min-width: 960px; min-height: 1393px; top:0%; left:0%; overflow:hidden;">
+<div class="xr_ap" id="xr_bph" style="width: 100%; height: 100%; left: 0px; top: 0px; overflow: hidden;">
+<div class="xr_ar xr_mvp_6 xr_mvpo " style="width: 100%; height: 100%;">
+<div class="xr_pbd">
+</div>
+</div>
+</div>
+<div class="xr_strb  xr_mvp_5 " style="top: 0px; left: 0px; width: 100%; min-width: 960px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 60px; top: 1333px; position: absolute; background-color: #DBD7E9;"></span>
+</div>
+<div class="xr_strb  xr_mvp_5 " style="top: 0px; left: 0px; width: 100%; min-width: 960px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 78px; top: 95px; position: absolute; background-color: #1C1341;"></span>
+</div>
+<div class="xr_strb  xr_mvp_6  xr_mvpo " style="top: 0px; left: 0px; width: 100%; min-width: 480px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 60px; top: 1597px; position: absolute; background-color: #DBD7E9;"></span>
+</div>
+<div class="xr_strb  xr_mvp_6  xr_mvpo " style="top: 0px; left: 0px; width: 100%; min-width: 480px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 78px; top: 110px; position: absolute; background-color: #1C1341;"></span>
+</div>
+<!--[if gte IE 9]><!-->
+<div id="xr_xr" class="xr_noc" style="top:0px; position:relative; text-align:left; margin:0 auto;" onmousedown="xr_mm(event);">
+<!--<![endif]-->
+<!--[if lt IE 9]>
+<div class="xr_ap" id="xr_xr" style="width: 960px; height: 1393px; top:0px; left:50%; margin-left: -480px; text-align: left;">
+<![endif]-->
+ <script>var xr_xr=document.getElementById("xr_xr");xr_rxc();</script>
+<div id="xr_td" class="xr_td">
+<div id="xr_mvp_5" class="xr_mvp_5 xr_bgn_4_-768_2129" style="position:absolute; width:960px; height:1393px;">
+<div class="xr_ap xr_xri_" style="width: 960px; height: 1393px;">
+<div class="xr_group">
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+ <span class="xr_ar" style="left:0px;top:193px;width:960px;height:1139px; background-color: #FFFFFF;"></span>
+ <div class="xr_txt xr_s2" style="position: absolute; left:20px; top:236px; width:915px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h2 class="xr_tl Normal_text Heading_2" style="top: -22.56px;margin:0;">Check Out Jinx</h2>
+  <span class="xr_tl Normal_text" style="top: 14.63px;">Want to see what the Jinx language looks like?&nbsp; Here we show off a few examples to give you an idea of the look and feel of the language.</span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 55.71px;margin:0;">Hello World!</h3>
+  <span class="xr_tl Normal_text" style="top: 80.5px;">Let’s start with the traditional “hello world” program.&nbsp; We see a few basic features of the language here, such as how to import a library, single </span>
+  <span class="xr_tl Normal_text" style="top: 101.04px;">line comments, and basic output logging.&nbsp; Unlike many language, Jinx imposes no significant restriction on the use of whitespace in variables </span>
+  <span class="xr_tl Normal_text" style="top: 121.58px;">and function names.&nbsp; Note that the “write line” function contains a space in the name.</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 162.66px;font-family:Courier New;font-weight:bold;font-size:13.05px;color:#00B050;">-- Use the core library</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 177.44px;font-family:Courier New;font-weight:bold;font-size:13.05px;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;color:#0070C0;">import </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;">core</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 207.01px;font-family:Courier New;font-weight:bold;font-size:13.05px;color:#00B050;">-- Write to the default output</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 221.79px;font-family:Courier New;font-weight:bold;font-size:13.05px;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;color:#7030A0;">write line </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;color:#C00000;">"Hello, world!"</span></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 257.12px;margin:0;">Assignments and Types</h3>
+  <span class="xr_tl Normal_text" style="top: 281.91px;">There are six common types used in Jinx, as well as a few lesser-used types.&nbsp; Here we assign six constant values to six variables, all of </span>
+  <span class="xr_tl Normal_text" style="top: 302.45px;">different types.</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 343.53px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var1 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">null</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- null type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 358.63px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var2 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">123.456</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- number type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 373.73px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var3 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">42</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- integer type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 388.83px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var4 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">false</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- boolean type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 403.94px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var5 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"a string value"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- string type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 419.04px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var6 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"red"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">, </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"green"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">, </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"blue"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- collection type</span></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 454.68px;margin:0;">FizzBuzz</h3>
+  <span class="xr_tl Normal_text" style="top: 479.47px;">In this example, we demonstrate basic function syntax, loops and if-branching, as well as an example of a variable with whitespace in the </span>
+  <span class="xr_tl Normal_text" style="top: 500.01px;">name.&nbsp; The program is an implementation of “FizzBuzz”, a game in which the words “Fizz” or “Buzz” are called out based on the whether a </span>
+  <span class="xr_tl Normal_text" style="top: 520.55px;">particular number in a sequence is divisible by 3 or 5.&nbsp; Note how the Jinx script compares to the examples in the <a href="https://en.wikipedia.org/wiki/Pseudocode" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,24)" >Wikipedia article on </a></span>
+  <span class="xr_tl Normal_text" style="top: 541.09px;"><a href="https://en.wikipedia.org/wiki/Pseudocode" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,24)" >pseudocode</a>, which happens to demonstrate this particular code in various pseudocode styles.&nbsp; Jinx was intentionally designed to look similar </span>
+  <span class="xr_tl Normal_text" style="top: 561.63px;">to traditional forms of pseudocode, eschewing complex symbols and functionality in favor of simplicity and straightforward syntax.</span>
+  <span class="xr_tl Normal_text" style="top: 602.71px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">import </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">core</span></span>
+  <span class="xr_tl Normal_text" style="top: 642.35px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">function </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">{</span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">integer </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">x} </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">is divisible by </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">{</span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">integer </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">y}</span></span>
+  <span class="xr_tl Normal_text" style="top: 662.17px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">return </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">x % y = </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">0</span></span>
+  <span class="xr_tl Normal_text" style="top: 682px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 721.64px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">loop </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">from </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">1 </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">100</span></span>
+  <span class="xr_tl Normal_text" style="top: 741.46px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">true</span></span>
+  <span class="xr_tl Normal_text" style="top: 761.28px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">if </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">is divisible by </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">3</span></span>
+  <span class="xr_tl Normal_text" style="top: 781.1px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">"Fizz"</span></span>
+  <span class="xr_tl Normal_text" style="top: 800.92px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">false</span></span>
+  <span class="xr_tl Normal_text" style="top: 820.75px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 840.57px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">if </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">is divisible by </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">5</span></span>
+  <span class="xr_tl Normal_text" style="top: 860.39px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">"Buzz"</span></span>
+  <span class="xr_tl Normal_text" style="top: 880.21px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">false</span></span>
+  <span class="xr_tl Normal_text" style="top: 900.03px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 919.85px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">if </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number</span></span>
+  <span class="xr_tl Normal_text" style="top: 939.67px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i</span></span>
+  <span class="xr_tl Normal_text" style="top: 959.49px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 979.32px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">newline</span></span>
+  <span class="xr_tl Normal_text" style="top: 999.14px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">wait</span></span>
+  <span class="xr_tl Normal_text" style="top: 1018.96px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+ </div>
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+ <div class="xr_txt Normal_text" style="position: absolute; left:430px; top:1368px; width:324px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <span class="xr_tc Normal_text" style="left: -178.92px; top: -13.16px; width: 358px;">Copyright © 2021 James Boer&nbsp; All Rights Reserved</span>
+ </div>
+</div>
+ <div class="xr_trigo_xr_ce7" style="display:block;position:absolute;left:481px;top:150px;width:174px;height:38px;z-index:-1;"></div>
+ <div class="xr_ap xr_ac" id="xr_xpxr_172" style="left:0; top:0; visibility: hidden; display: none;">
+ <div class="xr_txt Normal_text Heading_1" style="position: absolute; left:481px; top:150px; width:174px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h1 class="xr_tc Normal_text Heading_1" style="left: -98.75px; top: -37.6px; width: 198px;margin:0;">Examples</h1>
+ </div>
+ </div>
+ <span class="xr_trigo_xr_ce8" style="display:block;position:absolute;left:9px;top:84px;width:99px;height:99px;z-index:-1;"></span>
+ <div class="xr_ap xr_ac" id="xr_xpxr_195" style="left:0; top:0; visibility: hidden; display: none;">
+ <img class="xr_rn_ xr_ap" src="index_htm_files/331.png" alt="" title="" style="left:9px;top:84px;width:99px;height:99px;"/>
+ </div>
+ <div id="xr_xo24" class="xr_ap" style="left:0; top:0; width:960px; height:100px; visibility:hidden; z-index:3;">
+ <a href="" onclick="return(false);" onmousedown="xr_ppir(this);">
+ </a>
+ </div>
+ <div id="xr_xd24"></div>
+</div>
+</div>
+<div id="xr_mvp_6" class="xr_mvp_6 xr_bgn_5_-768_2393 xr_mvpo" style="position:absolute; width:480px; height:1657px;">
+<div class="xr_ap xr_xri_" style="width: 480px; height: 1657px;">
+<div class="xr_group">
+ <span class="xr_trigs xr_trigo_xr_ce9" style="display:block;position:absolute;left:-120px;top:0px;width:0px;height:0px;visibility:hidden;z-index:-1;"></span>
+ <span class="xr_trigs xr_trigo_xr_ce9" style="display:block;position:absolute;left:-120px;top:0px;width:0px;height:0px;visibility:hidden;z-index:-1;"></span>
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+ <span class="xr_ar" style="left:0px;top:200px;width:480px;height:1346px; background-color: #FFFFFF;"></span>
+ <div class="xr_txt xr_s2" style="position: absolute; left:11px; top:233px; width:454px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h2 class="xr_tl Normal_text Heading_2" style="top: -22.56px;margin:0;">Check Out Jinx</h2>
+  <span class="xr_tl Normal_text" style="top: 14.63px;">Want to see what the Jinx language looks like?&nbsp; Here we show off a </span>
+  <span class="xr_tl Normal_text" style="top: 35.17px;">few examples to give you an idea of the look and feel of the language.</span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 76.25px;margin:0;">Hello World!</h3>
+  <span class="xr_tl Normal_text" style="top: 101.04px;">Let’s start with the traditional “hello world” program.&nbsp; We see a few </span>
+  <span class="xr_tl Normal_text" style="top: 121.58px;">basic features of the language here, such as how to import a library, </span>
+  <span class="xr_tl Normal_text" style="top: 142.12px;">single line comments, and basic output logging.&nbsp; Unlike many </span>
+  <span class="xr_tl Normal_text" style="top: 162.66px;">language, Jinx imposes no significant restriction on the use of </span>
+  <span class="xr_tl Normal_text" style="top: 183.2px;">whitespace in variables and function names.&nbsp; Note that the “write line” </span>
+  <span class="xr_tl Normal_text" style="top: 203.74px;">function contains a space in the name.</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 244.82px;font-family:Courier New;font-weight:bold;font-size:13.05px;color:#00B050;">-- Use the core library</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 259.6px;font-family:Courier New;font-weight:bold;font-size:13.05px;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;color:#0070C0;">import </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;">core</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 289.17px;font-family:Courier New;font-weight:bold;font-size:13.05px;color:#00B050;">-- Write to the default output</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 303.95px;font-family:Courier New;font-weight:bold;font-size:13.05px;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;color:#7030A0;">write line </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;font-size:13.05px;color:#C00000;">"Hello, world!"</span></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 339.28px;margin:0;">Assignments and Types</h3>
+  <span class="xr_tl Normal_text" style="top: 364.07px;">There are six common types used in Jinx, as well as a few lesser-used </span>
+  <span class="xr_tl Normal_text" style="top: 384.61px;">types.&nbsp; Here we assign six constant values to six variables, all of </span>
+  <span class="xr_tl Normal_text" style="top: 405.15px;">different types.</span>
+  <span class="xr_tl Normal_text_a Code" style="top: 446.23px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var1 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">null</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- null type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 461.33px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var2 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">123.456</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- number type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 476.43px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var3 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">42</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- integer type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 491.53px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var4 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">false</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- boolean type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 506.64px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var5 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"a string value"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- string type</span></span>
+  <span class="xr_tl Normal_text_a Code" style="top: 521.74px;font-family:Courier New;font-weight:bold;"><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">var6 </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"red"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">, </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"green"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">, </span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#C00000;">"blue"</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;">&nbsp;</span><span class="Normal_text_a Code" style="font-family:Courier New;font-weight:bold;color:#00B050;">-- collection type</span></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 557.38px;margin:0;">FizzBuzz</h3>
+  <span class="xr_tl Normal_text" style="top: 582.17px;">In this example, we demonstrate basic function syntax, loops and if-</span>
+  <span class="xr_tl Normal_text" style="top: 602.71px;">branching, as well as an example of a variable with whitespace in the </span>
+  <span class="xr_tl Normal_text" style="top: 623.25px;">name.&nbsp; The program is an implementation of “FizzBuzz”, a game in </span>
+  <span class="xr_tl Normal_text" style="top: 643.79px;">which the words “Fizz” or “Buzz” are called out based on the whether a </span>
+  <span class="xr_tl Normal_text" style="top: 664.33px;">particular number in a sequence is divisible by 3 or 5.&nbsp; Note how the </span>
+  <span class="xr_tl Normal_text" style="top: 684.87px;">Jinx script compares to the examples in the <a href="https://en.wikipedia.org/wiki/Pseudocode" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,30)" >Wikipedia article on </a></span>
+  <span class="xr_tl Normal_text" style="top: 705.41px;"><a href="https://en.wikipedia.org/wiki/Pseudocode" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,30)" >pseudocode</a>, which happens to demonstrate this particular code in </span>
+  <span class="xr_tl Normal_text" style="top: 725.95px;">various pseudocode styles.&nbsp; Jinx was intentionally designed to look </span>
+  <span class="xr_tl Normal_text" style="top: 746.49px;">similar to traditional forms of pseudocode, eschewing complex </span>
+  <span class="xr_tl Normal_text" style="top: 767.03px;">symbols and functionality in favor of simplicity and straightforward </span>
+  <span class="xr_tl Normal_text" style="top: 787.57px;">syntax.</span>
+  <span class="xr_tl Normal_text" style="top: 828.65px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">import </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">core</span></span>
+  <span class="xr_tl Normal_text" style="top: 868.29px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">function </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">{</span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">integer </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">x} </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">is divisible by </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">{</span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">integer </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">y}</span></span>
+  <span class="xr_tl Normal_text" style="top: 888.11px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">return </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">x % y = </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">0</span></span>
+  <span class="xr_tl Normal_text" style="top: 907.94px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 947.58px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">loop </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">from </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">1 </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">100</span></span>
+  <span class="xr_tl Normal_text" style="top: 967.4px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">true</span></span>
+  <span class="xr_tl Normal_text" style="top: 987.22px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">if </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">is divisible by </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">3</span></span>
+  <span class="xr_tl Normal_text" style="top: 1007.04px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">"Fizz"</span></span>
+  <span class="xr_tl Normal_text" style="top: 1026.86px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">false</span></span>
+  <span class="xr_tl Normal_text" style="top: 1046.69px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 1066.51px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">if </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">is divisible by </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">5</span></span>
+  <span class="xr_tl Normal_text" style="top: 1086.33px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">"Buzz"</span></span>
+  <span class="xr_tl Normal_text" style="top: 1106.15px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">set </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">to </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#C00000;">false</span></span>
+  <span class="xr_tl Normal_text" style="top: 1125.97px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 1145.79px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">if </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">print number</span></span>
+  <span class="xr_tl Normal_text" style="top: 1165.61px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">i</span></span>
+  <span class="xr_tl Normal_text" style="top: 1185.43px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+  <span class="xr_tl Normal_text" style="top: 1205.26px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#7030A0;">write </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">newline</span></span>
+  <span class="xr_tl Normal_text" style="top: 1225.08px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;">&nbsp;&nbsp;&nbsp; </span><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">wait</span></span>
+  <span class="xr_tl Normal_text" style="top: 1244.9px;font-family:Courier New;font-weight:bold;"><span class="Normal_text" style="font-family:Courier New;font-weight:bold;color:#0070C0;">end</span></span>
+ </div>
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+ <div class="xr_txt Normal_text" style="position: absolute; left:240px; top:1632px; width:327px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <span class="xr_tc Normal_text" style="left: -180.34px; top: -13.16px; width: 361px;">Copyright © 2020 James Boer&nbsp; All Rights Reserved</span>
+ </div>
+</div>
+ <div class="xr_txt Normal_text Heading_1" style="position: absolute; left:244px; top:165px; width:174px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h1 class="xr_tc Normal_text Heading_1" style="left: -98.75px; top: -37.6px; width: 198px;margin:0;">Examples</h1>
+ </div>
+ <div id="xr_xo30" class="xr_ap" style="left:0; top:0; width:480px; height:100px; visibility:hidden; z-index:3;">
+ <a href="" onclick="return(false);" onmousedown="xr_ppir(this);">
+ </a>
+ </div>
+ <div id="xr_xd30"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="xr_ap  xr_mvp_5 " style="top:0px; left:0px; width:0px; height:0px; text-align:left;">
+ <div class="xr_ap xr_stickie" style="position:fixed;top:0px;width:100%;height:94px;">
+ <span class="xr_ar xr_stt" style=" left: 0px; width: 100%; height: 94px; position: fixed; background-color: #FFFFFF;-moz-opacity: 0.75;-khtml-opacity: 0.75;opacity: 0.75;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=75);"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:94px;width:100%;height:1px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 1px; position: fixed; background:url('index_htm_files/273@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+<div class="xr_xpos xr_stickie" style="position:fixed; left: 50%; margin-left: 54px; top: 29px; width:426px; height:51px;">
+<div id="xr_nb17" class="xr_ar">
+ <div class="xr_ar xr_nb0">
+ <a href="index.htm" target="_self" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/314.png" alt="Home" title="" onmousemove="xr_mo(this,30,event)" style="left:0px;top:0px;width:73px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/318.png" alt="Home" title="" onmousemove="xr_mo(this,30)" style="left:0px;top:0px;width:73px;height:51px;"/>
+ </a>
+ </div>
+ <div class="xr_ar xr_nb0">
+ <a href="downloads.htm" target="_self" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/315.png" alt="Downloads" title="" onmousemove="xr_mo(this,30,event)" style="left:72px;top:0px;width:111px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/319.png" alt="Downloads" title="" onmousemove="xr_mo(this,30)" style="left:72px;top:0px;width:111px;height:51px;"/>
+ </a>
+ </div>
+ <div class="xr_ar xr_nb0">
+ <a href="javascript:;" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/316.png" alt="Examples" title="" onmousemove="xr_mo(this,30,event)" style="left:182px;top:0px;width:101px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_rs" src="index_htm_files/320.png" alt="Examples" title="" onmousemove="xr_mo(this,30)" style="left:182px;top:0px;width:101px;height:51px;"/>
+ </a>
+ </div>
+ <div class="xr_ar xr_nb0">
+ <a href="documentation.htm" target="_self" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/281.png" alt="Documentation" title="" onmousemove="xr_mo(this,30,event)" style="left:282px;top:0px;width:144px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/286.png" alt="Documentation" title="" onmousemove="xr_mo(this,30)" style="left:282px;top:0px;width:144px;height:51px;"/>
+ </a>
+ </div>
+</div>
+</div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:93px;width:100%;height:2px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 2px; position: fixed; background:url('index_htm_files/336@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+</div>
+<div class="xr_ap  xr_mvp_6  xr_mvpo " style="top:0px; left:0px; width:0px; height:0px; text-align:left;">
+ <div class="xr_ap xr_ac xr_stickie" id="xr_xpxr_208" style="position:fixed;left:50%;margin-left:-360px;top:0px;width:720px;height:108px; visibility: hidden; display: none;">
+ <span class="xr_ar" style="left:0px;top:0px;width:720px;height:108px; background-color: #978DC0;-moz-opacity: 0.50;-khtml-opacity: 0.50;opacity: 0.50;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=50);"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:108px;width:100%;height:2px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 2px; position: fixed; background:url('index_htm_files/347@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:0px;width:100%;height:109px;">
+ <span class="xr_ar xr_stt" style=" left: 0px; width: 100%; height: 109px; position: fixed; background-color: #FFFFFF;-moz-opacity: 0.75;-khtml-opacity: 0.75;opacity: 0.75;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=75);"></span>
+ </div>
+<div class="xr_xpos xr_stickie" style="position:fixed; left: 50%; margin-left: 121px; top: 29px; width:103px; height:51px;">
+<div id="xr_nb21" class="xr_ar">
+ <div class="xr_ar xr_nb0">
+ <a href="javascript:;" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/441.png" alt="NAVIGATION" title="" style="left:0px;top:0px;width:103px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/443.png" alt="NAVIGATION" title="" onmousemove="xr_mo(this,30)" style="left:0px;top:0px;width:102px;height:51px;"/>
+ </a>
+  <div class="xr_nb2 xr_nb5 xr_smp0_-103" style="left:0px; top:51px; min-width:103px;">
+  <ul class="xr_nb4">
+   <li><a href="index.htm">Home</a>
+   </li>
+   <li><a href="downloads.htm">Downloads</a>
+   </li>
+   <li><a href="examples.htm">Examples</a>
+   </li>
+   <li><a href="documentation.htm">Documentation</a>
+   </li>
+  </ul>
+  </div>
+ </div>
+</div>
+</div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:110px;width:100%;height:2px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 2px; position: fixed; background:url('index_htm_files/347@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+</div>
+</div >
+<!--[if lt IE 7]><script src="index_htm_files/png.js"></script><![endif]-->
+<!--[if IE]><script>xr_aeh()</script><![endif]--><!--[if !IE]>--><script>xr_htm();repMobFonts();window.addEventListener('load', xr_aeh, false);</script><!--<![endif]-->
+</body>
+</html>

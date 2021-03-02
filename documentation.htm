@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
+ <meta charset="utf-8"/>
+ <meta name="Generator" content="Xara HTML filter v.8.8.0.483"/>
+ <meta name="XAR Files" content="index_htm_files/xr_files.txt"/>
+ <title>Jinx Scripting Language</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <meta name="keywords" content="scripting, scripting language, language, development, jinx, c++, videogame, videogame development"/>
+ <meta name="description" content="Jinx - Simple Embedable Scripting Language"/>
+ <link rel="stylesheet" href="index_htm_files/xr_fonts.css"/>
+ <script><!--
+ if(navigator.userAgent.indexOf('MSIE')!=-1 || navigator.userAgent.indexOf('Trident')!=-1){ document.write('<link rel="stylesheet" href="index_htm_files/xr_fontsie.css"/>');}
+ --></script>
+ <script>document.documentElement.className="xr_bgh6";</script>
+ <link rel="stylesheet" href="index_htm_files/xr_main.css"/>
+ <link rel="stylesheet" href="index_htm_files/xr_text.css"/>
+ <link rel="stylesheet" href="index_htm_files/custom_styles.css"/>
+ <link rel="shortcut icon" type="image/ico" href="index_htm_files/favicon.ico"/>
+ <link rel="icon" type="image/ico" href="index_htm_files/favicon.ico"/>
+ <meta name="msapplication-TileImage" content="index_htm_files/tileicon.png"/>
+ <link rel="apple-touch-icon" href="index_htm_files/tileicon.png"/>
+ <script src="index_htm_files/roe.js"></script>
+ <script src="index_htm_files/replaceMobileFonts.js"></script>
+ <script src="index_htm_files/prs4.js"></script>
+ <link rel="stylesheet" href="index_htm_files/xr_all.css" id="xr_mvcss"/>
+ <!--[if lt IE 9]><link rel="stylesheet" href="index_htm_files/xr_ie.css"/><![endif]-->
+ <script> var xr_multivar=1;xr_ios_ini2();</script>
+ <script src="index_htm_files/jquery.js"></script>
+ <link rel="stylesheet" href="index_htm_files/ani.css"/>
+</head>
+<body class="xr_bgb6">
+<div class="xr_ap" id="xr_xrii"  style="width: 100%; height: 100%; min-width: 960px; min-height: 902px; top:0%; left:0%; overflow:hidden;">
+<div class="xr_ap" id="xr_bph" style="width: 100%; height: 100%; left: 0px; top: 0px; overflow: hidden;">
+<div class="xr_ar xr_mvp_8 xr_mvpo " style="width: 100%; height: 100%;">
+<div class="xr_pbd">
+</div>
+</div>
+</div>
+<div class="xr_strb  xr_mvp_7 " style="top: 0px; left: 0px; width: 100%; min-width: 960px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 60px; top: 842px; position: absolute; background-color: #DBD7E9;"></span>
+</div>
+<div class="xr_strb  xr_mvp_7 " style="top: 0px; left: 0px; width: 100%; min-width: 960px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 79px; top: 94px; position: absolute; background-color: #1C1341;"></span>
+</div>
+<div class="xr_strb  xr_mvp_8  xr_mvpo " style="top: 0px; left: 0px; width: 100%; min-width: 480px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 60px; top: 826px; position: absolute; background-color: #DBD7E9;"></span>
+</div>
+<div class="xr_strb  xr_mvp_8  xr_mvpo " style="top: 0px; left: 0px; width: 100%; min-width: 480px; position: absolute;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 78px; top: 110px; position: absolute; background-color: #1C1341;"></span>
+</div>
+<!--[if gte IE 9]><!-->
+<div id="xr_xr" class="xr_noc" style="top:0px; position:relative; text-align:left; margin:0 auto;" onmousedown="xr_mm(event);">
+<!--<![endif]-->
+<!--[if lt IE 9]>
+<div class="xr_ap" id="xr_xr" style="width: 960px; height: 902px; top:0px; left:50%; margin-left: -480px; text-align: left;">
+<![endif]-->
+ <script>var xr_xr=document.getElementById("xr_xr");xr_rxc();</script>
+<div id="xr_td" class="xr_td">
+<div id="xr_mvp_7" class="xr_mvp_7 xr_bgn_6_-768_1638" style="position:absolute; width:960px; height:902px;">
+<div class="xr_ap xr_xri_" style="width: 960px; height: 902px;">
+<div class="xr_group">
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+ <div class="xr_txt Normal_text" style="position: absolute; left:430px; top:877px; width:324px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <span class="xr_tc Normal_text" style="left: -178.92px; top: -13.16px; width: 358px;">Copyright © 2021 James Boer&nbsp; All Rights Reserved</span>
+ </div>
+</div>
+ <div class="xr_trigo_xr_ce10" style="display:block;position:absolute;left:485px;top:151px;width:275px;height:30px;z-index:-1;"></div>
+ <div class="xr_ap xr_ac" id="xr_xpxr_213" style="left:0; top:0; visibility: hidden; display: none;">
+ <div class="xr_txt Normal_text Heading_1" style="position: absolute; left:485px; top:151px; width:275px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h1 class="xr_tc Normal_text Heading_1" style="left: -155.18px; top: -37.6px; width: 310px;margin:0;">Documentation</h1>
+ </div>
+ </div>
+ <span class="xr_trigo_xr_ce11" style="display:block;position:absolute;left:14px;top:85px;width:99px;height:99px;z-index:-1;"></span>
+ <div class="xr_ap xr_ac" id="xr_xpxr_236" style="left:0; top:0; visibility: hidden; display: none;">
+ <img class="xr_rn_ xr_ap" src="index_htm_files/331.png" alt="" title="" style="left:14px;top:85px;width:99px;height:99px;"/>
+ </div>
+ <img class="xr_rn_ xr_ap" src="index_htm_files/374.png" alt="" title="" style="left:0px;top:205px;width:304px;height:500px;"/>
+ <div class="xr_txt xr_s0" style="position: absolute; left:328px; top:220px; width:632px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h3 class="xr_tl Normal_text Heading_3" style="top: -15.04px;margin:0;">Tutorial</h3>
+  <span class="xr_tl Normal_text" style="top: 9.75px;">Want to learn how to use Jinx?&nbsp; Check out this step by step tutorial that will show you how to use </span>
+  <span class="xr_tl Normal_text" style="top: 30.29px;">both the language and give you instructions on how best to integrate the Jinx library into your </span>
+  <span class="xr_tl Normal_text" style="top: 50.83px;">project.</span>
+  <span class="xr_tl Normal_text" style="top: 91.91px;"><a href="http://www.jinx-lang.org/Tutorial.pdf" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >Tutorial (pdf)</a></span>
+  <span class="xr_tl Normal_text" style="top: 112.45px;"><a href="http://www.jinx-lang.org/Tutorial.htm" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >Tutorial (html)</a></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 153.53px;margin:0;">Library</h3>
+  <span class="xr_tl Normal_text" style="top: 178.32px;">Jinx has some built-in library functions, which are documented here.</span>
+  <span class="xr_tl Normal_text" style="top: 219.4px;"><a href="http://www.jinx-lang.org/LibCore.pdf" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >Core Library (pdf)</a></span>
+  <span class="xr_tl Normal_text" style="top: 239.94px;"><a href="http://www.jinx-lang.org/LibCore.htm" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >Core Library (html)</a></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 281.02px;margin:0;">API</h3>
+  <span class="xr_tl Normal_text" style="top: 305.81px;">Every public API interface, function, struct, and constant in the Jinx library is documented in these </span>
+  <span class="xr_tl Normal_text" style="top: 326.35px;">pages.</span>
+  <span class="xr_tl Normal_text" style="top: 367.43px;"><a href="http://www.jinx-lang.org/API/html/index.html" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >API Documentation (html)</a></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 408.51px;margin:0;">Performance</h3>
+  <span class="xr_tl Normal_text" style="top: 433.3px;">Read this whitepaper to learn how you can expect Jinx to perform on modern hardware, including </span>
+  <span class="xr_tl Normal_text" style="top: 453.84px;">MIPS measurements on several machines, and how that translates into estimated real world </span>
+  <span class="xr_tl Normal_text" style="top: 474.38px;">usage.</span>
+  <span class="xr_tl Normal_text" style="top: 515.46px;"><a href="http://www.jinx-lang.org/Performance.pdf" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >Performance (pdf)</a></span>
+  <span class="xr_tl Normal_text" style="top: 536px;"><a href="http://www.jinx-lang.org/Performance.htm" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,36)" >Performance (html)</a></span>
+ </div>
+ <div id="xr_xo36" class="xr_ap" style="left:0; top:0; width:960px; height:100px; visibility:hidden; z-index:3;">
+ <a href="" onclick="return(false);" onmousedown="xr_ppir(this);">
+ </a>
+ </div>
+ <div id="xr_xd36"></div>
+</div>
+</div>
+<div id="xr_mvp_8" class="xr_mvp_8 xr_bgn_7_-768_1622 xr_mvpo" style="position:absolute; width:480px; height:886px;">
+<div class="xr_ap xr_xri_" style="width: 480px; height: 886px;">
+<div class="xr_group">
+ <span class="xr_trigs xr_trigo_xr_ce12" style="display:block;position:absolute;left:-120px;top:0px;width:0px;height:0px;visibility:hidden;z-index:-1;"></span>
+ <span class="xr_trigs xr_trigo_xr_ce12" style="display:block;position:absolute;left:-120px;top:0px;width:0px;height:0px;visibility:hidden;z-index:-1;"></span>
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+</div>
+<div class="xr_group">
+ <div class="xr_txt Normal_text" style="position: absolute; left:240px; top:861px; width:327px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <span class="xr_tc Normal_text" style="left: -180.34px; top: -13.16px; width: 361px;">Copyright © 2020 James Boer&nbsp; All Rights Reserved</span>
+ </div>
+</div>
+ <div class="xr_txt xr_s0" style="position: absolute; left:0px; top:237px; width:480px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h3 class="xr_tl Normal_text Heading_3" style="top: -15.04px;margin:0;">Tutorial</h3>
+  <span class="xr_tl Normal_text" style="top: 9.75px;">Want to learn how to use Jinx?&nbsp; Check out this step by step tutorial that </span>
+  <span class="xr_tl Normal_text" style="top: 30.29px;">will show you how to use both the language and give you instructions on </span>
+  <span class="xr_tl Normal_text" style="top: 50.83px;">how best to integrate the Jinx library into your project.</span>
+  <span class="xr_tl Normal_text" style="top: 91.91px;"><a href="http://www.jinx-lang.org/Tutorial.pdf" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >Tutorial (pdf)</a></span>
+  <span class="xr_tl Normal_text" style="top: 112.45px;"><a href="http://www.jinx-lang.org/Tutorial.htm" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >Tutorial (html)</a></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 153.53px;margin:0;">Library</h3>
+  <span class="xr_tl Normal_text" style="top: 178.32px;">Jinx has some built-in library functions, which are documented here.</span>
+  <span class="xr_tl Normal_text" style="top: 219.4px;"><a href="http://www.jinx-lang.org/LibCore.pdf" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >Core Library (pdf)</a></span>
+  <span class="xr_tl Normal_text" style="top: 239.94px;"><a href="http://www.jinx-lang.org/LibCore.htm" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >Core Library (html)</a></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 281.02px;margin:0;">API</h3>
+  <span class="xr_tl Normal_text" style="top: 305.81px;">Every public API interface, function, struct, and constant in the Jinx library </span>
+  <span class="xr_tl Normal_text" style="top: 326.35px;">is documented in these pages.</span>
+  <span class="xr_tl Normal_text" style="top: 367.43px;"><a href="http://www.jinx-lang.org/API/html/index.html" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >API Documentation (html)</a></span>
+  <h3 class="xr_tl Normal_text Heading_3" style="top: 408.51px;margin:0;">Performance</h3>
+  <span class="xr_tl Normal_text" style="top: 433.3px;">Read this whitepaper to learn how you can expect Jinx to perform on </span>
+  <span class="xr_tl Normal_text" style="top: 453.84px;">modern hardware, including MIPS measurements on several machines, </span>
+  <span class="xr_tl Normal_text" style="top: 474.38px;">and how that translates into estimated real world usage.</span>
+  <span class="xr_tl Normal_text" style="top: 515.46px;"><a href="http://www.jinx-lang.org/Performance.pdf" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >Performance (pdf)</a></span>
+  <span class="xr_tl Normal_text" style="top: 536px;"><a href="http://www.jinx-lang.org/Performance.htm" target="_blank" onclick="return(xr_nn());" onmousemove="xr_mo(this,42)" >Performance (html)</a></span>
+ </div>
+ <div class="xr_txt Normal_text Heading_1" style="position: absolute; left:244px; top:165px; width:275px; height:10px;font-feature-settings:'kern','liga' 0,'clig' 0,'calt' 0;">
+  <h1 class="xr_tc Normal_text Heading_1" style="left: -155.18px; top: -37.6px; width: 310px;margin:0;">Documentation</h1>
+ </div>
+ <div id="xr_xo42" class="xr_ap" style="left:0; top:0; width:480px; height:100px; visibility:hidden; z-index:3;">
+ <a href="" onclick="return(false);" onmousedown="xr_ppir(this);">
+ </a>
+ </div>
+ <div id="xr_xd42"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="xr_ap  xr_mvp_7 " style="top:0px; left:0px; width:0px; height:0px; text-align:left;">
+ <div class="xr_ap xr_stickie" style="position:fixed;top:0px;width:100%;height:94px;">
+ <span class="xr_ar xr_stt" style=" left: 0px; width: 100%; height: 94px; position: fixed; background-color: #FFFFFF;-moz-opacity: 0.75;-khtml-opacity: 0.75;opacity: 0.75;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=75);"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:94px;width:100%;height:1px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 1px; position: fixed; background:url('index_htm_files/273@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+<div class="xr_xpos xr_stickie" style="position:fixed; left: 50%; margin-left: 54px; top: 29px; width:426px; height:51px;">
+<div id="xr_nb25" class="xr_ar">
+ <div class="xr_ar xr_nb0">
+ <a href="index.htm" target="_self" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/314.png" alt="Home" title="" onmousemove="xr_mo(this,42,event)" style="left:0px;top:0px;width:73px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/318.png" alt="Home" title="" onmousemove="xr_mo(this,42)" style="left:0px;top:0px;width:73px;height:51px;"/>
+ </a>
+ </div>
+ <div class="xr_ar xr_nb0">
+ <a href="downloads.htm" target="_self" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/315.png" alt="Downloads" title="" onmousemove="xr_mo(this,42,event)" style="left:72px;top:0px;width:111px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/319.png" alt="Downloads" title="" onmousemove="xr_mo(this,42)" style="left:72px;top:0px;width:111px;height:51px;"/>
+ </a>
+ </div>
+ <div class="xr_ar xr_nb0">
+ <a href="examples.htm" target="_self" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/316.png" alt="Examples" title="" onmousemove="xr_mo(this,42,event)" style="left:182px;top:0px;width:101px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/320.png" alt="Examples" title="" onmousemove="xr_mo(this,42)" style="left:182px;top:0px;width:101px;height:51px;"/>
+ </a>
+ </div>
+ <div class="xr_ar xr_nb0">
+ <a href="javascript:;" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/281.png" alt="Documentation" title="" onmousemove="xr_mo(this,42,event)" style="left:282px;top:0px;width:144px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_rs" src="index_htm_files/286.png" alt="Documentation" title="" onmousemove="xr_mo(this,42)" style="left:282px;top:0px;width:144px;height:51px;"/>
+ </a>
+ </div>
+</div>
+</div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:95px;width:100%;height:1px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 1px; position: fixed; background:url('index_htm_files/339@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:94px;width:100%;height:2px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 2px; position: fixed; background:url('index_htm_files/334@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+</div>
+<div class="xr_ap  xr_mvp_8  xr_mvpo " style="top:0px; left:0px; width:0px; height:0px; text-align:left;">
+ <div class="xr_ap xr_ac xr_stickie" id="xr_xpxr_249" style="position:fixed;left:50%;margin-left:-360px;top:0px;width:720px;height:108px; visibility: hidden; display: none;">
+ <span class="xr_ar" style="left:0px;top:0px;width:720px;height:108px; background-color: #978DC0;-moz-opacity: 0.50;-khtml-opacity: 0.50;opacity: 0.50;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=50);"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:108px;width:100%;height:2px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 2px; position: fixed; background:url('index_htm_files/347@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:0px;width:100%;height:109px;">
+ <span class="xr_ar xr_stt" style=" left: 0px; width: 100%; height: 109px; position: fixed; background-color: #FFFFFF;-moz-opacity: 0.75;-khtml-opacity: 0.75;opacity: 0.75;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=75);"></span>
+ </div>
+<div class="xr_xpos xr_stickie" style="position:fixed; left: 50%; margin-left: 121px; top: 29px; width:105px; height:51px;">
+<div id="xr_nb29" class="xr_ar">
+ <div class="xr_ar xr_nb0">
+ <a href="javascript:;" onclick="return(xr_nn());">
+  <img class="xr_rn_ xr_ap" src="index_htm_files/437.png" alt="NAVIGATION" title="" style="left:0px;top:0px;width:105px;height:51px;"/>
+  <img class="xr_rn_ xr_ap xr_ro xr_ro0 xr_tt3" src="index_htm_files/438.png" alt="NAVIGATION" title="" onmousemove="xr_mo(this,42)" style="left:0px;top:0px;width:104px;height:51px;"/>
+ </a>
+  <div class="xr_nb2 xr_nb5 xr_smp0_-105" style="left:0px; top:51px; min-width:105px;">
+  <ul class="xr_nb4">
+   <li><a href="index.htm">Home</a>
+   </li>
+   <li><a href="downloads.htm">Downloads</a>
+   </li>
+   <li><a href="examples.htm">Examples</a>
+   </li>
+   <li><a href="documentation.htm">Documentation</a>
+   </li>
+  </ul>
+  </div>
+ </div>
+</div>
+</div>
+ <div class="xr_ap xr_stickie" style="position:fixed;top:110px;width:100%;height:2px;">
+ <span class="xr_ar" style=" left: 0px; width: 100%; height: 2px; position: fixed; background:url('index_htm_files/347@2x.png') center center no-repeat; background-size: cover;"></span>
+ </div>
+</div>
+</div >
+<!--[if lt IE 7]><script src="index_htm_files/png.js"></script><![endif]-->
+<!--[if IE]><script>xr_aeh()</script><![endif]--><!--[if !IE]>--><script>xr_htm();repMobFonts();window.addEventListener('load', xr_aeh, false);</script><!--<![endif]-->
+</body>
+</html>
