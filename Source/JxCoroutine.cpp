@@ -14,7 +14,7 @@ namespace Jinx::Impl
 	class Coroutine final : public ICoroutine
 	{
 	public:
-		Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params);
+		Coroutine(const std::shared_ptr<Script> & script, RuntimeID functionID, const Parameters & params);
 
 		bool IsFinished() override;
 		Variant GetReturnValue() const override;
@@ -25,7 +25,7 @@ namespace Jinx::Impl
 		Variant m_returnValue;
 	};
 
-	inline_t Coroutine::Coroutine(std::shared_ptr<Script> script, RuntimeID functionID, const Parameters & params)
+	inline_t Coroutine::Coroutine(const std::shared_ptr<Script> & script, RuntimeID functionID, const Parameters & params)
 	{
 		auto runtime = script->GetRuntime();
 		FunctionDefinitionPtr functionDef = runtime->FindFunction(functionID);

@@ -41,7 +41,7 @@ write line "Hello, world!"
 auto script = runtime->ExecuteScript(scriptText);
 ```
 
-There is a [more comprehensive tutorial](https://www.jinx-lang.org/Tutorial.pdf) on the Jinx website for anyone who wants to dive a bit deeper into the language.
+There is a [more comprehensive tutorial](https://jamesboer.github.io/Jinx/Tutorial.pdf) on the Jinx website for anyone who wants to dive a bit deeper into the language.
 
 ## Jinx Status
 

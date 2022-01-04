@@ -44,27 +44,20 @@ u8R"(
 
 	inline_t bool FindCaseFoldingData(char32_t sourceCodePoint, char32_t * destCodePoint1, char32_t * destCodePoint2)
 	{
-		int32_t lower = 0;
-		int32_t upper = static_cast<int32_t>(countof(Impl::FoldTable::caseFoldingTable)) - 1;
-		while (lower <= upper)
+		auto retVal = std::lower_bound(std::begin(Impl::FoldTable::caseFoldingTable), std::end(Impl::FoldTable::caseFoldingTable), sourceCodePoint,
+			[] (const CaseFoldingData & e, char32_t v)
 		{
-			int32_t split = (lower + upper) / 2;
-			char32_t currPoint = Impl::FoldTable::caseFoldingTable[split].sourceCodePoint;
-			if (currPoint < sourceCodePoint)
-				lower = split + 1;
-			else if (currPoint > sourceCodePoint)
-				upper = split - 1;
-			else
-			{
-				const auto & result = Impl::FoldTable::caseFoldingTable[split];
-				if (destCodePoint1)
-					*destCodePoint1 = result.destCodePoint1;
-				if (destCodePoint2)
-					*destCodePoint2 = result.destCodePoint2;
-				return true;
-			}
+			return e.sourceCodePoint < v;
 		}
-		return false;
+		);
+		if (retVal == std::end(Impl::FoldTable::caseFoldingTable) || (sourceCodePoint < retVal->sourceCodePoint))
+			return false;
+		if (destCodePoint1 && destCodePoint2)
+		{
+			*destCodePoint1 = retVal->destCodePoint1;
+			*destCodePoint2 = retVal->destCodePoint2;
+		}
+		return true;
 	}
 
 } // namespace Jinx::Impl
@@ -85,7 +78,7 @@ int main()
 {
     // Open and read file into memory, then close
     FILE * file;
-    auto err = fopen_s(&file, "..//..//Utils//CaseFoldGen//CaseFolding.txt", "r");
+    auto err = fopen_s(&file, "..//Utils//CaseFoldGen//CaseFolding.txt", "r");
     if (err != 0)
         return -1;
     fseek(file, 0, SEEK_END);
@@ -146,7 +139,7 @@ int main()
     }
     
     // Open converted source file for writing
-    err = fopen_s(&file, "..//..//Source//JxUnicodeCaseFolding.cpp", "w");
+    err = fopen_s(&file, "..//Source//JxUnicodeCaseFolding.cpp", "w");
     if (err != 0)
         return -1;
 
