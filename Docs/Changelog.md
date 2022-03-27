@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [1.3.5] - 2022-03-27
 
 - Added support for calling async functions from native code
+- Update MSVC build scripts to support VS2022
 
 ## [1.3.4] - 2021-02-21
 

@@ -1,5 +1,5 @@
 @echo off
-call GenerateMSVC.cmd
+call GenerateMSVC2019.cmd
 cd ..
 
 IF NOT EXIST Build (
