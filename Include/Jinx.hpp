@@ -480,19 +480,30 @@ namespace Jinx
 	class ICoroutine
 	{
 	public:
+
+		/// Checks if the script is finished executing, and executes if not finished
+		/**
+		Determines if the coroutine is finished executing, and executes if not
+		\return true if finished, false if still executing.
+		*/
 		virtual bool IsFinished() = 0;
+
+		/// Retrieves the coroutine's return value
+		/**
+		Returns the function value when finished executing
+		\return value from async function.
+		*/
 		virtual Variant GetReturnValue() const = 0;
 
 	protected:
 		virtual ~ICoroutine() {}
 	};
 
-	namespace Impl
-	{
-		class Script;
-	}
+
+	class IScript;
+	
 	using CoroutinePtr = std::shared_ptr<ICoroutine>;
-	CoroutinePtr CreateCoroutine(std::shared_ptr<Jinx::Impl::Script> script, RuntimeID functionID, const std::vector<Variant, Allocator<Variant>> & params);
+	CoroutinePtr CreateCoroutine(std::shared_ptr<Jinx::IScript> script, RuntimeID functionID, const std::vector<Variant, Allocator<Variant>> & params);
 }
 
 #endif // JX_COROUTINE_H__
@@ -752,7 +763,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 4;
+	const uint32_t PatchNumber = 5;
 
 	// Forward declaration
 	class IScript;
@@ -921,6 +932,15 @@ namespace Jinx
 		\return Returns the Variant containing the function return value, or null for no value.
 		*/
 		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
+
+		/// Call a library function as a coroutine
+		/**
+		\param id RuntimeID of the async function to call
+		\param params Vector of Variants to act as function parameters
+		\return Returns the ICoroutine interface to query when the function is finished executing
+		and to retrieve the return value.
+		*/
+		virtual CoroutinePtr CallAsyncFunction(RuntimeID id, Parameters params) = 0;
 
 		/// Get the script name
 		/**
@@ -2587,6 +2607,7 @@ namespace Jinx::Impl
 
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params) override;
+		CoroutinePtr CallAsyncFunction(RuntimeID id, Parameters params) override;
 
 		bool Execute() override;
 		bool IsFinished() const override;
@@ -3799,9 +3820,9 @@ namespace Jinx::Impl
 namespace Jinx
 {
 
-	inline CoroutinePtr CreateCoroutine(std::shared_ptr<Impl::Script> script, RuntimeID functionID, const Parameters & params)
+	inline CoroutinePtr CreateCoroutine(std::shared_ptr<IScript> script, RuntimeID functionID, const Parameters & params)
 	{
-		return std::allocate_shared<Impl::Coroutine>(Allocator<Impl::Coroutine>(), script, functionID, params);
+		return std::allocate_shared<Impl::Coroutine>(Allocator<Impl::Coroutine>(), std::static_pointer_cast<Impl::Script>(script), functionID, params);
 	}
 
 }// namespace Jinx
@@ -9689,6 +9710,11 @@ namespace Jinx::Impl
 		m_execution.back().reader.Seek(fnDef->GetOffset());
 		assert(m_stack.size() >= fnDef->GetParameterCount());
 		m_execution.back().stackTop = m_stack.size() - fnDef->GetParameterCount();
+	}
+
+	inline CoroutinePtr Script::CallAsyncFunction(RuntimeID id, Parameters params)
+	{
+		return CreateCoroutine(shared_from_this(), id, params);
 	}
 
 	inline Variant Script::CallFunction(RuntimeID id, Parameters params)

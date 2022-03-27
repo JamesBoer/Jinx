@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['freefn',['FreeFn',['../_jinx_8h.html#a466c508de040a6f6ef5873b2793e92eb',1,'Jinx']]]
+  ['freefn',['FreeFn',['../_jinx_8h.html#a432163615a0352f82470e53f8d9cc92c',1,'Jinx']]]
 ];

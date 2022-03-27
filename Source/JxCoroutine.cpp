@@ -85,9 +85,9 @@ namespace Jinx::Impl
 namespace Jinx
 {
 
-	inline_t CoroutinePtr CreateCoroutine(std::shared_ptr<Impl::Script> script, RuntimeID functionID, const Parameters & params)
+	inline_t CoroutinePtr CreateCoroutine(std::shared_ptr<IScript> script, RuntimeID functionID, const Parameters & params)
 	{
-		return std::allocate_shared<Impl::Coroutine>(Allocator<Impl::Coroutine>(), script, functionID, params);
+		return std::allocate_shared<Impl::Coroutine>(Allocator<Impl::Coroutine>(), std::static_pointer_cast<Impl::Script>(script), functionID, params);
 	}
 
 }// namespace Jinx

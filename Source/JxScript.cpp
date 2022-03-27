@@ -1041,6 +1041,11 @@ namespace Jinx::Impl
 		m_execution.back().stackTop = m_stack.size() - fnDef->GetParameterCount();
 	}
 
+	inline_t CoroutinePtr Script::CallAsyncFunction(RuntimeID id, Parameters params)
+	{
+		return CreateCoroutine(shared_from_this(), id, params);
+	}
+
 	inline_t Variant Script::CallFunction(RuntimeID id, Parameters params)
 	{
 		for (const auto & param : params)

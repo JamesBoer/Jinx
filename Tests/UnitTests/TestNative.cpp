@@ -293,7 +293,7 @@ TEST_CASE("Test Native", "[Native]")
 		REQUIRE(val == "Mary had a little lambda");
 	}
 
-	SECTION("Test native function with concurrent execution from C++")
+	SECTION("Test Jinx function with async script execution from C++")
 	{
 		const char * scriptText =
 			u8R"(
@@ -322,6 +322,33 @@ TEST_CASE("Test Native", "[Native]")
 			REQUIRE(script->Execute());
 		}
 		REQUIRE(script->GetVariable("x") == 3);
+	}
+
+	SECTION("Test async Jinx function execution from C++")
+	{
+		const char * scriptText =
+			u8R"(
+
+				private function async count
+					set x to 0
+					loop from 1 to 3
+						increment x
+						wait
+					end
+					return x
+				end
+
+			)";
+
+		auto script = TestCreateScript(scriptText);
+		REQUIRE(script);
+		REQUIRE(script->Execute());
+		auto id = script->FindFunction(nullptr, { "async count" });
+		REQUIRE(id != InvalidID);
+		auto coroutine = script->CallAsyncFunction(id, {});
+		while (!coroutine->IsFinished()) {}
+		auto val = coroutine->GetReturnValue();
+		REQUIRE(val == 3);
 	}
 
 	SECTION("Test native allocation / deallocation")
