@@ -372,7 +372,8 @@ namespace JinxTools
                 FlowDirection.LeftToRight,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretch),
                 FontSize,
-                brush);
+                brush,
+                VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
             fmtText.Trimming = TextTrimming.None;
             fmtText.LineHeight = m_lineHeight;
