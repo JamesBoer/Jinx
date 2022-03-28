@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 
 - Added support for calling async functions from native code
 - Update MSVC build scripts to support VS2022
+- Update tools to .NET target to 4.7.2
+- Update obsolete .NET function
 
 ## [1.3.4] - 2021-02-21
 
