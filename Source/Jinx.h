@@ -106,7 +106,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 4;
+	const uint32_t PatchNumber = 5;
 
 	// Forward declaration
 	class IScript;
@@ -275,6 +275,15 @@ namespace Jinx
 		\return Returns the Variant containing the function return value, or null for no value.
 		*/
 		virtual Variant CallFunction(RuntimeID id, Parameters params) = 0;
+
+		/// Call a library function as a coroutine
+		/**
+		\param id RuntimeID of the async function to call
+		\param params Vector of Variants to act as function parameters
+		\return Returns the ICoroutine interface to query when the function is finished executing
+		and to retrieve the return value.
+		*/
+		virtual CoroutinePtr CallAsyncFunction(RuntimeID id, Parameters params) = 0;
 
 		/// Get the script name
 		/**

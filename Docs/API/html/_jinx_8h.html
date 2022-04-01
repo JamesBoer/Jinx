@@ -84,6 +84,7 @@ $(function() {
 <code>#include &lt;cstddef&gt;</code><br />
 <code>#include &lt;limits&gt;</code><br />
 <code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;cassert&gt;</code><br />
 <code>#include &lt;any&gt;</code><br />
 <code>#include &quot;JxMemory.h&quot;</code><br />
 <code>#include &quot;JxTypes.h&quot;</code><br />
@@ -152,22 +153,22 @@ using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_ji
 using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a97637f9585b6e3e53b8cd7d6c629bb03">Jinx::RuntimePtr</a> = std::shared_ptr&lt; IRuntime &gt;</td></tr>
 <tr class="memdesc:a97637f9585b6e3e53b8cd7d6c629bb03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shared pointer to runtime object. <br /></td></tr>
 <tr class="separator:a97637f9585b6e3e53b8cd7d6c629bb03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a12afdf42274239e0b63991ed89b06798"><td class="memItemLeft" align="right" valign="top"><a id="a12afdf42274239e0b63991ed89b06798"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a12afdf42274239e0b63991ed89b06798">Jinx::AllocFn</a> = std::function&lt; void *(size_t)&gt;</td></tr>
-<tr class="memdesc:a12afdf42274239e0b63991ed89b06798"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory allocation function callback. <br /></td></tr>
-<tr class="separator:a12afdf42274239e0b63991ed89b06798"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa9df8057e9a6514ef43d59b573c62fc"><td class="memItemLeft" align="right" valign="top"><a id="aaa9df8057e9a6514ef43d59b573c62fc"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#aaa9df8057e9a6514ef43d59b573c62fc">Jinx::ReallocFn</a> = std::function&lt; void *(void *, size_t)&gt;</td></tr>
-<tr class="memdesc:aaa9df8057e9a6514ef43d59b573c62fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory re-allocation function callback. <br /></td></tr>
-<tr class="separator:aaa9df8057e9a6514ef43d59b573c62fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a466c508de040a6f6ef5873b2793e92eb"><td class="memItemLeft" align="right" valign="top"><a id="a466c508de040a6f6ef5873b2793e92eb"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a466c508de040a6f6ef5873b2793e92eb">Jinx::FreeFn</a> = std::function&lt; void(void *)&gt;</td></tr>
-<tr class="memdesc:a466c508de040a6f6ef5873b2793e92eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory free function callback. <br /></td></tr>
-<tr class="separator:a466c508de040a6f6ef5873b2793e92eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84b1d42a01a0d4930d4a09d334aa0219"><td class="memItemLeft" align="right" valign="top"><a id="a84b1d42a01a0d4930d4a09d334aa0219"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a84b1d42a01a0d4930d4a09d334aa0219">Jinx::LogFn</a> = std::function&lt; void(LogLevel level, const char *)&gt;</td></tr>
-<tr class="memdesc:a84b1d42a01a0d4930d4a09d334aa0219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global logging function callback. <br /></td></tr>
-<tr class="separator:a84b1d42a01a0d4930d4a09d334aa0219"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2865e7908102ee2e5a87610c09884c1"><td class="memItemLeft" align="right" valign="top"><a id="ab2865e7908102ee2e5a87610c09884c1"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#ab2865e7908102ee2e5a87610c09884c1">Jinx::AllocFn</a> = std::function&lt; void *(size_t bytes)&gt;</td></tr>
+<tr class="memdesc:ab2865e7908102ee2e5a87610c09884c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory allocation function callback. <br /></td></tr>
+<tr class="separator:ab2865e7908102ee2e5a87610c09884c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42000e1230568109142f772f8919abe2"><td class="memItemLeft" align="right" valign="top"><a id="a42000e1230568109142f772f8919abe2"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a42000e1230568109142f772f8919abe2">Jinx::ReallocFn</a> = std::function&lt; void *(void *, size_t newBytes, size_t currBytes)&gt;</td></tr>
+<tr class="memdesc:a42000e1230568109142f772f8919abe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory realloc function callback. <br /></td></tr>
+<tr class="separator:a42000e1230568109142f772f8919abe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a432163615a0352f82470e53f8d9cc92c"><td class="memItemLeft" align="right" valign="top"><a id="a432163615a0352f82470e53f8d9cc92c"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a432163615a0352f82470e53f8d9cc92c">Jinx::FreeFn</a> = std::function&lt; void(void *, size_t bytes)&gt;</td></tr>
+<tr class="memdesc:a432163615a0352f82470e53f8d9cc92c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global memory free function callback. <br /></td></tr>
+<tr class="separator:a432163615a0352f82470e53f8d9cc92c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7aba71cd0e3171fa55f7744f1fdd2bf0"><td class="memItemLeft" align="right" valign="top"><a id="a7aba71cd0e3171fa55f7744f1fdd2bf0"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#a7aba71cd0e3171fa55f7744f1fdd2bf0">Jinx::LogFn</a> = std::function&lt; void(LogLevel level, const char *msg)&gt;</td></tr>
+<tr class="memdesc:a7aba71cd0e3171fa55f7744f1fdd2bf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prototype for global logging function callback. <br /></td></tr>
+<tr class="separator:a7aba71cd0e3171fa55f7744f1fdd2bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -212,7 +213,7 @@ const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 <tr class="memdesc:a1c7318012adc2d64540cd28ed5f78b01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minor version number. <br /></td></tr>
 <tr class="separator:a1c7318012adc2d64540cd28ed5f78b01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae0e5e517609d07abbe8c6aa37e974d3a"><td class="memItemLeft" align="right" valign="top"><a id="ae0e5e517609d07abbe8c6aa37e974d3a"></a>
-const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#ae0e5e517609d07abbe8c6aa37e974d3a">Jinx::PatchNumber</a> = 0</td></tr>
+const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_jinx_8h.html#ae0e5e517609d07abbe8c6aa37e974d3a">Jinx::PatchNumber</a> = 4</td></tr>
 <tr class="memdesc:ae0e5e517609d07abbe8c6aa37e974d3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Patch number. <br /></td></tr>
 <tr class="separator:ae0e5e517609d07abbe8c6aa37e974d3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>

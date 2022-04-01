@@ -31,7 +31,7 @@ set_property(SOURCE App.xaml PROPERTY VS_XAML_TYPE "ApplicationDefinition")
 set_source_files_properties("Resources/Jinx.png" "Resources/Jinx.ico" PROPERTIES VS_TOOL_OVERRIDE "Resource")
 csharp_set_xaml_cs_properties(${jinxpad_source})
 target_compile_options(${PROJECT_NAME} PRIVATE "/langversion:6")
-set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.7.2")
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DOTNET_REFERENCES
 	"Microsoft.CSharp"
 	"PresentationCore"

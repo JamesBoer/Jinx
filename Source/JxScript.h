@@ -23,6 +23,7 @@ namespace Jinx::Impl
 
 		RuntimeID FindFunction(LibraryPtr library, const String & name) override;
 		Variant CallFunction(RuntimeID id, Parameters params) override;
+		CoroutinePtr CallAsyncFunction(RuntimeID id, Parameters params) override;
 
 		bool Execute() override;
 		bool IsFinished() const override;
