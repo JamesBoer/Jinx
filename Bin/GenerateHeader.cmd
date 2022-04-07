@@ -1,4 +1,4 @@
 @echo off
 
 rem Generate unified header file from all library source
-Heady.exe --source "../Source" --output "../Include/Jinx.hpp"
+Heady.exe --define JINX_HEADER_ONLY --source "../Source" --output "../Include/Jinx.hpp"

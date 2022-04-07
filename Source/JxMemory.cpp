@@ -30,6 +30,16 @@ namespace Jinx
 
 	inline_t void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
 	{
+#if defined(_MSC_VER) && defined(JINX_HEADER_ONLY)
+		void * newPtr = nullptr;
+		if (newBytes)
+		{
+			newPtr = MemAllocate(newBytes);
+			memcpy(newPtr, ptr, currBytes);
+		}
+		MemFree(ptr, currBytes);
+		return newPtr;
+#else
 		// With a size of zero, this acts like free()
 		if (newBytes == 0)
 		{
@@ -45,6 +55,7 @@ namespace Jinx
 		Impl::allocationCount++;
 		Impl::allocatedMemory += (newBytes - currBytes);
 		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
+#endif
 	}
 
 	inline_t void MemFree(void * ptr, size_t bytes)

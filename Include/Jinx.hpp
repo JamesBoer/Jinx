@@ -1,4 +1,9 @@
 
+// Amalgamation-specific define
+#ifndef JINX_HEADER_ONLY
+#define JINX_HEADER_ONLY
+#endif
+
 
 // begin --- JxBuffer.cpp --- 
 
@@ -763,7 +768,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 5;
+	const uint32_t PatchNumber = 6;
 
 	// Forward declaration
 	class IScript;
@@ -5321,6 +5326,16 @@ namespace Jinx
 
 	inline void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
 	{
+#if defined(_MSC_VER) && defined(JINX_HEADER_ONLY)
+		void * newPtr = nullptr;
+		if (newBytes)
+		{
+			newPtr = MemAllocate(newBytes);
+			memcpy(newPtr, ptr, currBytes);
+		}
+		MemFree(ptr, currBytes);
+		return newPtr;
+#else
 		// With a size of zero, this acts like free()
 		if (newBytes == 0)
 		{
@@ -5336,6 +5351,7 @@ namespace Jinx
 		Impl::allocationCount++;
 		Impl::allocatedMemory += (newBytes - currBytes);
 		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
+#endif
 	}
 
 	inline void MemFree(void * ptr, size_t bytes)
