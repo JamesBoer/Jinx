@@ -18,9 +18,9 @@ function(jinx_build_executable project_name source_list is_linked is_startup req
 	set(CMAKE_CXX_STANDARD 17)
 	set(CMAKE_CXX_STANDARD_REQUIRED ON)
 	set(CMAKE_CXX_EXTENSIONS OFF)
-if(MSVC)
-	target_compile_options(${project_name} PRIVATE /permissive- /utf-8)
-endif()
+	if(MSVC)
+		target_compile_options(${project_name} PRIVATE /permissive- /utf-8)
+	endif()
 
 	# Set the executable as the default startup project
 	if(is_startup)
@@ -30,6 +30,8 @@ endif()
 	# Add Jinx library
 	if(is_linked)
 		target_link_libraries(${project_name} Jinx)
+	else()
+		target_compile_definitions(${project_name} PRIVATE USE_HEADER_ONLY_LIB)
 	endif()
 	
 	# Add pthreads
@@ -123,12 +125,6 @@ get_directory_property(jinx_is_subproject PARENT_DIRECTORY)
 if(NOT jinx_is_subproject)
 
 	set(
-		headertest_source_list
-		"Tests/HeaderTest/HeaderTest.cpp"
-		"Tests/HeaderTest/HeaderTest.h"
-		"Tests/HeaderTest/Main.cpp"
-	)
-	set(
 		unittests_source_list
 		"Tests/UnitTests/catch.hpp"
 		"Tests/UnitTests/Main.cpp"
@@ -151,7 +147,7 @@ if(NOT jinx_is_subproject)
 	)
 	jinx_build_executable(Features "Tests/Features/Main.cpp" TRUE FALSE FALSE)	
 	jinx_build_executable(FuzzTests "Tests/FuzzTests/Main.cpp" TRUE FALSE TRUE)	
-	jinx_build_executable(HeaderTest "${headertest_source_list}" FALSE FALSE FALSE)
+	jinx_build_executable(HeaderTests "${unittests_source_list}" FALSE FALSE FALSE)
 	jinx_build_executable(PerfTest "Tests/PerfTest/Main.cpp" TRUE FALSE TRUE)
 	jinx_build_executable(UnitTests "${unittests_source_list}" TRUE TRUE FALSE)
 	if(MSVC)

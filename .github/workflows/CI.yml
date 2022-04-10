@@ -38,6 +38,10 @@ jobs:
     - name: Run unit tests
       run: ./../Build/Release/UnitTests.exe
 
+    # Run header-only unit tests
+    - name: Run header-only unit tests
+      run: ./../Build/Release/HeaderTests.exe
+
   build_macos:
     # The type of runner that the job will run on
     runs-on: macos-latest
@@ -59,6 +63,10 @@ jobs:
     - name: Run unit tests
       run: ./../Build/Release/UnitTests
 
+    # Run header-ony unit tests
+    - name: Run header-only unit tests
+      run: ./../Build/Release/HeaderTests
+
   build_linux:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
@@ -79,3 +87,7 @@ jobs:
     # Run unit tests
     - name: Run unit tests
       run: ./../Build/Release/UnitTests
+
+    # Run header-only unit tests
+    - name: Run header-only unit tests
+      run: ./../Build/Release/HeaderTests

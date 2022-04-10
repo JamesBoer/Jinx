@@ -1,4 +1,4 @@
-﻿/*
+/*
 The MIT License (MIT)
 
 Copyright (c) 2017 James Boer
@@ -26,7 +26,11 @@ THE SOFTWARE.
 #ifndef UNIT_TESTS_H____
 #define UNIT_TESTS_H____
 
+#ifdef USE_HEADER_ONLY_LIB
+#include "../../Include/Jinx.hpp"
+#else
 #include "../../Source/Jinx.h"
+#endif
 
 #include "catch.hpp"
 

@@ -1,4 +1,9 @@
 
+// Amalgamation-specific define
+#ifndef JINX_HEADER_ONLY
+#define JINX_HEADER_ONLY
+#endif
+
 
 // begin --- JxBuffer.cpp --- 
 
@@ -763,7 +768,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 5;
+	const uint32_t PatchNumber = 7;
 
 	// Forward declaration
 	class IScript;
@@ -5301,22 +5306,22 @@ Copyright (c) 2016 James Boer
 namespace Jinx
 {
 	// External allocation functions
-	namespace Impl
+	struct Mem
 	{
-		static inline AllocFn allocFn = [](size_t size) { return malloc(size); };
+		static inline AllocFn allocFn = [] (size_t size) { return malloc(size); };
 		static inline ReallocFn reallocFn = [] (void * p, size_t s, size_t) { return realloc(p, s); };
-		static inline FreeFn freeFn = [](void * p, size_t) { return free(p); };
+		static inline FreeFn freeFn = [] (void * p, size_t) { return free(p); };
 
 		static inline std::atomic_uint64_t allocationCount = 0;
 		static inline std::atomic_uint64_t freeCount = 0;
 		static inline std::atomic_uint64_t allocatedMemory = 0;
-	} 
+	};
 
 	inline void * MemAllocate(size_t bytes)
 	{
-		Impl::allocationCount++;
-		Impl::allocatedMemory += bytes;
-		return reinterpret_cast<uint8_t *>(Impl::allocFn(bytes));
+		Mem::allocationCount++;
+		Mem::allocatedMemory += bytes;
+		return reinterpret_cast<uint8_t *>(Mem::allocFn(bytes));
 	}
 
 	inline void * MemReallocate(void * ptr, size_t newBytes, size_t currBytes)
@@ -5330,22 +5335,23 @@ namespace Jinx
 
 		// If we have currently allocated memory, we track this as a free() as well as an alloc()
 		if (ptr)
-			Impl::freeCount++;
+			Mem::freeCount++;
 
 		// Normal realloc behaviorwith preserved data
-		Impl::allocationCount++;
-		Impl::allocatedMemory += (newBytes - currBytes);
-		return reinterpret_cast<uint8_t *>(Impl::reallocFn(ptr, newBytes, currBytes));
+		Mem::allocationCount++;
+		Mem::allocatedMemory += (newBytes - currBytes);
+		return reinterpret_cast<uint8_t *>(Mem::reallocFn(ptr, newBytes, currBytes));
 	}
 
 	inline void MemFree(void * ptr, size_t bytes)
 	{
 		if (!ptr)
 			return;
-		Impl::freeCount++;
-		assert(Impl::allocatedMemory >= bytes);
-		Impl::allocatedMemory -= bytes;
-		Impl::freeFn(ptr, bytes);
+		Mem::freeCount++;
+		assert(Mem::allocationCount >= Mem::freeCount);
+		assert(Mem::allocatedMemory >= bytes);
+		Mem::allocatedMemory -= bytes;
+		Mem::freeFn(ptr, bytes);
 	}
 
 	inline void InitializeMemory(const GlobalParams & params)
@@ -5354,18 +5360,18 @@ namespace Jinx
 		{
 			// If you're using one custom memory function, you must use them ALL
 			assert(params.allocFn && params.reallocFn && params.freeFn);
-			Impl::allocFn = params.allocFn;
-			Impl::reallocFn = params.reallocFn;
-			Impl::freeFn = params.freeFn;
+			Mem::allocFn = params.allocFn;
+			Mem::reallocFn = params.reallocFn;
+			Mem::freeFn = params.freeFn;
 		}
 	}
 
 	inline MemoryStats GetMemoryStats()
 	{
 		MemoryStats stats;
-		stats.allocationCount = Impl::allocationCount;
-		stats.freeCount = Impl::freeCount;
-		stats.allocatedMemory = Impl::allocatedMemory;
+		stats.allocationCount = Mem::allocationCount;
+		stats.freeCount = Mem::freeCount;
+		stats.allocatedMemory = Mem::allocatedMemory;
 		return stats;
 	}
 
