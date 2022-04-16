@@ -92,6 +92,49 @@ namespace Jinx::Impl
 		m_columnMarker = m_columnNumber;
 	}
 
+	inline_t void Lexer::ErrorWriteDetails() const
+	{
+		// Get line start position
+		const char * current = m_start;
+		const char * lineStart = m_start;
+		while (current < m_current)
+		{
+			if (IsNewline(*current))
+				lineStart = current + 1;
+			++current;
+		}
+		size_t whitespaceOffset = 0;
+		while (lineStart < m_current && IsWhitespace(*lineStart))
+		{
+			if (*lineStart == '\t')
+				whitespaceOffset += 4;
+			else
+				++whitespaceOffset;
+			++lineStart;
+		}
+
+		// Find line end
+		String lineText;
+		lineText.reserve(32);
+		while (lineStart < m_end && !IsNewline(*lineStart))
+		{
+			lineText += *lineStart;
+			++lineStart;
+		}
+
+		// Write line text
+		LogWriteLine(LogLevel::Error, lineText.c_str());
+
+		// Write marker showing location of error
+		String markerText;
+		markerText.reserve(32);
+		for (size_t i = 0; i < std::max(size_t(m_columnMarker), whitespaceOffset) - whitespaceOffset; ++i)
+			markerText += " ";
+		for (size_t i = 0; i < 3; ++i)
+			markerText += "^";
+		LogWriteLine(LogLevel::Error, markerText.c_str());
+	}
+
 	inline_t bool Lexer::Execute()
 	{
 		m_current = m_start;

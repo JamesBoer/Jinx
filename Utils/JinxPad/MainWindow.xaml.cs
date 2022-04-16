@@ -126,7 +126,7 @@ namespace JinxPad
 
         private void OnHelpViewTutorial(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://www.jinx-lang.org/Tutorial.pdf");
+            System.Diagnostics.Process.Start("https://jamesboer.github.io/Jinx/Tutorial.pdf");
         }
 
         private void OnHelpAbout(object sender, RoutedEventArgs e)
