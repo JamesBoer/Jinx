@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.3.7] - 2022-03-27
+
+- Improved error messages
+- Fixed URL to tutorial in JinxPad
+
 ## [1.3.6] - 2022-03-27
 
 - Fixed memory allocation stats in amalgamated header

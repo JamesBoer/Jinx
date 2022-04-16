@@ -313,6 +313,12 @@ namespace Jinx::Impl
 			m_writer.Write(&lineEntry, sizeof(lineEntry));
 	}
 
+	inline_t void Parser::PreviousSymbol()
+	{
+		if (m_currentSymbol > m_symbolList.begin())
+			--m_currentSymbol;
+	}
+
 	inline_t void Parser::NextSymbol()
 	{
 		m_lastLine = m_currentSymbol->lineNumber;
@@ -1276,6 +1282,7 @@ namespace Jinx::Impl
 
 		if (propertyLibrary->PropertyNameExists(name))
 		{
+			PreviousSymbol();
 			Error("Property is already defined");
 			return;
 		}
@@ -1298,7 +1305,7 @@ namespace Jinx::Impl
 		{
 			// Parse expression
 			ParseExpression();
-			Expect(SymbolType::NewLine);
+			Expect(SymbolType::NewLine, "Error parsing expression");
 
 			// Set property opcode
 			EmitOpcode(Opcode::SetProp);
@@ -1313,7 +1320,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
-			Expect(SymbolType::NewLine);
+			Expect(SymbolType::NewLine, "Error declaring property");
 		}
 	}
 
@@ -1744,7 +1751,7 @@ namespace Jinx::Impl
 				if (Accept(SymbolType::ParenOpen))
 				{
 					ParseExpression();
-					Expect(SymbolType::ParenClose);
+					Expect(SymbolType::ParenClose, "Error parsing expression");
 				}
 				else
 				{
@@ -1795,7 +1802,7 @@ namespace Jinx::Impl
 			else if (Accept(SymbolType::ParenOpen))
 			{
 				ParseExpression();
-				Expect(SymbolType::ParenClose);
+				Expect(SymbolType::ParenClose, "Error parsing expression");
 			}
 			else if (CheckProperty())
 			{

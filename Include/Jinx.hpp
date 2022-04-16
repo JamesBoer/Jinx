@@ -768,7 +768,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 7;
+	const uint32_t PatchNumber = 8;
 
 	// Forward declaration
 	class IScript;
@@ -1894,6 +1894,8 @@ namespace Jinx::Impl
 
 	private:
 
+		void ErrorWriteDetails() const;
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -1905,6 +1907,7 @@ namespace Jinx::Impl
 			else
 				LogWrite(LogLevel::Error, "Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
 			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
+			ErrorWriteDetails();
 			m_error = true;
 		}
 
@@ -2450,6 +2453,9 @@ namespace Jinx::Impl
 
 		// Write optional debug info
 		void WriteDebugInfo();
+
+		// Revert to previous symbol
+		void PreviousSymbol();
 
 		// Advance to next sumbol
 		void NextSymbol();
@@ -4273,6 +4279,49 @@ namespace Jinx::Impl
 		m_columnMarker = m_columnNumber;
 	}
 
+	inline void Lexer::ErrorWriteDetails() const
+	{
+		// Get line start position
+		const char * current = m_start;
+		const char * lineStart = m_start;
+		while (current < m_current)
+		{
+			if (IsNewline(*current))
+				lineStart = current + 1;
+			++current;
+		}
+		size_t whitespaceOffset = 0;
+		while (lineStart < m_current && IsWhitespace(*lineStart))
+		{
+			if (*lineStart == '\t')
+				whitespaceOffset += 4;
+			else
+				++whitespaceOffset;
+			++lineStart;
+		}
+
+		// Find line end
+		String lineText;
+		lineText.reserve(32);
+		while (lineStart < m_end && !IsNewline(*lineStart))
+		{
+			lineText += *lineStart;
+			++lineStart;
+		}
+
+		// Write line text
+		LogWriteLine(LogLevel::Error, lineText.c_str());
+
+		// Write marker showing location of error
+		String markerText;
+		markerText.reserve(32);
+		for (size_t i = 0; i < std::max(size_t(m_columnMarker), whitespaceOffset) - whitespaceOffset; ++i)
+			markerText += " ";
+		for (size_t i = 0; i < 3; ++i)
+			markerText += "^";
+		LogWriteLine(LogLevel::Error, markerText.c_str());
+	}
+
 	inline bool Lexer::Execute()
 	{
 		m_current = m_start;
@@ -5698,6 +5747,12 @@ namespace Jinx::Impl
 			m_writer.Write(&lineEntry, sizeof(lineEntry));
 	}
 
+	inline void Parser::PreviousSymbol()
+	{
+		if (m_currentSymbol > m_symbolList.begin())
+			--m_currentSymbol;
+	}
+
 	inline void Parser::NextSymbol()
 	{
 		m_lastLine = m_currentSymbol->lineNumber;
@@ -6661,6 +6716,7 @@ namespace Jinx::Impl
 
 		if (propertyLibrary->PropertyNameExists(name))
 		{
+			PreviousSymbol();
 			Error("Property is already defined");
 			return;
 		}
@@ -6683,7 +6739,7 @@ namespace Jinx::Impl
 		{
 			// Parse expression
 			ParseExpression();
-			Expect(SymbolType::NewLine);
+			Expect(SymbolType::NewLine, "Error parsing expression");
 
 			// Set property opcode
 			EmitOpcode(Opcode::SetProp);
@@ -6698,7 +6754,7 @@ namespace Jinx::Impl
 		}
 		else
 		{
-			Expect(SymbolType::NewLine);
+			Expect(SymbolType::NewLine, "Error declaring property");
 		}
 	}
 
@@ -7129,7 +7185,7 @@ namespace Jinx::Impl
 				if (Accept(SymbolType::ParenOpen))
 				{
 					ParseExpression();
-					Expect(SymbolType::ParenClose);
+					Expect(SymbolType::ParenClose, "Error parsing expression");
 				}
 				else
 				{
@@ -7180,7 +7236,7 @@ namespace Jinx::Impl
 			else if (Accept(SymbolType::ParenOpen))
 			{
 				ParseExpression();
-				Expect(SymbolType::ParenClose);
+				Expect(SymbolType::ParenClose, "Error parsing expression");
 			}
 			else if (CheckProperty())
 			{

@@ -73,9 +73,8 @@ int main(int argc, char ** argv)
 	const char * scriptText =
 		u8R"(
 
-			set private a to 123
-			set private a to 234
-
+			set a to "Invalid string
+                              
 		)";
 
 	auto script = TestExecuteScript(scriptText);

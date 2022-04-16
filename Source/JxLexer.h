@@ -50,6 +50,8 @@ namespace Jinx::Impl
 
 	private:
 
+		void ErrorWriteDetails() const;
+
 		// Log an error
 		template<class... Args>
 		void Error(const char * format, Args&&... args)
@@ -61,6 +63,7 @@ namespace Jinx::Impl
 			else
 				LogWrite(LogLevel::Error, "Error in '%s' at line %i, column %i: ", m_name.c_str(), m_lineNumber, m_columnNumber);
 			LogWriteLine(LogLevel::Error, format, std::forward<Args>(args)...);
+			ErrorWriteDetails();
 			m_error = true;
 		}
 

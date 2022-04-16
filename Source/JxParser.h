@@ -117,6 +117,9 @@ namespace Jinx::Impl
 		// Write optional debug info
 		void WriteDebugInfo();
 
+		// Revert to previous symbol
+		void PreviousSymbol();
+
 		// Advance to next sumbol
 		void NextSymbol();
 
