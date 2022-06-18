@@ -178,7 +178,7 @@ TEST_CASE("Test Library Functionality", "[Libraries]")
 
 		auto runtime2 = TestCreateRuntime();
 		auto script1 = runtime2->CreateScript(scriptBytecode1);
-		script1->Execute();
+		REQUIRE(TestExecuteScript(script1));
 		auto script2 = TestExecuteScript(scriptText2, runtime2);
 		REQUIRE(script1);
 		REQUIRE(script2);

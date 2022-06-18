@@ -533,7 +533,6 @@ TEST_CASE("Test Collections", "[Collections]")
 
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->Execute());
 		REQUIRE(script->GetVariable("a") == 2);
 	}
 
@@ -547,7 +546,7 @@ TEST_CASE("Test Collections", "[Collections]")
 			)";
 
 		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script->Execute());
+        REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == 5);
 	}
 
@@ -561,7 +560,7 @@ TEST_CASE("Test Collections", "[Collections]")
 			)";
 
 		auto script = TestExecuteScript(scriptText);
-		REQUIRE(script->Execute());
+		REQUIRE(script);
 		REQUIRE(script->GetLibrary()->GetProperty("a") == 5);
 	}
 
@@ -644,7 +643,7 @@ TEST_CASE("Test Collections", "[Collections]")
 
 		auto script = TestCreateScript(scriptText);
 		script->SetVariable("text", tableText);
-		REQUIRE(script->Execute());
+		REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test Name A");
 		REQUIRE(script->GetVariable("b") == 2);
@@ -680,7 +679,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		Variant table = tableText;
 		REQUIRE(table.ConvertTo(ValueType::Collection));
 		script->SetVariable("table", table);
-		REQUIRE(script->Execute());
+        REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test Name A");
 		REQUIRE(script->GetVariable("b") == 2);
@@ -716,7 +715,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		Variant table = tableText;
 		REQUIRE(table.ConvertTo(ValueType::Collection));
 		script->SetVariable("table", table);
-		REQUIRE(script->Execute());
+        REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test Name A");
 		REQUIRE(script->GetVariable("b") == 2);
@@ -746,7 +745,7 @@ TEST_CASE("Test Collections", "[Collections]")
 
 		auto script = TestCreateScript(scriptText);
 		script->SetVariable("text", tableText);
-		REQUIRE(script->Execute());
+        REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test 1, 2, 3");
 		REQUIRE(script->GetVariable("b") == "Test 4");
@@ -771,7 +770,7 @@ TEST_CASE("Test Collections", "[Collections]")
 
 		auto script = TestCreateScript(scriptText);
 		script->SetVariable("text", tableText);
-		REQUIRE(script->Execute());
+        REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "\"Quoted text\"");
 	}
@@ -795,7 +794,7 @@ TEST_CASE("Test Collections", "[Collections]")
 
 		auto script = TestCreateScript(scriptText);
 		script->SetVariable("text", tableText);
-		REQUIRE(script->Execute());
+        REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a").GetNumber() == Approx(123.456));
 	}

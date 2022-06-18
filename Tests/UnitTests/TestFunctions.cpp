@@ -808,7 +808,7 @@ TEST_CASE("Test Functions", "[Functions]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->Execute());
+		REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("a") == "finished");
 	}
 

@@ -241,7 +241,7 @@ TEST_CASE("Test Native", "[Native]")
 		{
 			auto script = runtime->CreateScript(scriptText);
 			REQUIRE(script);
-			REQUIRE(script->Execute());
+			REQUIRE(TestExecuteScript(script));
 			REQUIRE(script->IsFinished());
 			REQUIRE(script->GetVariable("a") == 123);
 		}
@@ -249,7 +249,7 @@ TEST_CASE("Test Native", "[Native]")
 		{
 			auto script = runtime->CreateScript(scriptText);
 			REQUIRE(script);
-			REQUIRE(script->Execute());
+            REQUIRE(TestExecuteScript(script));
 			REQUIRE(script->IsFinished());
 			REQUIRE(script->GetVariable("a") == 123);
 		}
@@ -312,7 +312,7 @@ TEST_CASE("Test Native", "[Native]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(script->Execute());
+		REQUIRE(TestExecuteScript(script));
 		auto id = script->FindFunction(nullptr, { "{} minus {}" });
 		REQUIRE(id != InvalidID);
 		while (!script->IsFinished())

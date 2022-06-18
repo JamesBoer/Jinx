@@ -449,7 +449,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+		REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid increment #2 error")
@@ -464,7 +464,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid increment #3 error")
@@ -492,7 +492,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid decrement #2 error")
@@ -507,7 +507,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid decrement #3 error")
@@ -978,7 +978,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto runtime2 = TestCreateRuntime();
 		auto script1 = runtime2->CreateScript(scriptBytecode1);
-		script1->Execute();
+        REQUIRE(TestExecuteScript(script1));
 		auto script2 = TestExecuteScript(scriptText2, runtime2);
 		REQUIRE(script1);
 		REQUIRE(!script2);
@@ -1010,7 +1010,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto runtime2 = TestCreateRuntime();
 		auto script1 = runtime2->CreateScript(scriptBytecode1);
-		script1->Execute();
+        REQUIRE(TestExecuteScript(script1));
 		auto script2 = TestExecuteScript(scriptText2, runtime2);
 		REQUIRE(script1);
 		REQUIRE(!script2);
@@ -1185,7 +1185,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid subtraction")
@@ -1201,7 +1201,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid multiplication")
@@ -1217,7 +1217,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid division")
@@ -1233,7 +1233,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid mod")
@@ -1249,7 +1249,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test invalid function parameter cast")
@@ -1266,7 +1266,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test missing function name")
@@ -1441,7 +1441,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index var set high")
@@ -1456,7 +1456,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index var set low")
@@ -1471,7 +1471,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index range var set low")
@@ -1486,7 +1486,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index var set high")
@@ -1501,7 +1501,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test reversed range indeces var")
@@ -1516,7 +1516,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index prop set low")
@@ -1531,7 +1531,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index prop set high")
@@ -1546,7 +1546,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index var get low")
@@ -1561,7 +1561,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index var get high")
@@ -1576,7 +1576,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index pair var get low")
@@ -1591,7 +1591,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index pair var get high")
@@ -1606,7 +1606,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index pair var reversed")
@@ -1621,7 +1621,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index prop get low")
@@ -1636,7 +1636,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test out of bounds string index prop get high")
@@ -1651,7 +1651,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test '{} (get) key' with invalid parameter")
@@ -1668,7 +1668,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test '{} (get) value' with invalid parameter")
@@ -1685,7 +1685,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test misnamed function declaration")
@@ -1722,7 +1722,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 	SECTION("Test 'call with' with invalid parameter")
@@ -1742,7 +1742,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 
 		auto script = TestCreateScript(scriptText);
 		REQUIRE(script);
-		REQUIRE(!script->Execute());
+        REQUIRE(!TestExecuteScript(script));
 	}
 
 }
