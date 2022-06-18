@@ -572,7 +572,7 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
-	SECTION("Test function declaration duplicate error")
+	SECTION("Test local function declaration duplicate error")
 	{
 		static const char * scriptText =
 			u8R"(
@@ -589,7 +589,24 @@ TEST_CASE("Test Syntax, Parsing, and Runtime Errors", "[Errors]")
 		REQUIRE(!script);
 	}
 
-	SECTION("Test multi-script function declaration duplicate error")
+    SECTION("Test non-local function declaration duplicate error")
+    {
+        static const char * scriptText =
+                u8R"(
+
+			public function somefunction
+			end
+
+			public function somefunction
+			end
+
+			)";
+
+        auto script = TestCreateScript(scriptText);
+        REQUIRE(!script);
+    }
+
+    SECTION("Test multi-script function declaration duplicate error")
 	{
 		static const char * scriptText1 =
 			u8R"(

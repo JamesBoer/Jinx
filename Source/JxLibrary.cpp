@@ -122,7 +122,10 @@ namespace Jinx::Impl
 	inline_t void Library::RegisterFunctionSignature(const FunctionSignature & signature)
 	{
 		std::lock_guard<std::mutex> lock(m_functionMutex);
-		m_functionList.push_back(signature);
+        auto itr = std::find(m_functionList.begin(), m_functionList.end(), signature);
+        if (itr != m_functionList.end())
+            return;
+        m_functionList.push_back(signature);
 	}
 
 	inline_t bool Library::RegisterProperty(Visibility visibility, Access access, const String & name, const Variant & value)
