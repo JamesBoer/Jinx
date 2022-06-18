@@ -11,6 +11,7 @@ Copyright (c) 2016 James Boer
 #include <string.h>
 #include <assert.h>
 #include <stdexcept>
+#include <inttypes.h>
 
 #include "../../Source/Jinx.h"
 
@@ -83,9 +84,9 @@ int main(int argc, char ** argv)
 	auto memStats = GetMemoryStats();
 	printf("\nMemory Stats\n");
 	printf("-------------\n");
-	printf("Allocation count: %zu\n", memStats.allocationCount);
-	printf("Free count: %zu\n", memStats.freeCount);
-	printf("Allocated memory: %zu bytes\n", memStats.allocatedMemory);
+	printf("Allocation count: %" PRIu64 "\n", memStats.allocationCount);
+	printf("Free count: %" PRIu64 "\n", memStats.freeCount);
+	printf("Allocated memory: %" PRIu64 " bytes\n", memStats.allocatedMemory);
 
 	return 0;
 }

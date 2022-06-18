@@ -54,13 +54,25 @@ Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runt
 	// Create a script with the compiled bytecode
 	auto script = runtime->CreateScript(bytecode, userContext);
 
-	// Execute script until finished
-	do
-	{
-		if (!script->Execute())
-			return nullptr;
-	} 
-	while (!script->IsFinished());
+    // Execute script until finished
+    if (!TestExecuteScript(script))
+        return nullptr;
 
+    // Return script
 	return script;
+}
+
+bool TestExecuteScript(Jinx::ScriptPtr script)
+{
+    if (!script)
+        return false;
+
+    // Execute script until finished
+    do
+    {
+        if (!script->Execute())
+            return false;
+    }
+    while (!script->IsFinished());
+    return true;
 }

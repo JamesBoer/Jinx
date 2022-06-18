@@ -990,7 +990,7 @@ namespace Jinx::Impl
 				auto result = op1 - op2;
 				if (result.IsNull())
 				{
-					Error("Invalid variable for subraction");
+					Error("Invalid variable for subtraction");
 					return false;
 				}
 				Push(result);

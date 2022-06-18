@@ -37,6 +37,6 @@ THE SOFTWARE.
 Jinx::RuntimePtr TestCreateRuntime();
 Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr, JinxAny userContext = nullptr);
 Jinx::ScriptPtr TestExecuteScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr, JinxAny userContext = nullptr);
-
+bool TestExecuteScript(Jinx::ScriptPtr script);
 
 #endif // UNIT_TESTS_H____

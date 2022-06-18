@@ -1,12 +1,19 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [1.3.7] - 2022-03-27
+## [1.3.9] - 2022-06-17
+
+- Fixed issue with duplicate non-local function registration
+- Fix unit tests to allow easier max instruction tests
+- Minor spelling corrections
+- Corrected previously out-of-sync patch messages in changelog
+
+## [1.3.8] - 2022-03-27
 
 - Improved error messages
 - Fixed URL to tutorial in JinxPad
 
-## [1.3.6] - 2022-03-27
+## [1.3.7] - 2022-03-27
 
 - Fixed memory allocation stats in amalgamated header
 
