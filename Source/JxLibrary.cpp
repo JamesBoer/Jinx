@@ -104,7 +104,7 @@ namespace Jinx::Impl
 		if (!signature.IsValid())
 			return false;
 
-		// Register function in library table.  This allows the the parser to find
+		// Register function in library table.  This allows the parser to find
 		// and use this function.
 		RegisterFunctionSignature(signature);
 
