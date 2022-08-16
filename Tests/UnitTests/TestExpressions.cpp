@@ -50,13 +50,13 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("e") == 6);
 		REQUIRE(script->GetVariable("f") == 3);
 		REQUIRE(script->GetVariable("g") == 1);
-		REQUIRE(script->GetVariable("h").GetNumber() == Approx(123.456));
-		REQUIRE(script->GetVariable("i").GetNumber() == Approx(23.45));
-		REQUIRE(script->GetVariable("j").GetNumber() == Approx(2895.0432));
-		REQUIRE(script->GetVariable("k").GetNumber() == Approx(5.2646));
-		REQUIRE(script->GetVariable("l").GetNumber() == Approx(146.906));
-		REQUIRE(script->GetVariable("m").GetNumber() == Approx(100.006));
-		REQUIRE(script->GetVariable("n").GetNumber() == Approx(6.206));
+		REQUIRE(script->GetVariable("h").GetNumber() == Catch::Approx(123.456));
+		REQUIRE(script->GetVariable("i").GetNumber() == Catch::Approx(23.45));
+		REQUIRE(script->GetVariable("j").GetNumber() == Catch::Approx(2895.0432));
+		REQUIRE(script->GetVariable("k").GetNumber() == Catch::Approx(5.2646));
+		REQUIRE(script->GetVariable("l").GetNumber() == Catch::Approx(146.906));
+		REQUIRE(script->GetVariable("m").GetNumber() == Catch::Approx(100.006));
+		REQUIRE(script->GetVariable("n").GetNumber() == Catch::Approx(6.206));
 	}
 
 	SECTION("Test unary negation operator")
@@ -86,8 +86,8 @@ TEST_CASE("Test Expressions", "[Expressions]")
 		REQUIRE(script->GetVariable("e") == -1);
 		REQUIRE(script->GetVariable("f") == -3);
 		REQUIRE(script->GetVariable("g") == -1);
-		REQUIRE(script->GetVariable("h").GetNumber() == Approx(123.456));
-		REQUIRE(script->GetVariable("i").GetNumber() == Approx(-123.456));
+		REQUIRE(script->GetVariable("h").GetNumber() == Catch::Approx(123.456));
+		REQUIRE(script->GetVariable("i").GetNumber() == Catch::Approx(-123.456));
 		REQUIRE(script->GetVariable("j") == -3);
 		REQUIRE(script->GetVariable("k") == 0);
 	}

@@ -37,7 +37,7 @@ TEST_CASE("Test Casts", "[Casts]")
 		REQUIRE(script->GetVariable("d").IsInteger());
 		REQUIRE(script->GetVariable("d") == 456);
 		REQUIRE(script->GetVariable("e").IsNumber());
-		REQUIRE(script->GetVariable("e").GetNumber() == Approx(-123.456));
+		REQUIRE(script->GetVariable("e").GetNumber() == Catch::Approx(-123.456));
 		REQUIRE(script->GetVariable("f").IsString());
 		REQUIRE(script->GetVariable("f") == "15");
 		REQUIRE(script->GetVariable("g").IsNull());
