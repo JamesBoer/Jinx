@@ -647,7 +647,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test Name A");
 		REQUIRE(script->GetVariable("b") == 2);
-		REQUIRE(script->GetVariable("c").GetNumber() == Approx(22.3345));
+		REQUIRE(script->GetVariable("c").GetNumber() == Catch::Approx(22.3345));
 		REQUIRE(script->GetVariable("d") == "Still more text");
 		REQUIRE(script->GetVariable("e") == "Yet more text to test");
 	}
@@ -683,7 +683,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test Name A");
 		REQUIRE(script->GetVariable("b") == 2);
-		REQUIRE(script->GetVariable("c").GetNumber() == Approx(22.3345));
+		REQUIRE(script->GetVariable("c").GetNumber() == Catch::Approx(22.3345));
 		REQUIRE(script->GetVariable("d") == "Still more text");
 		REQUIRE(script->GetVariable("e") == "Yet more text to test");
 	}
@@ -719,7 +719,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		REQUIRE(script->GetVariable("table").IsCollection());
 		REQUIRE(script->GetVariable("a") == "Test Name A");
 		REQUIRE(script->GetVariable("b") == 2);
-		REQUIRE(script->GetVariable("c").GetNumber() == Approx(22.3345));
+		REQUIRE(script->GetVariable("c").GetNumber() == Catch::Approx(22.3345));
 		REQUIRE(script->GetVariable("d") == "Still more text");
 		REQUIRE(script->GetVariable("e") == "Yet more text to test");
 	}
@@ -796,7 +796,7 @@ TEST_CASE("Test Collections", "[Collections]")
 		script->SetVariable("text", tableText);
         REQUIRE(TestExecuteScript(script));
 		REQUIRE(script->GetVariable("table").IsCollection());
-		REQUIRE(script->GetVariable("a").GetNumber() == Approx(123.456));
+		REQUIRE(script->GetVariable("a").GetNumber() == Catch::Approx(123.456));
 	}
 
 	SECTION("Test parsing of collection parsing as function parameter inside loop")

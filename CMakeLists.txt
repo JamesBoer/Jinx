@@ -126,7 +126,8 @@ if(NOT jinx_is_subproject)
 
 	set(
 		unittests_source_list
-		"Tests/UnitTests/catch.hpp"
+		"Tests/UnitTests/catch_amalgamated.hpp"
+		"Tests/UnitTests/catch_amalgamated.cpp"
 		"Tests/UnitTests/Main.cpp"
 		"Tests/UnitTests/TestCasts.cpp"
 		"Tests/UnitTests/TestCollections.cpp"

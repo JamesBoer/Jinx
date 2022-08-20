@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include "../../Source/Jinx.h"
 #endif
 
-#include "catch.hpp"
+#include "catch_amalgamated.hpp"
 
 Jinx::RuntimePtr TestCreateRuntime();
 Jinx::ScriptPtr TestCreateScript(const char * scriptText, Jinx::RuntimePtr runtime = nullptr, JinxAny userContext = nullptr);
