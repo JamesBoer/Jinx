@@ -6,4 +6,4 @@ Copyright (c) 2017 James Boer
 */
 
 #define CATCH_CONFIG_MAIN
-#include "catch_amalgamated.hpp"
+#include "catch.hpp"

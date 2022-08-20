@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [1.3.10] - 2022-06-17
+
+- Updated Catch2 to fix several compilation issues
+
 ## [1.3.9] - 2022-06-17
 
 - Fixed issue with duplicate non-local function registration

@@ -45,5 +45,5 @@ There is a [more comprehensive tutorial](https://jamesboer.github.io/Jinx/Tutori
 
 ## Jinx Status
 
-Jinx was released as 1.0.0 (stable) on January 1, 2019, after three years of development, refinement, and testing.  Additional work, for the immediate future, will be restricted to bug fixing or critical refinements, with the intention of retaining backwards compatibility.
+Jinx was released as 1.0.0 (stable) on January 1, 2019, after three years of development, refinement, and testing.  Since then, mostly minor language features and API enhancements have been edded.  Additional work, for the immediate future, will be restricted to bug fixing or critical refinements, with the intention of retaining backwards compatibility.
 

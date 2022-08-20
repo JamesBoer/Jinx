@@ -188,7 +188,7 @@ multiline comment
 		auto script = TestExecuteScript(scriptText);
 		REQUIRE(script);
 		REQUIRE(script->GetVariable("a") == -375.5);
-		REQUIRE(script->GetVariable("b").GetNumber() == Catch::Approx(.11111));
+		REQUIRE(script->GetVariable("b").GetNumber() == Approx(.11111));
 		REQUIRE(script->GetVariable("c") == -999);
 		REQUIRE(script->GetVariable("d") == 1);
 		REQUIRE(script->GetVariable("e") == 123);
