@@ -167,6 +167,7 @@ namespace Jinx::Impl
 
 	inline_t uint32_t Parser::GetOperatorPrecedence(Opcode opcode) const
 	{
+		// Lower values mean higher precedence
 		switch (opcode)
 		{
 		case Opcode::Multiply: return 1;
