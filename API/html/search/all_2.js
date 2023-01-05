@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['callasyncfunction',['CallAsyncFunction',['../class_jinx_1_1_i_script.html#a62a745b8725a1054d2259a7777858e29',1,'Jinx::IScript']]],
   ['callfunction',['CallFunction',['../class_jinx_1_1_i_script.html#af4df3369ab82192a9a00c7eae47d7e15',1,'Jinx::IScript']]],
   ['compilationtimens',['compilationTimeNs',['../struct_jinx_1_1_performance_stats.html#ae21efe2845c419482372258f56851c64',1,'Jinx::PerformanceStats']]],
   ['compile',['Compile',['../class_jinx_1_1_i_runtime.html#a85a3a6697eea6c30b8d02b4ca1dc2131',1,'Jinx::IRuntime']]],

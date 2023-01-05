@@ -14,7 +14,7 @@
 .xr_mvp_4 {display: block;}
 .xr_mvp_3 {display: none;}
 .xr_pbd {margin-left: -240px;}
-#xr_xr {width: 480px; height: 653px}
+#xr_xr {width: 480px; height: 751px}
 }
 @media screen and (orientation: portrait) and (min-device-width: 720px), screen and (orientation: landscape) and (min-device-height: 720px) {
 .xr_mvp_4 {display: none;}
