@@ -768,7 +768,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 9;
+	const uint32_t PatchNumber = 10;
 
 	// Forward declaration
 	class IScript;
@@ -5604,6 +5604,7 @@ namespace Jinx::Impl
 
 	inline uint32_t Parser::GetOperatorPrecedence(Opcode opcode) const
 	{
+		// Lower values mean higher precedence
 		switch (opcode)
 		{
 		case Opcode::Multiply: return 1;
