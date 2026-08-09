@@ -9,14 +9,14 @@ goto ERROR
 
 cd Build
 
-MSBuild Jinx.sln /p:Configuration=Debug && (
+MSBuild Jinx.slnx /p:Configuration=Debug && (
   echo Debug build succeeded
 ) || (
   echo Debug build failed
   goto ERROR
 )
 
-MSBuild Jinx.sln /p:Configuration=Release && (
+MSBuild Jinx.slnx /p:Configuration=Release && (
   echo Release build succeeded
 ) || (
   echo Release build failed
