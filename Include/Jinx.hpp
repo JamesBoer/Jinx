@@ -108,6 +108,7 @@ case a project wishes to target macOS clients earlier than 10.14.
 #include <limits>
 #include <cstring>
 #include <cassert>
+#include <cstdint>
 #ifdef JINX_USE_ANY
 #include <any>
 #endif
