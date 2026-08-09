@@ -1,6 +1,6 @@
 
 # Require minimum standard version of CMake
-cmake_minimum_required (VERSION 4.2)
+cmake_minimum_required (VERSION 3.31)
 
 # Add C# utilities for building tools
 include(CSharpUtilities)
