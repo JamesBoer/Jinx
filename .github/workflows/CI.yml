@@ -32,7 +32,7 @@ jobs:
   
     # Generate and build MSVC project using batch file
     - name: Build using MSVC
-      run: ./BuildMSVC2022.cmd
+      run: ./BuildMSVC2026.cmd
 
     # Run unit tests
     - name: Run unit tests
