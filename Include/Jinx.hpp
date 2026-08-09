@@ -108,6 +108,7 @@ case a project wishes to target macOS clients earlier than 10.14.
 #include <limits>
 #include <cstring>
 #include <cassert>
+#include <cstdint>
 #ifdef JINX_USE_ANY
 #include <any>
 #endif
@@ -768,7 +769,7 @@ namespace Jinx
 	const uint32_t MinorVersion = 3;
 
 	/// Patch number
-	const uint32_t PatchNumber = 10;
+	const uint32_t PatchNumber = 11;
 
 	// Forward declaration
 	class IScript;
@@ -1188,6 +1189,7 @@ namespace Jinx
 #include <locale>
 #include <codecvt>
 #include <climits>
+#include <chrono>
 #ifdef JINX_USE_FROM_CHARS
 #include <charconv>
 #else

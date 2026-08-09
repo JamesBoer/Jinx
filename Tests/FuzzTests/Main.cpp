@@ -11,6 +11,7 @@ Copyright (c) 2016 James Boer
 #include <list>
 #include <inttypes.h>
 #include <iostream>
+#include <chrono>
 
 #include "../../Source/Jinx.h"
 #include "clara.hpp"
