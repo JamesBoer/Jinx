@@ -1,0 +1,141 @@
+-- ============================================================================
+-- JINX PAD EDITOR SYNTAX HIGHLIGHTING TEST SCRIPT
+-- Feature Test: Single line comments, multi-word variables, and native strings
+-- ============================================================================
+
+-- Import the standard core library
+import core
+
+-- Test global variables with spaces and single-quote syntax fallbacks
+set 'player name' to "Sir Highlight"
+set hero health to 100.0
+set hero max damage to 25
+set hero is alive to true
+
+set dragon name to "Grammar the Great Worm"
+set dragon health to 250.0
+set dragon is poisoned to false
+set non existent target to null
+
+-- ============================================================================
+-- FUNCTION CONFIGURATION TESTS
+-- Testing unique Jinx signatures: curly parameters, optionals (), and alternates /
+-- ============================================================================
+
+-- 1. Standard custom function with multi-word signature and typed parameters
+function calculate {damage} percent adjustment for {status effect}
+    if status effect = "enraged"
+        return damage * 1.5
+    else if status effect = "weakened"
+        return damage * 0.5
+    else
+        return damage
+    end
+end
+
+-- 2. Function with alternative name parts using forward slash (is/are)
+function {name} is/are toast
+    write line name, " has been completely defeated!"
+    return true
+end
+
+-- 3. Function with optional name parts designated by parentheses ()
+function check if {target name} (is) critically wounded
+    set current status to false
+    if target name = "Sir Highlight" and hero health < 30
+        set current status to true
+    else if target name = "Grammar the Great Worm" and dragon health < 50
+        set current status to true
+    end
+    return current status
+end
+
+-- ============================================================================
+-- THE MAIN SIMULATION LOOP (INTERESTING BEHAVIOR)
+-- Tests loops, blocks, logical operators, properties, and complex conditions
+-- ============================================================================
+
+write line "--- THE BATTLE BEGINS AT THE SYNTAX CRATER ---"
+write line "Combatants: ", 'player name', " vs ", dragon name
+write line ""
+
+set round counter to 1
+
+-- Testing a standard while loop
+loop while hero health > 0 and dragon health > 0
+    write line "=== ROUND ", round counter, " ==="
+    
+    -- Explicit scope test using begin/end
+    begin
+        -- Hero attacks dragon
+        set raw strike to hero max damage / 2 + 5
+        set final strike to calculate raw strike percent adjustment for "none"
+        set dragon health to dragon health - final strike
+        
+        write line 'player name', " strikes ", dragon name, " for ", final strike, " damage."
+    end
+    
+    -- Testing if/else checking with boolean evaluation
+    if check if dragon name critically wounded
+        write line ">>> WARNING: ", dragon name, " looks severely battered! <<<"
+    end
+    
+    -- Dragon counter-attacks if still breathing
+    if dragon health > 0
+        set dragon rolled roll to 18 -- Mocking a pseudo-random value
+        
+        -- Testing boolean operators (or, not) and literals (true, false)
+        if dragon rolled roll >= 15 or not dragon is poisoned
+            set dragon attack to 20
+            set hero health to hero health - dragon attack
+            write line dragon name, " breathes fire, dealing ", dragon attack, " damage to ", 'player name', "."
+        else
+            write line dragon name, " misses their tail-swipe entirely!"
+        end
+    else
+        -- Break keyword test
+        break
+    end
+    
+    -- Check if hero is critically hurt using optional function syntax variant
+    if check if 'player name' is critically wounded
+        write line ">>> DANGER: ", 'player name', "'s armor is cracking! <<<"
+    end
+    
+    -- Check loop termination via syntax helpers
+    set round counter to round counter + 1
+    write line "Hero Health: ", hero health, " | Dragon Health: ", dragon health
+    write line ""
+end
+
+-- ============================================================================
+-- COLLECTION & ITERATION KEYWORD TESTS
+-- Tests collections, 'over', 'erase', and collection properties ('s)
+-- ============================================================================
+
+write line "--- POST-MATCH ANALYSIS & LOOT GENERATION ---"
+
+-- Testing lists and collections
+set 'loot table' to "Dragon Scale", "Magic Sword", "Empty Potion Bottle", "Rusty Nail"
+
+-- Testing property accessor syntax ('s) and collection deletion
+if dragon health <= 0
+    set dragon status to dragon name is toast
+    write line "The hero parses through the remains..."
+    
+    -- Loop over collection test
+    loop item over 'loot table'
+        if item's value = "Rusty Nail"
+            -- Erase collection element keyword test
+            erase item
+        else
+            write line "Found item: ", item's value
+        end
+    end
+else
+    set hero status to 'player name' are toast
+    write line "The dungeon remains un-cleared. Better luck in the next text editor."
+end
+
+write line ""
+write line "--- SYNTAX HIGHLIGHTING TEST COMPLETE ---"

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../JinxTools/JinxTools.csproj" />
+  <Project Path="JinxPad/JinxPad.csproj" />
+</Solution>

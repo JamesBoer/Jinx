@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<!--
+	Syntax highlighting definition for the Jinx scripting language.
+	Covers single and multi-line comments, string literals, keywords,
+	boolean/null constants, numbers, and function declarations.
+	Anything not covered here (e.g. multi-word variable names, property
+	access, etc.) is intentionally left as plain text for now.
+-->
+<SyntaxDefinition name="Jinx" extensions=".jinx" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+	<Color name="Comment" foreground="#6A9955" exampleText="-- a comment" />
+	<Color name="String" foreground="#CE9178" exampleText="&quot;a string&quot;" />
+	<Color name="Keyword" foreground="#569CD6" exampleText="if a = b then" />
+	<Color name="Constant" foreground="#569CD6" exampleText="set a to true" />
+	<Color name="Number" foreground="#B5CEA8" exampleText="set a to 1.5" />
+	<Color name="FunctionDeclaration" foreground="#DCDCAA" fontWeight="bold" exampleText="function {a} do something" />
+	<Color name="Parameter" foreground="#9CDCFE" exampleText="function {a} do something" />
+
+	<!-- Main ruleset -->
+	<RuleSet>
+
+		<!-- Multi-line block comment: opens with 3+ dashes, closes with a run of 3+ dashes -->
+		<Span color="Comment" multiline="true">
+			<Begin>-{3,}</Begin>
+			<End>-{3,}</End>
+		</Span>
+
+		<!-- Single line comment: exactly two dashes not followed by a third -->
+		<Span color="Comment">
+			<Begin>--(?!-)</Begin>
+		</Span>
+
+		<!-- String literals: double quoted, no escape sequences, single line only -->
+		<Span color="String">
+			<Begin>"</Begin>
+			<End>"</End>
+		</Span>
+
+		<!-- Function declarations: "function", "public function" or "private function"
+		     through to the end of the line, with {parameter} placeholders called out -->
+		<Span color="FunctionDeclaration">
+			<Begin>\b((public|private)\s+)?function\b</Begin>
+			<RuleSet>
+				<Span color="Parameter">
+					<Begin>\{</Begin>
+					<End>\}</End>
+				</Span>
+			</RuleSet>
+		</Span>
+
+		<!-- Boolean and null constants -->
+		<Keywords color="Constant">
+			<Word>true</Word>
+			<Word>false</Word>
+			<Word>null</Word>
+		</Keywords>
+
+		<!-- Reserved keywords -->
+		<Keywords color="Keyword">
+			<Word>and</Word>
+			<Word>as</Word>
+			<Word>begin</Word>
+			<Word>boolean</Word>
+			<Word>break</Word>
+			<Word>by</Word>
+			<Word>collection</Word>
+			<Word>coroutine</Word>
+			<Word>decrement</Word>
+			<Word>else</Word>
+			<Word>end</Word>
+			<Word>erase</Word>
+			<Word>external</Word>
+			<Word>from</Word>
+			<Word>function</Word>
+			<Word>guid</Word>
+			<Word>if</Word>
+			<Word>import</Word>
+			<Word>increment</Word>
+			<Word>integer</Word>
+			<Word>is</Word>
+			<Word>library</Word>
+			<Word>loop</Word>
+			<Word>not</Word>
+			<Word>number</Word>
+			<Word>object</Word>
+			<Word>or</Word>
+			<Word>over</Word>
+			<Word>private</Word>
+			<Word>public</Word>
+			<Word>readonly</Word>
+			<Word>return</Word>
+			<Word>set</Word>
+			<Word>string</Word>
+			<Word>to</Word>
+			<Word>type</Word>
+			<Word>until</Word>
+			<Word>wait</Word>
+			<Word>while</Word>
+		</Keywords>
+
+		<!-- Numbers: integers and floating point -->
+		<Rule color="Number">
+			\b\d+(\.\d+)?\b
+		</Rule>
+
+	</RuleSet>
+</SyntaxDefinition>

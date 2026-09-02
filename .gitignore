@@ -1,6 +1,6 @@
 Build/
-
-
 .DS_Store
-
 .idea/
+bin/
+obj/
+

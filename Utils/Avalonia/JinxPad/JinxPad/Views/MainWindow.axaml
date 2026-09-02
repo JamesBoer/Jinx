@@ -1,0 +1,85 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:JinxPad.ViewModels"
+        xmlns:tools="clr-namespace:JinxTools;assembly=JinxTools"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="JinxPad.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/jinx-logo.ico"
+        Width="1100"
+        Height="800"
+        MinWidth="800"
+        MinHeight="600"
+        Title="{Binding WindowTitle}">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Menu Grid.Row="0">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Name="NewMenuItem"/>
+                <MenuItem Header="_Open..." Name="OpenMenuItem"/>
+                <MenuItem Header="_Save" Name="SaveMenuItem"/>
+                <MenuItem Header="Save _As..." Name="SaveAsMenuItem"/>
+                <Separator/>
+                <MenuItem Header="E_xit" Name="ExitMenuItem"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Undo" Name="UndoMenuItem"/>
+                <MenuItem Header="_Redo" Name="RedoMenuItem"/>
+                <Separator/>
+                <MenuItem Header="Cu_t" Name="CutMenuItem"/>
+                <MenuItem Header="_Copy" Name="CopyMenuItem"/>
+                <MenuItem Header="_Paste" Name="PasteMenuItem"/>
+                <MenuItem Header="_Select All" Name="SelectAllMenuItem"/>
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="Jinx _Website" Name="JinxWebsiteMenuItem"/>
+                <Separator/>
+                <MenuItem Header="_About JinxPad" Name="AboutMenuItem"/>
+            </MenuItem>
+        </Menu>
+
+        <Border Grid.Row="1" Padding="8,4" Background="{DynamicResource ThemeControlLowBrush}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Name="NewButton" Width="30" Height="30" ToolTip.Tip="New">
+                    <PathIcon Data="M4 2 L10 2 L14 6 L14 14 L4 14 Z M10 2 L10 6 L14 6" Width="14" Height="14"/>
+                </Button>
+                <Button Name="OpenButton" Width="30" Height="30" ToolTip.Tip="Open">
+                    <PathIcon Data="M2 5 L8 5 L10 7 L14 7 L14 14 L2 14 Z" Width="14" Height="14"/>
+                </Button>
+                <Button Name="SaveButton" Width="30" Height="30" ToolTip.Tip="Save">
+                    <PathIcon Data="M3 2 L13 2 L13 14 L3 14 Z M5 2 L5 6 L11 6 L11 2" Width="14" Height="14"/>
+                </Button>
+                <Border Width="1" Height="22" Background="{DynamicResource ThemeForegroundBrush}" VerticalAlignment="Center"/>
+                <Button Name="UndoButton" Width="30" Height="30" ToolTip.Tip="Undo">
+                    <PathIcon Data="M7 4 L3 8 L7 12 M4 8 L11 8 C13 8 14 9 14 11" Width="14" Height="14"/>
+                </Button>
+                <Button Name="RedoButton" Width="30" Height="30" ToolTip.Tip="Redo">
+                    <PathIcon Data="M9 4 L13 8 L9 12 M12 8 L5 8 C3 8 2 9 2 11" Width="14" Height="14"/>
+                </Button>
+                <Border Width="1" Height="22" Background="{DynamicResource ThemeForegroundBrush}" VerticalAlignment="Center"/>
+                <Button Name="CutButton" Width="30" Height="30" ToolTip.Tip="Cut">
+                    <PathIcon Data="F0 M3 2 L10 10 L11 9 L4 1 Z M11 2 L4 10 L5 11 L12 3 Z M12.1 11.5 A1.6 1.6 0 1 1 8.9 11.5 A1.6 1.6 0 1 1 12.1 11.5 Z M11.3 11.5 A0.8 0.8 0 1 1 9.7 11.5 A0.8 0.8 0 1 1 11.3 11.5 Z M5.6 11.5 A1.6 1.6 0 1 1 2.4 11.5 A1.6 1.6 0 1 1 5.6 11.5 Z M4.8 11.5 A0.8 0.8 0 1 1 3.2 11.5 A0.8 0.8 0 1 1 4.8 11.5 Z" Width="14" Height="14"/>
+                </Button>
+                <Button Name="CopyButton" Width="30" Height="30" ToolTip.Tip="Copy">
+                    <PathIcon Data="M6 5 L13 5 L13 13 L6 13 Z M3 2 L10 2 L10 5 M3 2 L3 10 L6 10" Width="14" Height="14"/>
+                </Button>
+                <Button Name="PasteButton" Width="30" Height="30" ToolTip.Tip="Paste">
+                    <PathIcon Data="M4 3 L4 14 L12 14 L12 3 L9 3 L9 2 L7 2 L7 3 Z M6 2 L10 2 L10 4 L6 4 Z" Width="14" Height="14"/>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Margin="8" BorderBrush="{DynamicResource ThemeBorderMidBrush}" BorderThickness="1">
+            <tools:JinxEditor Text="{Binding ScriptText, Mode=TwoWay}"/>
+        </Border>
+    </Grid>
+
+</Window>
